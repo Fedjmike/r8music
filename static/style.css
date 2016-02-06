@@ -7,8 +7,11 @@ html, body {
     height: 100%;
 }
 
+/*Basic formatting*/
+
 body {
 	font-family: Signika, sans-serif;
+	font-weight: 300;
 }
 
 header, p, ol, ul {
@@ -23,6 +26,10 @@ h2 {
 	font-size: 1.5em;
 }
 
+h3 {
+	font-size: 1.17em;
+}
+
 h1 a, h2 a {
 	color: #4078c0;
 	text-decoration: none;
@@ -35,6 +42,8 @@ a:hover {
 ol, ul {
 	padding-left: 2em;
 }
+
+/*Custom lists*/
 
 .tracks {
 	max-width: 20em;
@@ -71,14 +80,6 @@ ol.rating li {
 	background-color: rgb(191, 55, 91);
 }
 
-.album-main {
-	display: inline-block;
-}
-
-.album-cover {
-	margin-top: 2em;
-}
-
 .releases h2 {
 	display: inline-block;
 }
@@ -92,6 +93,18 @@ ol.rating li {
 .releases :hover .rating {
 	display: inline-block;
 }
+
+/*Albums*/
+
+.album-main {
+	display: inline-block;
+}
+
+.album-cover {
+	margin-top: 2em;
+}
+
+/*Layout*/
 
 section {
 	clear: both;
