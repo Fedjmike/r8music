@@ -1,0 +1,41 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+	font-family: Signika, sans-serif;
+}
+
+ol, ul {
+	padding-left: 2em;
+}
+
+ol.rating {
+	padding: 0;
+}
+
+.tracks {
+	max-width: 20em;
+}
+
+.tracks time {
+	float: right;
+}
+
+ol.rating {
+	list-style: none;
+}
+
+ol.rating li {
+	display: inline-block;
+	width: 0em;
+	height: 0em;
+	padding: 1em;
+	background-color: rgb(191, 55, 91);
+	color: white;
+}
+
+.album-main {
+	display: inline-block;
+}
