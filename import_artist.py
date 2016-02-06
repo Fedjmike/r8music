@@ -19,6 +19,11 @@ def get_releases(mbid):
     releases = result['artist']['release-group-list']
     return releases
 
+def get_tracks(release_id):
+    result = musicbrainzngs.get_release_by_id(release_id, includes=['recordings'])
+    tracks = result['release']['medium-list'][0]['track-list']
+    return tracks
+
 def import_artist(artist_name):
     result = musicbrainzngs.search_artists(artist=artist_name)
     artist_info = result['artist-list'][0]
@@ -33,18 +38,25 @@ def import_artist(artist_name):
 
     artist_id = cursor.lastrowid
     releases = get_releases(artist_info['id'])
+
     for release in releases:
         cursor.execute(
             "insert into releases (title, year, artist_id) values (?, ?, ?)",
             (release['title'], release['first-release-date'], artist_id)
         )
-
+        release['local-id'] = cursor.lastrowid
+        tracks = get_tracks(release['id'])
+        for track in tracks:
+            cursor.execute(
+                "insert into tracks (title, runtime, release_id) values (?, ?, ?)",
+                (track['recording']['title'], track['recording']['length'], release['local-id'])
+            )
     con.commit()
 
-    print("DANK")
     # result = musicbrainzngs.get_artist_by_id(artist_info['id'], includes=['release-groups'])
     # print(json.dumps(result, sort_keys=True, indent=4, separators=(',', ': ')))
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
-import_artist("nujabes")
+import_artist("yung lean")
 # get_releases("1595addf-f76b-450a-a097-af852ff35f27")
+# get_tracks('9f3a4a9b-5741-4a3b-9350-10940ce8bbf3')
