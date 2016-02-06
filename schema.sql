@@ -2,7 +2,7 @@ drop table if exists releases;
 create table releases (
     id integer primary key autoincrement,
     title text not null,
-    release_year integer not null,
+    'year' integer not null,
 	artist_id integer not null
 );
 

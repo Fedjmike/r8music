@@ -23,6 +23,19 @@ def init_db():
             ("My Bloody Valentine", "my-bloody-valentine")
         )
         
+        mbv_id = 1
+        releases = [
+            ("Loveless", 1991, mbv_id),
+            ("Isn't Anything", 1988, mbv_id),
+            ("m b v", 2013, mbv_id)
+        ]
+        
+        for release in releases:
+            db.execute(
+                "insert into releases (title, year, artist_id) values (?, ?, ?)",
+                release
+            )
+        
         db.commit()
 
 def get_db():
@@ -48,7 +61,10 @@ def query_db(query, args=(), one=False):
 @app.route("/<name>")
 def render_release(name=None):
     print(query_db("select * from artists"))
-    return render_template("release.html", name=name)
+    artist_releases = query_db("select * from releases")
+    print(artist_releases)
+    return render_template("release.html", name=name, releases=artist_releases)
 
 if __name__ == "__main__":
+    init_db()
     app.run(debug=True)
