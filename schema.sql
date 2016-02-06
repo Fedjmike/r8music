@@ -1,3 +1,10 @@
+drop table if exists artists;
+create table artists (
+    id integer primary key autoincrement,
+    name text not null,
+    url text not null
+);
+
 drop table if exists releases;
 create table releases (
     id integer primary key autoincrement,
@@ -12,11 +19,4 @@ create table tracks (
     title text not null,
     runtime integer not null,
 	release_id integer not null
-);
-
-drop table if exists artists;
-create table artists (
-    id integer primary key autoincrement,
-    name text not null,
-    url text not null
 );
