@@ -2,6 +2,11 @@ from functools import partial as p
 import sqlite3
 
 
+# TODO: Generate some DOM.
+# TODO: Make things lazier where appropriate.
+# TODO: Properly encapsulate the db.
+
+
 DB_NAME = 'sample.db'
 
 
@@ -33,7 +38,6 @@ class Artist(object):
 class Release(object):
     def __init__(self, artist, name):
         self.artist, self.name = artist, name
-        print((self.name, self.artist._id))
         ((self._id,),) = db_results(
                 'select id from releases where title=? and artist_id=?',
                 (self.name, self.artist._id))
