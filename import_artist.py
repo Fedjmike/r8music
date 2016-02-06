@@ -1,6 +1,6 @@
 import musicbrainzngs
 import sqlite3
-import json
+import sys
 import re
 from unidecode import unidecode
 
@@ -42,7 +42,7 @@ def import_artist(artist_name):
     for release in releases:
         cursor.execute(
             "insert into releases (title, year, artist_id) values (?, ?, ?)",
-            (release['title'], release['date'], artist_id)
+            (release['title'], int(release['date'][:4]), artist_id)
         )
         release['local-id'] = cursor.lastrowid
         try:
@@ -57,5 +57,5 @@ def import_artist(artist_name):
     con.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
-import_artist("BESTIe")
+import_artist(sys.argv[1])
 # print(json.dumps(result, sort_keys=True, indent=4, separators=(',', ': ')))
