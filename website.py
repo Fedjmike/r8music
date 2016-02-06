@@ -65,6 +65,14 @@ def render_release(name=None):
     print(artist_releases)
     return render_template("release.html", name=name, releases=artist_releases)
 
+
+# Nic messing around...
+@app.route("/obj/artist/<name>")
+def gen_artist_dom(name=None):
+    from music_objects import Artist
+    return str(Artist(name, 0000))
+
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)

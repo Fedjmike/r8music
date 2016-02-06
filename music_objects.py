@@ -23,8 +23,8 @@ def lmap(*args, **kwargs):
 class Artist(object):
     def __init__(self, url, fstyr):
         self.url, self.fstyr = url, fstyr
-        ((self._id,),) = db_results(
-                'select id from artists where url=?', (self.url,))
+        ((self._id, self.name),) = db_results(
+                'select id,name from artists where url=?', (self.url,))
         self.releases = lmap(p(Release, self), self._release_names())
 
     def _release_names(self):
@@ -32,7 +32,7 @@ class Artist(object):
                 'select title from releases where artist_id=?', (self._id,))]
 
     def __repr__(self):
-        return self.url
+        return self.name+str(self.releases)
 
 
 class Release(object):
