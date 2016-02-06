@@ -11,7 +11,7 @@ body {
 	font-family: Signika, sans-serif;
 }
 
-p, ol, ul {
+header, p, ol, ul {
 	margin: 1em 0;
 }
 
@@ -36,10 +36,6 @@ ol, ul {
 	padding-left: 2em;
 }
 
-ol.rating {
-	padding: 0;
-}
-
 .tracks {
 	max-width: 20em;
 }
@@ -48,8 +44,14 @@ ol.rating {
 	float: right;
 }
 
-ol.rating {
+ol.rating, ol.releases {
 	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+ol.rating {
+	display: inline-block;
 }
 
 ol.rating li {
@@ -61,6 +63,14 @@ ol.rating li {
 	color: white;
 }
 
+.rating:hover li {
+	background-color: #7F0626;
+}
+
+.rating li:hover ~ li {
+	background-color: rgb(191, 55, 91);
+}
+
 .album-main {
 	display: inline-block;
 }
@@ -69,12 +79,23 @@ ol.rating li {
 	margin-top: 2em;
 }
 
-section {
-	clear: both;
+.releases h2 {
+	display: inline-block;
 }
 
-.columns {
-    margin-bottom: -1em;
+.releases .rating {
+	display: none;
+	float: right;
+	margin-right: 4em;
+}
+
+.releases :hover .rating {
+	display: inline-block;
+}
+
+section {
+	clear: both;
+	margin-bottom: 2em;
 }
 
 .columns > * {
@@ -96,13 +117,8 @@ section {
 	.page {
 		margin: 0 auto;
 		width: 50em;
-		padding-top: 2em;
 	}
 
-	.two.columns > * {
-        #width: 48%;
-    }
-    
     .two.columns > :nth-child(2n+1) {
         float: left;
         margin-right: 4em;
