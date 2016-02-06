@@ -3,8 +3,33 @@
     padding: 0;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
 	font-family: Signika, sans-serif;
+}
+
+p, ol, ul {
+	margin: 1em 0;
+}
+
+h1 {
+	font-size: 2em;
+}
+
+h2 {
+	font-size: 1.5em;
+}
+
+h1 a, h2 a {
+	color: #4078c0;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 ol, ul {
@@ -38,4 +63,48 @@ ol.rating li {
 
 .album-main {
 	display: inline-block;
+}
+
+.album-cover {
+	margin-top: 2em;
+}
+
+section {
+	clear: both;
+}
+
+.columns {
+    margin-bottom: -1em;
+}
+
+.columns > * {
+    display: inline-block;
+    margin-bottom: 1em;
+}
+
+.columns:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+}
+
+/*Computer*/
+@media only screen and (min-width: 600px) {
+	.page {
+		margin: 0 auto;
+		width: 50em;
+		padding-top: 2em;
+	}
+
+	.two.columns > * {
+        #width: 48%;
+    }
+    
+    .two.columns > :nth-child(2n+1) {
+        float: left;
+        margin-right: 4em;
+    }
 }
