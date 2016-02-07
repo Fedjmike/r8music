@@ -65,9 +65,9 @@ ol.rating {
 
 ol.rating li {
 	display: inline-block;
-	width: 0em;
-	height: 0em;
-	padding: 1em;
+	width: 2.6em;
+    text-align: center;
+	padding: 0.2em 0;
 	background-color: rgb(191, 55, 91);
 	color: white;
 }
