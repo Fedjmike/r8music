@@ -1,5 +1,7 @@
 from functools import partial as p
 import sqlite3
+from lxml import etree
+from lxml.builder import E
 
 
 # TODO: Generate some DOM.
@@ -31,8 +33,14 @@ class Artist(object):
         return [t for (t,) in db_results(
                 'select title from releases where artist_id=?', (self._id,))]
 
+    def _dom(self):
+        return E.div(
+                 E.h3(self.name),
+                 E.ol(*[E.li(r.name) for r in self.releases]),
+               )
+
     def __repr__(self):
-        return self.name+str(self.releases)
+        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
 
 
 class Release(object):
@@ -47,8 +55,14 @@ class Release(object):
         return [t for (t,) in db_results(
                 'select title from tracks where release_id=?', (self._id,))]
 
+    def _dom(self):
+        return E.div(
+                 E.h4(self.name),
+                 E.ol(*[E.li(r.name) for r in self.tracks]),
+               )
+
     def __repr__(self):
-        return self.name
+        return etree.tostring(self._dom()).decode('utf-8')
 
 
 class Track(object):
