@@ -69,7 +69,7 @@ class Release(object):
 
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
-        return cls(Artist.from_slug(artist_slug), release_slug)
+        return cls.from_slug(Artist.from_slug(artist_slug), release_slug)
 
     def _dom(self):
         return E.div({'class': 'release'},
