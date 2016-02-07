@@ -3,7 +3,7 @@ from contextlib import closing
 from flask import Flask, render_template, g
 
 from music_objects import Artist, Release, Track
-
+from import_artist import import_artist
 
 app = Flask(__name__)
 
@@ -19,36 +19,7 @@ def init_db():
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
         
-        db.execute(
-            "insert into artists (name, slug) values (?, ?)",
-            ("My Bloody Valentine", "my-bloody-valentine")
-        )
-        
-        mbv_id = 1
-        releases = [
-            ("Loveless", 1991, mbv_id, 'gay', 'loveless'),
-            ("Isn't Anything", 1988, mbv_id, 'gay', 'isnt-anything'),
-            ("m b v", 2013, mbv_id, 'gay', 'm-b-v')
-        ]
-        
-        for release in releases:
-            db.execute(
-                "insert into releases (title, date, artist_id, type, slug) values (?, ?, ?, ?, ?)",
-                release
-            )
-
-        loveless_id = 1
-        tracks = [
-            (1, "Only Shallow", 100, loveless_id, 'only-shallow'),
-            (2, "Loomer", 104, loveless_id, 'loomer'),
-        ]
-
-        for track in tracks:
-            db.execute(
-                "insert into tracks (position, title, runtime, release_id, slug) values (?, ?, ?, ?, ?)",
-                track
-            )
-
+        import_artist("My Bloody Valentine")
         
         db.commit()
 
