@@ -38,13 +38,13 @@ def init_db():
 
         loveless_id = 1
         tracks = [
-            ("Only Shallow", 100, loveless_id),
-            ("Loomer", 104, loveless_id),
+            (1, "Only Shallow", 100, loveless_id),
+            (2, "Loomer", 104, loveless_id),
         ]
 
         for track in tracks:
             db.execute(
-                "insert into tracks (title, runtime, release_id) values (?, ?, ?)",
+                "insert into tracks (position, title, runtime, release_id) values (?, ?, ?, ?)",
                 track
             )
 

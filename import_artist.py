@@ -22,8 +22,7 @@ def get_releases(mbid):
     releases = []
     for group in release_groups:
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        print(json.dumps(result, sort_keys=True, indent=4, separators=(',', ': ')))
-        try:
+        try: # Tries to get the oldest release of the group. If it fails, tries to get any release with a valid date
             release = min(result['release-group']['release-list'], key=lambda release: arrow.get(release['date']).timestamp)
         except KeyError:
             for r in result['release-group']['release-list']:
@@ -42,6 +41,7 @@ def get_releases(mbid):
 def get_tracks(release_id):
     result = musicbrainzngs.get_release_by_id(release_id, includes=['recordings'])
     tracks = result['release']['medium-list'][0]['track-list']
+    # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
     return tracks
 
 def import_artist(artist_name):
@@ -69,8 +69,8 @@ def import_artist(artist_name):
             tracks = get_tracks(release['id'])
             for track in tracks:
                 cursor.execute(
-                    "insert into tracks (title, runtime, release_id) values (?, ?, ?)",
-                    (track['recording']['title'], track['recording']['length'], release['local-id'])
+                    "insert into tracks (position, title, runtime, release_id) values (?, ?, ?, ?)",
+                    (int(track['position']), track['recording']['title'], track['recording']['length'], release['local-id'])
                 )
         except:
             pass

@@ -17,6 +17,7 @@ create table releases (
 drop table if exists tracks;
 create table tracks (
     id integer primary key autoincrement,
+    position integer not null,
     title text not null,
     runtime integer not null,
 	release_id integer not null
