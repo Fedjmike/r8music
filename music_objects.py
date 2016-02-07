@@ -19,18 +19,15 @@ class Artist(object):
     def __init__(self, _id):
         ((self._id, self.name, self.slug),) = db_results(
                 'select * from artists where id=?', (_id,))
-        self.releases = map(p(Release, self), self.get_releases())
+        # map is lazy so the following call invokes a single db lookup.
+        self.releases = map(p(Release, self), [i for (i,) in db_results(
+                'select id from releases where artist_id=?', (self._id,))])
 
     @classmethod
     def from_slug(cls, slug):
         ((_id,),) = db_results(
                 'select id from artists where slug=?', (slug,))
         return cls(_id)
-        
-
-    def get_releases(self):
-        return [i for (i,) in db_results(
-                'select id from releases where artist_id=?', (self._id,))]
 
     def _dom(self):
         return E.div(
@@ -47,17 +44,14 @@ class Release(object):
         self.artist = artist
         ((self._id, self.title, self.date, self._artist_id, self.reltype),) = \
                 db_results('select * from releases where id=?', (_id,))
-        self.tracks = map(p(Track, self), self._get_tracks())
+        self.tracks = map(p(Track, self), [t for (t,) in db_results(
+                'select id from tracks where release_id=?', (self._id,))])
 
     @classmethod
     def from_slug(cls, artist, slug):
         ((_id,),) = db_results(
                 'select id from releases where slug=?', (slug,))
         return cls(artist, _id)
-
-    def _get_tracks(self):
-        return [i for (i,) in db_results(
-                'select id from tracks where release_id=?', (self._id,))]
 
     def _dom(self):
         return E.div(
