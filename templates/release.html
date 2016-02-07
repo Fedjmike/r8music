@@ -6,22 +6,14 @@
 <section class="two columns">
 	<div class="album-main">
 		<header>
-			<h1>Loveless</h1>
-			<h2><a href="#my-bloody-valentine">My Bloody Valentine</a>, 1992</h2>
+			<h1>{{ release.title }}</h1>
+			<h2><a href="#my-bloody-valentine">{{ release.artist.name }}</a>, {{ release.date[:4] }}</h2>
 		</header>
 		
 		<ol class="tracks">
+        {% for track in release.tracks | sort(attribute="position") %}
 			<li>Only Shallow <time>4:17</time></li>
-			<li>Loomer <time>2:38</time></li>
-			<li>Touched <time>0:56</time></li>
-			<li>To Here Knows When <time>5:31</time></li>
-			<li>When You Sleep <time>4:11</time></li>
-			<li>I Only Said <time>5:34</time></li>
-			<li>Come In Alone <time>3:58</time></li>
-			<li>Sometimes <time>5:19</time></li>
-			<li>What You Want <time>5:33</time></li>
-			<li>Blown a Wish <time>3:36</time></li>
-			<li>Soon <time>6:58</time></li>
+        {% endfor %}
 		</ol>
 	  
 		<div>Average rating: 9.7<br/>My rating:<br/>
@@ -43,14 +35,14 @@
 </section>
 
 <section>
-	<header><h3><em>More from</em></h6><h1>My Bloody Valentine</h1></header>
+	<header><h3><em>More from</em></h6><h1>{{ release.artist.name }}</h1></header>
 	
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
 	
 	<ol class="releases">
-    {% for release in releases | sort(attribute="date") %}
+    {% for release in release.artist.releases | sort(attribute="date") %}
 		<li>
-			<h2>{{ release.date[:4] }} <a href="#todo">{{ release.title }}</a></h2>
+			<h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
 			<ol class="rating">
 				<li>1</li>
 				<li>2</li>
