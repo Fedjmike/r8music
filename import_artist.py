@@ -36,7 +36,7 @@ def import_artist(artist_name):
     cursor = con.cursor()
 
     cursor.execute(
-        "insert into artists (name, url) values (?, ?)",
+        "insert into artists (name, slug) values (?, ?)",
         (artist_info["name"], slugify(artist_info["name"]))
     )
 

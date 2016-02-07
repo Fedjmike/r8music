@@ -2,7 +2,7 @@ drop table if exists artists;
 create table artists (
     id integer primary key autoincrement,
     name text not null,
-    url text not null
+    slug text not null
 );
 
 drop table if exists releases;

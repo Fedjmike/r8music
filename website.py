@@ -19,7 +19,7 @@ def init_db():
             db.cursor().executescript(f.read())
         
         db.execute(
-            "insert into artists (name, url) values (?, ?)",
+            "insert into artists (name, slug) values (?, ?)",
             ("My Bloody Valentine", "my-bloody-valentine")
         )
         
