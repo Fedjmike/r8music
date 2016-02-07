@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import closing
 from flask import Flask, render_template, g
 
-from music_objects import Artist, Release, Track
+from music_objects import Artist, Release, Track, ArtistNotFound, ReleaseNotFound
 from import_artist import import_artist
 
 app = Flask(__name__)
@@ -52,8 +52,7 @@ def render_release(artist_slug, release_slug):
         release = Release.from_slugs(artist_slug, release_slug)
         return render_template("release.html", release=release)
         
-    #todo ArtistNotFound, ReleaseNotFound
-    except ValueError:
+    except (ArtistNotFound, ReleaseNotFound):
         return "404"
 
 @app.route("/<slug>/")
@@ -62,7 +61,7 @@ def render_artist(slug):
         artist = Artist.from_slug(slug)
         return render_template("artist.html", artist=artist)
         
-    except ValueError:
+    except ArtistNotFound:
         return "404"
 
 

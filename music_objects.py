@@ -18,6 +18,11 @@ def db_results(*args, **kwargs):
     with sqlite3.connect(DB_NAME) as conn:
         return list(conn.cursor().execute(*args, **kwargs))
 
+class ArtistNotFound(Exception):
+    pass
+    
+class ReleaseNotFound(Exception):
+    pass
 
 class Artist(object):
     def __init__(self, _id):
@@ -28,9 +33,13 @@ class Artist(object):
 
     @classmethod
     def from_slug(cls, slug):
-        ((_id,),) = db_results(
-                'select id from artists where slug=?', (slug,))
-        return cls(_id)
+        try:
+            ((_id,),) = db_results(
+                    'select id from artists where slug=?', (slug,))
+            return cls(_id)
+        
+        except ValueError:
+            raise ArtistNotFound()
 
     def _dom(self):
         return E.div({'class': 'artist-main'},
@@ -63,9 +72,13 @@ class Release(object):
 
     @classmethod
     def from_slug(cls, artist, release_slug):
-        ((_id,),) = db_results(
-                'select id from releases where slug=?', (release_slug,))
-        return cls(artist, _id)
+        try:
+            ((_id,),) = db_results(
+                    'select id from releases where slug=?', (release_slug,))
+            return cls(artist, _id)
+            
+        except ValueError:
+            raise ReleaseNotFound()
 
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
