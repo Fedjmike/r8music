@@ -48,9 +48,9 @@
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
 	
 	<ol class="releases">
-    {% for release in releases | sort(attribute="year") %}
+    {% for release in releases %}
 		<li>
-			<h2>{{ release.year }} <a href="#todo">{{ release.title }}</a></h2>
+			<h2>{{ release.date }} <a href="#todo">{{ release.title }}</a></h2>
 			<ol class="rating">
 				<li>1</li>
 				<li>2</li>

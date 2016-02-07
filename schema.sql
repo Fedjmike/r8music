@@ -9,7 +9,6 @@ drop table if exists releases;
 create table releases (
     id integer primary key autoincrement,
     title text not null,
-    'year' integer not null,
     'date' text not null,
 	artist_id integer not null,
     type text not null

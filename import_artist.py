@@ -48,8 +48,8 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, year, date, artist_id, type) values (?, ?, ?, ?, ?)",
-            (release['title'], int(release['date'][:4]), release['date'], artist_id, release['type'])
+            "insert into releases (title, date, artist_id, type) values (?, ?, ?, ?)",
+            (release['title'], release['date'], artist_id, release['type'])
         )
         release['local-id'] = cursor.lastrowid
         try:
