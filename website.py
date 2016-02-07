@@ -81,9 +81,21 @@ def render_release(name=None):
 
 # Nic messing around...
 @app.route("/obj/artist/<slug>")
-def gen_artist_dom(slug=None):
+def artist_dom_from_slug(slug=None):
     from music_objects import Artist
     return str(Artist.from_slug(slug))
+
+@app.route("/obj/id/<int:_id>")
+def artist_dom_from_id(_id=None):
+    from music_objects import Artist
+    return str(Artist(_id))
+
+# Not working yet because no slug field for releases.
+@app.route("/obj/<artist>/<release>")
+def release_dom_from_slugs(artist, release):
+    from music_objects import Artist, Release
+    artist = Artist.from_slug(artist)
+    return str(Release.from_slug(artist, release))
 
 
 if __name__ == "__main__":

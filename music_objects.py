@@ -33,6 +33,7 @@ class Artist(object):
         return E.div(
                  E.h3(self.name),
                  E.ol(*[E.li(r.title) for r in self.releases]),
+                 E.p(E.a('permalink', href='/obj/id/'+str(self._id))),
                )
 
     def __repr__(self):
