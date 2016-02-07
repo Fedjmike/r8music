@@ -58,10 +58,10 @@ def render_release(artist_slug, release_slug):
         return "404"
 
 @app.route("/<slug>/")
-def render_artist(slug=None):
+def render_artist(slug):
     try:
         artist = Artist.from_slug(slug)
-        return render_template("artist.html", artist_name=artist.name, releases=artist.releases)
+        return render_template("artist.html", artist=artist)
         
     except ValueError:
         return "404"

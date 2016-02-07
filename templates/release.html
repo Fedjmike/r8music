@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Loveless [1992] - My Blood Valentine {{ super() }}{% endblock %}
+{% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
 <section class="two columns">
