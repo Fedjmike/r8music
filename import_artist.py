@@ -57,5 +57,6 @@ def import_artist(artist_name):
     con.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
-import_artist(sys.argv[1])
-# print(json.dumps(result, sort_keys=True, indent=4, separators=(',', ': ')))
+
+if __name__ == '__main__':
+    import_artist(sys.argv[1])
