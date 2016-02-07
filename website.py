@@ -78,7 +78,7 @@ def render_release(name=None):
     print(artist_releases)
     return render_template("release.html", name=name, releases=artist_releases)
 
-@app.route("/<slug>")
+@app.route("/<slug>/")
 def render_artist(slug=None):
     try:
         artist = Artist.from_slug(slug)
