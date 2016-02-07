@@ -61,9 +61,14 @@ ol.rating, ol.releases {
 
 ol.rating {
 	display: inline-block;
+    /*Whitespace between the list items becomes hidden*/
+    font-size: 0;
 }
 
 ol.rating li {
+    /*Reset*/
+    font-size: 1rem;
+    
 	display: inline-block;
 	width: 2.6em;
     text-align: center;
@@ -72,8 +77,20 @@ ol.rating li {
 	color: white;
 }
 
+/*Rounded first and last rating buttons*/
+ol.rating li:first-child {
+    border-top-left-radius:     0.7em;
+    border-bottom-left-radius:  0.7em;
+}                               
+                                
+ol.rating li:last-child {       
+    border-top-right-radius:    0.7em;
+    border-bottom-right-radius: 0.7em;
+}
+
 .rating:hover li {
 	background-color: #7F0626;
+    cursor: default;
 }
 
 .rating li:hover ~ li {
