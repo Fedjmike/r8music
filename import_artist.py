@@ -61,16 +61,17 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, date, artist_id, type) values (?, ?, ?, ?)",
-            (release['title'], release['date'], artist_id, release['type'])
+            "insert into releases (title, date, artist_id, type, slug) values (?, ?, ?, ?, ?)",
+            (release['title'], release['date'], artist_id, release['type'], slugify(release['title']))
         )
         release['local-id'] = cursor.lastrowid
         try:
             tracks = get_tracks(release['id'])
             for track in tracks:
                 cursor.execute(
-                    "insert into tracks (position, title, runtime, release_id) values (?, ?, ?, ?)",
-                    (int(track['position']), track['recording']['title'], track['recording']['length'], release['local-id'])
+                    "insert into tracks (position, title, runtime, release_id, slug) values (?, ?, ?, ?, ?)",
+                    (int(track['position']), track['recording']['title'],
+                     track['recording']['length'], release['local-id'], slugify(track['recording']['title']))
                 )
         except:
             pass

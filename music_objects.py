@@ -51,7 +51,12 @@ class Artist(object):
 class Release(object):
     def __init__(self, artist, _id):
         self.artist = artist
-        ((self._id, self.title, self.date, self._artist_id, self.reltype),) = \
+        ((self._id,
+          self.title,
+          self.date,
+          self._artist_id,
+          self.reltype,
+          self.slug),) = \
                 db_results('select * from releases where id=?', (_id,))
         self.tracks = map(p(Track, self), [t for (t,) in db_results(
                 'select id from tracks where release_id=?', (self._id,))])
@@ -88,7 +93,8 @@ class Track(object):
           self.position,
           self.title,
           self.runtime,
-          self._release_id),) = \
+          self._release_id,
+          self.slug),) = \
                   db_results('select * from tracks where id=?', (_id,))
 
     def __repr__(self):
