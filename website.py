@@ -21,7 +21,7 @@ def init_db():
             
         db.commit()
         
-    import_artist("My Bloody Valentine")
+    import_artist("Yung Lean")
 
 def get_db():
     if not hasattr(g, 'sqlite_db'):

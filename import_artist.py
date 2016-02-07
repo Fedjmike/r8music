@@ -42,7 +42,7 @@ def generate_slug(text, cursor, table):
 def get_album_art_url(release_id):
     r = requests.get(album_art_base_url + release_id + '/')
     try:
-        return r.json()['images'][0]['image']
+        return r.json()['images'][0]['thumbnails']['large']
     except:
         return None
 
