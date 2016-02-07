@@ -4,8 +4,6 @@ from lxml import etree
 from lxml.builder import E
 
 
-# TODO: Generate some DOM.
-# TODO: Make things lazier where appropriate.
 # TODO: Properly encapsulate the db.
 
 
@@ -17,17 +15,12 @@ def db_results(*args, **kwargs):
         return list(conn.cursor().execute(*args, **kwargs))
 
 
-def lmap(*args, **kwargs):
-    # map is lazy, lmap isn't.
-    return list(map(*args, **kwargs))
-
-
 class Artist(object):
-    def __init__(self, url, fstyr):
-        self.url, self.fstyr = url, fstyr
+    def __init__(self, slug, fstyr):
+        self.slug, self.fstyr = slug, fstyr
         ((self._id, self.name),) = db_results(
-                'select id,name from artists where url=?', (self.url,))
-        self.releases = lmap(p(Release, self), self._release_names())
+                'select id,name from artists where slug=?', (self.slug,))
+        self.releases = map(p(Release, self), self._release_names())
 
     def _release_names(self):
         return [t for (t,) in db_results(
@@ -49,7 +42,7 @@ class Release(object):
         ((self._id,),) = db_results(
                 'select id from releases where title=? and artist_id=?',
                 (self.name, self.artist._id))
-        self.tracks = lmap(p(Track, self), self._track_names())
+        self.tracks = map(p(Track, self), self._track_names())
 
     def _track_names(self):
         return [t for (t,) in db_results(
@@ -68,6 +61,7 @@ class Release(object):
 class Track(object):
     def __init__(self, release, name):
         self.name = name
+        self.release = release
         ((self._id,),) = db_results(
                 'select id from tracks where title=? and release_id=?',
                 (self.name, self.release._id))

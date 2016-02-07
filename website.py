@@ -35,6 +35,19 @@ def init_db():
                 "insert into releases (title, date, artist_id, type) values (?, ?, ?, ?)",
                 release
             )
+
+        loveless_id = 1
+        tracks = [
+            ("Only Shallow", 100, loveless_id),
+            ("Loomer", 104, loveless_id),
+        ]
+
+        for track in tracks:
+            db.execute(
+                "insert into tracks (title, runtime, release_id) values (?, ?, ?)",
+                track
+            )
+
         
         db.commit()
 
