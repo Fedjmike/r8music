@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import re
 import json
+import arrow
 from unidecode import unidecode
 
 # From http://flask.pocoo.org/snippets/5/
@@ -21,8 +22,15 @@ def get_releases(mbid):
     releases = []
     for group in release_groups:
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        release = result['release-group']['release-list'][0]
-        print(json.dumps(release, sort_keys=True, indent=4, separators=(',', ': ')))
+        print(json.dumps(result, sort_keys=True, indent=4, separators=(',', ': ')))
+        try:
+            release = min(result['release-group']['release-list'], key=lambda release: arrow.get(release['date']).timestamp)
+        except KeyError:
+            for r in result['release-group']['release-list']:
+                if 'date' in r:
+                    release = r
+                    break
+            continue
         try:
             release['type'] = group['type']
         except KeyError:
