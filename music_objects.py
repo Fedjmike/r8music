@@ -33,15 +33,11 @@ class Artist(object):
         return E.div({'class': 'artist-main'},
                  E.h1(self.name),
                  E.ol(
-                   *[E.li(
-                       E.a(
-                         r.title,
-                         href='/artist/'+str(self._id)+'/release/'+str(r._id)
-                       )
-                     )
+                   *[E.li(E.a(r.title,
+                       href='/'+self.slug+'/'+r.slug))
                      for r in self.releases]
                  ),
-                 E.p(E.a('permalink', href='/artist/'+str(self._id))),
+                 E.p(E.a('permalink', href='/a/'+str(self._id))),
                )
 
     def __repr__(self):

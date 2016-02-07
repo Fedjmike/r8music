@@ -71,7 +71,7 @@ def query_db(query, args=(), one=False):
 # 
 
 @app.route("/")
-@app.route("/<name>")
+#@app.route("/<name>")  # Sam hates me.
 def render_release(name=None):
     print(query_db("select * from artists"))
     artist_releases = query_db("select * from releases")
@@ -80,24 +80,23 @@ def render_release(name=None):
 
 
 # Nic messing around...
-@app.route("/obj/artist/<slug>")
-def artist_dom_from_slug(slug=None):
+@app.route("/<artist>")
+def artist_dom_from_slug(artist=None):
     from music_objects import Artist
-    return str(Artist.from_slug(slug))
+    return str(Artist.from_slug(artist))
 
-@app.route("/artist/<int:_id>")
+@app.route("/a/<int:_id>")
 def artist_dom_from_id(_id=None):
     from music_objects import Artist
     return str(Artist(_id))
 
-# Not working yet because no slug field for releases.
-@app.route("/obj/<artist>/<release>")
+@app.route("/<artist>/<release>")
 def release_dom_from_slugs(artist, release):
     from music_objects import Artist, Release
     artist = Artist.from_slug(artist)
     return str(Release.from_slug(artist, release))
 
-@app.route("/artist/<int:artist_id>/release/<int:release_id>")
+@app.route("/a/<int:artist_id>/r/<int:release_id>")
 def release_dom_from_id(artist_id, release_id):
     from music_objects import Artist, Release
     artist = Artist(artist_id)
