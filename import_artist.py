@@ -43,7 +43,8 @@ def get_releases(mbid):
     for group in release_groups:
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
         try: # Tries to get the oldest release of the group. If it fails, tries to get any release with a valid date
-            release = min(result['release-group']['release-list'], key=lambda release: arrow.get(release['date']).timestamp)
+            release = min(result['release-group']['release-list'],
+                          key=lambda release: arrow.get(release['date']+"-01-01").timestamp if len(release['date']) == 4 else arrow.get(release['date']).timestamp)
         except KeyError:
             for r in result['release-group']['release-list']:
                 if 'date' in r:
