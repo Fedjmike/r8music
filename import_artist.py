@@ -15,8 +15,12 @@ def slugify(text, delim=u'-'):
     return delim.join(result)
 
 def get_releases(mbid):
-    result = musicbrainzngs.get_artist_by_id(mbid, includes=['releases']) 
-    releases = result['artist']['release-list']
+    result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
+    release_groups = result['artist']['release-group-list']
+    releases = []
+    for group in release_groups:
+        result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
+        releases.append(result['release-group']['release-list'][0])
     return releases
 
 def get_tracks(release_id):
@@ -57,6 +61,7 @@ def import_artist(artist_name):
     con.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+musicbrainzngs.musicbrainz.VALID_RELEASE_TYPES = ['nat', 'album', 'ep', 'other', 'compilation', 'soundtrack', 'live', 'remix', 'dj-mix', 'mixtape/street']
 
 if __name__ == '__main__':
     import_artist(sys.argv[1])
