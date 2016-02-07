@@ -1,8 +1,9 @@
-from flask import Flask, render_template
-
 import sqlite3
 from contextlib import closing
-from flask import g
+from flask import Flask, render_template, g
+
+from music_objects import Artist, Release, Track
+
 
 app = Flask(__name__)
 
@@ -82,23 +83,21 @@ def render_release(name=None):
 # Nic messing around...
 @app.route("/<artist>")
 def artist_dom_from_slug(artist=None):
-    from music_objects import Artist
+    # Quick hack to stop complaining about favicon.ico.
+    if artist == 'favicon.ico': return '0'
     return str(Artist.from_slug(artist))
 
 @app.route("/a/<int:_id>")
 def artist_dom_from_id(_id=None):
-    from music_objects import Artist
     return str(Artist(_id))
 
 @app.route("/<artist>/<release>")
 def release_dom_from_slugs(artist, release):
-    from music_objects import Artist, Release
     artist = Artist.from_slug(artist)
     return str(Release.from_slug(artist, release))
 
 @app.route("/a/<int:artist_id>/r/<int:release_id>")
 def release_dom_from_id(artist_id, release_id):
-    from music_objects import Artist, Release
     artist = Artist(artist_id)
     return str(Release(artist, release_id))
 
