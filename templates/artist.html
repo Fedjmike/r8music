@@ -1,14 +1,5 @@
 {% extends "layout.html" %}
-
-{% macro release_list(releases) -%}
-    <ol class="releases">
-    {% for release in releases | sort(attribute="date") %}
-        <li>
-            <h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
-        </li>
-    {% endfor %}
-    </ol>
-{%- endmacro %}
+{% from "release_list.html" import release_list %}
 
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
