@@ -12,6 +12,7 @@ create table releases (
     'date' text not null,
 	artist_id integer not null,
     type text not null,
+    album_art_url text,
     slug text not null
 
 );

@@ -55,6 +55,7 @@ class Release(object):
           self.date,
           self._artist_id,
           self.reltype,
+          self.album_art_url,
           self.slug),) = \
                 db_results('select * from releases where id=?', (_id,))
         self.tracks = lmap(p(Track, self), [t for (t,) in db_results(

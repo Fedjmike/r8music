@@ -3,11 +3,14 @@ import sqlite3
 import sys
 import re
 import json
+import requests
 import arrow
 from unidecode import unidecode
 
 # From http://flask.pocoo.org/snippets/5/
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+album_art_base_url = 'http://coverartarchive.org/release/'
 
 def slugify(text, delim=u'-'):
     """Generates an ASCII-only slug."""
@@ -35,6 +38,13 @@ def avoid_collison(slug_candidate, cursor, table):
 def generate_slug(text, cursor, table):
     slug_candidate = slugify(text)
     return avoid_collison(slug_candidate, cursor, table)
+
+def get_album_art_url(release_id):
+    r = requests.get(album_art_base_url + release_id + '/')
+    try:
+        return r.json()['images'][0]['image']
+    except:
+        return None
 
 def get_releases(mbid):
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
@@ -82,8 +92,8 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, date, artist_id, type, slug) values (?, ?, ?, ?, ?)",
-            (release['title'], release['date'], artist_id, release['type'], generate_slug(release['title'], cursor, 'releases'))
+            "insert into releases (title, date, artist_id, type, album_art_url, slug) values (?, ?, ?, ?, ?, ?)",
+            (release['title'], release['date'], artist_id, release['type'], get_album_art_url(release['id']), generate_slug(release['title'], cursor, 'releases'))
         )
         release['local-id'] = cursor.lastrowid
         try:
@@ -99,7 +109,6 @@ def import_artist(artist_name):
     con.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
-musicbrainzngs.musicbrainz.VALID_RELEASE_TYPES = ['nat', 'album', 'ep', 'other', 'compilation', 'soundtrack', 'live', 'remix', 'dj-mix', 'mixtape/street']
 
 if __name__ == '__main__':
     import_artist(sys.argv[1])
