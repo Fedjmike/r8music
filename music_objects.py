@@ -62,10 +62,14 @@ class Release(object):
                 'select id from tracks where release_id=?', (self._id,))])
 
     @classmethod
-    def from_slug(cls, artist, slug):
+    def from_slug(cls, artist, release_slug):
         ((_id,),) = db_results(
-                'select id from releases where slug=?', (slug,))
+                'select id from releases where slug=?', (release_slug,))
         return cls(artist, _id)
+
+    @classmethod
+    def from_slugs(cls, artist_slug, release_slug):
+        return cls(Artist.from_slug(artist_slug), release_slug)
 
     def _dom(self):
         return E.div({'class': 'release'},

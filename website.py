@@ -49,8 +49,7 @@ def render_homepage():
 @app.route("/<artist_slug>/<release_slug>")
 def render_release(artist_slug, release_slug):
     try:
-        artist = Artist.from_slug(artist_slug)
-        release = Release.from_slug(artist, release_slug)
+        release = Release.from_slugs(artist_slug, release_slug)
         return render_template("release.html", release=release)
         
     #todo ArtistNotFound, ReleaseNotFound
