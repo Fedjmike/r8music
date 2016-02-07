@@ -12,7 +12,8 @@
 		
 		<ol class="tracks">
         {% for track in release.tracks | sort(attribute="position") %}
-			<li>Only Shallow <time>4:17</time></li>
+            <!-- todo seconds to m:ss -->
+			<li>{{ track.title }} <time>{{ track.runtime }} s</time></li>
         {% endfor %}
 		</ol>
 	  
