@@ -2,6 +2,7 @@ import musicbrainzngs
 import sqlite3
 import sys
 import re
+import json
 from unidecode import unidecode
 
 # From http://flask.pocoo.org/snippets/5/
@@ -20,7 +21,9 @@ def get_releases(mbid):
     releases = []
     for group in release_groups:
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        releases.append(result['release-group']['release-list'][0])
+        release = result['release-group']['release-list'][0]
+        release['type'] = group['type']
+        releases.append(release)
     return releases
 
 def get_tracks(release_id):
@@ -45,8 +48,8 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, year, artist_id) values (?, ?, ?)",
-            (release['title'], int(release['date'][:4]), artist_id)
+            "insert into releases (title, year, artist_id, type) values (?, ?, ?, ?)",
+            (release['title'], int(release['date'][:4]), artist_id, release['type'])
         )
         release['local-id'] = cursor.lastrowid
         try:

@@ -25,14 +25,14 @@ def init_db():
         
         mbv_id = 1
         releases = [
-            ("Loveless", 1991, mbv_id),
-            ("Isn't Anything", 1988, mbv_id),
-            ("m b v", 2013, mbv_id)
+            ("Loveless", 1991, mbv_id, 'gay'),
+            ("Isn't Anything", 1988, mbv_id, 'gay'),
+            ("m b v", 2013, mbv_id, 'gay')
         ]
         
         for release in releases:
             db.execute(
-                "insert into releases (title, year, artist_id) values (?, ?, ?)",
+                "insert into releases (title, year, artist_id, type) values (?, ?, ?, ?)",
                 release
             )
         
