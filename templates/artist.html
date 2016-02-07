@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ artist_name }} {{ super() }}{% endblock %}
+
+{% block content %}
+<section>
+	<header><h1>{{ artist_name }}</h1></header>
+	
+	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
+	
+	<ol class="releases">
+    {% for release in releases | sort(attribute="date") %}
+		<li>
+			<h2>{{ release.date[:4] }} <a href="#todo">{{ release.title }}</a></h2>
+			<ol class="rating">
+				<li>1</li>
+				<li>2</li>
+				<li>3</li>
+				<li>4</li>
+				<li>5</li>
+				<li>6</li>
+				<li>7</li>
+				<li>8</li>
+				<li>9</li>
+				<li>10</li>
+			</ol>
+		</li>
+    {% endfor %}
+	</ol>
+</section>
+{% endblock %}

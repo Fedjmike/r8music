@@ -72,16 +72,24 @@ def query_db(query, args=(), one=False):
 # 
 
 @app.route("/")
-#@app.route("/<name>")  # Sam hates me.
 def render_release(name=None):
     print(query_db("select * from artists"))
     artist_releases = query_db("select * from releases")
     print(artist_releases)
     return render_template("release.html", name=name, releases=artist_releases)
 
+@app.route("/<slug>")
+def render_artist(slug=None):
+    try:
+        artist = Artist.from_slug(slug)
+        return render_template("artist.html", artist_name=artist.name, releases=artist.releases)
+        
+    except ValueError:
+        return "404"
+
 
 # Nic messing around...
-@app.route("/<artist>")
+#@app.route("/<artist>")
 def artist_dom_from_slug(artist=None):
     return str(Artist.from_slug(artist))
 
