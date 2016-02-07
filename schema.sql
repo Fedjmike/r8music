@@ -11,7 +11,9 @@ create table releases (
     title text not null,
     'date' text not null,
 	artist_id integer not null,
-    type text not null
+    type text not null,
+    slug text not null
+
 );
 
 drop table if exists tracks;
@@ -20,5 +22,6 @@ create table tracks (
     position integer not null,
     title text not null,
     runtime integer not null,
-	release_id integer not null
+	release_id integer not null,
+    slug text not null
 );
