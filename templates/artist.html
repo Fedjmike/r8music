@@ -1,5 +1,15 @@
 {% extends "layout.html" %}
 
+{% macro release_list(releases) -%}
+    <ol class="releases">
+    {% for release in releases | sort(attribute="date") %}
+        <li>
+            <h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
+        </li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
@@ -9,49 +19,9 @@
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
 	
     <h3>Albums</h3>
-	<ol class="releases">
-    {% for release in artist.releases | sort(attribute="date") %}
-        {% if release.reltype == "Album" %}
-            <li>
-                <h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
-                <ol class="rating">
-                    <li>1</li>
-                    <li>2</li>
-                    <li>3</li>
-                    <li>4</li>
-                    <li>5</li>
-                    <li>6</li>
-                    <li>7</li>
-                    <li>8</li>
-                    <li>9</li>
-                    <li>10</li>
-                </ol>
-            </li>
-        {% endif %}
-    {% endfor %}
-	</ol>
+    {{ release_list(artist.releases | selectattr("reltype", "equalto", "Album")) }}
     
     <br/><h3>Other releases</h3>
-    <ol class="releases">
-    {% for release in artist.releases | sort(attribute="date") %}
-        {% if release.reltype != "Album" %}
-            <li>
-                <h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
-                <ol class="rating">
-                    <li>1</li>
-                    <li>2</li>
-                    <li>3</li>
-                    <li>4</li>
-                    <li>5</li>
-                    <li>6</li>
-                    <li>7</li>
-                    <li>8</li>
-                    <li>9</li>
-                    <li>10</li>
-                </ol>
-            </li>
-        {% endif %}
-    {% endfor %}
-	</ol>
+    {{ release_list(artist.releases | rejectattr("reltype", "equalto", "Album")) }}
 </section>
 {% endblock %}
