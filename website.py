@@ -18,10 +18,10 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
-        
-        import_artist("My Bloody Valentine")
-        
+            
         db.commit()
+        
+    import_artist("My Bloody Valentine")
 
 def get_db():
     if not hasattr(g, 'sqlite_db'):
