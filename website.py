@@ -80,10 +80,10 @@ def render_release(name=None):
 
 
 # Nic messing around...
-@app.route("/obj/artist/<name>")
-def gen_artist_dom(name=None):
+@app.route("/obj/artist/<slug>")
+def gen_artist_dom(slug=None):
     from music_objects import Artist
-    return str(Artist(name, 0000))
+    return str(Artist.from_slug(slug))
 
 
 if __name__ == "__main__":
