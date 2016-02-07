@@ -23,6 +23,9 @@ def detect_collision(slug_candidate, cursor, table):
     return False
 
 def avoid_collison(slug_candidate, cursor, table):
+    if not detect_collision(slug_candidate, cursor, table):
+        return slug_candidate
+
     i = 1
     while True:
         if not detect_collision(slug_candidate + "-" + str(i), cursor, table):
