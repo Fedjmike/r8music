@@ -7,7 +7,7 @@
 	<div class="album-main">
 		<header>
 			<h1>{{ release.title }}</h1>
-			<h2><a href="#my-bloody-valentine">{{ release.artist.name }}</a>, {{ release.date[:4] }}</h2>
+			<h2><a href="/{{ release.artist.slug }}/">{{ release.artist.name }}</a>, {{ release.date[:4] }}</h2>
 		</header>
 		
 		<ol class="tracks">
