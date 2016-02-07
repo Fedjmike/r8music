@@ -16,6 +16,23 @@ def slugify(text, delim=u'-'):
         result.extend(unidecode(word).split())
     return delim.join(result)
 
+def detect_collision(slug_candidate, cursor, table):
+    cursor.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,))
+    if cursor.fetchall()[0][0] > 0:
+        return True
+    return False
+
+def avoid_collison(slug_candidate, cursor, table):
+    i = 1
+    while True:
+        if not detect_collision(slug_candidate + "-" + str(i), cursor, table):
+            return slug_candidate + "-" + str(i)
+        i += 1
+
+def generate_slug(text, cursor, table):
+    slug_candidate = slugify(text)
+    return avoid_collison(slug_candidate, cursor, table)
+
 def get_releases(mbid):
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
     release_groups = result['artist']['release-group-list']
@@ -53,7 +70,7 @@ def import_artist(artist_name):
 
     cursor.execute(
         "insert into artists (name, slug) values (?, ?)",
-        (artist_info["name"], slugify(artist_info["name"]))
+        (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'))
     )
 
     artist_id = cursor.lastrowid
@@ -62,7 +79,7 @@ def import_artist(artist_name):
     for release in releases:
         cursor.execute(
             "insert into releases (title, date, artist_id, type, slug) values (?, ?, ?, ?, ?)",
-            (release['title'], release['date'], artist_id, release['type'], slugify(release['title']))
+            (release['title'], release['date'], artist_id, release['type'], generate_slug(release['title'], cursor, 'releases'))
         )
         release['local-id'] = cursor.lastrowid
         try:
@@ -71,7 +88,7 @@ def import_artist(artist_name):
                 cursor.execute(
                     "insert into tracks (position, title, runtime, release_id, slug) values (?, ?, ?, ?, ?)",
                     (int(track['position']), track['recording']['title'],
-                     track['recording']['length'], release['local-id'], slugify(track['recording']['title']))
+                     track['recording']['length'], release['local-id'], generate_slug(track['recording']['title'], cursor, 'tracks'))
                 )
         except:
             pass
