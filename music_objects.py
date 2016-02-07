@@ -30,10 +30,18 @@ class Artist(object):
         return cls(_id)
 
     def _dom(self):
-        return E.div(
-                 E.h3(self.name),
-                 E.ol(*[E.li(r.title) for r in self.releases]),
-                 E.p(E.a('permalink', href='/obj/id/'+str(self._id))),
+        return E.div({'class': 'artist-main'},
+                 E.h1(self.name),
+                 E.ol(
+                   *[E.li(
+                       E.a(
+                         r.title,
+                         href='/artist/'+str(self._id)+'/release/'+str(r._id)
+                       )
+                     )
+                     for r in self.releases]
+                 ),
+                 E.p(E.a('permalink', href='/artist/'+str(self._id))),
                )
 
     def __repr__(self):
@@ -55,20 +63,33 @@ class Release(object):
         return cls(artist, _id)
 
     def _dom(self):
-        return E.div(
-                 E.h4(self.title),
-                 E.ol(*[E.li(r.title) for r in self.tracks]),
+        return E.div({'class': 'release'},
+                 E.h1(self.title),
+                 E.h2(self.artist.name),
+                 E.ol({'class': 'tracks'},
+                   *[E.li(t.title) for t in self.tracks]
+                 ),
+                 E.div(
+                   E.p('average rating '+str(9.7)),
+                   E.ol({'class': 'rating'},
+                     *[E.li(str(i)) for i in range(11)]
+                   ),
+                 ),
                )
 
     def __repr__(self):
-        return etree.tostring(self._dom()).decode('utf-8')
+        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
 
 
 class Track(object):
     def __init__(self, release, _id):
         self.release = release
-        ((self._id, self.title, self.runtime, self._release_id),) = db_results(
-                'select * from tracks where id=?', (self._id))
+        ((self._id,
+          self.position,
+          self.title,
+          self.runtime,
+          self._release_id),) = \
+                  db_results('select * from tracks where id=?', (_id,))
 
     def __repr__(self):
         return self.title

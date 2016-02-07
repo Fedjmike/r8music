@@ -85,7 +85,7 @@ def artist_dom_from_slug(slug=None):
     from music_objects import Artist
     return str(Artist.from_slug(slug))
 
-@app.route("/obj/id/<int:_id>")
+@app.route("/artist/<int:_id>")
 def artist_dom_from_id(_id=None):
     from music_objects import Artist
     return str(Artist(_id))
@@ -96,6 +96,13 @@ def release_dom_from_slugs(artist, release):
     from music_objects import Artist, Release
     artist = Artist.from_slug(artist)
     return str(Release.from_slug(artist, release))
+
+@app.route("/artist/<int:artist_id>/release/<int:release_id>")
+def release_dom_from_id(artist_id, release_id):
+    from music_objects import Artist, Release
+    artist = Artist(artist_id)
+    return str(Release(artist, release_id))
+
 
 
 if __name__ == "__main__":
