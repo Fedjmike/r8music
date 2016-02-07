@@ -92,6 +92,7 @@ class Track(object):
           self._release_id,
           self.slug),) = \
                   db_results('select * from tracks where id=?', (_id,))
+        self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
 
     def __repr__(self):
         return self.title
