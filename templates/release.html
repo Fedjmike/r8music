@@ -30,7 +30,9 @@
 			</ol>
 		</div>
 	</div>
-	<img class="album-cover" src="{{ release.album_art_url }}"/>
+    {% if release.album_art_url %}
+        <img class="album-cover" src="{{ release.album_art_url }}"/>
+    {% endif %}
 </section>
 
 <section>

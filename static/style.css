@@ -102,6 +102,8 @@ ol.rating li {
 
 .album-cover {
 	margin-top: 2em;
+    max-width: 20em;
+    float: right;
 }
 
 /*Layout*/
@@ -129,7 +131,7 @@ section {
 @media only screen and (min-width: 600px) {
 	.page {
 		margin: 0 auto;
-		width: 50em;
+		width: 47em;
 	}
 
     .two.columns > :nth-child(2n+1) {
