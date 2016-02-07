@@ -22,7 +22,12 @@ def get_releases(mbid):
     for group in release_groups:
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
         release = result['release-group']['release-list'][0]
-        release['type'] = group['type']
+        print(json.dumps(release, sort_keys=True, indent=4, separators=(',', ': ')))
+        try:
+            release['type'] = group['type']
+        except KeyError:
+            release['type'] = 'Unspecified'
+
         releases.append(release)
     return releases
 
