@@ -83,8 +83,6 @@ def render_release(name=None):
 # Nic messing around...
 @app.route("/<artist>")
 def artist_dom_from_slug(artist=None):
-    # Quick hack to stop complaining about favicon.ico.
-    if artist == 'favicon.ico': return '0'
     return str(Artist.from_slug(artist))
 
 @app.route("/a/<int:_id>")
