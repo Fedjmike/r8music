@@ -10,6 +10,10 @@ from lxml.builder import E
 DB_NAME = 'sample.db'
 
 
+def lmap(*args, **kwargs):
+    return list(map(*args, **kwargs))
+
+
 def db_results(*args, **kwargs):
     with sqlite3.connect(DB_NAME) as conn:
         return list(conn.cursor().execute(*args, **kwargs))
@@ -19,8 +23,7 @@ class Artist(object):
     def __init__(self, _id):
         ((self._id, self.name, self.slug),) = db_results(
                 'select * from artists where id=?', (_id,))
-        # map is lazy so the following call invokes a single db lookup.
-        self.releases = map(p(Release, self), [i for (i,) in db_results(
+        self.releases = lmap(p(Release, self), [i for (i,) in db_results(
                 'select id from releases where artist_id=?', (self._id,))])
 
     @classmethod
@@ -54,7 +57,7 @@ class Release(object):
           self.reltype,
           self.slug),) = \
                 db_results('select * from releases where id=?', (_id,))
-        self.tracks = map(p(Track, self), [t for (t,) in db_results(
+        self.tracks = lmap(p(Track, self), [t for (t,) in db_results(
                 'select id from tracks where release_id=?', (self._id,))])
 
     @classmethod
