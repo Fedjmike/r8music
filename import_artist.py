@@ -51,13 +51,15 @@ def get_album_art_url(release_id):
 def get_dominant_color(album_art_url):
     urllib.request.urlretrieve(album_art_url, "/tmp/img.jpg")
     color_thief = ColorThief('/tmp/img.jpg')
-    rolor_thief.get_color(quality=1)
+    color_thief.get_color(quality=5)
 
 def get_releases(mbid):
+    print("Querying MB for release groups...")
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
     release_groups = result['artist']['release-group-list']
     releases = []
     for group in release_groups:
+        print("Querying MB for release group " + group['id'] + "...")
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
         try: # Tries to get the oldest release of the group. If it fails, tries to get any release with a valid date
             release = min(result['release-group']['release-list'],
@@ -77,12 +79,14 @@ def get_releases(mbid):
     return releases
 
 def get_tracks(release_id):
+    print("Getting tracks for release " + release_id + "...")
     result = musicbrainzngs.get_release_by_id(release_id, includes=['recordings'])
     tracks = result['release']['medium-list'][0]['track-list']
     # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
     return tracks
 
 def import_artist(artist_name):
+    print("Querying MB for artist info...")
     result = musicbrainzngs.search_artists(artist=artist_name)
     artist_info = result['artist-list'][0]
 
@@ -98,6 +102,7 @@ def import_artist(artist_name):
     releases = get_releases(artist_info['id'])
 
     for release in releases:
+        print("Getting album art for release" + release['id'] + "...")
         cursor.execute(
             "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
             (artist_id, release['title'],
