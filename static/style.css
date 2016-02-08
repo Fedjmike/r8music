@@ -88,6 +88,7 @@ ol.nav {
 	display: inline-block;
     background-color: #4078c0;
     border-radius: 0.7rem;
+    overflow: hidden;
     /*Whitespace between the list items becomes hidden*/
     font-size: 0;
 }
@@ -103,17 +104,6 @@ ol.nav {
     transition: background-color 0.04s;
 	color: white;
     text-align: center;
-}
-
-/*Rounded first and last rating buttons*/
-.rating li:first-child {
-    border-top-left-radius:     0.7em;
-    border-bottom-left-radius:  0.7em;
-}                               
-                                
-.rating li:last-child {       
-    border-top-right-radius:    0.7em;
-    border-bottom-right-radius: 0.7em;
 }
 
 .rating:hover li {
