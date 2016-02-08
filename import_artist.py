@@ -4,6 +4,8 @@ import sys
 import re
 import json
 import requests
+import urllib.request
+from colorthief import ColorThief
 import arrow
 from unidecode import unidecode
 
@@ -45,6 +47,11 @@ def get_album_art_url(release_id):
         return r.json()['images'][0]['thumbnails']['large']
     except:
         return None
+
+def get_dominant_color(album_art_url):
+    urllib.request.urlretrieve(album_art_url, "/tmp/img.jpg")
+    color_thief = ColorThief('/tmp/img.jpg')
+    rolor_thief.get_color(quality=1)
 
 def get_releases(mbid):
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
