@@ -48,10 +48,15 @@ def get_album_art_url(release_id):
     except:
         return None
 
+def rgb_to_hex(rgb):
+    return '#%02x%02x%02x' % rgb
+
 def get_dominant_color(album_art_url):
+    if not album_art_url:
+        return None
     urllib.request.urlretrieve(album_art_url, "/tmp/img.jpg")
     color_thief = ColorThief('/tmp/img.jpg')
-    rolor_thief.get_color(quality=1)
+    return rgb_to_hex(color_thief.get_color(quality=1))
 
 def get_releases(mbid):
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
@@ -98,12 +103,15 @@ def import_artist(artist_name):
     releases = get_releases(artist_info['id'])
 
     for release in releases:
+        album_art_url = get_album_art_url(release['id'])
         cursor.execute(
-            "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
+            "insert into releases (artist_id, title, slug, date, type, album_art_url, album_art_dominant_color) values (?, ?, ?, ?, ?, ?, ?)",
             (artist_id, release['title'],
              generate_slug(release['title'], cursor, 'releases'),
-             release['date'], release['type'],
-             get_album_art_url(release['id']))
+             release['date'],
+             release['type'],
+             album_art_url,
+             get_dominant_color(album_art_url)),
         )
         release['local-id'] = cursor.lastrowid
         try:
