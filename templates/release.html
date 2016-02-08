@@ -18,7 +18,7 @@
 		</ol>
 	  
 		<p class="tight">Average rating: 7.8 &nbsp; &nbsp; My rating:</p>
-        <ol class="rating">
+        <ol class="rating" {% if release.album_art_dominant_color %} style="background-color: {{ release.album_art_dominant_color }} {% endif %}">
             <li>1</li>
             <li>2</li>
             <li>3</li>
