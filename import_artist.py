@@ -1,10 +1,5 @@
 import musicbrainzngs
-import sqlite3
-import sys
-import re
-import json
-import requests
-import urllib.request
+import sqlite3, sys, os, re, json, requests, urllib.request
 from colorthief import ColorThief
 import arrow
 from unidecode import unidecode
@@ -50,9 +45,12 @@ def get_album_art_url(release_id):
         return None
 
 def get_dominant_color(album_art_url):
-    urllib.request.urlretrieve(album_art_url, "/tmp/img.jpg")
-    color_thief = ColorThief('/tmp/img.jpg')
-    color_thief.get_color(quality=5)
+    if not album_art_url:
+        return None
+    tempname, _ = urllib.request.urlretrieve(album_art_url)
+    color_thief = ColorThief(tempname)
+    os.remove(tempname)
+    return rgb_to_hex(color_thief.get_color(quality=5))
 
 def get_releases(mbid):
     print("Querying MB for release groups...")

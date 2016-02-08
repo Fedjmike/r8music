@@ -112,7 +112,7 @@ ol.nav {
 
 .rating li:hover {
 	background-color: rgba(0, 0, 0, 0.4);
-    cursor: default;
+    cursor: pointer;
 }
 
 .rating li:hover ~ li {
