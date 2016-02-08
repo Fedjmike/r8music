@@ -42,6 +42,10 @@ def query_db(query, args=(), one=False):
 
 # 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
 @app.route("/")
 def render_homepage():
     return render_template("layout.html")
@@ -57,7 +61,7 @@ def render_release(artist_slug, release_slug):
         return render_template("release.html", release=release)
         
     except (ArtistNotFound, ReleaseNotFound):
-        return "404"
+        return page_not_found("/%s/%s" % (artist_slug, release_slug))
 
 @app.route("/<slug>/")
 def render_artist(slug):
@@ -69,7 +73,7 @@ def render_artist(slug):
         return render_template("artist.html", artist=artist)
         
     except ArtistNotFound:
-        return "404"
+        return page_not_found("/%s/" % (slug,))
 
 
 # Nic messing around...
