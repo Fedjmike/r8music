@@ -42,6 +42,7 @@ def generate_slug(text, cursor, table):
     return avoid_collison(slug_candidate, cursor, table)
 
 def get_album_art_url(release_id):
+    print("Getting album art for release " + release['id'] + "...")
     r = requests.get(album_art_base_url + release_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
@@ -102,7 +103,6 @@ def import_artist(artist_name):
     releases = get_releases(artist_info['id'])
 
     for release in releases:
-        print("Getting album art for release" + release['id'] + "...")
         cursor.execute(
             "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
             (artist_id, release['title'],
