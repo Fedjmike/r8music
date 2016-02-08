@@ -44,8 +44,12 @@ def query_db(query, args=(), one=False):
 
 @app.route("/")
 def render_homepage():
-    return "home sweet home"
-    
+    return render_template("layout.html")
+
+def render_artists_index():
+    artists = query_db("select * from artists")
+    return render_template("artists_index.html", artists=artists)
+
 @app.route("/<artist_slug>/<release_slug>")
 def render_release(artist_slug, release_slug):
     try:
@@ -57,6 +61,9 @@ def render_release(artist_slug, release_slug):
 
 @app.route("/<slug>/")
 def render_artist(slug):
+    if slug == "artists":
+        return render_artists_index()
+
     try:
         artist = Artist.from_slug(slug)
         return render_template("artist.html", artist=artist)

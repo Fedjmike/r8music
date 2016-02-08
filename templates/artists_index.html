@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}Artists index {{ super() }}{% endblock %}
+
+{% block content %}
+<header><h1>Artists</h1></header>
+
+<ol>
+{% for artist in artists %}
+    <li><a href="/{{ artist.slug }}/">{{ artist.name }}</a></li>
+{% endfor %}
+</ol>
+{% endblock %}
