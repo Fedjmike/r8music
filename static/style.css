@@ -57,10 +57,33 @@ ol, ul {
 	float: right;
 }
 
-ol.rating, ol.releases {
+ol.nav, ol.rating, ol.releases {
 	list-style: none;
 	padding: 0;
 	margin: 0;
+}
+
+ol.nav {
+    padding: 0.5rem 0;
+    font-size: 1.17em;
+}
+
+.nav .banner {
+    font-size: 1.17em;
+    font-weight: bold;
+    position: relative;
+    top: 0.06em;
+}
+
+.nav li {
+    display: inline-block;
+}
+
+.nav li:not(:last-child):after {
+    content: ' /';
+    font-size: 1.2em;
+    position: relative;
+    top: 0.15em;
 }
 
 .rating {
