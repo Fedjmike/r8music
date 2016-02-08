@@ -10,7 +10,7 @@ create table releases (
     id integer primary key autoincrement,
     title text not null,
     'date' text not null,
-	artist_id integer not null,
+    artist_id integer not null,
     type text not null,
     album_art_url text,
     slug text not null
@@ -23,6 +23,6 @@ create table tracks (
     position integer not null,
     title text not null,
     runtime integer not null,
-	release_id integer not null,
+    release_id integer not null,
     slug text not null
 );
