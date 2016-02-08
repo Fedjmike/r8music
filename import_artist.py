@@ -101,10 +101,9 @@ def import_artist(artist_name):
         cursor.execute(
             "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
             (artist_id, release['title'],
-             generate_slug(release['title'],
+             generate_slug(release['title'], cursor, 'releases'),
              release['date'], release['type'],
-             get_album_art_url(release['id']),
-             cursor, 'releases'))
+             get_album_art_url(release['id']))
         )
         release['local-id'] = cursor.lastrowid
         try:
