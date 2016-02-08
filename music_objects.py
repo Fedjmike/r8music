@@ -60,12 +60,12 @@ class Release(object):
     def __init__(self, artist, _id):
         self.artist = artist
         ((self._id,
-          self.title,
-          self.date,
           self._artist_id,
+          self.title,
+          self.slug,
+          self.date,
           self.reltype,
-          self.album_art_url,
-          self.slug),) = \
+          self.album_art_url),) = \
                 db_results('select * from releases where id=?', (_id,))
         self.tracks = lmap(p(Track, self), [t for (t,) in db_results(
                 'select id from tracks where release_id=?', (self._id,))])
@@ -107,11 +107,11 @@ class Track(object):
     def __init__(self, release, _id):
         self.release = release
         ((self._id,
-          self.position,
-          self.title,
-          self.runtime,
           self._release_id,
-          self.slug),) = \
+          self.title,
+          self.slug,
+          self.position,
+          self.runtime),) = \
                   db_results('select * from tracks where id=?', (_id,))
         self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
 
