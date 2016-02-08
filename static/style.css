@@ -18,6 +18,10 @@ header, p, ol, ul {
 	margin: 1em 0;
 }
 
+.tight {
+    margin: 0.3em 0;
+}
+
 h1 {
 	font-size: 2em;
 }
@@ -30,7 +34,7 @@ h3 {
 	font-size: 1.17em;
 }
 
-h1 a, h2 a {
+a, h1 a, h2 a {
 	color: #4078c0;
 	text-decoration: none;
 }
@@ -101,7 +105,7 @@ ol.rating, ol.releases {
 }
 
 .rating li:hover ~ li {
-	background-color: rgb(191, 55, 91);
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .releases h2 {
@@ -122,6 +126,10 @@ ol.rating, ol.releases {
 
 .album-main {
 	display: inline-block;
+}
+
+.columns .album-main {
+    max-width: 22em;
 }
 
 .album-cover {

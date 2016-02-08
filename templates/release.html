@@ -4,7 +4,7 @@
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
-<section class="two columns">
+<section class="{% if release.album_art_url %} two columns {% endif %}">
 	<div class="album-main">
 		<header>
 			<h1>{{ release.title }}</h1>
@@ -17,18 +17,17 @@
         {% endfor %}
 		</ol>
 	  
-		<div>Average rating: 7.8<br/>My rating:<br/>
-			<ol class="rating">
-				<li>1</li>
-				<li>2</li>
-				<li>3</li>
-				<li>4</li>
-				<li>5</li>
-				<li>6</li>
-				<li>7</li>
-				<li>8</li>
-			</ol>
-		</div>
+		<p class="tight">Average rating: 7.8 &nbsp; &nbsp; My rating:</p>
+        <ol class="rating">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+            <li>6</li>
+            <li>7</li>
+            <li>8</li>
+        </ol>
 	</div>
     {% if release.album_art_url %}
         <img class="album-cover" src="{{ release.album_art_url }}"/>
@@ -40,6 +39,6 @@
 	
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
     
-	{{ release_list(release.artist.releases) }} 
+	{{ release_list(release.artist.releases | selectattr("reltype", "equalto", "Album")) }} 
 </section>
 {% endblock %}
