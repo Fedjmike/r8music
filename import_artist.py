@@ -99,17 +99,24 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, date, artist_id, type, album_art_url, slug) values (?, ?, ?, ?, ?, ?)",
-            (release['title'], release['date'], artist_id, release['type'], get_album_art_url(release['id']), generate_slug(release['title'], cursor, 'releases'))
+            "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
+            (artist_id, release['title'],
+             generate_slug(release['title'],
+             release['date'], release['type'],
+             get_album_art_url(release['id']),
+             cursor, 'releases'))
         )
         release['local-id'] = cursor.lastrowid
         try:
             tracks = get_tracks(release['id'])
             for track in tracks:
                 cursor.execute(
-                    "insert into tracks (position, title, runtime, release_id, slug) values (?, ?, ?, ?, ?)",
-                    (int(track['position']), track['recording']['title'],
-                     track['recording']['length'], release['local-id'], generate_slug(track['recording']['title'], cursor, 'tracks'))
+                    "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
+                    (release['local-id'],
+                     track['recording']['title'],
+                     generate_slug(track['recording']['title'], cursor, 'tracks'),
+                     int(track['position']),
+                     track['recording']['length'])
                 )
         except:
             pass
