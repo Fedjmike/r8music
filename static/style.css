@@ -127,23 +127,27 @@ ol.nav {
     padding-right: 0.3em;
 }
 
-.releases.grid li {
+.releases.grid > li {
     display: inline-block;
-    width: 11em;
-    margin-right: 1em;
+    width: 11.5em;
     margin-bottom: 1em;
     vertical-align: top;
     text-align: center;
 }
 
-.releases.grid li div {
-    width: 11em;
-    height: 11em;
+.releases.grid > li:not(:nth-child(4n)) {
+    /*11.5x4 + 1.1x3 = 49.3 < 50 (page width) */
+    margin-right: 1.1em;
+}
+
+.releases.grid > li div {
+    width: 11.5em;
+    height: 11.5em;
     overflow: hidden;
     margin-bottom: 0.2em;
 }
 
-.releases.grid li img {
+.releases.grid > li img {
     width: 100%;
 }
 
