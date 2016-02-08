@@ -16,6 +16,9 @@ def slugify(text, delim=u'-'):
         result.extend(unidecode(word).split())
     return delim.join(result)
 
+def rgb_to_hex(rgb):
+    return '#%02x%02x%02x' % rgb
+
 def detect_collision(slug_candidate, cursor, table):
     cursor.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,))
     if cursor.fetchall()[0][0] > 0:
@@ -44,13 +47,20 @@ def get_album_art_url(release_id):
     except:
         return None
 
-def get_dominant_color(album_art_url):
+def get_palette(album_art_url):
+    print("Getting palette...")
     if not album_art_url:
-        return None
+        return ['ur mom', 'ur mom', 'ur mom'] # Temporary, should find another way to get accent colors without album art
     tempname, _ = urllib.request.urlretrieve(album_art_url)
     color_thief = ColorThief(tempname)
     os.remove(tempname)
-    return rgb_to_hex(color_thief.get_color(quality=5))
+    palette = []
+    try:
+        for color in (color_thief.get_palette(3, 5)):
+            palette.append(rgb_to_hex(color))
+    except:
+        return ['ur mom', 'ur mom', 'ur mom']
+    return palette
 
 def get_releases(mbid):
     print("Querying MB for release groups...")
@@ -101,14 +111,27 @@ def import_artist(artist_name):
     releases = get_releases(artist_info['id'])
 
     for release in releases:
+        release['album-art-url'] = get_album_art_url(release['id'])
         cursor.execute(
             "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
-            (artist_id, release['title'],
+            (artist_id,
+             release['title'],
              generate_slug(release['title'], cursor, 'releases'),
-             release['date'], release['type'],
-             get_album_art_url(release['id']))
+             release['date'],
+             release['type'],
+             release['album-art-url'])
         )
         release['local-id'] = cursor.lastrowid
+
+        palette = get_palette(release['album-art-url'])
+        cursor.execute(
+            "insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
+            (release['local-id'],
+             palette[0],
+             palette[1],
+             palette[2])
+        )
+
         try:
             tracks = get_tracks(release['id'])
             for track in tracks:
