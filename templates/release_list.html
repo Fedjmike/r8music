@@ -2,7 +2,7 @@
     <ol class="releases">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            <h2>{{ release.date[:4] }} <a href="{{ release.slug }}">{{ release.title }}</a></h2>
+            <h2><time>{{ release.date[:4] }}</time> <a href="{{ release.slug }}">{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>

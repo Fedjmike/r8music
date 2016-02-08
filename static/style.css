@@ -49,10 +49,6 @@ ol, ul {
 
 /*Custom lists*/
 
-.tracks {
-	max-width: 20em;
-}
-
 .tracks time {
 	float: right;
 }
@@ -88,7 +84,7 @@ ol.nav {
 
 .rating {
 	display: inline-block;
-    background-color: rgb(191, 55, 91);
+    background-color: #4078c0;
     border-radius: 0.7rem;
     /*Whitespace between the list items becomes hidden*/
     font-size: 0;
@@ -119,11 +115,11 @@ ol.nav {
 }
 
 .rating:hover li {
-	background-color: rgba(64, 0, 0, 0.3);
+	background-color: rgba(0, 0, 0, 0.25);
 }
 
 .rating li:hover {
-	background-color: rgba(64, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.4);
     cursor: default;
 }
 
@@ -135,19 +131,13 @@ ol.nav {
 	display: inline-block;
 }
 
-.releases .rating {
-	display: none;
-	float: right;
-	margin-right: 4em;
-}
-
-.releases :hover .rating {
-	display: inline-block;
+.releases time {
+    padding-right: 0.3em;
 }
 
 .releases.grid li {
     display: inline-block;
-    width: 10em;
+    width: 11em;
     margin-right: 1em;
     margin-bottom: 1em;
     vertical-align: top;
@@ -155,8 +145,8 @@ ol.nav {
 }
 
 .releases.grid li div {
-    width: 10em;
-    height: 10em;
+    width: 11em;
+    height: 11em;
     overflow: hidden;
     margin-bottom: 0.2em;
 }
@@ -172,7 +162,7 @@ ol.nav {
 }
 
 .columns .album-main {
-    max-width: 22em;
+    width: 25em;
 }
 
 .album-cover {
@@ -206,7 +196,7 @@ section {
 @media only screen and (min-width: 600px) {
 	.page {
 		margin: 0 auto;
-		width: 47em;
+		width: 50em;
 	}
 
     .two.columns > :nth-child(2n+1) {
