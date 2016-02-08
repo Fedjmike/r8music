@@ -50,7 +50,7 @@ def get_album_art_url(release_id):
 def get_palette(album_art_url):
     print("Getting palette...")
     if not album_art_url:
-        return ['ur mom', 'ur mom', 'ur mom'] # Temporary, should find another way to get accent colors without album art
+        return ['#0000ff', '#00ff00', 'ff0000'] # Temporary, should find another way to get accent colors without album art
     tempname, _ = urllib.request.urlretrieve(album_art_url)
     color_thief = ColorThief(tempname)
     os.remove(tempname)
@@ -59,7 +59,7 @@ def get_palette(album_art_url):
         for color in (color_thief.get_palette(3, 5)):
             palette.append(rgb_to_hex(color))
     except:
-        return ['ur mom', 'ur mom', 'ur mom']
+        return ['#0000ff', '#00ff00', 'ff0000']
     return palette
 
 def get_releases(mbid):
