@@ -59,37 +59,44 @@ ol.rating, ol.releases {
 	margin: 0;
 }
 
-ol.rating {
+.rating {
 	display: inline-block;
+    background-color: rgb(191, 55, 91);
+    border-radius: 0.7rem;
     /*Whitespace between the list items becomes hidden*/
     font-size: 0;
 }
 
-ol.rating li {
+.rating li {
     /*Reset*/
     font-size: 1rem;
     
 	display: inline-block;
 	width: 2.6em;
-    text-align: center;
 	padding: 0.2em 0;
-	background-color: rgb(191, 55, 91);
+    
+    transition: background-color 0.04s;
 	color: white;
+    text-align: center;
 }
 
 /*Rounded first and last rating buttons*/
-ol.rating li:first-child {
+.rating li:first-child {
     border-top-left-radius:     0.7em;
     border-bottom-left-radius:  0.7em;
 }                               
                                 
-ol.rating li:last-child {       
+.rating li:last-child {       
     border-top-right-radius:    0.7em;
     border-bottom-right-radius: 0.7em;
 }
 
 .rating:hover li {
-	background-color: #7F0626;
+	background-color: rgba(64, 0, 0, 0.3);
+}
+
+.rating li:hover {
+	background-color: rgba(64, 0, 0, 0.5);
     cursor: default;
 }
 
