@@ -13,8 +13,7 @@ create table releases (
     slug text not null,
     'date' text not null,
     type text not null,
-    album_art_url text,
-    album_art_dominant_color text
+    album_art_url text
 
 );
 
