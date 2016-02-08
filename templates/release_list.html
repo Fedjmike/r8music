@@ -7,3 +7,16 @@
     {% endfor %}
     </ol>
 {%- endmacro %}
+
+{% macro release_grid(releases) -%}
+    <ol class="releases grid">
+    {% for release in releases | sort(attribute="date") %}
+        <li>
+            <a href="{{ release.slug }}">
+                <div><img src="{{ release.album_art_url }}" /></div>
+                <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>
+            </a>
+        </li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}

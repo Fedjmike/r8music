@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "release_list.html" import release_list %}
+{% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
@@ -9,8 +9,8 @@
 	
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
 	
-    <h3>Albums</h3>
-    {{ release_list(artist.releases | selectattr("reltype", "equalto", "Album")) }}
+    <header><h3>Albums</h3></header>
+    {{ release_grid(artist.releases | selectattr("reltype", "equalto", "Album")) }}
     
     <br/><h3>Other releases</h3>
     {{ release_list(artist.releases | rejectattr("reltype", "equalto", "Album")) }}

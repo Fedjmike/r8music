@@ -145,6 +145,26 @@ ol.nav {
 	display: inline-block;
 }
 
+.releases.grid li {
+    display: inline-block;
+    width: 10em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+    vertical-align: top;
+    text-align: center;
+}
+
+.releases.grid li div {
+    width: 10em;
+    height: 10em;
+    overflow: hidden;
+    margin-bottom: 0.2em;
+}
+
+.releases.grid li img {
+    width: 100%;
+}
+
 /*Albums*/
 
 .album-main {
