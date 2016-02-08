@@ -37,7 +37,7 @@ def generate_slug(text, cursor, table):
     return avoid_collison(slug_candidate, cursor, table)
 
 def get_album_art_url(release_id):
-    print("Getting album art for release " + release['id'] + "...")
+    print("Getting album art for release " + release_id + "...")
     r = requests.get(album_art_base_url + release_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
