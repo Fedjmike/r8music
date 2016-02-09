@@ -19,7 +19,8 @@ create table releases (
 drop table if exists release_mbid;
 create table release_mbid (
     release_id integer not null,
-    mbid text not null
+    mbid text not null,
+    foreign key(release_id) references releases(id)
 );
 
 drop table if exists authors;
