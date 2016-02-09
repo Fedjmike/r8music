@@ -59,7 +59,7 @@ def get_palette(album_art_url):
         os.remove(tempname)
         return palette
     #Blame the ColourTheif guy
-    except:
+    except (QuantizationError, ThisShouldntHappenError):
         return [None, None, None]
 
 def get_releases(mbid):
