@@ -137,13 +137,17 @@ def import_artist(artist_name):
 
         tracks = get_tracks(release['id'])
         for track in tracks:
+            try:
+                length = track['recording']['length'])
+            except KeyError:
+                length = none
             cursor.execute(
                 "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
                 (release['local-id'],
                  track['recording']['title'],
                  generate_slug(track['recording']['title'], cursor, 'tracks'),
                  int(track['position']),
-                 track['recording']['length'])
+                 length)
             )
 
     con.commit()
