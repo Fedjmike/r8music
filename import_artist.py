@@ -44,7 +44,7 @@ def get_album_art_url(release_id):
     r = requests.get(album_art_base_url + release_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
-    except:
+    except JSONDecodeError:
         return None
 
 def get_palette(album_art_url):
@@ -131,7 +131,7 @@ def import_artist(artist_name):
              palette[1],
              palette[2])
         )
-        
+
         tracks = get_tracks(release['id'])
         for track in tracks:
             cursor.execute(
