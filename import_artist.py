@@ -149,6 +149,12 @@ def import_artist(artist_name):
              release['palette'][2])
         )
 
+        cursor.execute(
+            "insert into release_mbid (release_id, mbid) values (?, ?)",
+            (release['local-id'],
+             release['id'])
+        )
+
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] == artist_info['id']:

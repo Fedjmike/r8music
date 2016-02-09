@@ -16,6 +16,12 @@ create table releases (
     album_art_url text
 );
 
+drop table if exists release_mbid;
+create table release_mbid (
+    release_id integer not null,
+    mbid text not null
+);
+
 drop table if exists authors;
 create table authors (
     release_id integer not null,
