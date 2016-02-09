@@ -44,7 +44,7 @@ def get_album_art_url(release_id):
     r = requests.get(album_art_base_url + release_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
-    except json.decoder.JSONDecodeError:
+    except ValueError:
         return None
 
 def get_palette(album_art_url):
@@ -123,7 +123,10 @@ def import_artist(artist_name):
         )
         release['local-id'] = cursor.lastrowid
 
-        palette = get_palette(release['album-art-url'])
+        if release['album-art-url']:
+            palette = get_palette(release['album-art-url'])
+        else:
+            palette = [None, None, None]
         cursor.execute(
             "insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
             (release['local-id'],
