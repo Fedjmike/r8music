@@ -3,6 +3,8 @@ import sqlite3, sys, os, re, json, requests, urllib.request
 import colorthief
 import arrow
 from unidecode import unidecode
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool 
 
 # From http://flask.pocoo.org/snippets/5/
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -94,6 +96,16 @@ def get_tracks(release_id):
     # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
     return tracks
 
+def get_release(release):
+    release['album-art-url'] = get_album_art_url(release['id'])
+
+    if release['album-art-url']:
+        release['palette'] = get_palette(release['album-art-url'])
+    else:
+        release['palette'] = [None, None, None]
+
+    release['tracks'] = get_tracks(release['id'])
+
 def import_artist(artist_name):
     print("Querying MB for artist info...")
     result = musicbrainzngs.search_artists(artist=artist_name)
@@ -110,8 +122,11 @@ def import_artist(artist_name):
     artist_id = cursor.lastrowid
     releases = get_releases(artist_info['id'])
 
+    pool = ThreadPool(8)
+
+    pool.map(get_release, releases)
+
     for release in releases:
-        release['album-art-url'] = get_album_art_url(release['id'])
         cursor.execute(
             "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
             (artist_id,
@@ -123,20 +138,15 @@ def import_artist(artist_name):
         )
         release['local-id'] = cursor.lastrowid
 
-        if release['album-art-url']:
-            palette = get_palette(release['album-art-url'])
-        else:
-            palette = [None, None, None]
         cursor.execute(
             "insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
             (release['local-id'],
-             palette[0],
-             palette[1],
-             palette[2])
+             release['palette'][0],
+             release['palette'][1],
+             release['palette'][2])
         )
 
-        tracks = get_tracks(release['id'])
-        for track in tracks:
+        for track in release['tracks']:
             try:
                 length = track['recording']['length']
             except KeyError:
