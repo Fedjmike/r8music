@@ -30,7 +30,7 @@ create table tracks (
 drop table if exists release_colors;
 create table release_colors (
     release_id integer primary key,
-    color1 text not null,
-    color2 text not null,
-    color3 text not null
+    color1 text,
+    color2 text,
+    color3 text
 );
