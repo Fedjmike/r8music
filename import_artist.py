@@ -138,7 +138,7 @@ def import_artist(artist_name):
         tracks = get_tracks(release['id'])
         for track in tracks:
             try:
-                length = track['recording']['length'])
+                length = track['recording']['length']
             except KeyError:
                 length = None
             cursor.execute(
