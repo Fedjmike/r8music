@@ -131,20 +131,18 @@ def import_artist(artist_name):
              palette[1],
              palette[2])
         )
+        
+        tracks = get_tracks(release['id'])
+        for track in tracks:
+            cursor.execute(
+                "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
+                (release['local-id'],
+                 track['recording']['title'],
+                 generate_slug(track['recording']['title'], cursor, 'tracks'),
+                 int(track['position']),
+                 track['recording']['length'])
+            )
 
-        try:
-            tracks = get_tracks(release['id'])
-            for track in tracks:
-                cursor.execute(
-                    "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
-                    (release['local-id'],
-                     track['recording']['title'],
-                     generate_slug(track['recording']['title'], cursor, 'tracks'),
-                     int(track['position']),
-                     track['recording']['length'])
-                )
-        except:
-            pass
     con.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
