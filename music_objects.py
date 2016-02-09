@@ -1,7 +1,5 @@
 from functools import partial as p
 import sqlite3
-from lxml import etree
-from lxml.builder import E
 
 
 # TODO: Properly encapsulate the db.
@@ -41,20 +39,6 @@ class Artist(object):
         except ValueError:
             raise ArtistNotFound()
 
-    def _dom(self):
-        return E.div({'class': 'artist-main'},
-                 E.h1(self.name),
-                 E.ol(
-                   *[E.li(E.a(r.title,
-                       href='/'+self.slug+'/'+r.slug))
-                     for r in self.releases]
-                 ),
-                 E.p(E.a('permalink', href='/a/'+str(self._id))),
-               )
-
-    def __repr__(self):
-        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
-
 
 class Release(object):
     def __init__(self, artist, _id):
@@ -84,24 +68,6 @@ class Release(object):
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
         return cls.from_slug(Artist.from_slug(artist_slug), release_slug)
-
-    def _dom(self):
-        return E.div({'class': 'release'},
-                 E.h1(self.title),
-                 E.h2(self.artist.name),
-                 E.ol({'class': 'tracks'},
-                   *[E.li(t.title) for t in self.tracks]
-                 ),
-                 E.div(
-                   E.p('average rating '+str(9.7)),
-                   E.ol({'class': 'rating'},
-                     *[E.li(str(i)) for i in range(11)]
-                   ),
-                 ),
-               )
-
-    def __repr__(self):
-        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
 
 
 class Track(object):
