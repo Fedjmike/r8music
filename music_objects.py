@@ -26,7 +26,7 @@ class ReleaseNotFound(Exception):
 
 class Artist(object):
     def __init__(self, _id):
-        ((self._id, self.name, self.slug),) = db_results(
+        ((self._id, self.name, self.slug, self.incomplete),) = db_results(
                 'select * from artists where id=?', (_id,))
         self.releases = lmap(p(Release, self), [i for (i,) in db_results(
                 'select id from releases where artist_id=?', (self._id,))])
@@ -59,8 +59,9 @@ class Artist(object):
 class Release(object):
     def __init__(self, artist, _id):
         self.artist = artist
+        ((artist_ids),) = db_results('select artist_id from release_artists where release_id=?', (_id,))
+        print(artist_ids)
         ((self._id,
-          self._artist_id,
           self.title,
           self.slug,
           self.date,

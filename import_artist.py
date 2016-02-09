@@ -89,12 +89,7 @@ def get_releases(mbid):
         releases.append(release)
     return releases
 
-def get_tracks(release_id):
-    print("Getting tracks for release " + release_id + "...")
-    result = musicbrainzngs.get_release_by_id(release_id, includes=['recordings'])
-    tracks = result['release']['medium-list'][0]['track-list']
     # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
-    return tracks
 
 def get_release(release):
     release['album-art-url'] = get_album_art_url(release['id'])
@@ -103,8 +98,10 @@ def get_release(release):
         release['palette'] = get_palette(release['album-art-url'])
     else:
         release['palette'] = [None, None, None]
-
-    release['tracks'] = get_tracks(release['id'])
+    print("Getting deets for release " + release['id'] + "...")
+    result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
+    release['tracks'] = result['release']['medium-list'][0]['track-list']
+    release['artists'] = result['release']['artist-credit']
 
 def import_artist(artist_name):
     print("Querying MB for artist info...")
@@ -114,9 +111,16 @@ def import_artist(artist_name):
     con = sqlite3.connect('sample.db')
     cursor = con.cursor()
 
+    # TODO: Check if artist is incomplete. If so
+        # Get a list of their releases already in the DB.
+        # Get the corresponding MBIDs
+        # For every release cross-check if it's already in the DB
+        # Releases may not be deterministically chosen from release groups. Do.
+        # Write None to 'incomplete'
+
     cursor.execute(
-        "insert into artists (name, slug) values (?, ?)",
-        (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'))
+        "insert into artists (name, slug, incomplete) values (?, ?, ?)",
+        (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'), None)
     )
 
     artist_id = cursor.lastrowid
@@ -128,9 +132,8 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (artist_id, title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?, ?)",
-            (artist_id,
-             release['title'],
+            "insert into releases (title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?)",
+            (release['title'],
              generate_slug(release['title'], cursor, 'releases'),
              release['date'],
              release['type'],
@@ -145,6 +148,23 @@ def import_artist(artist_name):
              release['palette'][1],
              release['palette'][2])
         )
+
+        for artist in release['artists']:
+            try:
+                if artist['artist']['id'] == artist_info['id']:
+                    pass
+                else:
+                    cursor.execute(
+                        "insert into artists (name, slug, incomplete) values (?, ?, ?)",
+                        (artist['artist']['name'],
+                         generate_slug(artist['artist']['name'], cursor, 'artists'),
+                         artist['artist']['id'])
+                    )
+                
+                # TODO: Populate authors table
+
+            except TypeError:
+                pass
 
         for track in release['tracks']:
             try:
