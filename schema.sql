@@ -24,7 +24,7 @@ create table tracks (
     title text not null,
     slug text not null,
     position integer not null,
-    runtime integer not null
+    runtime integer
 );
 
 drop table if exists release_colors;

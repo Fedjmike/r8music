@@ -140,7 +140,7 @@ def import_artist(artist_name):
             try:
                 length = track['recording']['length'])
             except KeyError:
-                length = none
+                length = None
             cursor.execute(
                 "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
                 (release['local-id'],
