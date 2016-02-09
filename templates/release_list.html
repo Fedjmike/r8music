@@ -12,6 +12,16 @@
     <ol class="releases grid">
     {% for release in releases | sort(attribute="date") %}
         <li>
+            <ol class="inset small rating" style="{% if release.album_art_dominant_color %} background-color: {{ release.album_art_dominant_color }} {% endif %}">
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+                <li>5</li>
+                <li>6</li>
+                <li>7</li>
+                <li>8</li>
+            </ol>
             <a href="{{ release.slug }}">
                 <div><img src="{{ release.album_art_url }}" /></div>
                 <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>

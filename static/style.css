@@ -87,6 +87,7 @@ ol.nav {
 .rating {
 	display: inline-block;
     background-color: #4078c0;
+    border: 3px solid rgba(0,0,0,0);
     border-radius: 0.7rem;
     overflow: hidden;
     /*Whitespace between the list items becomes hidden*/
@@ -99,11 +100,37 @@ ol.nav {
     
 	display: inline-block;
 	width: 2.6em;
-	padding: 0.2em 0;
     
     transition: background-color 0.04s;
 	color: white;
     text-align: center;
+}
+
+.inset.rating {
+    position: relative;
+    top: 11.3rem;
+    z-index: 999;
+    border: 2px solid rgba(255,255,255, 0.8);
+}
+
+.small.rating {
+    border-radius: 0.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.small.rating li {
+    font-size: 0.8rem;
+    width: 1.2em;
+    padding: 0.2em 0;
+}
+
+.rating li:first-child {
+    padding-left: 0.15em;
+
+}
+
+.rating li:last-child {
+    padding-right: 0.15em;
 }
 
 .rating:hover li {
@@ -111,7 +138,7 @@ ol.nav {
 }
 
 .rating li:hover {
-	background-color: rgba(0, 0, 0, 0.4);
+	background-color: rgba(0, 0, 0, 0.45);
     cursor: pointer;
 }
 
