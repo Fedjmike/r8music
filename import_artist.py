@@ -1,6 +1,6 @@
 import musicbrainzngs
 import sqlite3, sys, os, re, json, requests, urllib.request
-from colorthief import ColorThief
+import colorthief
 import arrow
 from unidecode import unidecode
 
@@ -44,14 +44,14 @@ def get_album_art_url(release_id):
     r = requests.get(album_art_base_url + release_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
-    except JSONDecodeError:
+    except json.decoder.JSONDecodeError:
         return None
 
 def get_palette(album_art_url):
     print("Getting palette...")
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
-        color_thief = ColorThief(tempname)
+        color_thief = colorthief.ColorThief(tempname)
         palette = []
         for color in (color_thief.get_palette(3, 5)):
             palette.append(rgb_to_hex(color))
@@ -59,7 +59,7 @@ def get_palette(album_art_url):
         os.remove(tempname)
         return palette
     #Blame the ColourTheif guy
-    except (QuantizationError, ThisShouldntHappenError):
+    except (colorthief.QuantizationError, colorthief.ThisShouldntHappenError):
         return [None, None, None]
 
 def get_releases(mbid):
