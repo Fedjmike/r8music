@@ -23,7 +23,9 @@
                 <li>8</li>
             </ol>
             <a href="{{ release.slug }}">
-                <div><img src="{{ release.album_art_url }}" /></div>
+                <div>
+                    <img src=" {{ release.album_art_url if release.album_art_url else 'http://www.howwe.biz/no-cover.png' }} " />
+                </div>
                 <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>
             </a>
         </li>
