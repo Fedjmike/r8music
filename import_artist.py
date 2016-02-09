@@ -14,7 +14,7 @@ def slugify(text, delim=u'-'):
     result = []
     for word in _punct_re.split(text.lower()):
         result.extend(unidecode(word).split())
-    return delim.join(result)
+    return delim.join(result).lower()
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
