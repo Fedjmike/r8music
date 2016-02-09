@@ -152,7 +152,7 @@ def import_artist(artist_name):
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] == artist_info['id']:
-                    pass
+                    artist['artist']['local-id'] = artist_id
                 else:
                     cursor.execute(
                         "insert into artists (name, slug, incomplete) values (?, ?, ?)",
@@ -160,8 +160,13 @@ def import_artist(artist_name):
                          generate_slug(artist['artist']['name'], cursor, 'artists'),
                          artist['artist']['id'])
                     )
-                
-                # TODO: Populate authors table
+                    artist['artist']['local-id'] = cursor.lastrowid
+
+                cursor.execute(
+                    "insert into authors (release_id, artist_id) values (?, ?)",
+                    (release['local-id'],
+                     artist['artist']['local-id'])
+                )
 
             except TypeError:
                 pass

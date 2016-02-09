@@ -17,7 +17,7 @@ create table releases (
 );
 
 drop table if exists authors;
-create table release_artists (
+create table authors (
     release_id integer not null,
     artist_id integer not null,
     foreign key(release_id) references releases(id),
