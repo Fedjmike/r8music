@@ -3,6 +3,8 @@
 
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.artist.name }} {{ super() }}{% endblock %}
 
+{% set accent_color_1 = release.colors[0] %}
+
 {% block content %}
 <section class="{% if release.album_art_url %} two columns {% endif %}">
 	<div class="album-main">
@@ -18,7 +20,7 @@
 		</ol>
 	  
 		<p class="tight">Average rating: 7.8 &nbsp; &nbsp; My rating:</p>
-        <ol class="rating" style="{% if release.album_art_dominant_color %} background-color: {{ release.album_art_dominant_color }} {% endif %}">
+        <ol class="rating" style="{% if release.colors[0] %} background-color: {{ release.colors[0] }} {% endif %}">
             <li>1</li>
             <li>2</li>
             <li>3</li>

@@ -11,6 +11,14 @@
 	<link href='https://fonts.googleapis.com/css?family=Signika:400,300' rel='stylesheet' type='text/css'>
     
     <link rel="shortcut icon" href="/static/favicon.png" />
+
+    <style>
+    {% if accent_color_1 %}
+    a, h2 a {
+        color: {{ accent_color_1 }};
+    }
+    {% endif %}
+    </style>
 </head>
 <body>
 	<div class="page">
