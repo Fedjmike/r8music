@@ -69,6 +69,7 @@ class Release(object):
                 db_results('select * from releases where id=?', (_id,))
         self.tracks = lmap(p(Track, self), [t for (t,) in db_results(
                 'select id from tracks where release_id=?', (self._id,))])
+        (self.colors, ) = db_results('select color1, color2, color3 from release_colors where release_id=?', (_id,))
 
     @classmethod
     def from_slug(cls, artist, release_slug):
