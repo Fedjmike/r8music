@@ -18,8 +18,10 @@ def close_db(error):
     if hasattr(g, 'db'):
         g.db.close()
 
-def query_db(query, args=(), one=False):
+def query_db(query, args=(), one=False, db=None):
     """Queries the database and returns a list of dictionaries."""
-    cur = get_db().execute(query, args)
+    if not db:
+        db = get_db()
+    cur = db.execute(query, args)
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
