@@ -28,18 +28,19 @@ class Artist(object):
     def __init__(self, _id):
         ((self._id, self.name, self.slug, self.incomplete),) = db_results(
                 'select * from artists where id=?', (_id,))
-        self.releases = lmap(p(Release, self), [i for (i,) in db_results(
-                'select id from releases where artist_id=?', (self._id,))])
+        self.release_ids = [i for (i,) in db_results(
+                'select release_id from authors where artist_id=?', (_id,))]
+        self.releases = lmap(p(Release, self), self.release_ids)
 
     @classmethod
     def from_slug(cls, slug):
-        try:
-            ((_id,),) = db_results(
-                    'select id from artists where slug=?', (slug,))
-            return cls(_id)
+        # try:
+        ((_id,),) = db_results(
+                'select id from artists where slug=?', (slug,))
+        return cls(_id)
         
-        except ValueError:
-            raise ArtistNotFound()
+        # except ValueError:
+        raise ArtistNotFound()
 
     def _dom(self):
         return E.div({'class': 'artist-main'},
@@ -59,8 +60,7 @@ class Artist(object):
 class Release(object):
     def __init__(self, artist, _id):
         self.artist = artist
-        ((artist_ids),) = db_results('select artist_id from release_artists where release_id=?', (_id,))
-        print(artist_ids)
+        artist_ids = [i for (i,) in db_results('select artist_id from authors where release_id=?', (_id,))]
         ((self._id,
           self.title,
           self.slug,
