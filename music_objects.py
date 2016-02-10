@@ -16,10 +16,16 @@ def db_results(*args, **kwargs):
     with sqlite3.connect(DB_NAME) as conn:
         return list(conn.cursor().execute(*args, **kwargs))
 
-class ArtistNotFound(Exception):
+class NotFound(Exception):
     pass
     
-class ReleaseNotFound(Exception):
+class ArtistNotFound(NotFound):
+    pass
+    
+class ReleaseNotFound(NotFound):
+    pass
+
+class UserNotFound(NotFound):
     pass
 
 class Artist(object):

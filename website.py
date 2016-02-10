@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import closing
 from flask import Flask, render_template, g
 
-from music_objects import Artist, Release, Track, User, ArtistNotFound, ReleaseNotFound, UserNotFound
+from music_objects import Artist, Release, Track, User, NotFound
 from import_artist import import_artist
 
 app = Flask(__name__)
@@ -64,7 +64,7 @@ def get_user():
     try:
         return User(1)
         
-    except UserNotFound:
+    except NotFound:
         return None
 
 @app.route("/<artist_slug>/<release_slug>")
@@ -74,7 +74,7 @@ def render_release(artist_slug, release_slug):
         release = Release.from_slugs(artist_slug, release_slug)
         return render_template("release.html", release=release, user=user)
         
-    except (ArtistNotFound, ReleaseNotFound):
+    except NotFound:
         return page_not_found("/%s/%s" % (artist_slug, release_slug))
 
 @app.route("/<slug>/")
@@ -87,7 +87,7 @@ def render_artist(slug):
         artist = Artist.from_slug(slug)
         return render_template("artist.html", artist=artist, user=user)
         
-    except ArtistNotFound:
+    except NotFound:
         return page_not_found("/%s/" % (slug,))
 
 
