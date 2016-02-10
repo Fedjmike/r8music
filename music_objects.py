@@ -86,7 +86,10 @@ class Track(object):
           self.position,
           self.runtime),) = \
                   db_results('select * from tracks where id=?', (_id,))
-        self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
+        if self.runtime:
+            self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
+        else:
+            self.runtime_string = "??:??"
 
     def __repr__(self):
         return self.title
