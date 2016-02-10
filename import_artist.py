@@ -5,7 +5,13 @@ import arrow
 from unidecode import unidecode
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool 
-from db import connect_db, query_db
+from db import connect_db
+
+def query_db(db, query, args=(), one=False):
+    """Queries the database and returns a list of dictionaries."""
+    cur = db.execute(query, args)
+    rv = cur.fetchall()
+    return (rv[0] if rv else None) if one else rv
 
 
 # From http://flask.pocoo.org/snippets/5/
@@ -126,7 +132,7 @@ def import_artist(artist_name):
         (artist_id,) = result[0]
         cursor.execute('select release_id from authors where artist_id=?', (artist_id,))
         processed_release_ids = [_id for (_id,) in cursor.fetchall()]
-        processed_release_mbids = [mbid for (mbid,) in [query_db('select mbid from release_mbid where release_id=?', (release_id,), True, db)\
+        processed_release_mbids = [mbid for (mbid,) in [query_db(db,'select mbid from release_mbid where release_id=?', (release_id,), True)\
                                    for release_id in processed_release_ids]]
         cursor.execute("update artists set incomplete = NULL where id=?", (artist_id,))
 
@@ -139,7 +145,7 @@ def import_artist(artist_name):
         artist_id = cursor.lastrowid
         processed_release_mbids = []
 
-    incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db('select incomplete, id from artists where incomplete is not null', db=db)}
+    incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db(db,'select incomplete, id from artists where incomplete is not null')}
     
     pool = ThreadPool(8)
     releases = get_releases(artist_info['id'], processed_release_mbids)
