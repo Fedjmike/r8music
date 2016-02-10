@@ -1,3 +1,4 @@
+from itertools import product  # Outer product.
 from functools import partial as p
 from db import query_db
 
@@ -7,13 +8,30 @@ from db import query_db
 DB_NAME = 'sample.db'
 
 
-def lmap(*args, **kwargs):
-    return list(map(*args, **kwargs))
+class lzmap(object):
+    # This is an object masquerading as a function.
+    def __init__(self, fn, listable):
+        self._fn = fn
+        self._list = listable  # Don't actually turn it into a list yet...
+        self._cache = dict()  # Dict because no such thing as nullable list.
+
+    def __getitem__(self, n):
+        try:
+            return self._cache[n]
+        except KeyError:
+            self._list = list(self._list)  # Idempotent.
+            self._cache[n] = self._fn(self._list[n])
+            return self.__getitem__(n)
+
+    def __len__(self):
+        self._list = list(self._list)
+        return len(self._list)
 
 
 def db_results(*args, **kwargs):
     with sqlite3.connect(DB_NAME) as conn:
         return list(conn.cursor().execute(*args, **kwargs))
+
 
 class NotFound(Exception):
     pass
@@ -27,13 +45,13 @@ class ReleaseNotFound(NotFound):
 class UserNotFound(NotFound):
     pass
 
+
 class Artist(object):
     def __init__(self, _id):
         ((self._id, self.name, self.slug, self.incomplete),) = query_db(
                 'select * from artists where id=?', (_id,))
-        self.release_ids = [i for (i,) in query_db(
-                'select release_id from authors where artist_id=?', (_id,))]
-        self.releases = lmap(p(Release, self), self.release_ids)
+        self.releases = lzmap(Release, [i for (i,) in query_db(
+                'select release_id from authors where artist_id=?', (_id,))])
 
     @classmethod
     def from_slug(cls, slug):
@@ -46,10 +64,22 @@ class Artist(object):
             raise ArtistNotFound()
 
 
+def _authorship_exists(authorship):
+    """Return authorship id if exists, else False.
+    """
+    (artist_id, release_id) = authorship
+    try:
+        query_db(
+                'select * from authors where artist_id=? and release_id=?',
+                (artist_id, release_id)
+            )
+        return True
+    except ValueError:
+        return False
+
+
 class Release(object):
-    def __init__(self, artist, _id):
-        self.artist = artist
-        artist_ids = [i for (i,) in query_db('select artist_id from authors where release_id=?', (_id,))]
+    def __init__(self, _id):
         ((self._id,
           self.title,
           self.slug,
@@ -57,8 +87,12 @@ class Release(object):
           self.reltype,
           self.album_art_url),) = \
                 query_db('select * from releases where id=?', (_id,))
-        self.tracks = lmap(p(Track, self), [t for (t,) in query_db(
+
+        self.artists = lzmap(Artist, [a for (a,) in query_db(
+                'select artist_id from authors where release_id=?', (_id,))])
+        self.tracks = lzmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
+
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
 
     @classmethod
@@ -73,7 +107,17 @@ class Release(object):
 
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
-        return cls.from_slug(Artist.from_slug(artist_slug), release_slug)
+        potential_artists = [a for (a,) in query_db(
+                'select id from artists where slug=?', (artist_slug,))]
+        potential_releases = [r for (r,) in query_db(
+                'select id from releases where slug=?', (release_slug,))]
+
+        ((_, release_id),) = filter(  # Throw an error on clash (for now).
+                _authorship_exists,
+                product(potential_artists, potential_releases)
+            )
+
+        return cls(release_id)
 
 
 class Track(object):
