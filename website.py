@@ -1,19 +1,14 @@
-import sqlite3
-from contextlib import closing
 from flask import Flask, render_template, g
+from contextlib import closing
 
 from music_objects import Artist, Release, Track, User, NotFound
 from import_artist import import_artist
+from db import connect_db, close_db, get_db, query_db
 
 app = Flask(__name__)
 
-# Database
+app.teardown_appcontext(close_db)
 
-def connect_db():
-    rv = sqlite3.connect("sample.db")
-    rv.row_factory = sqlite3.Row
-    return rv
-    
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource("schema.sql", mode="r") as f:
@@ -28,23 +23,6 @@ def init_db():
         db.commit()
         
     import_artist("Yung Lean")
-
-def get_db():
-    if not hasattr(g, 'sqlite_db'):
-        g.db = connect_db()
-        
-    return g.db
-
-@app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, 'db'):
-        g.db.close()
-
-def query_db(query, args=(), one=False):
-    """Queries the database and returns a list of dictionaries."""
-    cur = get_db().execute(query, args)
-    rv = cur.fetchall()
-    return (rv[0] if rv else None) if one else rv
 
 # 
 
