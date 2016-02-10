@@ -4,8 +4,7 @@ import colorthief
 import arrow
 from unidecode import unidecode
 from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool 
-from db import connect_db
+from multiprocessing.dummy import Pool as ThreadPool
 
 def query_db(db, query, args=(), one=False):
     """Queries the database and returns a list of dictionaries."""
@@ -117,7 +116,7 @@ def import_artist(artist_name):
     result = musicbrainzngs.search_artists(artist=artist_name)
     artist_info = result['artist-list'][0]
 
-    db = connect_db()
+    db = sqlite3.connect("sample.db")
     cursor = db.cursor()
 
     # TODO: 
