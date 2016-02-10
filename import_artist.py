@@ -116,8 +116,10 @@ def import_artist(artist_name):
         # Get the corresponding MBIDs
         # For every release cross-check if it's already in the DB
         # Releases may not be deterministically chosen from release groups. Do.
-        # Write None to 'incomplete'
 
+    # Check if the artist's MBID matches the 'incomplete' field of any other artists
+    # If so, get the artist_id and set the 'incomplete' field to NULL
+    # If not, import as a new artist into the database
     cursor.execute('select id from artists where incomplete=?', (artist_info['id'],))
     result = cursor.fetchall()
     try:
@@ -136,6 +138,7 @@ def import_artist(artist_name):
     releases = get_releases(artist_info['id'])
     pool.map(get_release, releases)
 
+    # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
     processed_artist_mbids = {artist_info['id']: artist_id}
 
     for release in releases:
@@ -166,8 +169,10 @@ def import_artist(artist_name):
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
+                    print(artist['artist']['name'] + "is already in the database")
                     artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
                 else:
+                    # Make a dummy entry into the artists table
                     cursor.execute(
                         "insert into artists (name, slug, incomplete) values (?, ?, ?)",
                         (artist['artist']['name'],
