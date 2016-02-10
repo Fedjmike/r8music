@@ -54,9 +54,7 @@ def get_palette(album_art_url):
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
         color_thief = colorthief.ColorThief(tempname)
-        palette = []
-        for color in (color_thief.get_palette(3, 5)):
-            palette.append(rgb_to_hex(color))
+        palette = [rgb_to_hex(color) for color in (color_thief.get_palette(3, 5))]
         
         os.remove(tempname)
         return palette
