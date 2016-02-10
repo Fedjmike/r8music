@@ -10,7 +10,7 @@
 	<div class="album-main">
 		<header>
 			<h1>{{ release.title }}</h1>
-			<h2><a href="/{{ release.artists[0].slug }}/">{{ release.artists[0].name }}</a>, {{ release.date[:4] }}</h2>
+			<h2>{% for artist in release.artists %}<a href="/{{ artist.slug }}/">{{ artist.name }}</a>, {% endfor %} {{ release.date[:4] }}</h2>
 		</header>
 		
 		<ol class="tracks">
@@ -28,10 +28,13 @@
 </section>
 
 <section>
-	<header><h3><em>More from</em></h6><h1>{{ release.artists[0].name }}</h1></header>
+	<h3><em>More from</em></h3>
+	{% for artist in release.artists %}
+	<header><h1>{{ artist.name }}</h1></header>
 	
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
     
-	{{ release_list(release.artists[0].releases | selectattr("reltype", "equalto", "Album") | rejectattr("_id", "equalto", release._id)) }} 
+	{{ release_list(artist.releases | selectattr("reltype", "equalto", "Album") | rejectattr("_id", "equalto", release._id)) }} 
+	{% endfor %}
 </section>
 {% endblock %}
