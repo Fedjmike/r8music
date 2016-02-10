@@ -5,6 +5,14 @@ import arrow
 from unidecode import unidecode
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool 
+from db import connect_db
+
+def query_db(db, query, args=(), one=False):
+    """Queries the database and returns a list of dictionaries."""
+    cur = db.execute(query, args)
+    rv = cur.fetchall()
+    return (rv[0] if rv else None) if one else rv
+
 
 # From http://flask.pocoo.org/snippets/5/
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -62,7 +70,7 @@ def get_palette(album_art_url):
     except (colorthief.QuantizationError, colorthief.ThisShouldntHappenError):
         return [None, None, None]
 
-def get_releases(mbid):
+def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
     release_groups = result['artist']['release-group-list']
@@ -78,6 +86,9 @@ def get_releases(mbid):
                 if 'date' in r:
                     release = r
                     break
+            continue
+        if release['id'] in processed_release_mbids:
+            print("Release " + release['id'] + " has already been processed")
             continue
         try:
             release['type'] = group['type']
@@ -106,8 +117,8 @@ def import_artist(artist_name):
     result = musicbrainzngs.search_artists(artist=artist_name)
     artist_info = result['artist-list'][0]
 
-    con = sqlite3.connect('sample.db')
-    cursor = con.cursor()
+    db = connect_db()
+    cursor = db.cursor()
 
     # TODO: Check if mbid is in incomplete. If so
         # Get a list of their releases already in the DB.
@@ -122,6 +133,10 @@ def import_artist(artist_name):
     result = cursor.fetchall()
     try:
         (artist_id,) = result[0]
+        cursor.execute('select release_id from authors where artist_id=?', (artist_id,))
+        processed_release_ids = [_id for (_id,) in cursor.fetchall()]
+        processed_release_mbids = [mbid for (mbid,) in [query_db(db,'select mbid from release_mbid where release_id=?', (release_id,), True)\
+                                   for release_id in processed_release_ids]]
         cursor.execute("update artists set incomplete = NULL where id=?", (artist_id,))
 
     except IndexError:
@@ -131,9 +146,10 @@ def import_artist(artist_name):
         )
 
         artist_id = cursor.lastrowid
+        processed_release_mbids = []
     
     pool = ThreadPool(8)
-    releases = get_releases(artist_info['id'])
+    releases = get_releases(artist_info['id'], processed_release_mbids)
     pool.map(get_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
@@ -167,7 +183,6 @@ def import_artist(artist_name):
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
-                    print(artist['artist']['name'] + "is already in the database")
                     artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
@@ -203,7 +218,7 @@ def import_artist(artist_name):
                  length)
             )
 
-    con.commit()
+    db.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
