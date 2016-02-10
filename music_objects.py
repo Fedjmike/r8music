@@ -84,16 +84,6 @@ class Release(object):
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
 
     @classmethod
-    def from_slug(cls, artist, release_slug):
-        try:
-            ((_id,),) = query_db(
-                    'select id from releases where slug=?', (release_slug,))
-            return cls(artist, _id)
-            
-        except ValueError:
-            raise ReleaseNotFound()
-
-    @classmethod
     def from_slugs(cls, artist_slug, release_slug):
         potential_artists = [a for (a,) in query_db(
                 'select id from artists where slug=?', (artist_slug,))]
