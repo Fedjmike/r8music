@@ -1,13 +1,7 @@
 {% macro rating_widget(release, selected, class, color) -%}
     <ol class="{{ class }} rating" style="{% if color %} background-color: {{ color }} {% endif %}">
     {% for n in range(1, 9) %}
-        <li {{ 'class=selected' if n == selected }}
-        onclick='$.ajax({
-            method: "POST",
-            url: "/rate/{{ release._id }}/{{ n }}"
-        }).done(function (msg) {
-            window.alert(msg);
-        })'>{{ n }}</li>
+        <li {{ 'class=selected' if n == selected }} onclick='rateRelease(this, {{ release._id }}, {{ n }});'>{{ n }}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
