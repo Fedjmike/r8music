@@ -38,13 +38,13 @@ class Artist(object):
 
     @classmethod
     def from_slug(cls, slug):
-        # try:
-        ((_id,),) = db_results(
-                'select id from artists where slug=?', (slug,))
-        return cls(_id)
+        try:
+            ((_id,),) = db_results(
+                    'select id from artists where slug=?', (slug,))
+            return cls(_id)
         
-        # except ValueError:
-        raise ArtistNotFound()
+        except ValueError:
+            raise ArtistNotFound()
 
 
 class Release(object):
