@@ -2,11 +2,6 @@ from itertools import product  # Outer product.
 from functools import partial as p
 from db import query_db
 
-# TODO: Properly encapsulate the db.
-
-
-DB_NAME = 'sample.db'
-
 
 class lzmap(object):
     # This is an object masquerading as a function.
@@ -26,11 +21,6 @@ class lzmap(object):
     def __len__(self):
         self._list = list(self._list)
         return len(self._list)
-
-
-def db_results(*args, **kwargs):
-    with sqlite3.connect(DB_NAME) as conn:
-        return list(conn.cursor().execute(*args, **kwargs))
 
 
 class NotFound(Exception):
