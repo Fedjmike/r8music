@@ -190,6 +190,18 @@ ol.nav {
 	display: inline-block;
 }
 
+.byline .author:after {
+    content: ', ';
+}
+
+.author:not(:last-of-type) {
+    display: block;
+}
+
+.author:not(:last-of-type):after {
+    content: ' &';
+}
+
 .columns .album-main {
     width: 25em;
 }

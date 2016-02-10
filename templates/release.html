@@ -10,7 +10,12 @@
 	<div class="album-main">
 		<header>
 			<h1>{{ release.title }}</h1>
-			<h2>{% for artist in release.artists %}<a href="/{{ artist.slug }}/">{{ artist.name }}</a>, {% endfor %} {{ release.date[:4] }}</h2>
+			<h2 class="byline">
+            {% for artist in release.artists %}
+                <span class="author"><a href="/{{ artist.slug }}/">{{ artist.name }}</a></span>
+            {% endfor %}
+                <time>{{ release.date[:4] }}</time>
+            </h2>
 		</header>
 		
 		<ol class="tracks">
