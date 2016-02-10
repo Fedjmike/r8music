@@ -66,7 +66,7 @@ def get_palette(album_art_url):
         os.remove(tempname)
         return palette
     #Blame the ColourTheif guy
-    except (colorthief.QuantizationError, colorthief.ThisShouldntHappenError):
+    except (colorthief.QuantizationError, colorthief.ThisShouldntHappenError, OSError):
         return [None, None, None]
 
 def get_releases(mbid, processed_release_mbids):
