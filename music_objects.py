@@ -84,3 +84,15 @@ class Track(object):
 
     def __repr__(self):
         return self.title
+
+
+class User(object):
+    def __init__(self, _id):
+        try:
+            ((self._id,
+              self.name),) = \
+                      db_results('select * from users where id=?', (_id,))
+        except ValueError:
+            raise UserNotFound()
+            
+        self.ratings = dict(db_results('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
