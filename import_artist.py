@@ -120,10 +120,7 @@ def import_artist(artist_name):
     db = connect_db()
     cursor = db.cursor()
 
-    # TODO: Check if mbid is in incomplete. If so
-        # Get a list of their releases already in the DB.
-        # Get the corresponding MBIDs
-        # For every release cross-check if it's already in the DB
+    # TODO: 
         # Releases may not be deterministically chosen from release groups. Do.
 
     # Check if the artist's MBID matches the 'incomplete' field of any other artists
@@ -147,6 +144,8 @@ def import_artist(artist_name):
 
         artist_id = cursor.lastrowid
         processed_release_mbids = []
+
+    incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db(db,'select incomplete, id from artists where incomplete is not null')}
     
     pool = ThreadPool(8)
     releases = get_releases(artist_info['id'], processed_release_mbids)
@@ -184,6 +183,8 @@ def import_artist(artist_name):
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
                     artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
+                elif artist['artist']['id'] in incomplete_artist_mbids:
+                    artist['artist']['local-id'] = incomplete_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
                     cursor.execute(
