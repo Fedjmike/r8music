@@ -111,24 +111,32 @@ def import_artist(artist_name):
     con = sqlite3.connect('sample.db')
     cursor = con.cursor()
 
-    # TODO: Check if artist is incomplete. If so
+    # TODO: Check if mbid is in incomplete. If so
         # Get a list of their releases already in the DB.
         # Get the corresponding MBIDs
         # For every release cross-check if it's already in the DB
         # Releases may not be deterministically chosen from release groups. Do.
         # Write None to 'incomplete'
 
-    cursor.execute(
-        "insert into artists (name, slug, incomplete) values (?, ?, ?)",
-        (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'), None)
-    )
+    cursor.execute('select id from artists where incomplete=?', (artist_info['id'],))
+    result = cursor.fetchall()
+    try:
+        (artist_id,) = result[0]
+        cursor.execute("update artists set incomplete = NULL where id=?", (artist_id,))
 
-    artist_id = cursor.lastrowid
-    releases = get_releases(artist_info['id'])
+    except IndexError:
+        cursor.execute(
+            "insert into artists (name, slug, incomplete) values (?, ?, ?)",
+            (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'), None)
+        )
 
+        artist_id = cursor.lastrowid
+    
     pool = ThreadPool(8)
-
+    releases = get_releases(artist_info['id'])
     pool.map(get_release, releases)
+
+    processed_artist_mbids = {artist_info['id']: artist_id}
 
     for release in releases:
         cursor.execute(
@@ -157,8 +165,8 @@ def import_artist(artist_name):
 
         for artist in release['artists']:
             try:
-                if artist['artist']['id'] == artist_info['id']:
-                    artist['artist']['local-id'] = artist_id
+                if artist['artist']['id'] in processed_artist_mbids:
+                    artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
                 else:
                     cursor.execute(
                         "insert into artists (name, slug, incomplete) values (?, ?, ?)",
@@ -167,6 +175,7 @@ def import_artist(artist_name):
                          artist['artist']['id'])
                     )
                     artist['artist']['local-id'] = cursor.lastrowid
+                    processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
 
                 cursor.execute(
                     "insert into authors (release_id, artist_id) values (?, ?)",
