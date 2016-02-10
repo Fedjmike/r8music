@@ -1,7 +1,13 @@
-{% macro rating_widget(selected, class, color) -%}
+{% macro rating_widget(release, selected, class, color) -%}
     <ol class="{{ class }} rating" style="{% if color %} background-color: {{ color }} {% endif %}">
     {% for n in range(1, 9) %}
-        <li {{ 'class=selected' if n == selected }}>{{ n }}</li>
+        <li {{ 'class=selected' if n == selected }}
+        onclick='$.ajax({
+            method: "POST",
+            url: "/rate/{{ release._id }}/{{ n }}"
+        }).done(function (msg) {
+            window.alert(msg);
+        })'>{{ n }}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
@@ -20,7 +26,7 @@
     <ol class="releases grid">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            {{ rating_widget(user.ratings[release._id] if user and release._id in user.ratings, "inset small", None) }}
+            {{ rating_widget(release, user.ratings[release._id] if user and release._id in user.ratings, "inset small", None) }}
             <a href="{{ release.slug }}">
                 <div><img src="{{ release.album_art_url if release.album_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
                 <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>

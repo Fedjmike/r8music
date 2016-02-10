@@ -90,6 +90,16 @@ def render_artist(slug):
     except NotFound:
         return page_not_found("/%s/" % (slug,))
 
+@app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
+def change_rating(release_id, rating):
+    user = get_user()
+    
+    db = get_db()
+    db.execute("insert or replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
+                 (release_id, user._id, rating))
+    db.commit()
+    
+    return "ok"
 
 # Nic messing around...
 #@app.route("/<artist>")
