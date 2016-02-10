@@ -65,8 +65,6 @@ class Artist(object):
 
 
 def _authorship_exists(authorship):
-    """Return authorship id if exists, else False.
-    """
     (artist_id, release_id) = authorship
     try:
         query_db(
