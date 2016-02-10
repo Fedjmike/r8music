@@ -1,6 +1,5 @@
 from functools import partial as p
-import sqlite3
-
+from db import query_db
 
 # TODO: Properly encapsulate the db.
 
@@ -30,16 +29,16 @@ class UserNotFound(NotFound):
 
 class Artist(object):
     def __init__(self, _id):
-        ((self._id, self.name, self.slug, self.incomplete),) = db_results(
+        ((self._id, self.name, self.slug, self.incomplete),) = query_db(
                 'select * from artists where id=?', (_id,))
-        self.release_ids = [i for (i,) in db_results(
+        self.release_ids = [i for (i,) in query_db(
                 'select release_id from authors where artist_id=?', (_id,))]
         self.releases = lmap(p(Release, self), self.release_ids)
 
     @classmethod
     def from_slug(cls, slug):
         try:
-            ((_id,),) = db_results(
+            ((_id,),) = query_db(
                     'select id from artists where slug=?', (slug,))
             return cls(_id)
         
@@ -50,22 +49,22 @@ class Artist(object):
 class Release(object):
     def __init__(self, artist, _id):
         self.artist = artist
-        artist_ids = [i for (i,) in db_results('select artist_id from authors where release_id=?', (_id,))]
+        artist_ids = [i for (i,) in query_db('select artist_id from authors where release_id=?', (_id,))]
         ((self._id,
           self.title,
           self.slug,
           self.date,
           self.reltype,
           self.album_art_url),) = \
-                db_results('select * from releases where id=?', (_id,))
-        self.tracks = lmap(p(Track, self), [t for (t,) in db_results(
+                query_db('select * from releases where id=?', (_id,))
+        self.tracks = lmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
-        (self.colors, ) = db_results('select color1, color2, color3 from release_colors where release_id=?', (_id,))
+        (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
 
     @classmethod
     def from_slug(cls, artist, release_slug):
         try:
-            ((_id,),) = db_results(
+            ((_id,),) = query_db(
                     'select id from releases where slug=?', (release_slug,))
             return cls(artist, _id)
             
@@ -86,7 +85,7 @@ class Track(object):
           self.slug,
           self.position,
           self.runtime),) = \
-                  db_results('select * from tracks where id=?', (_id,))
+                  query_db('select * from tracks where id=?', (_id,))
         if self.runtime:
             self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
         else:
@@ -101,8 +100,8 @@ class User(object):
         try:
             ((self._id,
               self.name),) = \
-                      db_results('select * from users where id=?', (_id,))
+                      query_db('select * from users where id=?', (_id,))
         except ValueError:
             raise UserNotFound()
             
-        self.ratings = dict(db_results('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
+        self.ratings = dict(query_db('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
