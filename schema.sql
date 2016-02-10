@@ -49,3 +49,17 @@ create table release_colors (
     color2 text,
     color3 text
 );
+
+drop table if exists users;
+create table users (
+    id integer primary key autoincrement,
+    name text not null
+);
+
+drop table if exists ratings;
+create table ratings (
+    release_id integer not null,
+    user_id integer not null,
+    rating integer not null,
+    primary key (release_id, user_id)
+);

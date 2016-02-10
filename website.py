@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import closing
 from flask import Flask, render_template, g
 
-from music_objects import Artist, Release, Track, ArtistNotFound, ReleaseNotFound
+from music_objects import Artist, Release, Track, User, NotFound
 from import_artist import import_artist
 
 app = Flask(__name__)
@@ -18,6 +18,12 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
+            
+        db.execute("insert into users (name) values (?)",
+                   ("sam",))
+                   
+        db.execute("insert into ratings (release_id, user_id, rating) values (?, ?, ?)",
+                   (1, 1, 6))
             
         db.commit()
         
@@ -54,13 +60,21 @@ def render_artists_index():
     artists = query_db("select * from artists")
     return render_template("artists_index.html", artists=artists)
 
+def get_user():
+    try:
+        return User(1)
+        
+    except NotFound:
+        return None
+
 @app.route("/<artist_slug>/<release_slug>")
 def render_release(artist_slug, release_slug):
     try:
+        user = get_user()
         release = Release.from_slugs(artist_slug, release_slug)
-        return render_template("release.html", release=release)
+        return render_template("release.html", release=release, user=user)
         
-    except (ArtistNotFound, ReleaseNotFound):
+    except NotFound:
         return page_not_found("/%s/%s" % (artist_slug, release_slug))
 
 @app.route("/<slug>/")
@@ -69,10 +83,11 @@ def render_artist(slug):
         return render_artists_index()
 
     try:
+        user = get_user()
         artist = Artist.from_slug(slug)
-        return render_template("artist.html", artist=artist)
+        return render_template("artist.html", artist=artist, user=user)
         
-    except ArtistNotFound:
+    except NotFound:
         return page_not_found("/%s/" % (slug,))
 
 

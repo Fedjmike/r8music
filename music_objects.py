@@ -1,7 +1,5 @@
 from functools import partial as p
 import sqlite3
-from lxml import etree
-from lxml.builder import E
 
 
 # TODO: Properly encapsulate the db.
@@ -18,10 +16,16 @@ def db_results(*args, **kwargs):
     with sqlite3.connect(DB_NAME) as conn:
         return list(conn.cursor().execute(*args, **kwargs))
 
-class ArtistNotFound(Exception):
+class NotFound(Exception):
     pass
     
-class ReleaseNotFound(Exception):
+class ArtistNotFound(NotFound):
+    pass
+    
+class ReleaseNotFound(NotFound):
+    pass
+
+class UserNotFound(NotFound):
     pass
 
 class Artist(object):
@@ -41,20 +45,6 @@ class Artist(object):
         
         # except ValueError:
         raise ArtistNotFound()
-
-    def _dom(self):
-        return E.div({'class': 'artist-main'},
-                 E.h1(self.name),
-                 E.ol(
-                   *[E.li(E.a(r.title,
-                       href='/'+self.slug+'/'+r.slug))
-                     for r in self.releases]
-                 ),
-                 E.p(E.a('permalink', href='/a/'+str(self._id))),
-               )
-
-    def __repr__(self):
-        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
 
 
 class Release(object):
@@ -86,24 +76,6 @@ class Release(object):
     def from_slugs(cls, artist_slug, release_slug):
         return cls.from_slug(Artist.from_slug(artist_slug), release_slug)
 
-    def _dom(self):
-        return E.div({'class': 'release'},
-                 E.h1(self.title),
-                 E.h2(self.artist.name),
-                 E.ol({'class': 'tracks'},
-                   *[E.li(t.title) for t in self.tracks]
-                 ),
-                 E.div(
-                   E.p('average rating '+str(9.7)),
-                   E.ol({'class': 'rating'},
-                     *[E.li(str(i)) for i in range(11)]
-                   ),
-                 ),
-               )
-
-    def __repr__(self):
-        return etree.tostring(self._dom(), pretty_print=True).decode('utf-8')
-
 
 class Track(object):
     def __init__(self, release, _id):
@@ -115,7 +87,22 @@ class Track(object):
           self.position,
           self.runtime),) = \
                   db_results('select * from tracks where id=?', (_id,))
-        self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
+        if self.runtime:
+            self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
+        else:
+            self.runtime_string = "??:??"
 
     def __repr__(self):
         return self.title
+
+
+class User(object):
+    def __init__(self, _id):
+        try:
+            ((self._id,
+              self.name),) = \
+                      db_results('select * from users where id=?', (_id,))
+        except ValueError:
+            raise UserNotFound()
+            
+        self.ratings = dict(db_results('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
