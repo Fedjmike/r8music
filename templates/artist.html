@@ -10,9 +10,9 @@
 	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
 	
     <header><h3>Albums</h3></header>
-    {{ release_grid(artist.releases | selectattr("reltype", "equalto", "Album")) }}
+    {{ release_grid(artist.releases | selectattr("reltype", "equalto", "Album"), user) }}
     
     <header><h3>Other releases</h3></header>
-    {{ release_grid(artist.releases | rejectattr("reltype", "equalto", "Album")) }}
+    {{ release_grid(artist.releases | rejectattr("reltype", "equalto", "Album"), user) }}
 </section>
 {% endblock %}
