@@ -70,10 +70,9 @@ def get_palette(album_art_url):
         c = chromatography.Chromatography(tempname)
         palette = [rgb_to_hex(color) for color in c.get_highlights(3, valid_pixel)]
         os.remove(tempname)
-        if len(palette) != 3:
-            return [None, None, None]
+        # if len(palette) < 3:
+        #     return [None, None, None]
         return palette
-    #Blame the ColourTheif guy
     except (chromatography.ChromatographyException, OSError):
         return [None, None, None]
 
