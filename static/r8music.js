@@ -4,9 +4,8 @@ function rateRelease(clicked_element, release_id, rating) {
         url: "/rate/" + release_id + "/" + rating
         
     }).done(function (msg) {
-        if (msg != "ok") {
+        if (msg != "ok")
             return;
-        }
         
         var siblings = clicked_element.parentNode.children;
         

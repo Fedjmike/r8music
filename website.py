@@ -16,10 +16,7 @@ def init_db():
             
         db.execute("insert into users (name) values (?)",
                    ("sam",))
-                   
-        db.execute("insert into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                   (1, 1, 6))
-            
+
         db.commit()
         
     import_artist("Yung Lean")

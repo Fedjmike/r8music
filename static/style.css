@@ -110,7 +110,7 @@ ol.nav {
     position: relative;
     top: 11.3rem;
     z-index: 999;
-    border: 2px solid rgba(255,255,255, 0.8);
+    border: 2px solid rgba(255,255,255, 0.7);
 }
 
 .small.rating {
@@ -177,6 +177,10 @@ ol.nav {
 
 .releases time {
     padding-right: 0.3em;
+}
+
+.releases.grid {
+    margin-top: -1.8rem;
 }
 
 .releases.grid > li {
