@@ -1,10 +1,11 @@
 import musicbrainzngs
 import sqlite3, sys, os, re, json, requests, urllib.request
-import colorthief
+import chromatography
 import arrow
 from unidecode import unidecode
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
+from colorsys import rgb_to_hsv
 
 def query_db(db, query, args=(), one=False):
     """Queries the database and returns a list of dictionaries."""
@@ -56,18 +57,24 @@ def get_album_art_url(release_group_id):
     except ValueError:
         return None
 
+def valid_pixel(pixel):
+    (h, s, v) = rgb_to_hsv(pixel[0]/255, pixel[1]/255, pixel[2]/255)
+    if s > 0.3 and v > 0.4 and v < 0.95:
+        return True
+    return False
+
 def get_palette(album_art_url):
     print("Getting palette...")
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
-        color_thief = colorthief.ColorThief(tempname)
-        palette = [rgb_to_hex(color) for color in (color_thief.get_palette(2, 5))]        
+        c = chromatography.Chromatography(tempname)
+        palette = [rgb_to_hex(color) for color in c.get_highlights(3, valid_pixel)]
         os.remove(tempname)
         if len(palette) != 3:
             return [None, None, None]
         return palette
     #Blame the ColourTheif guy
-    except (colorthief.QuantizationError, colorthief.ThisShouldntHappenError, OSError):
+    except (chromatography.ChromatographyException, OSError):
         return [None, None, None]
 
 def get_releases(mbid, processed_release_mbids):
