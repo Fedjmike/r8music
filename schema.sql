@@ -53,7 +53,8 @@ create table release_colors (
 drop table if exists users;
 create table users (
     id integer primary key autoincrement,
-    name text not null
+    name text not null,
+    pw_hash text not null
 );
 
 drop table if exists ratings;

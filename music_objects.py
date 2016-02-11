@@ -1,7 +1,7 @@
 from itertools import product  # Outer product.
 from functools import partial as p
 from db import query_db
-
+from werkzeug import check_password_hash
 
 class lzmap(object):
     # This is an object masquerading as a function.
@@ -139,3 +139,10 @@ class User(object):
     @classmethod
     def from_name(cls, name):
         return cls(cls.id_from_name(name))
+
+    @classmethod
+    def pw_hash_matches(cls, given_password, _id):
+        """For security, the hash is never stored anywhere except the databse.
+           For added security, it doesn't even leave this function."""
+        ((db_hash,),) = query_db('select pw_hash from users where id=?', (_id,))
+        return check_password_hash(db_hash, given_password)

@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template, g, request, session, redirect
+from werkzeug import generate_password_hash
 from contextlib import closing
 
 from music_objects import Artist, Release, Track, User, NotFound
@@ -17,8 +18,8 @@ def init_db():
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
             
-        db.execute("insert into users (name) values (?)",
-                   ("sam",))
+        db.execute("insert into users (name, pw_hash) values (?, ?)",
+                   ("sam", generate_password_hash("1")))
 
         db.commit()
         
@@ -111,12 +112,18 @@ def login():
         
     else:
         name = request.form["username"]
+        password = request.form["password"]
         
         try:
             _id = User.id_from_name(name)
-            session["user"] = {"name": name, "id": _id}
-            #todo redirect to previous page
-            return redirect("/")
+            
+            if User.pw_hash_matches(password, _id):
+                session["user"] = {"name": name, "id": _id}
+                #todo redirect to previous page
+                return redirect("/")
+                
+            else:
+                return "Incorrect password for %s" % name
             
         except NotFound:
             #error
