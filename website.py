@@ -69,7 +69,7 @@ def render_artist(slug):
     except NotFound:
         return page_not_found("/%s/" % (slug,))
 
-@app.route("/user/<name>/")
+@app.route("/user/<name>")
 def render_user(name):
     try:
         user = get_user()
@@ -77,7 +77,7 @@ def render_user(name):
         return render_template("user.html", that_user=that_user, user=user)
         
     except NotFound:
-        return page_not_found("/%s/" % (slug,))
+        return page_not_found("/%s/" % (name,))
 
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 def change_rating(release_id, rating):
