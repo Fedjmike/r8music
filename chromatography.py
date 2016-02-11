@@ -47,7 +47,7 @@ class Chromatography(object):
 	def get_palette(self, k=4, filter_pixels=None):
 		all_pixels = list(self.img.getdata())
 		try:
-			self.pixels = list(filter(filter_pixels, all_pixels))
+			self.pixels = filter(filter_pixels, all_pixels)
 		except TypeError:
 			raise MalformedImage
 		# TODO: Pick the initial centroids in a better way
