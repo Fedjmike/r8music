@@ -16,7 +16,7 @@ def query_db(db, query, args=(), one=False):
 # From http://flask.pocoo.org/snippets/5/
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
-album_art_base_url = 'http://coverartarchive.org/release/'
+album_art_base_url = 'http://coverartarchive.org/release-group/'
 
 def slugify(text, delim=u'-'):
     """Generates an ASCII-only slug."""
@@ -48,9 +48,9 @@ def generate_slug(text, cursor, table):
     slug_candidate = slugify(text)
     return avoid_collison(slug_candidate, cursor, table)
 
-def get_album_art_url(release_id):
-    print("Getting album art for release " + release_id + "...")
-    r = requests.get(album_art_base_url + release_id + '/')
+def get_album_art_url(release_group_id):
+    print("Getting album art for release group " + release_group_id + "...")
+    r = requests.get(album_art_base_url + release_group_id + '/')
     try:
         return r.json()['images'][0]['thumbnails']['large']
     except ValueError:
@@ -90,6 +90,7 @@ def get_releases(mbid, processed_release_mbids):
         if release['id'] in processed_release_mbids:
             print("Release " + release['id'] + " has already been processed")
             continue
+        release['group-id'] = group['id']
         try:
             release['type'] = group['type']
         except KeyError:
@@ -101,7 +102,7 @@ def get_releases(mbid, processed_release_mbids):
     # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
 
 def get_release(release):
-    release['album-art-url'] = get_album_art_url(release['id'])
+    release['album-art-url'] = get_album_art_url(release['group-id'])
 
     if release['album-art-url']:
         release['palette'] = get_palette(release['album-art-url'])
