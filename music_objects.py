@@ -135,3 +135,7 @@ class User(object):
             return _id
         except ValueError:
             raise UserNotFound()
+
+    @classmethod
+    def from_name(cls, name):
+        return cls(cls.id_from_name(name))

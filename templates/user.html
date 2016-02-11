@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+
+{% block title %}User '{{ that_user.name }}' {{ super() }}}{% endblock %}
+
+{% block content %}
+<header><h1>User: {{ that_user.name }}</h1></header>
+
+<p>{{ that_user.ratings }}</p>
+{% endblock %}

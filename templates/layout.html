@@ -34,7 +34,7 @@
         </ol>
         <ol class="nav right">
             {% if session.user %}
-                <li>Logged in as <a href="#">{{ session.user.name }}</a></li>
+                <li>Logged in as <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a></li>
                 <li><a href="/logout">log out</a></li>
             {% else %}
                 <li><a href="/login">log in</a></li>
