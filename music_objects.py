@@ -122,7 +122,7 @@ class User(object):
         try:
             ((self._id,
               self.name),) = \
-                      query_db('select * from users where id=?', (_id,))
+                      query_db('select id, name from users where id=?', (_id,))
         except ValueError:
             raise UserNotFound()
             
