@@ -76,6 +76,17 @@ def change_rating(release_id, rating):
     
     return "ok"
 
+@app.route("/unrate/<int:release_id>", methods=["POST"])
+def remove_rating(release_id):
+    user = get_user()
+    
+    db = get_db()
+    db.execute("delete from ratings where release_id=? and user_id=?",
+                (release_id, user._id))
+    db.commit()
+    
+    return "ok"
+
 # Nic messing around...
 #@app.route("/<artist>")
 def artist_dom_from_slug(artist=None):
