@@ -4,7 +4,7 @@ from flask import Flask, render_template, g, request, session, redirect
 from werkzeug import generate_password_hash
 from contextlib import closing
 
-from music_objects import Artist, Release, Track, User, NotFound
+from music_objects import Artist, Release, Track, User, NotFound, UserAlreadyExists
 from import_artist import import_artist
 from db import connect_db, close_db, get_db, query_db
 
@@ -49,6 +49,9 @@ def get_user():
         
     except (NotFound, TypeError, KeyError):
         return None
+
+def set_user(name, _id):
+    session["user"] = {"name": name, "id": _id}
 
 @app.route("/<artist_slug>/<release_slug>")
 def render_release(artist_slug, release_slug):
@@ -109,6 +112,38 @@ def remove_rating(release_id):
     
     return "ok"
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    #todo check not logged in
+
+    if request.method == "GET":
+        #todo https
+        return render_template("register.html")
+        
+    else:
+        name = request.form["username"]
+        password = request.form["password"]
+        verify_password = request.form["verify-password"]
+        
+        if password != verify_password:
+            return "LOL you typed your password wrong"
+            
+        #todo more restrictions, slugging
+        elif len(name) < 4:
+            return "Your username must be 4 characters or longer"
+            
+        try:
+            user = User.register(name, password)
+            #Automatically log them in
+            set_user(user.name, user._id)
+            
+            #todo redirect to previous page
+            return redirect("/")
+            
+        except UserAlreadyExists:
+            #error
+            return "Username %s already taken" % name
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     #todo check not logged in
@@ -125,7 +160,7 @@ def login():
             _id = User.id_from_name(name)
             
             if User.pw_hash_matches(password, _id):
-                session["user"] = {"name": name, "id": _id}
+                set_user(name, _id)
                 #todo redirect to previous page
                 return redirect("/")
                 

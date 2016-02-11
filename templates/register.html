@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}User registration {{ super() }}}{% endblock %}
+
+{% block content %}
+<header><h1>User registration</h1></header>
+
+<form action="/register" method="post">
+    <dl>
+        <dt>Username</dt> <dd><input type="text" name="username" /></dd>
+        <dt>Password</dt> <dd><input type="password" name="password" /></dd>
+        <dt>Verify password</dt> <dd><input type="password" name="verify-password" /></dd>
+        <dd><input type="submit" value="Register" /></dd>
+    </dl>
+</form>
+{% endblock %}

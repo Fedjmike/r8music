@@ -1,7 +1,7 @@
 from itertools import product  # Outer product.
 from functools import partial as p
-from db import query_db
-from werkzeug import check_password_hash
+from db import query_db, get_db
+from werkzeug import check_password_hash, generate_password_hash
 
 class lzmap(object):
     # This is an object masquerading as a function.
@@ -33,6 +33,9 @@ class ReleaseNotFound(NotFound):
     pass
 
 class UserNotFound(NotFound):
+    pass
+    
+class UserAlreadyExists(NotFound):
     pass
 
 
@@ -140,6 +143,24 @@ class User(object):
     def from_name(cls, name):
         return cls(cls.id_from_name(name))
 
+    @classmethod
+    def register (cls, name, password):
+        """Try to add a new user to the database.
+           Perhaps counterintuitively, for security hashing the password is
+           delayed until this function. Better that you accidentally hash
+           twice than hash zero times and store the password as plaintext."""
+    
+        if query_db('select id from users where name=?', (name,)):
+            raise UserAlreadyExists()
+            
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("insert into users (name, pw_hash) values (?, ?)",
+                       (name, generate_password_hash(password)))
+        db.commit()
+                       
+        return User(cursor.lastrowid)
+    
     @classmethod
     def pw_hash_matches(cls, given_password, _id):
         """For security, the hash is never stored anywhere except the databse.
