@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}Users index {{ super() }}{% endblock %}
+
+{% block content %}
+<header><h1>Users</h1></header>
+
+<ol>
+{% for user in users %}
+    <li><a href="/user/{{ user.name }}">{{ user.name }}</a></li>
+{% endfor %}
+</ol>
+{% endblock %}

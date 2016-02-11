@@ -39,6 +39,10 @@ def render_artists_index():
     artists = query_db("select * from artists")
     return render_template("artists_index.html", artists=artists)
 
+def render_users_index():
+    users = query_db("select name from users")
+    return render_template("users_index.html", users=users)
+
 def get_user():
     try:
         return User(session["user"]["id"])
@@ -60,6 +64,9 @@ def render_release(artist_slug, release_slug):
 def render_artist(slug):
     if slug == "artists":
         return render_artists_index()
+        
+    elif slug == "users":
+        return render_users_index()
 
     try:
         user = get_user()
