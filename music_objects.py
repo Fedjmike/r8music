@@ -131,8 +131,8 @@ class User(object):
             
         self.ratings = dict(query_db('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
 
-    @classmethod
-    def id_from_name(cls, name):
+    @staticmethod
+    def id_from_name(name):
         try:
             ((_id,),) = query_db('select id from users where name=?', (name,))
             return _id
@@ -144,7 +144,7 @@ class User(object):
         return cls(cls.id_from_name(name))
 
     @classmethod
-    def register (cls, name, password):
+    def register(cls, name, password):
         """Try to add a new user to the database.
            Perhaps counterintuitively, for security hashing the password is
            delayed until this function. Better that you accidentally hash
@@ -159,10 +159,10 @@ class User(object):
                        (name, generate_password_hash(password)))
         db.commit()
                        
-        return User(cursor.lastrowid)
+        return cls(cursor.lastrowid)
     
-    @classmethod
-    def pw_hash_matches(cls, given_password, _id):
+    @staticmethod
+    def pw_hash_matches(given_password, _id):
         """For security, the hash is never stored anywhere except the databse.
            For added security, it doesn't even leave this function."""
         ((db_hash,),) = query_db('select pw_hash from users where id=?', (_id,))
