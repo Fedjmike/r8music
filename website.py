@@ -19,10 +19,6 @@ def init_db():
 
         db.commit()
         
-    import_artist("My Bloody Valentine")
-    import_artist("Grimes")
-    import_artist("Neutral Milk Hotel")
-    import_artist("Andrew Jackson Jihad")
     import_artist("DJ Okawari")
 
 # 
