@@ -77,15 +77,15 @@ def get_releases(mbid, processed_release_mbids):
     for group in release_groups:
         print("Querying MB for release group " + group['id'] + "...")
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        try: # Tries to get the oldest release of the group. If it fails, tries to get any release with a valid date
-            release = min(result['release-group']['release-list'],
-                          key=lambda release: arrow.get(release['date']+"-01-01").timestamp if len(release['date']) == 4 else arrow.get(release['date']).timestamp)
-        except KeyError:
-            for r in result['release-group']['release-list']:
-                if 'date' in r:
-                    release = r
-                    break
+        # Gets the oldest release of the group. If it fails, ignore this release group
+        releases_candidates = filter(lambda x: 'date' in x, result['release-group']['release-list'])
+        if not releases_candidates:
             continue
+        release = min(releases_candidates,
+                      key=lambda release: arrow.get(release['date']+"-01-01").timestamp \
+                      if len(release['date']) == 4 \
+                      else arrow.get(release['date']).timestamp)
+
         if release['id'] in processed_release_mbids:
             print("Release " + release['id'] + " has already been processed")
             continue
