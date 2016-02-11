@@ -19,7 +19,11 @@ def init_db():
 
         db.commit()
         
-    import_artist("Yung Lean")
+    import_artist("My Bloody Valentine")
+    import_artist("Grimes")
+    import_artist("Neutral Milk Hotel")
+    import_artist("Andrew Jackson Jihad")
+    import_artist("DJ Okawari")
 
 # 
 
@@ -109,5 +113,5 @@ def release_dom_from_id(artist_id, release_id):
 
 
 if __name__ == "__main__":
-    init_db()
+    #init_db()
     app.run(debug=True)
