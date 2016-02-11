@@ -55,10 +55,6 @@ ol, ul {
 
 /*Custom lists*/
 
-.tracks time {
-	float: right;
-}
-
 ol.nav, ol.rating, ol.releases {
 	list-style: none;
 	padding: 0;
@@ -211,6 +207,14 @@ ol.nav {
 
 .releases.grid > li img {
     width: 100%;
+}
+
+.tracks time {
+	float: right;
+}
+
+.tracks li:nth-child(2n) {
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 /*Albums*/
