@@ -158,12 +158,13 @@ ol.nav {
 
 .rating li:hover ~ .selected {
     /*Medium light when selected after the hovered*/
-	background-color: rgba(255, 255, 255, 0.3);
+	background-color: rgba(192, 192, 192, 0.5);
 }
 
 .rating:hover .selected {
     /*Dark when selected before the hovered*/
-	background-color: rgba(255, 255, 255, 0.0);
+	background-color: rgba(128, 128, 128, 0.5);
+    color: white;
 }
 
 .rating .selected:hover {
