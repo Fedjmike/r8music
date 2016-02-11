@@ -127,3 +127,11 @@ class User(object):
             raise UserNotFound()
             
         self.ratings = dict(query_db('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
+
+    @classmethod
+    def id_from_name(cls, name):
+        try:
+            ((_id,),) = query_db('select id from users where name=?', (name,))
+            return _id
+        except ValueError:
+            raise UserNotFound()

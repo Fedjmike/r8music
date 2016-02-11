@@ -1,4 +1,6 @@
-from flask import Flask, render_template, g
+import os
+
+from flask import Flask, render_template, g, request, session, redirect
 from contextlib import closing
 
 from music_objects import Artist, Release, Track, User, NotFound
@@ -6,6 +8,7 @@ from import_artist import import_artist
 from db import connect_db, close_db, get_db, query_db
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 app.teardown_appcontext(close_db)
 
@@ -37,9 +40,9 @@ def render_artists_index():
 
 def get_user():
     try:
-        return User(1)
+        return User(session["user"]["id"])
         
-    except NotFound:
+    except (NotFound, TypeError, KeyError):
         return None
 
 @app.route("/<artist_slug>/<release_slug>")
@@ -68,6 +71,7 @@ def render_artist(slug):
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 def change_rating(release_id, rating):
     user = get_user()
+    #todo error if no user
     
     db = get_db()
     db.execute("insert or replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
@@ -87,6 +91,35 @@ def remove_rating(release_id):
     
     return "ok"
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    #todo check not logged in
+
+    if request.method == "GET":
+        #todo https
+        return render_template("login.html")
+        
+    else:
+        name = request.form["username"]
+        
+        try:
+            _id = User.id_from_name(name)
+            session["user"] = {"name": name, "id": _id}
+            #todo redirect to previous page
+            return redirect("/")
+            
+        except NotFound:
+            #error
+            return "User %s not found" % name
+
+@app.route("/logout")
+def logout():
+    #todo check logged in
+
+    session["user"] = None
+    return redirect("/")
+    
+    
 # Nic messing around...
 #@app.route("/<artist>")
 def artist_dom_from_slug(artist=None):

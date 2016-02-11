@@ -32,6 +32,15 @@
             <li><a href="/toplists">toplists</a></li>
             <li><a href="/users">users</a></li>
         </ol>
+        <ol class="nav right">
+            {% if session.user %}
+                <li>Logged in as <a href="#">{{ session.user.name }}</a></li>
+                <li><a href="/logout">log out</a></li>
+            {% else %}
+                <li><a href="/login">log in</a></li>
+            {% endif %}
+        </ol>
+        
 		{% block content %}{% endblock %}
 	</div>
 </body>

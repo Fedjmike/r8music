@@ -49,6 +49,10 @@ ol, ul {
 	padding-left: 2em;
 }
 
+.right {
+    float: right;
+}
+
 /*Custom lists*/
 
 .tracks time {
@@ -62,6 +66,7 @@ ol.nav, ol.rating, ol.releases {
 }
 
 ol.nav {
+    display: inline-block;
     padding: 0.5rem 0;
     font-size: 1.17em;
 }
@@ -233,6 +238,34 @@ ol.nav {
 .album-cover {
 	margin-top: 2em;
     max-width: 20em;
+    float: right;
+}
+
+/*Forms*/
+
+form dl {
+    width: 15rem;
+}
+
+form dt {
+    margin-bottom: 0.3em;
+}
+
+form dd {
+    margin-bottom: 0.7em;
+}
+
+form input {
+    font-size: 1rem;
+}
+
+form input[type="text"],
+form input[type="password"] {
+    width: 15em;
+    height: 1.6em;
+    box-sizing: border-box;
+}
+form input[type="submit"] {
     float: right;
 }
 
