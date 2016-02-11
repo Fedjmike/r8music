@@ -54,7 +54,7 @@ class Chromatography(object):
 		try:
 			centroids = sample(self.pixels, k)
 		# Not enough pixels to sample the initial centroids from
-		except ValueError:
+		except ValueError, TypeError:
 			raise NotEnoughValidPixels
 
 		while True:
