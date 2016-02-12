@@ -162,7 +162,7 @@ class User(object):
             
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("insert into users (name, pw_hash) values (?, ?)",
+        cursor.execute('insert into users (name, pw_hash) values (?, ?)',
                        (name, generate_password_hash(password)))
         db.commit()
                        

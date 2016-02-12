@@ -10,6 +10,8 @@ from import_artist import import_artist
 from db import connect_db, close_db, get_db, query_db
 
 app = Flask(__name__)
+#Used to encrypt cookies and session data. Change this to a constant to avoid
+#losing your session when the server restarts
 app.secret_key = os.urandom(24)
 
 app.teardown_appcontext(close_db)
