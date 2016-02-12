@@ -10,6 +10,7 @@ function unrateRelease(clicked_element, release_id) {
         clicked_element.classList.remove("selected");
         $("#rating-frequency").text(msg.ratingFrequency);
         $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
+        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
     })
 }
 
@@ -42,5 +43,6 @@ function rateRelease(clicked_element, release_id, rating) {
         
         $("#rating-frequency").text(msg.ratingFrequency);
         $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
+        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
     });
 }

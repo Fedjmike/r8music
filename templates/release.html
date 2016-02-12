@@ -27,7 +27,8 @@
 		<p class="tight">
             {% if release.average_rating %}
                 Average rating: <span id="average-rating">{{ release.average_rating }}</span>
-                by <span id="rating-frequency">{{ release.rating_frequency }}</span> user{{ 's' if release.rating_frequency != 1 }}
+                by <span id="rating-frequency">{{ release.rating_frequency }}</span>
+                <span id="user-demonym">user{{ 's' if release.rating_frequency != 1 }}</span>
                 &nbsp; &nbsp; &nbsp;
             {% endif %}
             My rating:
