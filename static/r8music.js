@@ -4,10 +4,12 @@ function unrateRelease(clicked_element, release_id) {
         url: "/unrate/" + release_id
         
     }).done(function (msg) {
-        if (msg != "ok")
+        if (msg.error)
             return;
             
         clicked_element.classList.remove("selected");
+        $("#rating-frequency").text(msg.ratingFrequency);
+        $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
     })
 }
 
@@ -24,7 +26,7 @@ function rateRelease(clicked_element, release_id, rating) {
         url: "/rate/" + release_id + "/" + rating
         
     }).done(function (msg) {
-        if (msg != "ok")
+        if (msg.error)
             return;
             
         /*Success, update rating widget*/
@@ -35,5 +37,10 @@ function rateRelease(clicked_element, release_id, rating) {
             siblings[i].classList.remove("selected");
             
         clicked_element.classList.add("selected");
+        
+        /*Update average rating*/
+        
+        $("#rating-frequency").text(msg.ratingFrequency);
+        $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
     });
 }

@@ -126,7 +126,10 @@ def change_rating(release_id, rating):
         
     db.commit()
     
-    return "ok"
+    ((sum, frequency,),) = query_db("select sum, frequency from rating_totals where release_id=?",
+                                    (release_id,))
+    
+    return jsonify(error=0, ratingSum=sum, ratingFrequency=frequency)
 
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 def remove_rating(release_id):
@@ -143,7 +146,7 @@ def remove_rating(release_id):
         #TODO: User attempted to unrate something not rated. Should we just say
         #it succeeded, so that their client gets updated to what is (and was
         #already) the case?
-        return "not ok"
+        return jsonify(error=1)
         
     db.execute("delete from ratings where release_id=? and user_id=?",
                (release_id, user_id))
@@ -151,7 +154,10 @@ def remove_rating(release_id):
                (old_rating, release_id))
     db.commit()
     
-    return "ok"
+    ((sum, frequency,),) = query_db("select sum, frequency from rating_totals where release_id=?",
+                                    (release_id,))
+    
+    return jsonify(error=0, ratingSum=sum, ratingFrequency=frequency)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
