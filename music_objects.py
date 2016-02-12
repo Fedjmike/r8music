@@ -85,9 +85,9 @@ class Release(object):
                 'select id from tracks where release_id=?', (self._id,))])
         
         try:
-            ((rating_sum, rating_frequency),) = \
+            ((rating_sum, self.rating_frequency),) = \
                     query_db('select sum, frequency from rating_totals where release_id=?', (self._id,))
-            self.average_rating = rating_sum / rating_frequency
+            self.average_rating = rating_sum / self.rating_frequency
         except (ValueError, ZeroDivisionError):
             self.average_rating = None
 
