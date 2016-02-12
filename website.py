@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, g, request, session, redirect
+from flask import Flask, render_template, g, request, session, redirect, jsonify
 from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
