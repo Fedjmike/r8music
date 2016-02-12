@@ -46,6 +46,13 @@ def render_users_index():
     users = query_db("select name from users")
     return render_template("users_index.html", users=users)
 
+def get_user_id():
+    try:
+        return session["user"]["id"]
+        
+    except (TypeError, KeyError):
+        return None
+        
 def get_user():
     try:
         return User(session["user"]["id"])
@@ -94,14 +101,14 @@ def render_user(name):
 
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 def change_rating(release_id, rating):
-    user = get_user()
+    user_id = get_user_id()
     #todo error if no user
     
     db = get_db()
     
     try:
         db.execute("insert into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                   (release_id, user._id, rating))
+                   (release_id, user_id, rating))
         #If the above didn't raise an error, the release wasn't already rated
         db.execute("update rating_totals set frequency = frequency + 1, sum = sum + ? where release_id=?",
                    (rating, release_id,))
@@ -110,10 +117,10 @@ def change_rating(release_id, rating):
     except IntegrityError:
         #todo transactions
         ((old_rating,),) = query_db("select rating from ratings where release_id=? and user_id=?",
-                                    (release_id, user._id))
+                                    (release_id, user_id))
         
         db.execute("replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                   (release_id, user._id, rating))
+                   (release_id, user_id, rating))
         db.execute("update rating_totals set sum = sum + ? where release_id=?",
                    (rating - old_rating, release_id))
         
@@ -123,7 +130,7 @@ def change_rating(release_id, rating):
 
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 def remove_rating(release_id):
-    user = get_user()
+    user_id = get_user_id()
     
     db = get_db()
 
@@ -139,7 +146,7 @@ def remove_rating(release_id):
         return "not ok"
         
     db.execute("delete from ratings where release_id=? and user_id=?",
-               (release_id, user._id))
+               (release_id, user_id))
     db.execute("update rating_totals set frequency = frequency - 1, sum = sum - ? where release_id=?",
                (old_rating, release_id))
     db.commit()
