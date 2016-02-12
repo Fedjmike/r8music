@@ -26,10 +26,12 @@
 	  
 		<p class="tight">
             {% if release.average_rating %}
+            <span id="average-rating-section">
                 Average rating: <span id="average-rating">{{ release.average_rating }}</span>
                 by <span id="rating-frequency">{{ release.rating_frequency }}</span>
                 <span id="user-demonym">user{{ 's' if release.rating_frequency != 1 }}</span>
                 &nbsp; &nbsp; &nbsp;
+            </span>
             {% endif %}
             My rating:
         </p>

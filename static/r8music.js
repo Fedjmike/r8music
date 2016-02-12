@@ -1,3 +1,14 @@
+function updateAverageRating(msg) {
+    if (msg.ratingFrequency == 0)
+        $("#average-rating-section").text("");
+        
+    else {
+        $("#rating-frequency").text(msg.ratingFrequency);
+        $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
+        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
+    }
+}
+
 function unrateRelease(clicked_element, release_id) {
     $.ajax({
         method: "POST",
@@ -8,9 +19,7 @@ function unrateRelease(clicked_element, release_id) {
             return;
             
         clicked_element.classList.remove("selected");
-        $("#rating-frequency").text(msg.ratingFrequency);
-        $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
-        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
+        updateAverageRating(msg);
     })
 }
 
@@ -39,10 +48,6 @@ function rateRelease(clicked_element, release_id, rating) {
             
         clicked_element.classList.add("selected");
         
-        /*Update average rating*/
-        
-        $("#rating-frequency").text(msg.ratingFrequency);
-        $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
-        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
+        updateAverageRating(msg);
     });
 }
