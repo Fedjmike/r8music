@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template, g, request, session, redirect
 from werkzeug import generate_password_hash
 from contextlib import closing
+from sqlite3 import IntegrityError
 
 from music_objects import Artist, Release, Track, User, NotFound, UserAlreadyExists
 from import_artist import import_artist
@@ -95,8 +96,25 @@ def change_rating(release_id, rating):
     #todo error if no user
     
     db = get_db()
-    db.execute("insert or replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                 (release_id, user._id, rating))
+    
+    try:
+        db.execute("insert into ratings (release_id, user_id, rating) values (?, ?, ?)",
+                   (release_id, user._id, rating))
+        #If the above didn't raise an error, the release wasn't already rated
+        db.execute("update rating_totals set frequency = frequency + 1, sum = sum + ? where release_id=?",
+                   (rating, release_id,))
+
+    #Rating already present, replace
+    except IntegrityError:
+        #todo transactions
+        ((old_rating,),) = query_db("select rating from ratings where release_id=? and user_id=?",
+                                    (release_id, user._id))
+        
+        db.execute("replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
+                   (release_id, user._id, rating))
+        db.execute("update rating_totals set sum = sum + ? where release_id=?",
+                   (rating - old_rating, release_id))
+        
     db.commit()
     
     return "ok"
@@ -106,8 +124,22 @@ def remove_rating(release_id):
     user = get_user()
     
     db = get_db()
+
+    try:
+        ((old_rating,),) = query_db("select rating from ratings where release_id=? and user_id=?",
+                                    (release_id, user_id))
+    
+    #No rating present
+    except ValueError:
+        #TODO: User attempted to unrate something not rated. Should we just say
+        #it succeeded, so that their client gets updated to what is (and was
+        #already) the case?
+        return "not ok"
+        
     db.execute("delete from ratings where release_id=? and user_id=?",
-                (release_id, user._id))
+               (release_id, user._id))
+    db.execute("update rating_totals set frequency = frequency - 1, sum = sum - ? where release_id=?",
+               (old_rating, release_id))
     db.commit()
     
     return "ok"

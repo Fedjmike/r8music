@@ -24,7 +24,12 @@
         {% endfor %}
 		</ol>
 	  
-		<p class="tight">Average rating: 7.8 &nbsp; &nbsp; My rating:</p>
+		<p class="tight">
+            {% if release.average_rating %}
+                Average rating: {{ release.average_rating }} &nbsp; &nbsp; &nbsp;
+            {% endif %}
+            My rating:
+        </p>
         {{ rating_widget(release, user.ratings[release._id] if user and release._id in user.ratings, None, release.colors[1]) }}
 	</div>
     {% if release.album_art_url %}

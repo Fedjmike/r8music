@@ -83,6 +83,13 @@ class Release(object):
                 'select artist_id from authors where release_id=?', (_id,))])
         self.tracks = lzmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
+        
+        try:
+            ((rating_sum, rating_frequency),) = \
+                    query_db('select sum, frequency from rating_totals where release_id=?', (self._id,))
+            self.average_rating = rating_sum / rating_frequency
+        except (ValueError, ZeroDivisionError):
+            self.average_rating = None
 
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
 
