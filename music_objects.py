@@ -1,25 +1,29 @@
 from itertools import product  # Outer product.
 from functools import partial as p
+from collections import namedtuple
 from db import query_db, get_db
 from werkzeug import check_password_hash, generate_password_hash
 
+
+# TODO: Make __init__s lazier.
+# TODO: Modify query_db so "[i for (i,) in." is unnecessary.
+
+
 class lzmap(object):
     # This is an object masquerading as a function.
-    def __init__(self, fn, listable):
+    def __init__(self, fn, list_):
         self._fn = fn
-        self._list = listable  # Don't actually turn it into a list yet...
+        self._list = list_  # Must be integer-indexable. (Can be lzmap.)
         self._cache = dict()  # Dict because no such thing as nullable list.
 
     def __getitem__(self, n):
         try:
             return self._cache[n]
         except KeyError:
-            self._list = list(self._list)  # Idempotent.
             self._cache[n] = self._fn(self._list[n])
             return self.__getitem__(n)
 
     def __len__(self):
-        self._list = list(self._list)
         return len(self._list)
 
 
@@ -30,6 +34,9 @@ class ArtistNotFound(NotFound):
     pass
     
 class ReleaseNotFound(NotFound):
+    pass
+
+class ReviewNotFound(NotFound):
     pass
 
 class UserNotFound(NotFound):
@@ -69,6 +76,9 @@ def _authorship_exists(authorship):
         return False
 
 
+RatingStats = namedtuple('RatingStats', ['mean', 'freq'])
+
+
 class Release(object):
     def __init__(self, _id):
         ((self._id,
@@ -83,15 +93,31 @@ class Release(object):
                 'select artist_id from authors where release_id=?', (_id,))])
         self.tracks = lzmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
+        self.reviews = lzmap(
+                p(Review, self._id), [u for (u,) in query_db(
+                'select user_id from reviews where release_id=?', (self._id,))])
+        # "lzmap(User, ..." is just a lazy list of Users, so self.reviews is
+        # "[a] Review [of my]self [for each] User [who reviewed me]".
+        # This will read better once the "[u for (u,) in" has gone.
         
-        try:
-            ((rating_sum, self.rating_frequency),) = \
-                    query_db('select sum, frequency from rating_totals where release_id=?', (self._id,))
-            self.average_rating = rating_sum / self.rating_frequency
-        except (ValueError, ZeroDivisionError):
-            self.average_rating = None
-
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
+
+        # try:
+        #     ((rating_sum, self.rating_frequency),) = \
+        #             query_db('select sum, frequency from rating_totals where release_id=?', (self._id,))
+        #     self.average_rating = rating_sum / self.rating_frequency
+        # except (ValueError, ZeroDivisionError):
+        #     self.average_rating = None
+
+    def get_rating_stats(self):
+        # This method is directly applicable to Users, also.
+        ratings = [r.rating for r in self.reviews if r.rating is not None]
+        sum_ratings, n_ratings = sum(ratings), len(ratings)
+        try:
+            mean_rating = sum_ratings/n_ratings
+            return RatingStats(mean=mean_rating, freq=n_ratings)
+        except ZeroDivisionError:
+            return RatingStats(mean=None, freq=0)
 
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
@@ -127,6 +153,54 @@ class Track(object):
         return self.title
 
 
+class Review(object):
+    def __init__(self, release_id, user_id):
+        try:
+            self.release = Release(release_id)
+            self.user = User(user_id)
+            ((self.rating,),) = query_db(
+                    'select rating from reviews '
+                    +'where release_id=? and user_id=?',
+                    (self.release._id, self.user._id))
+        except ValueError:
+            raise ReviewNotFound()
+
+    @classmethod
+    def new(cls, release_id, user_id):
+        db = get_db()
+        db.execute(
+                'insert into reviews (release_id, user_id, rating) '
+                +'values (?, ?, NULL)',
+                (release_id, user_id))
+        db.commit()
+        return cls(release_id, user_id)
+
+    @classmethod
+    def new_with_rating(cls, release_id, user_id, rating):
+        self = cls.new(release_id, user_id)
+        self.set_rating(rating)
+        return self
+
+    def set_rating(self, rating):
+        db = get_db()
+        db.execute(
+                'replace into reviews (release_id, user_id, rating) '
+                +'values (?, ?, ?)',
+                (self.release._id, self.user._id, rating))
+        db.commit()
+        self.__init__(self.release._id, self.user._id)  # Refresh.
+
+    def unset_rating(self):
+        db = get_db()
+        # TODO: Error if no rating present?
+        db.execute(
+                'replace into reviews (release_id, user_id, rating) '
+                +'values (?, ?, NULL)',
+                (self.release._id, self.user._id))
+        db.commit()
+        self.__init__(self.release._id, self.user._id)
+
+
 class User(object):
     def __init__(self, _id):
         try:
@@ -136,7 +210,8 @@ class User(object):
         except ValueError:
             raise UserNotFound()
             
-        self.ratings = dict(query_db('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
+        # TODO: Use Reviews.
+        self.ratings = dict(query_db('select release_id, rating from reviews where reviews.user_id=?', (_id,)))
 
     @staticmethod
     def id_from_name(name):

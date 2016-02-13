@@ -172,13 +172,6 @@ def import_artist(artist_name):
         release['local-id'] = cursor.lastrowid
 
         cursor.execute(
-            "insert into rating_totals (release_id, 'sum', frequency) values (?, ?, ?)",
-            (release['local-id'],
-             0,
-             0)
-        )
-        
-        cursor.execute(
             "insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
             (release['local-id'],
              release['palette'][0],
