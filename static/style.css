@@ -102,6 +102,7 @@ ol.nav {
     
 	display: inline-block;
 	width: 2.6em;
+	float: right;
     
     transition: background-color 0.04s;
 	color: white;
@@ -126,22 +127,17 @@ ol.nav {
     padding: 0.2em 0;
 }
 
-.rating li:first-child {
+/*The list elements are in reverse order and then reversed back with float: right*/
+.rating li:last-child {
     padding-left: 0.15em;
-
 }
 
-.rating li:last-child {
+.rating li:first-child {
     padding-right: 0.15em;
 }
 
 .rating li:hover ~ li {
-    /*Transparent after the hovered rating*/
-    background-color: rgba(0, 0, 0, 0);
-}
-
-.rating:hover li {
-    /*Medium-dark otherwise (before hovered)*/
+    /*Medium-dark before hovered*/
 	background-color: rgba(0, 0, 0, 0.3);
     color: white;
 }
@@ -159,14 +155,14 @@ ol.nav {
 }
 
 .rating li:hover ~ .selected {
-    /*Medium light when selected after the hovered*/
-	background-color: rgba(192, 192, 192, 0.5);
-}
-
-.rating:hover .selected {
     /*Dark when selected before the hovered*/
 	background-color: rgba(128, 128, 128, 0.5);
     color: white;
+}
+
+.rating:hover .selected {
+    /*Medium light when selected after the hovered*/
+	background-color: rgba(192, 192, 192, 0.5);
 }
 
 .rating .selected:hover {
