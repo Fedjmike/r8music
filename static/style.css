@@ -301,6 +301,29 @@ form input[type="submit"] {
     float: right;
 }
 
+/*Popups*/
+
+.popup {
+    width: 0em;
+    height: 0em;
+    float: right;
+    position: relative;
+    top: 0.5em;
+    left: 0.5em;
+    z-order: 999;
+    font-size: 1rem;
+}
+
+.popup > div {
+    display: none;
+    width: 15em;
+    padding: 1em;
+    margin-left: -17em;
+    
+    background: white;
+    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
+}
+
 /*Layout*/
 
 .page {

@@ -43,8 +43,11 @@
                 <li>Logged in as <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a></li>
                 <li><a href="/logout">log out</a></li>
             {% else %}
-                <li><a href="/login">log in</a></li>
-                <li><a href="/register">register</a></li>
+                <li><a id="login" href="/login">log in</a></li>
+                <li><a id="register" href="/register">register</a></li>
+                {% from "forms.html" import login_form, register_form %}
+                <div class="popup"><div class="popup-content" id="login-popup">{{ login_form() }}</div></div>
+                <div class="popup"><div class="popup-content" id="register-popup">{{ register_form() }}</div></div>
             {% endif %}
         </ol>
         

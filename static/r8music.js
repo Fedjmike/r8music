@@ -52,3 +52,17 @@ function rateRelease(clicked_element, release_id, rating) {
         updateAverageRating(msg);
     });
 }
+
+$(document).ready(function ($) {
+    $("a#login").click(function (event) {
+        event.preventDefault();
+        $(".popup-content:not(#login-popup)").toggle(false);
+        $("#login-popup").toggle({duration: 100});
+    });
+    
+    $("a#register").click(function (event) {
+        event.preventDefault();
+        $(".popup-content:not(#register-popup)").toggle(false);
+        $("#register-popup").toggle({duration: 100});
+    });
+});
