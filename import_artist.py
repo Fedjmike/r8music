@@ -68,11 +68,10 @@ def get_palette(album_art_url):
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
         c = chromatography.Chromatography(tempname)
-        palette = [rgb_to_hex(color) for color in c.get_highlights(3, valid_pixel)]
+        palette = c.get_highlights(3, valid_pixel)
+        palette = sorted(palette, key=lambda p:rgb_to_hsv(p[0]/255, p[1]/255, p[2]/255)[2])
         os.remove(tempname)
-        # if len(palette) < 3:
-        #     return [None, None, None]
-        return palette
+        return [rgb_to_hex(color) for color in palette]
     except (chromatography.ChromatographyException, OSError):
         return [None, None, None]
 
