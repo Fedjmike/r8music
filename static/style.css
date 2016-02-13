@@ -86,14 +86,26 @@ ol.nav {
     top: 0.15em;
 }
 
-.rating {
+ol.rating {
 	display: inline-block;
-    background-color: #4078c0;
-    border: 3px solid rgba(0,0,0,0);
-    border-radius: 0.7rem;
+    margin: 0.2rem 0;
     overflow: hidden;
     /*Whitespace between the list items becomes hidden*/
     font-size: 0;
+    
+    border: 2px solid rgba(0,0,0, 0);
+    border-radius: 0.7rem;
+    background-color: #4078c0;
+    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
+    
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
+    font-weight: bold;
+}
+
+ol:not(.small).rating {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .rating li {
@@ -101,11 +113,9 @@ ol.nav {
     font-size: 1rem;
     
 	display: inline-block;
-	width: 2.6em;
+    width: 12.5%;
 	float: right;
     
-    transition: background-color 0.04s;
-	color: white;
     text-align: center;
 }
 
@@ -119,6 +129,7 @@ ol.nav {
 .small.rating {
     border-radius: 0.5rem;
     background-color: rgba(0,0,0,0.4);
+    font-weight: normal;
 }
 
 .small.rating li {
@@ -128,18 +139,17 @@ ol.nav {
 }
 
 /*The list elements are in reverse order and then reversed back with float: right*/
-.rating li:last-child {
+.small.rating li:last-child {
     padding-left: 0.15em;
 }
 
-.rating li:first-child {
+.small.rating li:first-child {
     padding-right: 0.15em;
 }
 
 .rating li:hover ~ li {
     /*Medium-dark before hovered*/
 	background-color: rgba(0, 0, 0, 0.3);
-    color: white;
 }
 
 .rating li:hover {
@@ -149,15 +159,18 @@ ol.nav {
 }
 
 .rating .selected {
-    /*White with black text when selected*/
-	background-color: rgba(255, 255, 255, 0.7);
-    color: black;
+    /*Light when selected*/
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.rating:not(:hover) .selected ~ li {
+	/*Medium light before the selection*/
+	background-color: rgba(255, 255, 255, 0.3);
 }
 
 .rating li:hover ~ .selected {
     /*Dark when selected before the hovered*/
 	background-color: rgba(128, 128, 128, 0.5);
-    color: white;
 }
 
 .rating:hover .selected {
@@ -244,13 +257,20 @@ ol.nav {
 
 #average-rating {
     display: inline-block;
+    padding: 0.05em 0.33em 0.1em 0.3em;
     vertical-align: text-top;
 
     border-radius: 0.5em;
+    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
+    text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
     
     font-size: 1rem;
     font-weight: bold;
     color: white;
+}
+
+.album-cover{
+    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
 }
 
 /*Forms*/
