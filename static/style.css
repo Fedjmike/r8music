@@ -12,6 +12,7 @@ html, body {
 body {
 	font-family: Signika, sans-serif;
 	font-weight: 300;
+    text-rendering: optimizeLegibility;
     overflow-y: scroll;
     background-color: #eee;
 }
@@ -78,8 +79,8 @@ ol.nav {
     display: inline-block;
 }
 
-.nav li:not(:last-child):after {
-    content: ' /';
+.nav * + li:before {
+    content: '/ ';
     font-size: 1.2em;
     position: relative;
     top: 0.15em;
