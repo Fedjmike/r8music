@@ -277,7 +277,11 @@ form input[type="submit"] {
 
 .page {
     background: rgba(255, 255, 255, 0.6);
-    padding: 0 1em 3em 1em;
+    padding: 0 1.5em 3em 1.5em;
+}
+
+ol.nav {
+    margin: 0.5em 0;
 }
 
 section {
