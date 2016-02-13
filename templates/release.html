@@ -4,12 +4,19 @@
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.artists[0].name }} {{ super() }}{% endblock %}
 
 {% set accent_color_1 = release.colors[0] %}
+{% set accent_color_2 = release.colors[1] %}
+{% set accent_color_3 = release.colors[2] %}
 
 {% block content %}
 <section class="{% if release.album_art_url %} two columns {% endif %}">
 	<div class="album-main">
 		<header>
-			<h1>{{ release.title }}</h1>
+            <h1>
+                {{ release.title }}
+                <span id="average-rating-section" style="{{ '' if release.average_rating else 'display: none;' }}">
+                    <span id="average-rating">{{ release.average_rating }}</span>
+                </span>
+            </h1>
 			<h2 class="byline">
             {% for artist in release.artists %}
                 <span class="author"><a href="/{{ artist.slug }}/">{{ artist.name }}</a></span>
@@ -24,17 +31,6 @@
         {% endfor %}
 		</ol>
 	  
-		<p class="tight">
-            {% if release.average_rating %}
-            <span id="average-rating-section">
-                Average rating: <span id="average-rating">{{ release.average_rating }}</span>
-                by <span id="rating-frequency">{{ release.rating_frequency }}</span>
-                <span id="user-demonym">user{{ 's' if release.rating_frequency != 1 }}</span>
-                &nbsp; &nbsp; &nbsp;
-            </span>
-            {% endif %}
-            My rating:
-        </p>
         {{ rating_widget(release, user.ratings[release._id] if user and release._id in user.ratings, None, release.colors[1]) }}
 	</div>
     {% if release.album_art_url %}

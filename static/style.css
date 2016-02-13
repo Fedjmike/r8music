@@ -242,6 +242,17 @@ ol.nav {
     float: right;
 }
 
+#average-rating {
+    display: inline-block;
+    vertical-align: text-top;
+
+    border-radius: 0.5em;
+    
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+}
+
 /*Forms*/
 
 form dl {

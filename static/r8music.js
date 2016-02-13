@@ -1,8 +1,9 @@
 function updateAverageRating(msg) {
     if (msg.ratingFrequency == 0)
-        $("#average-rating-section").text("");
+        $("#average-rating-section").css("display", "none");
         
     else {
+        $("#average-rating-section").css("display", "inline");
         $("#rating-frequency").text(msg.ratingFrequency);
         $("#average-rating").text((msg.ratingSum / msg.ratingFrequency).toFixed(1));
         $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
