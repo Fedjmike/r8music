@@ -9,8 +9,9 @@ html, body {
 
 /*Basic formatting*/
 
-body {
+html {
 	font-family: Signika, sans-serif;
+    font-size: 12pt;
 	font-weight: 300;
     text-rendering: optimizeLegibility;
     overflow-y: scroll;
@@ -252,7 +253,7 @@ ol:not(.small).rating {
 }
 
 .album-cover {
-	margin-top: 2em;
+	margin-top: 3.5em;
     max-width: 20em;
     float: right;
 }
@@ -271,7 +272,7 @@ ol:not(.small).rating {
     color: white;
 }
 
-.album-cover{
+.album-cover {
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
 }
 
@@ -323,7 +324,6 @@ input[type="submit"] {
     padding: 1px 0.3em;
     border: 2px solid rgba(0,0,0,0);
     border-radius: 0.3em;
-    outline: none;
     
     background: #4078c0;
     box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
@@ -397,7 +397,7 @@ section {
 
 /*Computer*/
 @media only screen and (min-width: 600px) {
-	.page {
+    .page {
 		margin: 0 auto;
 		width: 50em;
 	}
@@ -405,5 +405,12 @@ section {
     .two.columns > :nth-child(2n+1) {
         float: left;
         margin-right: 4em;
+    }
+}
+
+/*Large screen*/
+@media only screen and (min-width: 1000px) {
+    html {
+        font-size: 14pt;
     }
 }
