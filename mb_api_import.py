@@ -136,7 +136,7 @@ def import_artist(artist_name):
     result = cursor.fetchall()
     try:
         (artist_id,) = result[0]
-        cursor.execute('select release_id from authors where artist_id=?', (artist_id,))
+        cursor.execute('select release_id from authorships where artist_id=?', (artist_id,))
         processed_release_ids = [_id for (_id,) in cursor.fetchall()]
         processed_release_mbids = [mbid for (mbid,) in [query_db(db,'select mbid from release_mbid where release_id=?', (release_id,), True)\
                                    for release_id in processed_release_ids]]
@@ -203,7 +203,7 @@ def import_artist(artist_name):
                     processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
 
                 cursor.execute(
-                    "insert into authors (release_id, artist_id) values (?, ?)",
+                    "insert into authorships (release_id, artist_id) values (?, ?)",
                     (release['local-id'],
                      artist['artist']['local-id'])
                 )

@@ -51,7 +51,7 @@ class Artist(object):
         ((self._id, self.name, self.slug, self.incomplete),) = query_db(
                 'select * from artists where id=?', (_id,))
         self.releases = lzmap(Release, [i for (i,) in query_db(
-                'select release_id from authors where artist_id=?', (_id,))])
+                'select release_id from authorships where artist_id=?', (_id,))])
 
     @classmethod
     def from_slug(cls, slug):
@@ -68,7 +68,7 @@ def _authorship_exists(authorship):
     (artist_id, release_id) = authorship
     try:
         query_db(
-                'select * from authors where artist_id=? and release_id=?',
+                'select * from authorships where artist_id=? and release_id=?',
                 (artist_id, release_id)
             )
         return True
@@ -90,7 +90,7 @@ class Release(object):
                 query_db('select * from releases where id=?', (_id,))
 
         self.artists = lzmap(Artist, [a for (a,) in query_db(
-                'select artist_id from authors where release_id=?', (_id,))])
+                'select artist_id from authorships where release_id=?', (_id,))])
         self.tracks = lzmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
         self.reviews = lzmap(

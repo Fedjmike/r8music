@@ -23,8 +23,8 @@ create table release_mbid (
     foreign key(release_id) references releases(id)
 );
 
-drop table if exists authors;
-create table authors (
+drop table if exists authorships;
+create table authorships (
     release_id integer not null,
     artist_id integer not null,
     foreign key(release_id) references releases(id),
