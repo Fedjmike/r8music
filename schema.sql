@@ -57,18 +57,10 @@ create table users (
     pw_hash text not null
 );
 
-drop table if exists ratings;
-create table ratings (
+drop table if exists reviews;
+create table reviews (
     release_id integer not null,
     user_id integer not null,
-    rating integer not null,
+    rating integer,
     primary key (release_id, user_id)
-);
-
-drop table if exists rating_totals;
-create table rating_totals (
-    release_id integer not null,
-    'sum' integer not null,
-    frequency integer not null,
-    foreign key (release_id) references releases(id)
 );

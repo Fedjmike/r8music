@@ -1,12 +1,13 @@
 import os
+from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify
 from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from music_objects import Artist, Release, Track, User, NotFound, UserAlreadyExists
-from import_artist import import_artist
+from music_objects import Artist, Release, Track, Review, User, NotFound, UserAlreadyExists
+from mb_api_import import import_artist
 from db import connect_db, close_db, get_db, query_db
 
 app = Flask(__name__)
@@ -27,6 +28,23 @@ def init_db():
         db.commit()
         
     import_artist("DJ Okawari")
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return     test_url.scheme in ("http", "https") \
+           and ref_url.netloc == test_url.netloc
+
+def get_redirect_target():
+    for target in request.values.get("next"), request.referrer:
+        if not target:
+            continue
+            
+        if is_safe_url(target):
+            return target
+    
+def redirect_back():
+    return redirect(get_redirect_target())
 
 # 
 
@@ -103,61 +121,32 @@ def render_user(name):
 def change_rating(release_id, rating):
     user_id = get_user_id()
     #todo error if no user
-    
-    db = get_db()
-    
-    try:
-        db.execute("insert into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                   (release_id, user_id, rating))
-        #If the above didn't raise an error, the release wasn't already rated
-        db.execute("update rating_totals set frequency = frequency + 1, sum = sum + ? where release_id=?",
-                   (rating, release_id,))
 
-    #Rating already present, replace
-    except IntegrityError:
-        #todo transactions
-        ((old_rating,),) = query_db("select rating from ratings where release_id=? and user_id=?",
-                                    (release_id, user_id))
-        
-        db.execute("replace into ratings (release_id, user_id, rating) values (?, ?, ?)",
-                   (release_id, user_id, rating))
-        db.execute("update rating_totals set sum = sum + ? where release_id=?",
-                   (rating - old_rating, release_id))
-        
-    db.commit()
-    
-    ((sum, frequency,),) = query_db("select sum, frequency from rating_totals where release_id=?",
-                                    (release_id,))
-    
-    return jsonify(error=0, ratingSum=sum, ratingFrequency=frequency)
+    try:
+        review = Review(release_id, user_id)
+        review.set_rating(rating)
+
+    except NotFound:
+        review = Review.new_with_rating(release_id, user_id, rating)
+
+    rating_stats = Release(release_id).get_rating_stats()
+
+    return jsonify(error=0,
+                   ratingMean=rating_stats.mean,
+                   ratingFrequency=rating_stats.freq)
 
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 def remove_rating(release_id):
     user_id = get_user_id()
-    
-    db = get_db()
 
-    try:
-        ((old_rating,),) = query_db("select rating from ratings where release_id=? and user_id=?",
-                                    (release_id, user_id))
-    
-    #No rating present
-    except ValueError:
-        #TODO: User attempted to unrate something not rated. Should we just say
-        #it succeeded, so that their client gets updated to what is (and was
-        #already) the case?
-        return jsonify(error=1)
-        
-    db.execute("delete from ratings where release_id=? and user_id=?",
-               (release_id, user_id))
-    db.execute("update rating_totals set frequency = frequency - 1, sum = sum - ? where release_id=?",
-               (old_rating, release_id))
-    db.commit()
-    
-    ((sum, frequency,),) = query_db("select sum, frequency from rating_totals where release_id=?",
-                                    (release_id,))
-    
-    return jsonify(error=0, ratingSum=sum, ratingFrequency=frequency)
+    review = Review(release_id, user_id)
+    review.unset_rating()
+
+    rating_stats = Release(release_id).get_rating_stats()
+
+    return jsonify(error=0,
+                   ratingMean=rating_stats.mean,
+                   ratingFrequency=rating_stats.freq)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -184,8 +173,7 @@ def register():
             #Automatically log them in
             set_user(user.name, user._id)
             
-            #todo redirect to previous page
-            return redirect("/")
+            return redirect_back()
             
         except UserAlreadyExists:
             #error
@@ -208,8 +196,7 @@ def login():
             
             if User.pw_hash_matches(password, _id):
                 set_user(name, _id)
-                #todo redirect to previous page
-                return redirect("/")
+                return redirect_back()
                 
             else:
                 return "Incorrect password for %s" % name
@@ -223,7 +210,7 @@ def logout():
     #todo check logged in
 
     session["user"] = None
-    return redirect("/")
+    return redirect_back()
     
     
 # Nic messing around...

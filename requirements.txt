@@ -2,3 +2,4 @@ musicbrainzngs>=0.5
 arrow>=0.7
 unidecode>=0.4
 flask>=0.10
+Pillow>=3.0.0

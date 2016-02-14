@@ -1,20 +1,26 @@
-{% macro login_form() -%}
+{% macro login_form(standalone=False) -%}
     <form action="/login" method="post">
         <dl>
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
-            <dd><input type="submit" value="Login" /></dd>
+            <dd><input type="submit" value="Sign in" /></dd>
+            {% if standalone %}
+                <input type="hidden" name="next" value="{{ request.referrer }}">
+            {% endif %}
         </dl><br/>
     </form>
 {%- endmacro %}
 
-{% macro register_form() -%}
+{% macro register_form(standalone=False) -%}
     <form action="/register" method="post">
         <dl>
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
-            <dt>Verify password</dt> <dd><input type="password" name="verify-password" /></dd>
+            <dt>Confirm password</dt> <dd><input type="password" name="verify-password" /></dd>
             <dd><input type="submit" value="Register" /></dd>
+            {% if standalone %}
+                <input type="hidden" name="next" value="{{ request.referrer }}">
+            {% endif %}
         </dl><br/>
     </form>
 {%- endmacro %}
