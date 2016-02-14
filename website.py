@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify
 from werkzeug import generate_password_hash
@@ -27,6 +28,23 @@ def init_db():
         db.commit()
         
     import_artist("DJ Okawari")
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return     test_url.scheme in ("http", "https") \
+           and ref_url.netloc == test_url.netloc
+
+def get_redirect_target():
+    for target in request.values.get("next"), request.referrer:
+        if not target:
+            continue
+            
+        if is_safe_url(target):
+            return target
+    
+def redirect_back():
+    return redirect(get_redirect_target())
 
 # 
 
@@ -155,8 +173,7 @@ def register():
             #Automatically log them in
             set_user(user.name, user._id)
             
-            #todo redirect to previous page
-            return redirect("/")
+            return redirect_back()
             
         except UserAlreadyExists:
             #error
@@ -179,8 +196,7 @@ def login():
             
             if User.pw_hash_matches(password, _id):
                 set_user(name, _id)
-                #todo redirect to previous page
-                return redirect("/")
+                return redirect_back()
                 
             else:
                 return "Incorrect password for %s" % name
@@ -194,7 +210,7 @@ def logout():
     #todo check logged in
 
     session["user"] = None
-    return redirect("/")
+    return redirect_back()
     
     
 # Nic messing around...

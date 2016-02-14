@@ -4,6 +4,7 @@
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
             <dd><input type="submit" value="Login" /></dd>
+            <input type="hidden" name="next" value="{{ request.referrer }}">
         </dl><br/>
     </form>
 {%- endmacro %}
@@ -15,6 +16,7 @@
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
             <dt>Verify password</dt> <dd><input type="password" name="verify-password" /></dd>
             <dd><input type="submit" value="Register" /></dd>
+            <input type="hidden" name="next" value="{{ request.referrer }}">
         </dl><br/>
     </form>
 {%- endmacro %}
