@@ -17,16 +17,10 @@ def import_artist(gid):
     cur.execute("select id from artist where gid = %s", (gid,))
     (_id,) = cur.fetchone()
     print(_id)
-    cur.execute("select artist_credit from artist_credit_name where artist = %s", (_id,))
-    artist_credit_ids = [ac_id for (ac_id,) in cur.fetchall()]
-    print(artist_credit_ids)
-    release_group_ids = []
-    for artist_credit in artist_credit_ids:
-        cur.execute("select id from release_group where artist_credit = %s", (artist_credit,))
-        for (release_group_id,) in cur.fetchall():
-            release_group_ids.append(release_group_id)
+    cur.execute("select entity1 from l_artist_release_group where entity0 = %s", (_id,))
+    print(cur.fetchall())
+    release_group_ids = [id for (id,) in cur.fetchall()]
     print(release_group_ids)
-
 
 if __name__ == '__main__':
     gid = gid_from_name(sys.argv[1])
