@@ -31,7 +31,7 @@ def import_artist(gid):
         release_ids = [_id for (_id,) in cur.fetchall()]
         print(release_ids)
         for release_id in release_ids:
-            cur.execute("select * from release_country where release_id = %s", (release_id,))
+            cur.execute("select * from release_country where release = %s", (release_id,))
 
 
 if __name__ == '__main__':
