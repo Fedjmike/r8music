@@ -26,6 +26,12 @@ def import_artist(gid):
         for (release_group_id,) in cur.fetchall():
             release_group_ids.append(release_group_id)
     print(release_group_ids)
+    for release_group_id in release_group_ids:
+        cur.execute("select id from release where release_group = %s", (release_group_id,))
+        release_ids = [_id for (_id,) in cur.fetchall()]
+        print(release_ids)
+        for release_id in release_ids:
+            cur.execute("select * from release_country where release_id = %s", (release_id,))
 
 
 if __name__ == '__main__':
