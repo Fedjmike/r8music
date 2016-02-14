@@ -58,11 +58,13 @@ $(document).ready(function ($) {
         event.preventDefault();
         $(".popup-content:not(#login-popup)").toggle(false);
         $("#login-popup").toggle({duration: 100});
+        $("#login-popup [name='username']").focus()
     });
     
     $("a#register").click(function (event) {
         event.preventDefault();
         $(".popup-content:not(#register-popup)").toggle(false);
         $("#register-popup").toggle({duration: 100});
+        $("#register-popup [name='username']").focus()
     });
 });
