@@ -27,6 +27,7 @@ drop table if exists authorships;
 create table authorships (
     release_id integer not null,
     artist_id integer not null,
+    primary key (release_id, artist_id),
     foreign key(release_id) references releases(id),
     foreign key(artist_id) references artists(id)
 );
