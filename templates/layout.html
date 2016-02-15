@@ -47,8 +47,14 @@
         </ol>
         <ol class="nav right">
             {% if session.user %}
-                <li>Logged in as <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a></li>
-                <li><a href="/logout">log out</a></li>
+                <li>
+                    <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a>
+                    <a id="user-more" href="">&#9662;</a>
+                </li>
+                <li><a id="logout" href="/logout">log out</a></li>
+                <div class="small popup"><div class="popup-content" id="user-popup">
+                    <a class="right" id="logout" href="/logout">log out</a><br/>
+                </div></div>
             {% else %}
                 <li><a id="login" href="/login">sign in</a></li>
                 <li><a id="register" href="/register">register</a></li>

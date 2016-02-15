@@ -67,4 +67,13 @@ $(document).ready(function ($) {
         $("#register-popup").toggle({duration: 100});
         $("#register-popup [name='username']").focus()
     });
+    
+    $("#logout").parent().remove();
+    $("#user-more").show();
+    
+    $("#user-more").click(function (event) {
+        event.preventDefault();
+        $(".popup-content:not(#user-popup)").toggle(false);
+        $("#user-popup").toggle({duration: 100});
+    });
 });
