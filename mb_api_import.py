@@ -32,13 +32,18 @@ def avoid_collison(slug_candidate, cursor, table):
 def generate_slug(text, cursor, table):
     slug_candidate = import_tools.slugify(text)
     return avoid_collison(slug_candidate, cursor, table)
+    
+def get_canonical_url(url):
+    print(url, requests.get(url).url)
+    return requests.get(url).url
 
 def get_album_art_urls(release_group_id):
     print("Getting album art for release group " + release_group_id + "...")
     r = requests.get(album_art_base_url + release_group_id + '/')
     try:
-        return (r.json()['images'][0]['image'],
-                r.json()['images'][0]['thumbnails']['large'])
+        return (get_canonical_url(url) for url in
+                (r.json()['images'][0]['image'],
+                 r.json()['images'][0]['thumbnails']['large']))
     except ValueError:
         return None, None
 
