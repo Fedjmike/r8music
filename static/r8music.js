@@ -74,6 +74,6 @@ $(document).ready(function ($) {
     $("#user-more").click(function (event) {
         event.preventDefault();
         $(".popup-content:not(#user-popup)").toggle(false);
-        $("#user-popup").toggle({duration: 100});
+        $("#user-popup").toggle({duration: 50});
     });
 });
