@@ -1,33 +1,17 @@
 import musicbrainzngs
-import sqlite3, sys, os, re, json, requests, urllib.request
-import chromatography
+import sqlite3, sys, requests
 import arrow
-from unidecode import unidecode
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
-from colorsys import rgb_to_hsv
+import import_tools
+
+album_art_base_url = 'http://coverartarchive.org/release-group/'
 
 def query_db(db, query, args=(), one=False):
     """Queries the database and returns a list of dictionaries."""
     cur = db.execute(query, args)
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
-
-
-# From http://flask.pocoo.org/snippets/5/
-_punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
-
-album_art_base_url = 'http://coverartarchive.org/release-group/'
-
-def slugify(text, delim=u'-'):
-    """Generates an ASCII-only slug."""
-    result = []
-    for word in _punct_re.split(text.lower()):
-        result.extend(unidecode(word).split())
-    return delim.join(result).lower()
-
-def rgb_to_hex(rgb):
-    return '#%02x%02x%02x' % rgb
 
 def detect_collision(slug_candidate, cursor, table):
     cursor.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,))
@@ -46,7 +30,7 @@ def avoid_collison(slug_candidate, cursor, table):
         i += 1
 
 def generate_slug(text, cursor, table):
-    slug_candidate = slugify(text)
+    slug_candidate = import_tools.slugify(text)
     return avoid_collison(slug_candidate, cursor, table)
 
 def get_album_art_url(release_group_id):
@@ -56,24 +40,6 @@ def get_album_art_url(release_group_id):
         return r.json()['images'][0]['thumbnails']['large']
     except ValueError:
         return None
-
-def valid_pixel(pixel):
-    (h, s, v) = rgb_to_hsv(pixel[0]/255, pixel[1]/255, pixel[2]/255)
-    if s > 0.3 and v > 0.4 and v < 0.95:
-        return True
-    return False
-
-def get_palette(album_art_url):
-    print("Getting palette...")
-    try:
-        tempname, _ = urllib.request.urlretrieve(album_art_url)
-        c = chromatography.Chromatography(tempname)
-        palette = c.get_highlights(3, valid_pixel)
-        palette = sorted(palette, key=lambda p:rgb_to_hsv(p[0]/255, p[1]/255, p[2]/255)[2])
-        os.remove(tempname)
-        return [rgb_to_hex(color) for color in palette]
-    except (chromatography.ChromatographyException, OSError):
-        return [None, None, None]
 
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
@@ -104,13 +70,11 @@ def get_releases(mbid, processed_release_mbids):
         releases.append(release)
     return releases
 
-    # print(json.dumps(tracks, sort_keys=True, indent=4, separators=(',', ': ')))
-
 def get_release(release):
     release['album-art-url'] = get_album_art_url(release['group-id'])
 
     if release['album-art-url']:
-        release['palette'] = get_palette(release['album-art-url'])
+        release['palette'] = import_tools.get_palette(release['album-art-url'])
     else:
         release['palette'] = [None, None, None]
     print("Getting deets for release " + release['id'] + "...")
