@@ -46,6 +46,11 @@
             <li><a href="/users">users</a></li>
         </ol>
         <ol class="nav right">
+            <li>
+                <form action="/search" method="post">
+                    <input type="text" placeholder="Search r8music"/>
+                </form>
+            </li>
             {% if session.user %}
                 <li>
                     <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a>

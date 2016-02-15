@@ -98,6 +98,18 @@ ol.nav {
     top: 0.125em;
 }
 
+.nav form {
+    display: inline-block;
+    margin-right: 0.2em;
+    font-size: 0.8rem;
+}
+
+.nav form input[type="text"] {
+    width: 15em;
+    padding: 0.1em 0.3em 0.05em 0.3em;
+    font-size: inherit;
+}
+
 .nav #user-more {
     /*Relies on JS, enabled by JS*/
     display: none;
