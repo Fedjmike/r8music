@@ -3,7 +3,7 @@ from functools import partial as p
 from collections import namedtuple
 from db import query_db, get_db
 from werkzeug import check_password_hash, generate_password_hash
-
+from datetime import datetime
 
 # TODO: Make __init__s lazier.
 # TODO: Modify query_db so "[i for (i,) in." is unnecessary.
@@ -206,8 +206,9 @@ class User(object):
     def __init__(self, _id):
         try:
             ((self._id,
-              self.name),) = \
-                      query_db('select id, name from users where id=?', (_id,))
+              self.name,
+              self.creation),) = \
+                      query_db('select id, name, creation from users where id=?', (_id,))
         except ValueError:
             raise UserNotFound()
             
@@ -227,7 +228,7 @@ class User(object):
         return cls(cls.id_from_name(name))
 
     @classmethod
-    def register(cls, name, password):
+    def register(cls, name, password, email=None, fullname=None):
         """Try to add a new user to the database.
            Perhaps counterintuitively, for security hashing the password is
            delayed until this function. Better that you accidentally hash
@@ -238,8 +239,8 @@ class User(object):
             
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('insert into users (name, pw_hash) values (?, ?)',
-                       (name, generate_password_hash(password)))
+        cursor.execute('insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)',
+                       (name, generate_password_hash(password), email, fullname, datetime.now().isoformat()))
         db.commit()
                        
         return cls(cursor.lastrowid)

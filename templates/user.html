@@ -5,5 +5,7 @@
 {% block content %}
 <header><h1>User: {{ that_user.name }}</h1></header>
 
+<p>Joined <time>{{ that_user.creation }}</time></p>
+
 <p>{{ that_user.ratings }}</p>
 {% endblock %}

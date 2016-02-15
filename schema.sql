@@ -56,7 +56,10 @@ drop table if exists users;
 create table users (
     id integer primary key autoincrement,
     name text not null,
-    pw_hash text not null
+    pw_hash text not null,
+    email text,
+    fullname text,
+    creation text not null
 );
 
 drop table if exists reviews;

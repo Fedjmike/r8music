@@ -22,11 +22,10 @@ def init_db():
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
             
-        db.execute("insert into users (name, pw_hash) values (?, ?)",
-                   ("sam", generate_password_hash("1")))
-
         db.commit()
         
+    User.register("sam", "1", "sam.nipps@gmail.com")
+    
     import_artist("DJ Okawari")
 
 def is_safe_url(target):
@@ -160,6 +159,7 @@ def register():
         name = request.form["username"]
         password = request.form["password"]
         verify_password = request.form["verify-password"]
+        email = request.form["email"]
         
         if password != verify_password:
             return "LOL you typed your password wrong"
@@ -169,7 +169,10 @@ def register():
             return "Your username must be 4 characters or longer"
             
         try:
-            user = User.register(name, password)
+            if email == "":
+                email = None
+        
+            user = User.register(name, password, email)
             #Automatically log them in
             set_user(user.name, user._id)
             
