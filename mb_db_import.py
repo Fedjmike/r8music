@@ -33,7 +33,13 @@ def import_artist(gid):
     print(release_group_ids)
     release_ids = []
     for release_group_id in release_group_ids:
-        cur.execute("SELECT id FROM (SELECT id FROM release WHERE release_group = %s) r LEFT JOIN release_country c ON r.id = c.release ORDER BY date_year nulls last, date_month nulls last, date_day nulls last LIMIT 1", (release_group_id,))
+        cur.execute("SELECT id FROM ( \
+                        SELECT id FROM release WHERE release_group = %s r \
+                        LEFT JOIN release_country c ON r.id = c.release \
+                            ORDER BY date_year nulls last, \
+                                     date_month nulls last, \
+                                     date_day nulls last \
+                        ) LIMIT 1", (release_group_id,))
         release_ids.append(cur.fetchone()[0])
 
 if __name__ == '__main__':
