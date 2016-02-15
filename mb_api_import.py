@@ -1,3 +1,5 @@
+#/usr/bin/python3
+
 import musicbrainzngs
 import sqlite3, sys, requests
 import arrow
