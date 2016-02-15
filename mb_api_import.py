@@ -34,7 +34,6 @@ def generate_slug(text, cursor, table):
     return avoid_collison(slug_candidate, cursor, table)
     
 def get_canonical_url(url):
-    print(url, requests.get(url).url)
     return requests.get(url).url
 
 def get_album_art_urls(release_group_id):
