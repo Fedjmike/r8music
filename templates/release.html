@@ -8,7 +8,7 @@
 {% set accent_color_3 = release.colors[2] %}
 
 {% block content %}
-<section class="{% if release.album_art_url %} two columns {% endif %}">
+<section class="{% if release.thumb_art_url %} two columns {% endif %}">
 	<div class="album-main">
 		<header>
             <h1>
@@ -33,8 +33,8 @@
 	  
         {{ rating_widget(release, user.ratings[release._id] if user and release._id in user.ratings, None) }}
 	</div>
-    {% if release.album_art_url %}
-        <img class="album-cover" src="{{ release.album_art_url }}"/>
+    {% if release.thumb_art_url %}
+        <a href="{{ release.full_art_url }}"><img class="album-cover" src="{{ release.thumb_art_url }}"/></a>
     {% endif %}
 </section>
 

@@ -13,7 +13,8 @@ create table releases (
     slug text not null,
     'date' text not null,
     type text not null,
-    album_art_url text
+    full_art_url text,
+    thumb_art_url text
 );
 
 drop table if exists release_mbid;

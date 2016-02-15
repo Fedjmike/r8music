@@ -33,13 +33,14 @@ def generate_slug(text, cursor, table):
     slug_candidate = import_tools.slugify(text)
     return avoid_collison(slug_candidate, cursor, table)
 
-def get_album_art_url(release_group_id):
+def get_album_art_urls(release_group_id):
     print("Getting album art for release group " + release_group_id + "...")
     r = requests.get(album_art_base_url + release_group_id + '/')
     try:
-        return r.json()['images'][0]['thumbnails']['large']
+        return (r.json()['images'][0]['image'],
+                r.json()['images'][0]['thumbnails']['large'])
     except ValueError:
-        return None
+        return None, None
 
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
@@ -71,10 +72,11 @@ def get_releases(mbid, processed_release_mbids):
     return releases
 
 def get_release(release):
-    release['album-art-url'] = get_album_art_url(release['group-id'])
+    release['full-art-url'], release['thumb-art-url'] \
+        = get_album_art_urls(release['group-id'])
 
-    if release['album-art-url']:
-        release['palette'] = import_tools.get_palette(release['album-art-url'])
+    if release['thumb-art-url']:
+        release['palette'] = import_tools.get_palette(release['thumb-art-url'])
     else:
         release['palette'] = [None, None, None]
     print("Getting deets for release " + release['id'] + "...")
@@ -126,12 +128,13 @@ def import_artist(artist_name):
 
     for release in releases:
         cursor.execute(
-            "insert into releases (title, slug, date, type, album_art_url) values (?, ?, ?, ?, ?)",
+            "insert into releases (title, slug, date, type, full_art_url, thumb_art_url) values (?, ?, ?, ?, ?, ?)",
             (release['title'],
              generate_slug(release['title'], cursor, 'releases'),
              release['date'],
              release['type'],
-             release['album-art-url'])
+             release['full-art-url'],
+             release['thumb-art-url'])
         )
         release['local-id'] = cursor.lastrowid
 

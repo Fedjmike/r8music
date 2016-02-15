@@ -86,7 +86,8 @@ class Release(object):
           self.slug,
           self.date,
           self.reltype,
-          self.album_art_url),) = \
+          self.full_art_url,
+          self.thumb_art_url),) = \
                 query_db('select * from releases where id=?', (_id,))
 
         self.artists = lzmap(Artist, [a for (a,) in query_db(
