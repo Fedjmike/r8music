@@ -15,7 +15,18 @@ html {
 	font-weight: 300;
     text-rendering: optimizeLegibility;
     overflow-y: scroll;
-    background-color: #eee;
+    background: repeating-linear-gradient(
+        45deg,
+        #e8e8e8,
+        #e8e8e8 3px,
+        #eaeaea 3px,
+        #eaeaea 6px
+    );
+}
+
+.page {
+    background: #fafafa;
+    box-shadow: 0 0 3em 0.5em rgba(0,0,0, 0.1);
 }
 
 header, p, ol, ul {
@@ -368,7 +379,6 @@ input[type="submit"]:active {
 /*Layout*/
 
 .page {
-    background: rgba(255, 255, 255, 0.6);
     padding: 0 1.5em 3em 1.5em;
 }
 
