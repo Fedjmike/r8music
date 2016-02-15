@@ -98,7 +98,7 @@ ol.nav {
     top: 0.125em;
 }
 
-.nav form {
+form.small {
     display: inline-block;
     margin-right: 0.2em;
     font-size: 0.8rem;
