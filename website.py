@@ -48,8 +48,8 @@ def redirect_back():
 # 
 
 @app.errorhandler(404)
-def page_not_found(e):
-    return render_template("404.html"), 404
+def page_not_found(what=None):
+    return render_template("404.html", what=what), 404
 
 @app.route("/")
 def render_homepage():
@@ -88,7 +88,7 @@ def render_release(artist_slug, release_slug):
         return render_template("release.html", release=release, user=user)
         
     except NotFound:
-        return page_not_found("/%s/%s" % (artist_slug, release_slug))
+        return page_not_found("release")
 
 @app.route("/<slug>/")
 def render_artist(slug):
@@ -104,7 +104,7 @@ def render_artist(slug):
         return render_template("artist.html", artist=artist, user=user)
         
     except NotFound:
-        return page_not_found("/%s/" % (slug,))
+        return page_not_found()
 
 @app.route("/user/<name>")
 def render_user(name):
@@ -114,7 +114,7 @@ def render_user(name):
         return render_template("user.html", that_user=that_user, user=user)
         
     except NotFound:
-        return page_not_found("/%s/" % (name,))
+        return page_not_found("user")
 
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 def change_rating(release_id, rating):
