@@ -19,21 +19,21 @@ def gid_from_name(artist_name):
 def import_artist(gid):
     mb_db = psycopg2.connect(user=user, database=database, password=password)
     cur = mb_db.cursor()
-    cur.execute("select id from artist where gid = %s", (gid,))
+    cur.execute("SELECT id FROM artist WHERE gid = %s", (gid,))
     (_id,) = cur.fetchone()
     print(_id)
-    cur.execute("select artist_credit from artist_credit_name where artist = %s", (_id,))
+    cur.execute("SELECT artist_credit FROM artist_credit_name WHERE artist = %s", (_id,))
     artist_credit_ids = [ac_id for (ac_id,) in cur.fetchall()]
     print(artist_credit_ids)
     release_group_ids = []
     for artist_credit in artist_credit_ids:
-        cur.execute("select id from release_group where artist_credit = %s", (artist_credit,))
+        cur.execute("SELECT id FROM release_group WHERE artist_credit = %s", (artist_credit,))
         for (release_group_id,) in cur.fetchall():
             release_group_ids.append(release_group_id)
     print(release_group_ids)
     release_ids = []
     for release_group_id in release_group_ids:
-        cur.execute("select id from (select id from release where release_group = %s) r left join release_country c on r.id = c.release order by date_year nulls last, date_month nulls last, date_day nulls last limit 1", (release_group_id,))
+        cur.execute("SELECT id FROM (SELECT id FROM release WHERE release_group = %s) r LEFT JOIN release_country c ON r.id = c.release ORDER BY date_year nulls last, date_month nulls last, date_day nulls last LIMIT 1", (release_group_id,))
         release_ids.append(cur.fetchone()[0])
 
 if __name__ == '__main__':
