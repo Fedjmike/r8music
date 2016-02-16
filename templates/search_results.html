@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}Search results {{ super() }}{% endblock %}
+
+{% block content %}
+<section>
+	<header><h1>{{ search.query }} &mdash; Search results</h1></header>
+	
+    {% if not search.results %}
+        <p>No matches!</p>
+    {% else %}
+        <ol class="search-results">
+        {% for result in search.results %}
+            <li>
+                <a href="TODO narrow to this type">{{ result.type }}</a>:
+                <a href="{{ result.url }}">{{ result.name }}</a>
+            </li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+</section>
+{% endblock %}
