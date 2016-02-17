@@ -248,6 +248,8 @@ ol:not(.small).rating {
 
 .releases.grid > li img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .tracks time {
