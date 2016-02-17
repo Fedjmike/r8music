@@ -440,7 +440,7 @@ section {
 }
 
 /*Large screen*/
-@media only screen and (min-width: 1000px) {
+@media only screen and (min-height: 900px) {
     html {
         font-size: 13pt;
     }
