@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}404 - {{ what if what else 'Page' }} not found {{ super() }}{% endblock %}
+{% block title %}404 - {{ what.capitalize() if what else 'Page' }} not found {{ super() }}{% endblock %}
 
 {% block content %}
 <header>

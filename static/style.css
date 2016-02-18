@@ -391,7 +391,7 @@ input[type="submit"]:active {
     position: relative;
     top: 0.5em;
     left: 0.5em;
-    z-order: 999;
+    z-index: 999;
     font-size: 1rem;
 }
 

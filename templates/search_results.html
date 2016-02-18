@@ -1,10 +1,13 @@
-{% extends "layout.html" %}
+﻿{% extends "layout.html" %}
 
 {% block title %}Search results {{ super() }}{% endblock %}
 
 {% block content %}
 <section>
-	<header><h1>{{ search.query }} &mdash; Search results</h1></header>
+	<header>
+        <h1>&lsquo;{{ search.query }}&rsquo;</h1>
+        <h3>Search results</h3>
+    </header>
 	
     {% if not search.results %}
         <p>No matches!</p>
