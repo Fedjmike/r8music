@@ -8,7 +8,7 @@
 	<meta http-equiv="content-language" content="en-gb" />
 
 	<link rel="stylesheet" type="text/css" href="/static/style.css" />
-	<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Signika:400,300' />
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Signika:400,300" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     
     <link rel="shortcut icon" href="/static/favicon.png" />
@@ -57,13 +57,13 @@
         <ol class="nav right">
             <li>
                 <form action="/search" method="post" class="small">
-                    <input type="text" name="query" placeholder="Search r8music"/>
+                    <input type="text" name="query" placeholder="Search r8music" />
                     <input type="submit" class="material-icons" value="search"><i></i>
                 </form>
             </li>
             {% if session.user %}
                 <li>
-                    <a href={{ url_for("user_page", slug=session.user.name) }}">{{ session.user.name }}</a>
+                    <a href={{ url_for("user_page", slug=session.user.name) }}>{{ session.user.name }}</a>
                     <a id="user-more" href="">&#9662;</a>
                 </li>
                 <li><a id="logout" href={{ url_for("logout") }}>log out</a></li>
