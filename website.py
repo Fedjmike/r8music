@@ -68,7 +68,6 @@ def render_users_index():
 @app.route("/search", methods=["POST"])
 def search_post():
     query = request.form["query"]
-    #todo HTTP encode the query string
     #Redirect to a GET with the query in the path
     return redirect(url_for("render_search", query=query))
 
