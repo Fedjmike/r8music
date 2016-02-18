@@ -56,7 +56,8 @@
         <ol class="nav right">
             <li>
                 <form action="/search" method="post" class="small">
-                    <input type="text" name="query" placeholder="Search r8music" />
+                    <input type="text" name="query" placeholder="Search r8music"
+                           {% if search_query %}value="{{ search_query }}" {% endif %} />
                     <input type="submit" class="material-icons" value="search"><i></i>
                 </form>
             </li>
