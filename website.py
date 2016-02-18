@@ -52,16 +52,16 @@ def page_not_found(what=None):
     return render_template("404.html", what=what), 404
 
 @app.route("/")
-def render_homepage():
+def homepage():
     return render_template("layout.html")
 
 @app.route("/artists")
-def render_artists_index():
+def artists_index():
     artists = query_db("select * from artists")
     return render_template("artists_index.html", artists=artists)
 
 @app.route("/users")
-def render_users_index():
+def users_index():
     users = query_db("select name from users")
     return render_template("users_index.html", users=users)
 
@@ -69,10 +69,10 @@ def render_users_index():
 def search_post():
     query = request.form["query"]
     #Redirect to a GET with the query in the path
-    return redirect(url_for("render_search", query=query))
+    return redirect(url_for("search_results", query=query))
 
 @app.route("/search/<query>", methods=["GET"])
-def render_search(query=None):
+def search_results(query=None):
     return render_template("search_results.html", search={"query": query, "results": []})
 
 def get_user_id():
@@ -93,7 +93,7 @@ def set_user(name, _id):
     session["user"] = {"name": name, "id": _id}
 
 @app.route("/<artist_slug>/<release_slug>")
-def render_release(artist_slug, release_slug):
+def release_page(artist_slug, release_slug):
     try:
         user = get_user()
         release = Release.from_slugs(artist_slug, release_slug)
@@ -103,7 +103,7 @@ def render_release(artist_slug, release_slug):
         return page_not_found("release")
 
 #Routing is done later because /<slug>/ would override other routes
-def render_artist(slug):
+def artist_page(slug):
     try:
         user = get_user()
         artist = Artist.from_slug(slug)
@@ -112,11 +112,11 @@ def render_artist(slug):
     except NotFound:
         return page_not_found()
 
-@app.route("/user/<name>")
-def render_user(name):
+@app.route("/user/<slug>")
+def user_page(slug):
     try:
         user = get_user()
-        that_user = User.from_name(name)
+        that_user = User.from_name(slug)
         return render_template("user.html", that_user=that_user, user=user)
         
     except NotFound:
@@ -245,5 +245,5 @@ def release_dom_from_id(artist_id, release_id):
 
 if __name__ == "__main__":
     #init_db()
-    app.add_url_rule("/<slug>/", view_func=render_artist)
+    app.add_url_rule("/<slug>/", view_func=artist_page)
     app.run(debug=True)

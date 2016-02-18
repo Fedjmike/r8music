@@ -10,7 +10,7 @@
     <ol class="releases">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            <h2><time>{{ release.date[:4] }}</time> <a href="{{ release.slug }}">{{ release.title }}</a></h2>
+            <h2><time>{{ release.date[:4] }}</time> <a href={{ url_for("release_page", release_slug=release.slug, artist_slug=release.artists[0].slug) }}>{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>

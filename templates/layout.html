@@ -40,10 +40,10 @@
 	<div class="page">
         <ol class="nav">
             <li><a href="/" class="banner">r8music</a></li>
-            <li><a href="/artists">artists</a></li>
-            <li><a href="/genres">genres</a></li>
-            <li><a href="/toplists">toplists</a></li>
-            <li><a href="/users">users</a></li>
+            <li><a href={{ url_for("artists_index") }}>artists</a></li>
+            <li><a href="#">genres</a></li>
+            <li><a href="#">toplists</a></li>
+            <li><a href={{ url_for("users_index") }}>users</a></li>
         </ol>
         <ol class="nav right">
             <li>
@@ -53,16 +53,16 @@
             </li>
             {% if session.user %}
                 <li>
-                    <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a>
+                    <a href={{ url_for("user_page", slug=session.user.name) }}">{{ session.user.name }}</a>
                     <a id="user-more" href="">&#9662;</a>
                 </li>
-                <li><a id="logout" href="/logout">log out</a></li>
+                <li><a id="logout" href={{ url_for("logout") }}>log out</a></li>
                 <div class="small popup"><div class="popup-content" id="user-popup">
-                    <a class="right" id="logout" href="/logout">log out</a><br/>
+                    <a class="right" id="logout" href={{ url_for("logout") }}>log out</a><br/>
                 </div></div>
             {% else %}
-                <li><a id="login" href="/login">sign in</a></li>
-                <li><a id="register" href="/register">register</a></li>
+                <li><a id="login" href={{ url_for("login") }}>sign in</a></li>
+                <li><a id="register" href={{ url_for("register") }}>register</a></li>
                 {% from "forms.html" import login_form, register_form %}
                 <div class="popup"><div class="popup-content" id="login-popup">{{ login_form() }}</div></div>
                 <div class="popup"><div class="popup-content" id="register-popup">{{ register_form() }}</div></div>

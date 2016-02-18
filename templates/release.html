@@ -19,7 +19,7 @@
             </h1>
 			<h2 class="byline">
             {% for artist in release.artists %}
-                <span class="author"><a href="/{{ artist.slug }}/">{{ artist.name }}</a></span>
+                <span class="author"><a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a></span>
             {% endfor %}
                 <time>{{ release.date[:4] }}</time>
             </h2>

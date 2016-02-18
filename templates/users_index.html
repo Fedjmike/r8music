@@ -7,7 +7,7 @@
 
 <ol>
 {% for user in users %}
-    <li><a href="/user/{{ user.name }}">{{ user.name }}</a></li>
+    <li><a href={{ url_for("user_page", slug=user.name ) }}>{{ user.name }}</a></li>
 {% endfor %}
 </ol>
 {% endblock %}
