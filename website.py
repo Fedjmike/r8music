@@ -220,6 +220,10 @@ def logout():
 
     session["user"] = None
     return redirect_back()
+
+@app.route("/recover-password")
+def recover_password():
+    pass
     
     
 # Nic messing around...

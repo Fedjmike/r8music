@@ -4,10 +4,11 @@
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
             <dd><input type="submit" value="Sign in" /></dd>
+            <a href={{ url_for("recover_password") }}>Recover password</a>
             {% if standalone %}
                 <input type="hidden" name="next" value="{{ request.referrer }}">
             {% endif %}
-        </dl><br/>
+        </dl>
     </form>
 {%- endmacro %}
 
@@ -22,7 +23,6 @@
             {% if standalone %}
                 <input type="hidden" name="next" value="{{ request.referrer }}">
             {% endif %}
-            <!-- TODO recover password -->
         </dl><br/>
     </form>
 {%- endmacro %}
