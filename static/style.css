@@ -107,6 +107,32 @@ form.small input[type="text"] {
     width: 15em;
     padding: 0.1em 0.3em 0.05em 0.3em;
     font-size: inherit;
+    
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+form.small input[type="submit"] {
+    box-shadow: none;
+    background: white;
+    color: rgba(0,0,0,0.2);
+    border: 2px solid rgba(0,0,0, 0.15);
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+form.small input:focus ~ input[type="submit"],
+form.small input[type="submit"]:active {
+    border: 2px solid rgba(0,0,0,0);
+    background-color: #4078c0;
+}
+
+form.small input[type="submit"].material-icons {
+    font-size: 1.35em;
+    width: 1.4em;
+    padding: 0.05em 0;
 }
 
 .nav #user-more {

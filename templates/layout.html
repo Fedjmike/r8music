@@ -9,6 +9,7 @@
 
 	<link rel="stylesheet" type="text/css" href="/static/style.css" />
 	<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Signika:400,300' />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     
     <link rel="shortcut icon" href="/static/favicon.png" />
 
@@ -22,9 +23,17 @@
     }
     
     input[type="text"]:focus,
-    input[type="password"]:focus {
+    input[type="password"]:focus,
+    form.small input:focus ~ input[type="submit"] {
         border-color: {{ accent_color_1 }};
     }
+    
+    form.small input:focus ~ input[type="submit"],
+    form.small input[type="submit"]:active {
+        background-color: {{ accent_color_1 }};
+        color: white;
+    }
+    
     {% endif %}
 
     {% if accent_color_2 %}
@@ -49,6 +58,7 @@
             <li>
                 <form action="/search" method="post" class="small">
                     <input type="text" name="query" placeholder="Search r8music"/>
+                    <input type="submit" class="material-icons" value="search"><i></i>
                 </form>
             </li>
             {% if session.user %}
