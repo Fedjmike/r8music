@@ -55,10 +55,12 @@ def page_not_found(what=None):
 def render_homepage():
     return render_template("layout.html")
 
+@app.route("/artists")
 def render_artists_index():
     artists = query_db("select * from artists")
     return render_template("artists_index.html", artists=artists)
 
+@app.route("/users")
 def render_users_index():
     users = query_db("select name from users")
     return render_template("users_index.html", users=users)
@@ -90,14 +92,8 @@ def render_release(artist_slug, release_slug):
     except NotFound:
         return page_not_found("release")
 
-@app.route("/<slug>/")
+#Routing is done later because /<slug>/ would override other routes
 def render_artist(slug):
-    if slug == "artists":
-        return render_artists_index()
-        
-    elif slug == "users":
-        return render_users_index()
-
     try:
         user = get_user()
         artist = Artist.from_slug(slug)
@@ -239,4 +235,5 @@ def release_dom_from_id(artist_id, release_id):
 
 if __name__ == "__main__":
     #init_db()
+    app.add_url_rule("/<slug>/", view_func=render_artist)
     app.run(debug=True)
