@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse, urljoin
 
-from flask import Flask, render_template, g, request, session, redirect, jsonify
+from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
@@ -64,6 +64,17 @@ def render_artists_index():
 def render_users_index():
     users = query_db("select name from users")
     return render_template("users_index.html", users=users)
+
+@app.route("/search", methods=["POST"])
+def search_post():
+    query = request.form["query"]
+    #todo HTTP encode the query string
+    #Redirect to a GET with the query in the path
+    return redirect(url_for("render_search", query=query))
+
+@app.route("/search/<query>", methods=["GET"])
+def render_search(query=None):
+    return render_template("search_results.html", search={"query": query, "results": []})
 
 def get_user_id():
     try:
