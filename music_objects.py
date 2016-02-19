@@ -102,14 +102,7 @@ class Release(object):
         # This will read better once the "[u for (u,) in" has gone.
         
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
-
-        # try:
-        #     ((rating_sum, self.rating_frequency),) = \
-        #             query_db('select sum, frequency from rating_totals where release_id=?', (self._id,))
-        #     self.average_rating = rating_sum / self.rating_frequency
-        # except (ValueError, ZeroDivisionError):
-        #     self.average_rating = None
-
+        
     def get_rating_stats(self):
         # This method is directly applicable to Users, also.
         ratings = [r.rating for r in self.ratings if r.rating is not None]
