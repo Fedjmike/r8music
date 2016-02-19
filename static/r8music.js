@@ -76,4 +76,10 @@ $(document).ready(function ($) {
         $(".popup-content:not(#user-popup)").toggle(false);
         $("#user-popup").toggle({duration: 50});
     });
+    
+    $("form#search input[type='submit']").click(function (event) {
+        /*Cancel the click if the search query is empty*/
+        if ($("form#search [name='query']").val() == "")
+            event.preventDefault();
+    });
 });
