@@ -5,7 +5,7 @@ function updateAverageRating(msg) {
     else {
         $("#average-rating-section").css("display", "inline");
         $("#rating-frequency").text(msg.ratingFrequency);
-        $("#average-rating").text(msg.ratingMean.toFixed(1));
+        $("#average-rating").text(msg.ratingAverage.toFixed(1));
         $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
     }
 }

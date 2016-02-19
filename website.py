@@ -146,8 +146,8 @@ def change_rating(release_id, rating):
     rating_stats = Release(release_id).get_rating_stats()
 
     return jsonify(error=0,
-                   ratingMean=rating_stats.mean,
-                   ratingFrequency=rating_stats.freq)
+                   ratingAverage=rating_stats.average,
+                   ratingFrequency=rating_stats.frequency)
 
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 def remove_rating(release_id):
@@ -158,8 +158,8 @@ def remove_rating(release_id):
     rating_stats = Release(release_id).get_rating_stats()
 
     return jsonify(error=0,
-                   ratingMean=rating_stats.mean,
-                   ratingFrequency=rating_stats.freq)
+                   ratingAverage=rating_stats.average,
+                   ratingFrequency=rating_stats.frequency)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

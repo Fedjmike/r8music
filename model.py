@@ -76,7 +76,7 @@ def _authorship_exists(authorship):
         return False
 
 
-RatingStats = namedtuple('RatingStats', ['mean', 'freq'])
+RatingStats = namedtuple('RatingStats', ['average', 'frequency'])
 
 
 class Release(object):
@@ -105,13 +105,13 @@ class Release(object):
         
     def get_rating_stats(self):
         # This method is directly applicable to Users, also.
-        ratings = [r.rating for r in self.ratings if r.rating is not None]
-        sum_ratings, n_ratings = sum(ratings), len(ratings)
         try:
-            mean_rating = sum_ratings/n_ratings
-            return RatingStats(mean=mean_rating, freq=n_ratings)
+            frequency = len(self.ratings)
+            average = sum(self.ratings) / frequency
+            return RatingStats(average=average, frequency=frequency)
+            
         except ZeroDivisionError:
-            return RatingStats(mean=None, freq=0)
+            return RatingStats(average=None, frequency=0)
 
     @classmethod
     def from_slugs(cls, artist_slug, release_slug):
