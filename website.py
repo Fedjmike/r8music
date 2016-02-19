@@ -6,7 +6,7 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from music_objects import Artist, Release, Track, Review, User, NotFound, UserAlreadyExists
+from music_objects import Artist, Release, Track, Rating, User, NotFound, UserAlreadyExists
 from mb_api_import import import_artist
 from db import connect_db, close_db, get_db, query_db
 
@@ -127,12 +127,7 @@ def change_rating(release_id, rating):
     user_id = get_user_id()
     #todo error if no user
 
-    try:
-        review = Review(release_id, user_id)
-        review.set_rating(rating)
-
-    except NotFound:
-        review = Review.new_with_rating(release_id, user_id, rating)
+    Rating.set_rating(release_id, user_id, rating)
 
     rating_stats = Release(release_id).get_rating_stats()
 
@@ -144,8 +139,7 @@ def change_rating(release_id, rating):
 def remove_rating(release_id):
     user_id = get_user_id()
 
-    review = Review(release_id, user_id)
-    review.unset_rating()
+    Rating.unset_rating(release_id, user_id)
 
     rating_stats = Release(release_id).get_rating_stats()
 

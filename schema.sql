@@ -62,10 +62,10 @@ create table users (
     creation text not null
 );
 
-drop table if exists reviews;
-create table reviews (
+drop table if exists ratings;
+create table ratings (
     release_id integer not null,
     user_id integer not null,
-    rating integer,
+    rating integer not null,
     primary key (release_id, user_id)
 );

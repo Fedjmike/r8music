@@ -94,11 +94,11 @@ class Release(object):
                 'select artist_id from authorships where release_id=?', (_id,))])
         self.tracks = lzmap(p(Track, self), [t for (t,) in query_db(
                 'select id from tracks where release_id=?', (self._id,))])
-        self.reviews = lzmap(
-                p(Review, self._id), [u for (u,) in query_db(
-                'select user_id from reviews where release_id=?', (self._id,))])
-        # "lzmap(User, ..." is just a lazy list of Users, so self.reviews is
-        # "[a] Review [of my]self [for each] User [who reviewed me]".
+        self.ratings = lzmap(
+                p(Rating, self._id), [u for (u,) in query_db(
+                'select user_id from ratings where release_id=?', (self._id,))])
+        # "lzmap(User, ..." is just a lazy list of Users, so self.ratings is
+        # "[a] Rating [of my]self [for each] User [who reviewed me]".
         # This will read better once the "[u for (u,) in" has gone.
         
         (self.colors, ) = query_db('select color1, color2, color3 from release_colors where release_id=?', (_id,))
@@ -112,7 +112,7 @@ class Release(object):
 
     def get_rating_stats(self):
         # This method is directly applicable to Users, also.
-        ratings = [r.rating for r in self.reviews if r.rating is not None]
+        ratings = [r.rating for r in self.ratings if r.rating is not None]
         sum_ratings, n_ratings = sum(ratings), len(ratings)
         try:
             mean_rating = sum_ratings/n_ratings
@@ -154,52 +154,35 @@ class Track(object):
         return self.title
 
 
-class Review(object):
+class Rating(object):
     def __init__(self, release_id, user_id):
         try:
             self.release = Release(release_id)
             self.user = User(user_id)
             ((self.rating,),) = query_db(
-                    'select rating from reviews '
-                    +'where release_id=? and user_id=?',
+                    'select rating from ratings '
+                    'where release_id=? and user_id=?',
                     (self.release._id, self.user._id))
         except ValueError:
             raise ReviewNotFound()
 
-    @classmethod
-    def new(cls, release_id, user_id):
+    @staticmethod
+    def set_rating(release_id, user_id, rating):
         db = get_db()
         db.execute(
-                'insert into reviews (release_id, user_id, rating) '
-                +'values (?, ?, NULL)',
-                (release_id, user_id))
+                'replace into ratings (release_id, user_id, rating) '
+                'values (?, ?, ?)',
+                (release_id, user_id, rating))
         db.commit()
-        return cls(release_id, user_id)
 
-    @classmethod
-    def new_with_rating(cls, release_id, user_id, rating):
-        self = cls.new(release_id, user_id)
-        self.set_rating(rating)
-        return self
-
-    def set_rating(self, rating):
-        db = get_db()
-        db.execute(
-                'replace into reviews (release_id, user_id, rating) '
-                +'values (?, ?, ?)',
-                (self.release._id, self.user._id, rating))
-        db.commit()
-        self.__init__(self.release._id, self.user._id)  # Refresh.
-
-    def unset_rating(self):
+    @staticmethod
+    def unset_rating(release_id, user_id):
         db = get_db()
         # TODO: Error if no rating present?
         db.execute(
-                'replace into reviews (release_id, user_id, rating) '
-                +'values (?, ?, NULL)',
-                (self.release._id, self.user._id))
+                'delete from ratings where release_id=? and user_id=?',
+                (release_id, user_id))
         db.commit()
-        self.__init__(self.release._id, self.user._id)
 
 
 class User(object):
@@ -212,8 +195,8 @@ class User(object):
         except ValueError:
             raise UserNotFound()
             
-        # TODO: Use Reviews.
-        self.ratings = dict(query_db('select release_id, rating from reviews where reviews.user_id=?', (_id,)))
+        # TODO: Use Ratings.
+        self.ratings = dict(query_db('select release_id, rating from ratings where ratings.user_id=?', (_id,)))
 
     @staticmethod
     def id_from_name(name):
