@@ -15,7 +15,7 @@ RatingStats = namedtuple("RatingStats", ["average", "frequency"])
 Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases"])
 Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
 Track = namedtuple("Track", ["title", "runtime"])
-User = namedtuple("User", ["id", "name", "creation", "ratings"])
+User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
 
 def now_isoformat():
     from datetime import datetime
@@ -90,6 +90,17 @@ class Model:
                        " join releases on releases.id = release_id", artist_id)
         ]
         
+    def get_releases_rated_by_user(self, user_id, rating=None):
+        """Get all the releases rated by a user, and only those rated
+           a certain value, if given"""
+        return [
+            self._make_release(row) for row in
+            self.query("select id, title, slug, date, type, full_art_url, thumb_art_url from"
+                       " (select release_id from ratings where user_id=?"
+                       + (" and rating=?)" if rating else ")") +
+                       " join releases on releases.id = release_id", user_id, rating)
+        ]
+        
     def get_release(self, artist_slug, release_slug):
         return self._make_release(
             self.query_unique("select releases.id, title, releases.slug, date, type, full_art_url, thumb_art_url from"
@@ -134,6 +145,11 @@ class Model:
 
     #User
     
+    def _make_user(self, _id, name, creation, ratings):
+        return User(_id, name, creation, ratings,
+            get_releases_rated=lambda rating=None: self.get_releases_rated_by_user(_id, rating)
+        )
+    
     def get_user(self, user):
         """Get user by id or by slug"""
         
@@ -144,7 +160,7 @@ class Model:
         ratings = dict(self.query("select release_id, rating from ratings"
                                   " where ratings.user_id=?", user_id))
                                 
-        return User(user_id, name, creation, ratings)
+        return self._make_user(user_id, name, creation, ratings)
         
     def register_user(self, name, password, email=None, fullname=None):
         """Try to add a new user to the database.
@@ -159,7 +175,7 @@ class Model:
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
                               name, generate_password_hash(password), email, fullname, creation)
                        
-        return User(user_id, name, creation, {})
+        return self._make_user(user_id, name, creation, {})
     
     def user_pw_hash_matches(self, given_password, user_slug):
         """For security, the hash is never stored anywhere except the databse.

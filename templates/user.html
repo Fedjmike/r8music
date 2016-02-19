@@ -1,11 +1,24 @@
 {% extends "layout.html" %}
+{% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}User '{{ that_user.name }}' {{ super() }}{% endblock %}
 
 {% block content %}
 <header><h1>User: {{ that_user.name }}</h1></header>
 
-<p>Joined <time>{{ that_user.creation }}</time></p>
+<p>
+    Joined <time>{{ that_user.creation }}</time><br/>
+    {% set rated_no = that_user.ratings | length %}
+    Rated {{ rated_no }} release{{ 's' if rated_no != 1 else '' }}
+</p>
 
-<p>{{ that_user.ratings }}</p>
+{% for n in range(8, 0, -1) %}
+    {% set rated_n = that_user.get_releases_rated(n) | list %}
+    {% if rated_n %}
+    <h2>{{ n }}</h2>
+        <!-- TODO show own ratings? confusing? -->
+        {{ release_grid(rated_n, user) }}
+    {% endif %}
+{% endfor %}
+
 {% endblock %}
