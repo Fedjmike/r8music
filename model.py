@@ -51,7 +51,7 @@ class Model:
         
     def _make_artist(self, row):
         #Always need to know the releases, might as well get them eagerly
-        return Artist(*row, releases=self.get_artist_releases(row["id"]))
+        return Artist(*row, releases=self.get_releases_by_artist(row["id"]))
         
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
@@ -82,12 +82,12 @@ class Model:
             get_rating_stats=lambda: self.get_release_rating_stats(release_id)
         )
         
-    def get_artist_releases(self, artist_id):
+    def get_releases_by_artist(self, artist_id):
         return [
             self._make_release(row) for row in
             self.query("select id, title, slug, date, type, full_art_url, thumb_art_url from"
-                       " ((select release_id from authorships where artist_id=?)"
-                       " join releases on releases.id = release_id)", artist_id)
+                       " (select release_id from authorships where artist_id=?)"
+                       " join releases on releases.id = release_id", artist_id)
         ]
         
     def get_release(self, artist_slug, release_slug):
