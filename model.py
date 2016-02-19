@@ -42,7 +42,7 @@ class ReviewNotFound(NotFound):
 class UserNotFound(NotFound):
     pass
     
-class UserAlreadyExists(NotFound):
+class UserAlreadyExists(Exception):
     pass
 
 
