@@ -27,7 +27,10 @@
 		
 		<ol class="tracks">
         {% for track in release.tracks | sort(attribute="position") %}
-			<li>{{ track.title }} <time>{{ track.runtime_string }}</time></li>
+			<li>
+                {{ track.title }}
+                {% if track.runtime %} <time>{{ track.runtime_string }}</time> {% endif %}
+            </li>
         {% endfor %}
 		</ol>
 	  

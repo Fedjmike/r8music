@@ -147,8 +147,6 @@ class Track(object):
                   query_db('select * from tracks where id=?', (_id,))
         if self.runtime:
             self.runtime_string = str(self.runtime//60000) + ":" + str(int(self.runtime/1000) % 60).zfill(2)
-        else:
-            self.runtime_string = "??:??"
 
     def __repr__(self):
         return self.title
