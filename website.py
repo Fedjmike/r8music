@@ -7,9 +7,11 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from music_objects import Artist, Release, Track, Rating, User, NotFound, UserAlreadyExists
+from model import Model, NotFound, AlreadyExists
 from mb_api_import import import_artist
 from db import connect_db, close_db, get_db, query_db
+
+model = Model()
 
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
@@ -25,8 +27,6 @@ def init_db():
             
         db.commit()
         
-    User.register("sam", "1", "sam.nipps@gmail.com")
-    
     import_artist("DJ Okawari")
 
 def is_safe_url(target):
@@ -98,7 +98,7 @@ def get_user_id():
         
 def get_user():
     try:
-        return User(session["user"]["id"])
+        return model.get_user(session["user"]["id"])
         
     except (NotFound, TypeError, KeyError):
         return None
@@ -110,7 +110,7 @@ def set_user(name, _id):
 def release_page(artist_slug, release_slug):
     try:
         user = get_user()
-        release = Release.from_slugs(artist_slug, release_slug)
+        release = model.get_release(artist_slug, release_slug)
         return render_template("release.html", release=release, user=user)
         
     except NotFound:
@@ -120,7 +120,7 @@ def release_page(artist_slug, release_slug):
 def artist_page(slug):
     try:
         user = get_user()
-        artist = Artist.from_slug(slug)
+        artist = model.get_artist(slug)
         return render_template("artist.html", artist=artist, user=user)
         
     except NotFound:
@@ -130,7 +130,7 @@ def artist_page(slug):
 def user_page(slug):
     try:
         user = get_user()
-        that_user = User.from_name(slug)
+        that_user = model.get_user(slug)
         return render_template("user.html", that_user=that_user, user=user)
         
     except NotFound:
@@ -141,9 +141,8 @@ def change_rating(release_id, rating):
     user_id = get_user_id()
     #todo error if no user
 
-    Rating.set_rating(release_id, user_id, rating)
-
-    rating_stats = Release(release_id).get_rating_stats()
+    model.set_release_rating(release_id, user_id, rating)
+    rating_stats = model.get_release_rating_stats(release_id)
 
     return jsonify(error=0,
                    ratingAverage=rating_stats.average,
@@ -153,9 +152,8 @@ def change_rating(release_id, rating):
 def remove_rating(release_id):
     user_id = get_user_id()
 
-    Rating.unset_rating(release_id, user_id)
-
-    rating_stats = Release(release_id).get_rating_stats()
+    model.unset_release_rating(release_id, user_id)
+    rating_stats = model.get_release_rating_stats(release_id)
 
     return jsonify(error=0,
                    ratingAverage=rating_stats.average,
@@ -186,13 +184,13 @@ def register():
             if email == "":
                 email = None
         
-            user = User.register(name, password, email)
+            user = model.register_user(name, password, email)
             #Automatically log them in
-            set_user(user.name, user._id)
+            set_user(user.name, user.id)
             
             return redirect_back()
             
-        except UserAlreadyExists:
+        except AlreadyExists:
             #error
             return "Username %s already taken" % name
 
@@ -209,10 +207,10 @@ def login():
         password = request.form["password"]
         
         try:
-            _id = User.id_from_name(name)
+            matches, user_id = model.user_pw_hash_matches(password, name)
             
-            if User.pw_hash_matches(password, _id):
-                set_user(name, _id)
+            if matches:
+                set_user(name, user_id)
                 return redirect_back()
                 
             else:

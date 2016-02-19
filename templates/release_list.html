@@ -1,7 +1,7 @@
 {% macro rating_widget(release, selected, class) -%}
     <ol class="{{ class if class else '' }} rating">
     {% for n in range(8, 0, -1) %}
-        <li {{ 'class=selected' if n == selected }} onclick='rateRelease(this, {{ release._id }}, {{ n }});'>{{ n }}</li>
+        <li {{ 'class=selected' if n == selected }} onclick='rateRelease(this, {{ release.id }}, {{ n }});'>{{ n }}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
@@ -10,7 +10,7 @@
     <ol class="releases">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            <h2><time>{{ release.date[:4] }}</time> <a href={{ url_for("release_page", release_slug=release.slug, artist_slug=release.artists[0].slug) }}>{{ release.title }}</a></h2>
+            <h2><time>{{ release.date[:4] }}</time> <a href={{ url_for("release_page", release_slug=release.slug, artist_slug=release.get_artists()[0].slug) }}>{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>
@@ -20,7 +20,7 @@
     <ol class="releases grid">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            {{ rating_widget(release, user.ratings[release._id] if user and release._id in user.ratings, "inset small") }}
+            {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, "inset small") }}
             <a href="{{ release.slug }}">
                 <div><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
                 <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>
