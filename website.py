@@ -224,28 +224,8 @@ def logout():
 @app.route("/recover-password")
 def recover_password():
     pass
-    
-    
-# Nic messing around...
-#@app.route("/<artist>")
-def artist_dom_from_slug(artist=None):
-    return str(Artist.from_slug(artist))
 
-@app.route("/a/<int:_id>")
-def artist_dom_from_id(_id=None):
-    return str(Artist(_id))
-
-@app.route("/<artist>/<release>")
-def release_dom_from_slugs(artist, release):
-    artist = Artist.from_slug(artist)
-    return str(Release.from_slug(artist, release))
-
-@app.route("/a/<int:artist_id>/r/<int:release_id>")
-def release_dom_from_id(artist_id, release_id):
-    artist = Artist(artist_id)
-    return str(Release(artist, release_id))
-
-
+#
 
 if __name__ == "__main__":
     #init_db()
