@@ -179,7 +179,7 @@ class Model:
     
     def user_pw_hash_matches(self, given_password, user_slug):
         """For security, the hash is never stored anywhere except the databse.
-           For added security, it doesn"t even leave this function."""
+           For added security, it doesn't even leave this function."""
         user_id, db_hash = self.query_unique("select id, pw_hash from users where name=?", user_slug)
         matches = check_password_hash(db_hash, given_password)
         return (matches, user_id if matches else None)

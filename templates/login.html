@@ -2,7 +2,9 @@
 
 {% from "forms.html" import login_form %}
 
-{% block title %}Log in {{ super() }}}{% endblock %}
+{% block title %}Log in {{ super() }}{% endblock %}
+
+{% set dont_display_login_register = True %}
 
 {% block content %}
 <header><h1>Login</h1></header>

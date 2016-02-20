@@ -18,7 +18,7 @@
     
     <style>
     {% if accent_color_1 %}
-    a, h2 a {
+    a {
         color: {{ accent_color_1 }};
     }
     
@@ -70,7 +70,7 @@
                 <div class="small popup"><div class="popup-content" id="user-popup">
                     <a class="right" id="logout" href={{ url_for("logout") }}>log out</a><br/>
                 </div></div>
-            {% else %}
+            {% elif not dont_display_login_register %}
                 <li><a id="login" href={{ url_for("login") }}>sign in</a></li>
                 <li><a id="register" href={{ url_for("register") }}>register</a></li>
                 {% from "forms.html" import login_form, register_form %}

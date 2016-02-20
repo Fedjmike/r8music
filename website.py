@@ -1,6 +1,5 @@
-import os
+import os, time
 from urllib.parse import urlparse, urljoin
-import time
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from werkzeug import generate_password_hash
@@ -50,11 +49,11 @@ def redirect_back():
 
 @app.before_request
 def before_request():
-    g.start = time.time()
+    request.start = time.time()
 
 @app.after_request
 def after_request(response):
-    duration = (time.time() - g.start)*1000
+    duration = (time.time() - request.start)*1000
     
     if duration > 5:
         print("Request took %d ms" % duration)

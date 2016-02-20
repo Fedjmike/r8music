@@ -2,7 +2,9 @@
 
 {% from "forms.html" import register_form %}
 
-{% block title %}User registration {{ super() }}}{% endblock %}
+{% block title %}User registration {{ super() }}{% endblock %}
+
+{% set dont_display_login_register = True %}
 
 {% block content %}
 <header><h1>User registration</h1></header>
