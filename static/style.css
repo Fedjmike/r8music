@@ -349,7 +349,7 @@ ol:not(.small).rating {
 /*Forms*/
 
 form dl {
-    width: 15rem;
+    width: 17.5rem;
 }
 
 form dt {
@@ -367,7 +367,7 @@ form input {
 
 form input[type="text"],
 form input[type="password"] {
-    width: 15em;
+    width: 17.5em;
     box-sizing: border-box;
 }
 
@@ -427,9 +427,9 @@ input[type="submit"]:active {
 
 .popup > div {
     display: none;
-    width: 15em;
+    width: 17.5em;
     padding: 1em;
-    margin-left: -17em;
+    margin-left: -19.5em;
     
     background: white;
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);

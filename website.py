@@ -1,4 +1,4 @@
-import os, time
+import os, time, requests
 from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
@@ -9,6 +9,8 @@ from sqlite3 import IntegrityError
 from model import Model, NotFound, AlreadyExists
 from mb_api_import import import_artist
 from db import connect_db, close_db, get_db, query_db
+
+g_recaptcha_secret = "todo config"
 
 model = Model()
 
@@ -158,6 +160,22 @@ def remove_rating(release_id):
                    ratingAverage=rating_stats.average,
                    ratingFrequency=rating_stats.frequency)
 
+def failed_recaptcha(recaptcha_response, remote_addr):
+    response = requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={
+            "secret": g_recaptcha_secret,
+            "response": recaptcha_response,
+            "remoteip": remote_addr
+        }
+    ).json()
+
+    #Incorrect use of the API, not captcha failure
+    if "error-codes" in response:
+        raise Exception(response["error-codes"])
+    
+    return not response["success"]
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     #todo check not logged in
@@ -171,6 +189,10 @@ def register():
         password = request.form["password"]
         verify_password = request.form["verify-password"]
         email = request.form["email"]
+        recaptcha_response = request.form["g-recaptcha-response"]
+        
+        if failed_recaptcha(recaptcha_response, request.remote_addr):
+            return "Sorry, you appear to be a robot"
         
         if password != verify_password:
             return "LOL you typed your password wrong"

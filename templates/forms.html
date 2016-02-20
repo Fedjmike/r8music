@@ -19,7 +19,13 @@
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
             <dt>Confirm password</dt> <dd><input type="password" name="verify-password" /></dd>
             <dt>Email (optional)</dt> <dd><input type="text" name="email" /></dd>
+            
+            <!-- "I'm not a robot" reCAPTCHA -->
+            <script src='https://www.google.com/recaptcha/api.js'></script>
+            <dd><div class="g-recaptcha" data-sitekey="6LeJzxgTAAAAAO9KpMEH9DsZKG9ax0C3DAIYSpgA"></div></dd>
+            
             <dd><input type="submit" value="Register" /></dd>
+            
             {% if standalone %}
                 <input type="hidden" name="next" value="{{ request.referrer }}">
             {% endif %}
