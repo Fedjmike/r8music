@@ -63,7 +63,7 @@ def after_request(response):
     return response
 
 @app.errorhandler(404)
-def page_not_found(what=None):
+def page_not_found(e=None, what=None):
     return render_template("404.html", what=what), 404
 
 @app.route("/")
@@ -115,7 +115,7 @@ def release_page(artist_slug, release_slug):
         return render_template("release.html", release=release, user=user)
         
     except NotFound:
-        return page_not_found("release")
+        return page_not_found(what="release")
 
 #Routing is done later because /<slug>/ would override other routes
 def artist_page(slug):
@@ -135,7 +135,7 @@ def user_page(slug):
         return render_template("user.html", that_user=that_user, user=user)
         
     except NotFound:
-        return page_not_found("user")
+        return page_not_found(what="user")
 
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 def change_rating(release_id, rating):
