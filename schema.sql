@@ -67,5 +67,6 @@ create table ratings (
     release_id integer not null,
     user_id integer not null,
     rating integer not null,
+    creation text not null,
     primary key (release_id, user_id)
 );

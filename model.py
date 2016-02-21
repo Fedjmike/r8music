@@ -126,8 +126,8 @@ class Model:
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
     def set_release_rating(self, release_id, user_id, rating):
-        self.execute("replace into ratings (release_id, user_id, rating)"
-                     " values (?, ?, ?)", release_id, user_id, rating)
+        self.execute("replace into ratings (release_id, user_id, rating, creation)"
+                     " values (?, ?, ?, ?)", release_id, user_id, rating, now_isoformat())
 
     def unset_release_rating(self, release_id, user_id):
         # TODO: Error if no rating present?
