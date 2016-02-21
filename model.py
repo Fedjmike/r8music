@@ -11,12 +11,6 @@ class NotFound(Exception):
 class AlreadyExists(Exception):
     pass
     
-RatingStats = namedtuple("RatingStats", ["average", "frequency"])
-Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases"])
-Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
-Track = namedtuple("Track", ["title", "runtime"])
-User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
-
 def now_isoformat():
     from datetime import datetime
     return datetime.now().isoformat()
@@ -48,10 +42,12 @@ class Model:
         return cursor.lastrowid
         
     #Artist
+    
+    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases"])
         
     def _make_artist(self, row):
         #Always need to know the releases, might as well get them eagerly
-        return Artist(*row, releases=self.get_releases_by_artist(row["id"]))
+        return self.Artist(*row, releases=self.get_releases_by_artist(row["id"]))
         
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
@@ -72,6 +68,8 @@ class Model:
         
     #Release
     
+    Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
+    
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
     _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
@@ -80,7 +78,7 @@ class Model:
     def _make_release(self, row):
         release_id = row["release_id"]
         
-        return Release(*row,
+        return self.Release(*row,
             get_artists=lambda: self.get_release_artists(release_id),
             get_colors=lambda: self.get_release_colors(release_id),
             get_tracks=lambda: self.get_release_tracks(release_id),
@@ -123,6 +121,10 @@ class Model:
         return self.query_unique("select color1, color2, color3 from release_colors"
                                  " where release_id=?", release_id)
         
+    #Rating
+    
+    RatingStats = namedtuple("RatingStats", ["average", "frequency"])
+        
     def set_release_rating(self, release_id, user_id, rating):
         self.execute("replace into ratings (release_id, user_id, rating)"
                      " values (?, ?, ?)", release_id, user_id, rating)
@@ -137,26 +139,30 @@ class Model:
             ratings = [r for (r,) in self.query("select rating from ratings where release_id=?", release_id)]
             frequency = len(ratings)
             average = sum(ratings) / frequency
-            return RatingStats(average=average, frequency=frequency)
+            return self.RatingStats(average=average, frequency=frequency)
             
         except ZeroDivisionError:
-            return RatingStats(average=None, frequency=0)
+            return self.RatingStats(average=None, frequency=0)
         
     #Track
+    
+    Track = namedtuple("Track", ["title", "runtime"])
 
     def get_release_tracks(self, release_id):
         #todo sort by position
         return [
-            Track(title,
-                  "%d:%02d" % (runtime//60000, (runtime/1000) % 60) if runtime else None)
+            self.Track(title,
+                       "%d:%02d" % (runtime//60000, (runtime/1000) % 60) if runtime else None)
             for title, runtime
             in self.query("select title, runtime from tracks where release_id=?", release_id)
         ]
 
     #User
     
+    User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
+    
     def _make_user(self, _id, name, creation, ratings):
-        return User(_id, name, creation, ratings,
+        return self.User(_id, name, creation, ratings,
             get_releases_rated=lambda rating=None: self.get_releases_rated_by_user(_id, rating)
         )
     
