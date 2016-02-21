@@ -107,42 +107,67 @@ def get_user():
 def set_user(name, _id):
     session["user"] = {"name": name, "id": _id}
 
+def with_user(f):
+    """A decorator for pages that (can) use the logged in User, but
+       do not *require* authentication."""
+    def decorated(*args, **kwargs):
+        request.user = get_user()
+        return f(*args, **kwargs)
+        
+    #Make the name appear the same, for routing and debugging
+    decorated.__name__ = f.__name__
+    return decorated
+
+def needs_auth(f):
+    """A decorator for pages that require authentication"""
+    def decorated(*args, **kwargs):
+        request.user_id = get_user_id()
+        
+        if request.user_id == None:
+            #todo
+            #todo send JSON for some pages (e.g. rating, with UI info)
+            return "Not authenticated", 403
+        
+        else:
+            return f(*args, **kwargs)
+        
+    decorated.__name__ = f.__name__
+    return decorated
+    
 @app.route("/<artist_slug>/<release_slug>")
+@with_user
 def release_page(artist_slug, release_slug):
     try:
-        user = get_user()
         release = model.get_release(artist_slug, release_slug)
-        return render_template("release.html", release=release, user=user)
+        return render_template("release.html", release=release, user=request.user)
         
     except NotFound:
         return page_not_found(what="release")
 
 #Routing is done later because /<slug>/ would override other routes
+@with_user
 def artist_page(slug):
     try:
-        user = get_user()
         artist = model.get_artist(slug)
-        return render_template("artist.html", artist=artist, user=user)
+        return render_template("artist.html", artist=artist, user=request.user)
         
     except NotFound:
         return page_not_found()
 
 @app.route("/user/<slug>")
+@with_user
 def user_page(slug):
     try:
-        user = get_user()
         that_user = model.get_user(slug)
-        return render_template("user.html", that_user=that_user, user=user)
+        return render_template("user.html", that_user=that_user, user=request.user)
         
     except NotFound:
         return page_not_found(what="user")
 
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
+@needs_auth
 def change_rating(release_id, rating):
-    user_id = get_user_id()
-    #todo error if no user
-
-    model.set_release_rating(release_id, user_id, rating)
+    model.set_release_rating(release_id, request.user_id, rating)
     rating_stats = model.get_release_rating_stats(release_id)
 
     return jsonify(error=0,
@@ -150,10 +175,9 @@ def change_rating(release_id, rating):
                    ratingFrequency=rating_stats.frequency)
 
 @app.route("/unrate/<int:release_id>", methods=["POST"])
+@needs_auth
 def remove_rating(release_id):
-    user_id = get_user_id()
-
-    model.unset_release_rating(release_id, user_id)
+    model.unset_release_rating(release_id, request.user_id)
     rating_stats = model.get_release_rating_stats(release_id)
 
     return jsonify(error=0,
