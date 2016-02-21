@@ -71,9 +71,14 @@ class Model:
         ]
         
     #Release
-        
+    
+    #Handle selection/renaming for joins
+    _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
+    _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
+    #todo rename the actual columns
+
     def _make_release(self, row):
-        release_id = row["id"]
+        release_id = row["release_id"]
         
         return Release(*row,
             get_artists=lambda: self.get_release_artists(release_id),
@@ -85,7 +90,7 @@ class Model:
     def get_releases_by_artist(self, artist_id):
         return [
             self._make_release(row) for row in
-            self.query("select id, title, slug, date, type, full_art_url, thumb_art_url from"
+            self.query("select " + self._release_columns + " from"
                        " (select release_id from authorships where artist_id=?)"
                        " join releases on releases.id = release_id", artist_id)
         ]
@@ -95,7 +100,7 @@ class Model:
            a certain value, if given"""
         return [
             self._make_release(row) for row in
-            self.query("select id, title, slug, date, type, full_art_url, thumb_art_url from"
+            self.query("select " + self._release_columns + " from"
                        " (select release_id from ratings where user_id=?"
                        + (" and rating=?)" if rating else ")") +
                        " join releases on releases.id = release_id", user_id, rating)
@@ -103,10 +108,15 @@ class Model:
         
     def get_release(self, artist_slug, release_slug):
         return self._make_release(
-            self.query_unique("select releases.id, title, releases.slug, date, type, full_art_url, thumb_art_url from"
-                              " (releases join authorships join artists"
-                              "  on releases.id = release_id and artist_id = artists.id)"
-                              " where artists.slug=? and releases.slug=?", artist_slug, release_slug)
+            #Select the artist and release rows with the right slugs
+            # (first, to make the join small)
+            #Join them using authorships
+            self.query_unique("select " + self._release_columns + " from"
+                              " (select artists.id as artist_id from artists where artists.slug=?)"
+                              " inner join authorships using (artist_id)"
+                              " inner join (select " + self._release_columns_rename + 
+                              "             from releases where releases.slug=?)"
+                              " using (release_id)", artist_slug, release_slug)
         )
         
     def get_release_colors(self, release_id):
