@@ -19,9 +19,9 @@ create table releases (
 
 drop table if exists release_mbid;
 create table release_mbid (
-    release_id integer not null,
+    release_id integer primary key,
     mbid text not null,
-    foreign key(release_id) references releases(id)
+    foreign key (release_id) references releases(id)
 );
 
 drop table if exists authorships;
@@ -29,10 +29,9 @@ create table authorships (
     release_id integer not null,
     artist_id integer not null,
     primary key (release_id, artist_id),
-    foreign key(release_id) references releases(id),
-    foreign key(artist_id) references artists(id)
+    foreign key (release_id) references releases(id),
+    foreign key (artist_id) references artists(id)
 );
-
 
 drop table if exists tracks;
 create table tracks (
@@ -49,7 +48,8 @@ create table release_colors (
     release_id integer primary key,
     color1 text,
     color2 text,
-    color3 text
+    color3 text,
+    foreign key (release_id) references releases(id)
 );
 
 drop table if exists users;
@@ -69,4 +69,6 @@ create table ratings (
     rating integer not null,
     creation text not null,
     primary key (release_id, user_id)
+    foreign key (release_id) references releases(id),
+    foreign key (user_id) references users(id)
 );
