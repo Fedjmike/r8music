@@ -250,16 +250,14 @@ ol:not(.small).rating {
     padding-right: 0.3em;
 }
 
-.releases.grid {
-    margin-top: -1.8rem;
-}
-
 .releases.grid > li {
     display: inline-block;
+    /*To get rid of the gap created by the rating widget*/
+    margin-top: -1.8rem;
     margin-bottom: 1em;
-    /*9x5 + 0.78x4 = 48.12 < 50 (page width)*/
+    /*9x5 + 1.03x4 = 49.12 < 50 (page width)*/
     width: 9em;
-    margin-right: 0.78em;
+    margin-right: 1.03em;
     
     vertical-align: top;
     text-align: center;
@@ -485,7 +483,7 @@ section {
 }
 
 /*Large screen*/
-@media only screen and (min-height: 900px) {
+@media only screen and (min-width: 1000px) and (min-height: 900px) {
     html {
         font-size: 13pt;
     }
