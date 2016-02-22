@@ -272,8 +272,26 @@ ol:not(.small).rating {
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.15);
 }
 
-.releases.grid > li:nth-child(5n) {
+.small.releases.grid > li {
+    width: 7.5em;
+    margin-right: 0.78em;
+}
+
+.small.releases.grid > li div {
+    height: 7.5em;
+}
+
+.small.releases.grid .small.rating li {
+    font-size: 0.65rem;
+}
+
+:not(.small).releases.grid > li:nth-child(5n),
+.small.releases.grid > li:nth-child(6n) {
     margin-right: 0;
+}
+
+.small.grid .inset.rating {
+    top: 7.5rem;
 }
 
 .releases.grid > li img {
