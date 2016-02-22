@@ -43,11 +43,11 @@ class Model:
         
     #Artist
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "description", "releases"])
         
     def _make_artist(self, row):
         #Always need to know the releases, might as well get them eagerly
-        return self.Artist(*row, releases=self.get_releases_by_artist(row["id"]))
+        return self.Artist(*row, description=self.get_description(row["id"]), releases=self.get_releases_by_artist(row["id"]))
         
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
@@ -66,6 +66,9 @@ class Model:
                        " join artists on artist_id = artists.id", release_id)
         ]
         
+    def get_description(self, artist_id):
+        return self.query_unique("select description from descriptions where artist_id = (?)", artist_id)[0]
+
     #Release
     
     Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])

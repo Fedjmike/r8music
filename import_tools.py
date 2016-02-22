@@ -1,5 +1,6 @@
 import re, os, urllib.request
 import chromatography
+import wikipedia
 from unidecode import unidecode
 from colorsys import rgb_to_hsv
 
@@ -11,6 +12,17 @@ def slugify(text, delim=u'-'):
     for word in _punct_re.split(text.lower()):
         result.extend(unidecode(word).split())
     return delim.join(result).lower()
+
+# TODO: Force disambiguate
+def get_description(artist_name):
+    try:
+        description = wikipedia.summary(artist_name)
+        return description
+    except wikipedia.exceptions.DisambiguationError as disambiguation:
+        for name in disambiguation.options:
+            if any(word in name for word in ['musician', 'band']):
+                return wikipedia.summary(name)
+    return None
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb

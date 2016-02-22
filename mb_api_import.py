@@ -98,9 +98,6 @@ def import_artist(artist_name):
     db = sqlite3.connect("sample.db")
     cursor = db.cursor()
 
-    # TODO: 
-        # Releases may not be deterministically chosen from release groups. Do.
-
     # Check if the artist's MBID matches the 'incomplete' field of any other artists
     # If so, get the artist_id and set the 'incomplete' field to NULL
     # If not, import as a new artist into the database
@@ -122,6 +119,9 @@ def import_artist(artist_name):
 
         artist_id = cursor.lastrowid
         processed_release_mbids = []
+
+        print("Getting description from wikipedia...")
+        cursor.execute("insert into descriptions (artist_id, description) values (?, ?)", (artist_id, import_tools.get_description(artist_info['name'])))
 
     incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db(db,'select incomplete, id from artists where incomplete is not null')}
     
@@ -174,6 +174,12 @@ def import_artist(artist_name):
                     )
                     artist['artist']['local-id'] = cursor.lastrowid
                     processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
+
+
+                    cursor.execute(
+                        "insert into descriptions (artist_id, description) values (?, ?)",
+                        (artist['artist']['local-id'], import_tools.get_description(artist['artist']['name']))
+                    )
 
                 cursor.execute(
                     "insert into authorships (release_id, artist_id) values (?, ?)",

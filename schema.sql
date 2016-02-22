@@ -52,6 +52,13 @@ create table release_colors (
     foreign key (release_id) references releases(id)
 );
 
+drop table if exists descriptions;
+create table descriptions (
+    artist_id integer not null,
+    description text,
+    foreign key (artist_id) references artists(id)
+);
+
 drop table if exists users;
 create table users (
     id integer primary key autoincrement,
