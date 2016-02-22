@@ -30,6 +30,8 @@ def get_description(artist_name):
         for name in disambiguation.options:
             if any(word in name for word in categories):
                 return wikipedia.summary(name)
+    except wikipedia.exceptions.PageError:
+        pass
     return None
 
 def rgb_to_hex(rgb):
