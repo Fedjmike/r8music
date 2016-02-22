@@ -7,7 +7,7 @@
 <section>
 	<header><h1>{{ artist.name }}</h1></header>
 	
-	<p>{{ artist.description }}</p>
+	<p>{{ artist.get_description() }}</p>
 	
     {% set albums = artist.releases | selectattr("release_type", "equalto", "Album") | list %}
     {% if albums %}
