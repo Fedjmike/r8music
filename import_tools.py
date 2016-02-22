@@ -13,10 +13,17 @@ def slugify(text, delim=u'-'):
         result.extend(unidecode(word).split())
     return delim.join(result).lower()
 
-# TODO: Force disambiguate
 def get_description(artist_name):
     try:
-        description = wikipedia.summary(artist_name)
+        page = wikipedia.page(artist_name)
+        description = page.summary
+        for link in page.links:
+            if 'disambiguation' in link:
+                disambiguation_page = wikipedia.page(link)
+                for l in disambiguation_page.links:
+                    if any(word in name for word in ['musician', 'band']):
+                        return wikipedia.summary(name)
+                break
         return description
     except wikipedia.exceptions.DisambiguationError as disambiguation:
         for name in disambiguation.options:
