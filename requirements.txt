@@ -3,3 +3,4 @@ arrow>=0.7
 unidecode>=0.4
 flask>=0.10
 Pillow>=3.0.0
+wikipedia>=1.4.0
