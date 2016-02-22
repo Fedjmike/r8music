@@ -6,20 +6,17 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from model import Model, NotFound, AlreadyExists
+from model import model, close_model, NotFound, AlreadyExists
 from mb_api_import import import_artist
-from db import connect_db, close_db, get_db, query_db
 
 g_recaptcha_secret = "todo config"
-
-model = Model()
 
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
 #losing your session when the server restarts
 app.secret_key = os.urandom(24)
 
-app.teardown_appcontext(close_db)
+app.teardown_appcontext(close_model)
 
 def init_db():
     with closing(connect_db()) as db:
@@ -72,12 +69,12 @@ def homepage():
 
 @app.route("/artists")
 def artists_index():
-    artists = query_db("select * from artists")
+    artists = model().query("select * from artists")
     return render_template("artists_index.html", artists=artists)
 
 @app.route("/users")
 def users_index():
-    users = query_db("select name from users")
+    users = model().query("select name from users")
     return render_template("users_index.html", users=users)
 
 @app.route("/search", methods=["POST"])
@@ -99,7 +96,7 @@ def get_user_id():
         
 def get_user():
     try:
-        return model.get_user(session["user"]["id"])
+        return model().get_user(session["user"]["id"])
         
     except (NotFound, TypeError, KeyError):
         return None
@@ -138,7 +135,7 @@ def needs_auth(f):
 @with_user
 def release_page(artist_slug, release_slug):
     try:
-        release = model.get_release(artist_slug, release_slug)
+        release = model().get_release(artist_slug, release_slug)
         return render_template("release.html", release=release, user=request.user)
         
     except NotFound:
@@ -148,7 +145,7 @@ def release_page(artist_slug, release_slug):
 @with_user
 def artist_page(slug):
     try:
-        artist = model.get_artist(slug)
+        artist = model().get_artist(slug)
         return render_template("artist.html", artist=artist, user=request.user)
         
     except NotFound:
@@ -158,7 +155,7 @@ def artist_page(slug):
 @with_user
 def user_page(slug):
     try:
-        that_user = model.get_user(slug)
+        that_user = model().get_user(slug)
         return render_template("user.html", that_user=that_user, user=request.user)
         
     except NotFound:
@@ -167,8 +164,8 @@ def user_page(slug):
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 @needs_auth
 def change_rating(release_id, rating):
-    model.set_release_rating(release_id, request.user_id, rating)
-    rating_stats = model.get_release_rating_stats(release_id)
+    model().set_release_rating(release_id, request.user_id, rating)
+    rating_stats = model().get_release_rating_stats(release_id)
 
     return jsonify(error=0,
                    ratingAverage=rating_stats.average,
@@ -177,8 +174,8 @@ def change_rating(release_id, rating):
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 @needs_auth
 def remove_rating(release_id):
-    model.unset_release_rating(release_id, request.user_id)
-    rating_stats = model.get_release_rating_stats(release_id)
+    model().unset_release_rating(release_id, request.user_id)
+    rating_stats = model().get_release_rating_stats(release_id)
 
     return jsonify(error=0,
                    ratingAverage=rating_stats.average,
@@ -229,7 +226,7 @@ def register():
             if email == "":
                 email = None
         
-            user = model.register_user(name, password, email)
+            user = model().register_user(name, password, email)
             #Automatically log them in
             set_user(user.name, user.id)
             
@@ -252,7 +249,7 @@ def login():
         password = request.form["password"]
         
         try:
-            matches, user_id = model.user_pw_hash_matches(password, name)
+            matches, user_id = model().user_pw_hash_matches(password, name)
             
             if matches:
                 set_user(name, user_id)

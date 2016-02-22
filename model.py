@@ -1,7 +1,8 @@
 from functools import cmp_to_key
 from collections import namedtuple
-from db import query_db, get_db
+import sqlite3
 from werkzeug import check_password_hash, generate_password_hash
+from flask import g
 
 # TODO: Modify query_db so "[i for (i,) in." is unnecessary.
 
@@ -15,9 +16,29 @@ def now_isoformat():
     from datetime import datetime
     return datetime.now().isoformat()
 
+def connect_db():
+    db = sqlite3.connect("sample.db")
+    db.row_factory = sqlite3.Row
+    return db
+    
+def model():
+    if not hasattr(g, "model"):
+        g.model = Model(connect_db)
+        
+    return g.model
+
+def close_model():
+    model().close()
+
 class Model:
+    def __init__(self, connect_db):
+        self.db = connect_db()
+        
+    def close(self):
+        self.db.close()
+
     def query(self, query, *args):
-        return query_db(query, *args)
+        return self.db.execute(query, args).fetchall()
         
     def query_unique(self, query, *args):
         result = self.query(query, *args)
