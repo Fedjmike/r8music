@@ -49,9 +49,9 @@
         <h1>{{ artist.name }}</h1>
     </header>
 	
-	<p>Kevin Shields and co. blended ethereal melodies with discordant sounds to become one of the prime influences on the late-'80s indie scene.</p>
-    
 	{{ release_list(artist.releases | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id)) }} 
+    
+	<p>{{ artist.get_description() }}</p>
 </section>
 {% endfor %}
 {% endblock %}
