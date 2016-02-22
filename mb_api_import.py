@@ -121,7 +121,7 @@ def import_artist(artist_name):
         processed_release_mbids = []
 
         print("Getting description from wikipedia...")
-        cursor.execute("insert into descriptions (artist_id, description) values (?, ?)", (artist_id, import_tools.get_description(artist_info['name'])))
+        cursor.execute("insert into artist_descriptions (artist_id, description) values (?, ?)", (artist_id, import_tools.get_description(artist_info['name'])))
 
     incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db(db,'select incomplete, id from artists where incomplete is not null')}
     
@@ -177,7 +177,7 @@ def import_artist(artist_name):
 
 
                     cursor.execute(
-                        "insert into descriptions (artist_id, description) values (?, ?)",
+                        "insert into artist_descriptions (artist_id, description) values (?, ?)",
                         (artist['artist']['local-id'], import_tools.get_description(artist['artist']['name']))
                     )
 
