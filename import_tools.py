@@ -14,6 +14,7 @@ def slugify(text, delim=u'-'):
     return delim.join(result).lower()
 
 def get_description(artist_name):
+    categories = ['musician', 'band', 'rapper']
     try:
         page = wikipedia.page(artist_name)
         description = page.summary
@@ -21,13 +22,13 @@ def get_description(artist_name):
             if 'disambiguation' in link:
                 disambiguation_page = wikipedia.page(link)
                 for l in disambiguation_page.links:
-                    if any(word in name for word in ['musician', 'band']):
+                    if any(word in name for word in categories):
                         return wikipedia.summary(name)
                 break
         return description
     except wikipedia.exceptions.DisambiguationError as disambiguation:
         for name in disambiguation.options:
-            if any(word in name for word in ['musician', 'band']):
+            if any(word in name for word in categories):
                 return wikipedia.summary(name)
     return None
 
