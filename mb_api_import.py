@@ -40,27 +40,25 @@ def get_releases(mbid, processed_release_mbids):
         print("Querying MB for release group " + group['id'] + "...")
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
         # Gets the oldest release of the group. If it fails, ignore this release group
-        release_candidates = list(filter(lambda x: 'date' in x, result['release-group']['release-list']))
+        release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
         if not release_candidates:
             continue
+        
+        fulldate = lambda date: date + "-12-31" if len(date) == 4 else date
         release = min(release_candidates,
-                      key=lambda release: arrow.get(release['date']+"-01-01").timestamp \
-                      if len(release['date']) == 4 \
-                      else arrow.get(release['date']).timestamp)
+                      key=lambda release: arrow.get(fulldate(release["date"])).timestamp)
 
         if release['id'] in processed_release_mbids:
             print("Release " + release['id'] + " has already been processed")
             continue
+
         release['group-id'] = group['id']
-        try:
-            release['type'] = group['type']
-        except KeyError:
-            release['type'] = 'Unspecified'
+        release['type'] = group['type'] if 'type' in group else 'Unspecified'
 
         releases.append(release)
     return releases
 
-def get_release(release):
+def prepare_release(release):
     release['full-art-url'], release['thumb-art-url'] \
         = get_album_art_urls(release['group-id'])
 
@@ -86,37 +84,36 @@ def import_artist(artist_name):
     # If not, import as a new artist into the database
     try:
         (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
+    
+        processed_release_mbids = [
+            row['mbid'] for row in
+            model.query('select mbid from release_externals natural join'
+                        ' (select release_id from authorships where artist_id=?)', artist_id)
+        ]
         
-        processed_release_mbids = \
-            [model.query_unique('select mbid from release_externals where release_id=?', release_id)["mbid"] \
-             for (release_id,) in model.query('select release_id from authorships where artist_id=?', artist_id)]
-
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
         artist_id = model.add_artist(artist_info['name'], import_tools.get_description(artist_info['name']))
         processed_release_mbids = []
 
-    incomplete_artist_mbids = {
-        mbid: _id for mbid, _id
-        in model.query('select incomplete, id from artists where incomplete is not null')
-    }
-    
     print("Getting links...")
     links = get_links(artist_mbid)
-    for item in links:
-        try:
-            link_type_id = model.query_unique("select id from link_types where link_type = ?", item['type'])
-        except NotFound:
-            link_type_id = model.insert("insert into link_types (link_type) values (?)", item['type'])
-        model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, item['target'])
+    if links:
+        for item in links:
+            try:
+                link_type_id = model.query_unique("select id from link_types where link_type = ?", item['type'])
+            except NotFound:
+                link_type_id = model.insert("insert into link_types (link_type) values (?)", item['type'])
+            model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, item['target'])
 
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
-    pool.map(get_release, releases)
+    pool.map(prepare_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
-    processed_artist_mbids = {artist_mbid: artist_id}
+    processed_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
+    processed_artist_mbids[artist_mbid] = artist_id
 
     for release in releases:
         release_id = model.add_release(
@@ -129,14 +126,10 @@ def import_artist(artist_name):
             release['id'] #mbid
         )
         
-        release['local-id'] = release_id
-
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
-                    artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
-                elif artist['artist']['id'] in incomplete_artist_mbids:
-                    artist['artist']['local-id'] = incomplete_artist_mbids[artist['artist']['id']]
+                    featured_artist_id = processed_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
@@ -145,10 +138,9 @@ def import_artist(artist_name):
                         artist['artist']['id'] #mbid
                     )
                     
-                    artist['artist']['local-id'] = featured_artist_id
-                    processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
+                    processed_artist_mbids[artist['artist']['id']] = featured_artist_id
 
-                model.add_author(release_id, artist['artist']['local-id'])
+                model.add_author(release_id, featured_artist_id)
 
             except TypeError:
                 pass
