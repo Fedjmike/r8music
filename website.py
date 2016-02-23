@@ -6,7 +6,7 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from model import model, close_model, NotFound, AlreadyExists
+from model import Model, connect_db, NotFound, AlreadyExists
 from mb_api_import import import_artist
 
 g_recaptcha_secret = "todo config"
@@ -16,7 +16,15 @@ app = Flask(__name__)
 #losing your session when the server restarts
 app.secret_key = os.urandom(24)
 
-app.teardown_appcontext(close_model)
+def model():
+    if not hasattr(g, "model"):
+        g.model = Model(connect_db)
+        
+    return g.model
+
+@app.teardown_appcontext
+def close_model():
+    model().close()
 
 def init_db():
     with closing(connect_db()) as db:

@@ -20,15 +20,6 @@ def connect_db():
     db = sqlite3.connect("sample.db")
     db.row_factory = sqlite3.Row
     return db
-    
-def model():
-    if not hasattr(g, "model"):
-        g.model = Model(connect_db)
-        
-    return g.model
-
-def close_model():
-    model().close()
 
 class Model:
     def __init__(self, connect_db):
