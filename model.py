@@ -4,6 +4,8 @@ import sqlite3
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g
 
+from import_tools import slugify
+
 # TODO: Modify query_db so "[i for (i,) in." is unnecessary.
 
 class NotFound(Exception):
@@ -21,6 +23,27 @@ def connect_db():
     db.row_factory = sqlite3.Row
     return db
 
+def detect_collision(slug_candidate, db, table):
+    result = db.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,)).fetchall()
+    if result[0][0] > 0:
+        return True
+    return False
+
+def avoid_collison(slug_candidate, db, table):
+    if not detect_collision(slug_candidate, db, table):
+        return slug_candidate
+
+    i = 1
+    while True:
+        if not detect_collision(slug_candidate + "-" + str(i), db, table):
+            return slug_candidate + "-" + str(i)
+        i += 1
+
+def generate_slug(text, db, table):
+    slug_candidate = slugify(text)
+    return avoid_collison(slug_candidate, db, table)
+    
+    
 class Model:
     def __init__(self, connect_db):
         self.db = connect_db()
@@ -44,18 +67,30 @@ class Model:
         
     def execute(self, query, *args):
         self.query(query, *args)
-        get_db().commit()
+        self.db.commit()
         
     def insert(self, query, *args):
-        db = get_db()
-        cursor = db.cursor()
+        cursor = self.db.cursor()
         cursor.execute(query, args)
-        db.commit()
+        self.db.commit()
         return cursor.lastrowid
         
     #Artist
     
     Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_description"])
+        
+    def add_artist(self, name, description, incomplete=None):
+        #Todo document "incomplete"
+        
+        slug = generate_slug(name, self.db, "artists")
+        
+        artist_id = self.insert("insert into artists (name, slug, incomplete) values (?, ?, ?)",
+                                name, slug, incomplete)
+                                
+        self.insert("insert into artist_descriptions (artist_id, description) values (?, ?)",
+                    artist_id, description)
+                    
+        return artist_id
         
     def _make_artist(self, row):
         #Always need to know the releases, might as well get them eagerly
@@ -93,6 +128,24 @@ class Model:
     _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
     #todo rename the actual columns
 
+    def add_release(self, title, date, type, full_art_url, thumb_arl_url, palette, mbid):
+        slug = generate_slug(title, self.db, "releases")
+        
+        release_id = self.insert("insert into releases (title, slug, date, type, full_art_url, thumb_art_url)"
+                                 " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_arl_url)
+
+        self.insert("insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
+                    release_id, palette[0], palette[1], palette[2])
+                    
+        self.insert("insert into release_externals (release_id, mbid) values (?, ?)",
+                    release_id, mbid)
+                    
+        return release_id
+    
+    def add_author(self, release_id, artist_id):
+        self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
+                    release_id, artist_id)
+    
     def _make_release(self, row):
         release_id = row["release_id"]
         
@@ -165,6 +218,12 @@ class Model:
     #Track
     
     Track = namedtuple("Track", ["title", "runtime"])
+    
+    def add_track(self, release_id, title, position, runtime):
+        slug = generate_slug(title, self.db, "tracks")
+                    
+        self.insert("insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
+                    release_id, title, slug, position, runtime)
 
     def get_release_tracks(self, release_id):
         #todo sort by position

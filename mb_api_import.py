@@ -6,35 +6,10 @@ import arrow
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 import import_tools
+from model import Model, NotFound
 
 album_art_base_url = 'http://coverartarchive.org/release-group/'
 
-def query_db(db, query, args=(), one=False):
-    """Queries the database and returns a list of dictionaries."""
-    cur = db.execute(query, args)
-    rv = cur.fetchall()
-    return (rv[0] if rv else None) if one else rv
-
-def detect_collision(slug_candidate, cursor, table):
-    cursor.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,))
-    if cursor.fetchall()[0][0] > 0:
-        return True
-    return False
-
-def avoid_collison(slug_candidate, cursor, table):
-    if not detect_collision(slug_candidate, cursor, table):
-        return slug_candidate
-
-    i = 1
-    while True:
-        if not detect_collision(slug_candidate + "-" + str(i), cursor, table):
-            return slug_candidate + "-" + str(i)
-        i += 1
-
-def generate_slug(text, cursor, table):
-    slug_candidate = import_tools.slugify(text)
-    return avoid_collison(slug_candidate, cursor, table)
-    
 def get_canonical_url(url):
     return requests.get(url).url
 
@@ -94,69 +69,50 @@ def import_artist(artist_name):
     print("Querying MB for artist info...")
     result = musicbrainzngs.search_artists(artist=artist_name)
     artist_info = result['artist-list'][0]
+    artist_mbid = artist_info['id']
 
-    db = sqlite3.connect("sample.db")
-    cursor = db.cursor()
+    model = Model()
 
     # Check if the artist's MBID matches the 'incomplete' field of any other artists
     # If so, get the artist_id and set the 'incomplete' field to NULL
     # If not, import as a new artist into the database
-    cursor.execute('select id from artists where incomplete=?', (artist_info['id'],))
-    result = cursor.fetchall()
     try:
-        (artist_id,) = result[0]
-        cursor.execute('select release_id from authorships where artist_id=?', (artist_id,))
-        processed_release_ids = [_id for (_id,) in cursor.fetchall()]
-        processed_release_mbids = [mbid for (mbid,) in [query_db(db,'select mbid from release_mbid where release_id=?', (release_id,), True)\
-                                   for release_id in processed_release_ids]]
-        cursor.execute("update artists set incomplete = NULL where id=?", (artist_id,))
+        (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
+        
+        processed_release_mbids = \
+            [model.query_unique('select mbid from release_externals where release_id=?', release_id)["mbid"] \
+             for (release_id,) in model.query('select release_id from authorships where artist_id=?', artist_id)]
 
-    except IndexError:
-        cursor.execute(
-            "insert into artists (name, slug, incomplete) values (?, ?, ?)",
-            (artist_info["name"], generate_slug(artist_info["name"], cursor, 'artists'), None)
-        )
+        model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
-        artist_id = cursor.lastrowid
+    except NotFound:
+        artist_id = model.add_artist(artist_info['name'], import_tools.get_description(artist_info['name']))
         processed_release_mbids = []
 
-        print("Getting description from wikipedia...")
-        cursor.execute("insert into artist_descriptions (artist_id, description) values (?, ?)", (artist_id, import_tools.get_description(artist_info['name'])))
-
-    incomplete_artist_mbids = {mbid: artist_id for (mbid, artist_id,) in query_db(db,'select incomplete, id from artists where incomplete is not null')}
+    incomplete_artist_mbids = {
+        mbid: _id for mbid, _id
+        in model.query('select incomplete, id from artists where incomplete is not null')
+    }
     
     pool = ThreadPool(8)
-    releases = get_releases(artist_info['id'], processed_release_mbids)
+    releases = get_releases(artist_mbid, processed_release_mbids)
     pool.map(get_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
-    processed_artist_mbids = {artist_info['id']: artist_id}
+    processed_artist_mbids = {artist_mbid: artist_id}
 
     for release in releases:
-        cursor.execute(
-            "insert into releases (title, slug, date, type, full_art_url, thumb_art_url) values (?, ?, ?, ?, ?, ?)",
-            (release['title'],
-             generate_slug(release['title'], cursor, 'releases'),
-             release['date'],
-             release['type'],
-             release['full-art-url'],
-             release['thumb-art-url'])
+        release_id = model.add_release(
+            release['title'],
+            release['date'],
+            release['type'],
+            release['full-art-url'],
+            release['thumb-art-url'],
+            release['palette'],
+            release['id'] #mbid
         )
-        release['local-id'] = cursor.lastrowid
-
-        cursor.execute(
-            "insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
-            (release['local-id'],
-             release['palette'][0],
-             release['palette'][1],
-             release['palette'][2])
-        )
-
-        cursor.execute(
-            "insert into release_mbid (release_id, mbid) values (?, ?)",
-            (release['local-id'],
-             release['id'])
-        )
+        
+        release['local-id'] = release_id
 
         for artist in release['artists']:
             try:
@@ -166,26 +122,16 @@ def import_artist(artist_name):
                     artist['artist']['local-id'] = incomplete_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
-                    cursor.execute(
-                        "insert into artists (name, slug, incomplete) values (?, ?, ?)",
-                        (artist['artist']['name'],
-                         generate_slug(artist['artist']['name'], cursor, 'artists'),
-                         artist['artist']['id'])
+                    featured_artist_id = model.add_artist(
+                        artist['artist']['name'],
+                        import_tools.get_description(artist['artist']['name']),
+                        artist['artist']['id'] #mbid
                     )
-                    artist['artist']['local-id'] = cursor.lastrowid
+                    
+                    artist['artist']['local-id'] = featured_artist_id
                     processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
 
-
-                    cursor.execute(
-                        "insert into artist_descriptions (artist_id, description) values (?, ?)",
-                        (artist['artist']['local-id'], import_tools.get_description(artist['artist']['name']))
-                    )
-
-                cursor.execute(
-                    "insert into authorships (release_id, artist_id) values (?, ?)",
-                    (release['local-id'],
-                     artist['artist']['local-id'])
-                )
+                model.add_author(release_id, artist['artist']['local-id'])
 
             except TypeError:
                 pass
@@ -195,16 +141,12 @@ def import_artist(artist_name):
                 length = track['recording']['length']
             except KeyError:
                 length = None
-            cursor.execute(
-                "insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
-                (release['local-id'],
-                 track['recording']['title'],
-                 generate_slug(track['recording']['title'], cursor, 'tracks'),
-                 int(track['position']),
-                 length)
+            model.add_track(
+                release_id,
+                track['recording']['title'],
+                int(track['position']),
+                length
             )
-
-    db.commit()
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
