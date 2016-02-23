@@ -18,7 +18,7 @@ app.secret_key = os.urandom(24)
 
 def model():
     if not hasattr(g, "model"):
-        g.model = Model(connect_db)
+        g.model = Model()
         
     return g.model
 

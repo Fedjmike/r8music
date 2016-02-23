@@ -45,7 +45,7 @@ def generate_slug(text, db, table):
     
     
 class Model:
-    def __init__(self, connect_db):
+    def __init__(self, connect_db=connect_db):
         self.db = connect_db()
         
     def close(self):
