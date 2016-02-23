@@ -32,22 +32,20 @@ def get_releases(mbid, processed_release_mbids):
         print("Querying MB for release group " + group['id'] + "...")
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
         # Gets the oldest release of the group. If it fails, ignore this release group
-        release_candidates = list(filter(lambda x: 'date' in x, result['release-group']['release-list']))
+        release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
         if not release_candidates:
             continue
+        
+        fulldate = lambda date: date + "-12-31" if len(date) == 4 else date
         release = min(release_candidates,
-                      key=lambda release: arrow.get(release['date']+"-12-31").timestamp \
-                      if len(release['date']) == 4 \
-                      else arrow.get(release['date']).timestamp)
+                      key=lambda release: arrow.get(fulldate(release["date"])).timestamp)
 
         if release['id'] in processed_release_mbids:
             print("Release " + release['id'] + " has already been processed")
             continue
+
         release['group-id'] = group['id']
-        try:
-            release['type'] = group['type']
-        except KeyError:
-            release['type'] = 'Unspecified'
+        release['type'] = group['type'] if 'type' in group else 'Unspecified'
 
         releases.append(release)
     return releases
