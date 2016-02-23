@@ -6,6 +6,21 @@ create table artists (
     incomplete text
 );
 
+drop table if exists artist_links;
+create table artist_links (
+    artist_id integer not null,
+    link_type_id text not null,
+    link_target text not null,
+    foreign key (link_type_id) references link_types(id)
+);
+
+drop table if exists link_types;
+create table link_types (
+    id integer primary key autoincrement,
+    link_type text not null
+);
+
+
 drop table if exists releases;
 create table releases (
     id integer primary key autoincrement,

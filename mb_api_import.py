@@ -23,6 +23,14 @@ def get_album_art_urls(release_group_id):
     except ValueError:
         return None, None
 
+def get_links(artist_mbid):
+    result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
+    # TODO: Do this in a non-retarded way
+    try:
+        return result['artist']['url-relation-list'] 
+    except KeyError:
+        return None
+
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
     result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
@@ -94,6 +102,15 @@ def import_artist(artist_name):
         in model.query('select incomplete, id from artists where incomplete is not null')
     }
     
+    print("Getting links...")
+    links = get_links(artist_mbid)
+    for item in links:
+        try:
+            link_type_id = model.query_unique("select id from link_types where link_type = ?", item['type'])
+        except NotFound:
+            link_type_id = model.insert("insert into link_types (link_type) values (?)", item['type'])
+        model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, item['target'])
+
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
     pool.map(get_release, releases)
