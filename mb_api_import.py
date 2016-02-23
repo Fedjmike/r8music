@@ -91,14 +91,13 @@ def import_artist(artist_name):
         artist_id = model.add_artist(artist_info['name'], import_tools.get_description(artist_info['name']))
         processed_release_mbids = []
 
-    incomplete_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
-    
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
     pool.map(prepare_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
-    processed_artist_mbids = {artist_mbid: artist_id}
+    processed_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
+    processed_artist_mbids[artist_mbid] = artist_id
 
     for release in releases:
         release_id = model.add_release(
@@ -115,8 +114,6 @@ def import_artist(artist_name):
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
                     featured_artist_id = processed_artist_mbids[artist['artist']['id']]
-                elif artist['artist']['id'] in incomplete_artist_mbids:
-                    featured_artist_id = incomplete_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
