@@ -25,9 +25,18 @@ def get_album_art_urls(release_group_id):
 
 def get_links(artist_mbid):
     result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
-    # TODO: Do this in a non-retarded way
+    other_types = {'www.facebook.com': 'facebook',
+                   'twitter.com': 'twitter',
+                   'plus.google.com': 'google plus'}
     try:
-        return result['artist']['url-relation-list'] 
+        links = {}
+        for item in result['artist']['url-relation-list']:
+            domain = item['target'].split('/')[2]
+            if domain in other_types:
+                links[other_types[domain]] = item['target']
+                continue
+            links[item['type']] = item['target']
+        return links
     except KeyError:
         return None
 
@@ -100,12 +109,12 @@ def import_artist(artist_name):
     print("Getting links...")
     links = get_links(artist_mbid)
     if links:
-        for item in links:
+        for _type in links:
             try:
-                link_type_id = model.query_unique("select id from link_types where link_type = ?", item['type'])
+                link_type_id = model.query_unique("select id from link_types where link_type = ?", _type)[0]
             except NotFound:
-                link_type_id = model.insert("insert into link_types (link_type) values (?)", item['type'])
-            model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, item['target'])
+                link_type_id = model.insert("insert into link_types (link_type) values (?)", _type)
+            model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, links[_type])
 
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
