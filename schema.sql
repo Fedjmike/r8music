@@ -1,6 +1,6 @@
 drop table if exists artists;
 create table artists (
-    id integer primary key autoincrement,
+    id integer primary key,
     name text not null,
     slug text not null,
     incomplete text
@@ -23,7 +23,7 @@ create table link_types (
 
 drop table if exists releases;
 create table releases (
-    id integer primary key autoincrement,
+    id integer primary key,
     title text not null,
     slug text not null,
     'date' text not null,
@@ -50,7 +50,7 @@ create table authorships (
 
 drop table if exists tracks;
 create table tracks (
-    id integer primary key autoincrement,
+    id integer primary key,
     release_id integer not null,
     title text not null,
     slug text not null,
@@ -76,7 +76,7 @@ create table artist_descriptions (
 
 drop table if exists users;
 create table users (
-    id integer primary key autoincrement,
+    id integer primary key,
     name text not null,
     pw_hash text not null,
     email text,
