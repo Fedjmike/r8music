@@ -36,7 +36,7 @@ def get_releases(mbid, processed_release_mbids):
         if not release_candidates:
             continue
         release = min(release_candidates,
-                      key=lambda release: arrow.get(release['date']+"-01-01").timestamp \
+                      key=lambda release: arrow.get(release['date']+"-12-31").timestamp \
                       if len(release['date']) == 4 \
                       else arrow.get(release['date']).timestamp)
 
