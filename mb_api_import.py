@@ -78,11 +78,13 @@ def import_artist(artist_name):
     # If not, import as a new artist into the database
     try:
         (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
+    
+        processed_release_mbids = [
+            row['mbid'] for row in
+            model.query('select mbid from release_externals natural join'
+                        ' (select release_id from authorships where artist_id=?)', artist_id)
+        ]
         
-        processed_release_mbids = \
-            [model.query_unique('select mbid from release_externals where release_id=?', release_id)["mbid"] \
-             for (release_id,) in model.query('select release_id from authorships where artist_id=?', artist_id)]
-
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
