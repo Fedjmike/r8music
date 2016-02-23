@@ -17,8 +17,8 @@ create table releases (
     thumb_art_url text
 );
 
-drop table if exists release_mbid;
-create table release_mbid (
+drop table if exists release_externals;
+create table release_externals (
     release_id integer primary key,
     mbid text not null,
     foreign key (release_id) references releases(id)
