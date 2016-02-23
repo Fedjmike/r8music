@@ -2,6 +2,7 @@
 
 import musicbrainzngs
 import sqlite3, sys, requests
+from urllib.parse import urlparse
 import arrow
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
@@ -31,7 +32,7 @@ def get_links(artist_mbid):
     try:
         links = {}
         for item in result['artist']['url-relation-list']:
-            domain = item['target'].split('/')[2]
+            domain = urlparse(item['target']).netloc
             if domain in other_types:
                 links[other_types[domain]] = item['target']
                 continue
