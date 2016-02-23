@@ -52,7 +52,7 @@ def get_releases(mbid, processed_release_mbids):
         releases.append(release)
     return releases
 
-def get_release(release):
+def prepare_release(release):
     release['full-art-url'], release['thumb-art-url'] \
         = get_album_art_urls(release['group-id'])
 
@@ -89,14 +89,11 @@ def import_artist(artist_name):
         artist_id = model.add_artist(artist_info['name'], import_tools.get_description(artist_info['name']))
         processed_release_mbids = []
 
-    incomplete_artist_mbids = {
-        mbid: _id for mbid, _id
-        in model.query('select incomplete, id from artists where incomplete is not null')
-    }
+    incomplete_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
     
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
-    pool.map(get_release, releases)
+    pool.map(prepare_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
     processed_artist_mbids = {artist_mbid: artist_id}
@@ -112,14 +109,12 @@ def import_artist(artist_name):
             release['id'] #mbid
         )
         
-        release['local-id'] = release_id
-
         for artist in release['artists']:
             try:
                 if artist['artist']['id'] in processed_artist_mbids:
-                    artist['artist']['local-id'] = processed_artist_mbids[artist['artist']['id']]
+                    featured_artist_id = processed_artist_mbids[artist['artist']['id']]
                 elif artist['artist']['id'] in incomplete_artist_mbids:
-                    artist['artist']['local-id'] = incomplete_artist_mbids[artist['artist']['id']]
+                    featured_artist_id = incomplete_artist_mbids[artist['artist']['id']]
                 else:
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
@@ -128,10 +123,9 @@ def import_artist(artist_name):
                         artist['artist']['id'] #mbid
                     )
                     
-                    artist['artist']['local-id'] = featured_artist_id
-                    processed_artist_mbids[artist['artist']['id']] = artist['artist']['local-id']
+                    processed_artist_mbids[artist['artist']['id']] = featured_artist_id
 
-                model.add_author(release_id, artist['artist']['local-id'])
+                model.add_author(release_id, featured_artist_id)
 
             except TypeError:
                 pass
