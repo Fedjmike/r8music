@@ -33,15 +33,7 @@ def get_description(artist_name):
     categories = ['musician', 'band', 'rapper']
     try:
         page = wikipedia.page(artist_name)
-        description = get_wikipedia_summary(page)
-        for link in page.links:
-            if 'disambiguation' in link:
-                disambiguation_page = wikipedia.page(link)
-                for l in disambiguation_page.links:
-                    if any(word in name for word in categories):
-                        return wikipedia.summary(name)
-                break
-        return description
+        return get_wikipedia_summary(page)
     except wikipedia.exceptions.DisambiguationError as disambiguation:
         for name in disambiguation.options:
             if any(word in name for word in categories):
