@@ -1,10 +1,9 @@
 #/usr/bin/python3
 
-import musicbrainzngs
-import sqlite3, sys, requests
+import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
-import arrow
 from multiprocessing.dummy import Pool as ThreadPool
+
 import import_tools
 from model import Model, NotFound
 

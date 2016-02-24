@@ -1,6 +1,7 @@
+import itertools, sqlite3
 from functools import cmp_to_key, lru_cache
+from datetime import datetime
 from collections import namedtuple
-import sqlite3
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g
 
@@ -15,7 +16,6 @@ class AlreadyExists(Exception):
     pass
     
 def now_isoformat():
-    from datetime import datetime
     return datetime.now().isoformat()
 
 def connect_db():
@@ -33,11 +33,9 @@ def avoid_collison(slug_candidate, db, table):
     if not detect_collision(slug_candidate, db, table):
         return slug_candidate
 
-    i = 1
-    while True:
+    for i in itertools.count(1):
         if not detect_collision(slug_candidate + "-" + str(i), db, table):
             return slug_candidate + "-" + str(i)
-        i += 1
 
 def generate_slug(text, db, table):
     slug_candidate = slugify(text)

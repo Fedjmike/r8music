@@ -385,6 +385,11 @@ ol:not(.small).rating {
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
 }
 
+/*Comes with the description HTML from wikipedia. Hacky! todo fix*/
+ol.references {
+    display: none;
+}
+
 /*Forms*/
 
 form dl {
@@ -499,15 +504,6 @@ section {
 .columns > * {
     display: inline-block;
     margin-bottom: 1em;
-}
-
-.columns:after {
-    visibility: hidden;
-    display: block;
-    font-size: 0;
-    content: " ";
-    clear: both;
-    height: 0;
 }
 
 /*Computer*/

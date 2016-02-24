@@ -23,16 +23,20 @@ def model():
     return g.model
 
 @app.teardown_appcontext
-def close_model():
+def close_model(exception):
     model().close()
 
 def init_db():
+    return
+
     with closing(connect_db()) as db:
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
             
         db.commit()
         
+    Model().register_user("sam", "1", "sam.nipps@gmail")
+    
     import_artist("DJ Okawari")
 
 def is_safe_url(target):
@@ -43,10 +47,7 @@ def is_safe_url(target):
 
 def get_redirect_target():
     for target in request.values.get("next"), request.referrer:
-        if not target:
-            continue
-            
-        if is_safe_url(target):
+        if target and is_safe_url(target):
             return target
     
 def redirect_back():
@@ -284,6 +285,6 @@ def recover_password():
 #
 
 if __name__ == "__main__":
-    #init_db()
+    init_db()
     app.add_url_rule("/<slug>/", view_func=artist_page)
     app.run(debug=True)
