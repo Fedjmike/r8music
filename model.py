@@ -1,10 +1,10 @@
-from functools import cmp_to_key
+from functools import cmp_to_key, lru_cache
 from collections import namedtuple
 import sqlite3
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g
 
-from import_tools import slugify
+from import_tools import slugify, get_wikipedia_urls
 
 # TODO: Modify query_db so "[i for (i,) in." is unnecessary.
 
@@ -77,7 +77,7 @@ class Model:
         
     #Artist
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_description"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_description", "get_wikipedia_urls"])
         
     def add_artist(self, name, description, incomplete=None):
         #Todo document "incomplete"
@@ -96,7 +96,8 @@ class Model:
         #Always need to know the releases, might as well get them eagerly
         return self.Artist(*row,
             releases=self.get_releases_by_artist(row["id"]),
-            get_description=lambda: self.get_artist_description(row["id"])
+            get_description=lambda: self.get_artist_description(row["id"]),
+            get_wikipedia_urls=lambda: get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
         )
         
     def get_artist(self, artist):
@@ -128,6 +129,18 @@ class Model:
             
         self.insert("insert into artist_links (artist_id, type_id, target)"
                     " values (?, ?, ?)", artist_id, link_type_id, target)
+
+    def get_artist_link(self, artist_id, link_type):
+        """link_type can either be the string that identifies a link, or its id"""
+        
+        @lru_cache(maxsize=128)
+        def get_link_type_id(link_type):
+            return self.query_unique("select id from link_types where type=?", link_type)[0]
+
+        link_type_id = get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+    
+        return self.query_unique("select target from artist_links"
+                                 " where artist_id=? and type_id=?", artist_id, link_type_id)[0]
 
     #Release
     

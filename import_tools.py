@@ -52,6 +52,10 @@ def guess_wikipedia_page(artist_name):
         
     return None
     
+def get_wikipedia_urls(page_title):
+    return "https://en.wikipedia.org/wiki/%s" % page_title, \
+           "https://en.wikipedia.org/w/index.php?title=%s&action=edit" % page_title
+    
 def get_description(artist_name):
     page = guess_wikipedia_page(artist_name)
     return get_wikipedia_summary(page) if page else None

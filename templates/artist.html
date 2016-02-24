@@ -8,6 +8,12 @@
 	<header><h1>{{ artist.name }}</h1></header>
 	
     <p>{{ artist.get_description() | safe }}</p>
+
+    {% set wp_urls = artist.get_wikipedia_urls() %}
+    {% if wp_urls %}
+        {% set wp_page, wp_edit = wp_urls %}
+        <p>[<a href="{{ wp_page }}">Read more</a> or <a href="{{ wp_edit }}">edit</a> on Wikipedia]</p>
+    {% endif %}
 	
     {% set albums = artist.releases | selectattr("release_type", "equalto", "Album") | list %}
     {% if albums %}
