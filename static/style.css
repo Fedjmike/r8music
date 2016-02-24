@@ -333,6 +333,10 @@ ol:not(.small).rating {
     width: 25em;
 }
 
+.tracks {
+    min-width: 23em;
+}
+
 .tracks time {
 	float: right;
 }
