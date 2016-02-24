@@ -77,7 +77,7 @@ class Model:
         
     #Artist
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_description", "get_wikipedia_urls"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
     def add_artist(self, name, description, incomplete=None):
         #Todo document "incomplete"
@@ -96,6 +96,7 @@ class Model:
         #Always need to know the releases, might as well get them eagerly
         return self.Artist(*row,
             releases=self.get_releases_by_artist(row["id"]),
+            get_image_url=lambda: None,
             get_description=lambda: self.get_artist_description(row["id"]),
             get_wikipedia_urls=lambda: get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
         )
