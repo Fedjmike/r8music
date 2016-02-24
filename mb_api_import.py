@@ -4,7 +4,6 @@ import musicbrainzngs
 import sqlite3, sys, requests
 from urllib.parse import urlparse
 import arrow
-from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 import import_tools
 from model import Model, NotFound
@@ -28,7 +27,8 @@ def get_links(artist_mbid):
     result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
     other_types = {'www.facebook.com': 'facebook',
                    'twitter.com': 'twitter',
-                   'plus.google.com': 'google plus'}
+                   'plus.google.com': 'google plus',
+                   'en.wikipedia.org': 'wikipedia'}
     try:
         links = {}
         for item in result['artist']['url-relation-list']:
@@ -37,9 +37,9 @@ def get_links(artist_mbid):
                 links[other_types[domain]] = item['target']
                 continue
             links[item['type']] = item['target']
-        return links
     except KeyError:
-        return None
+        pass
+    return links
 
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
@@ -109,9 +109,8 @@ def import_artist(artist_name):
 
     print("Getting links...")
     links = get_links(artist_mbid)
-    if links:
-        for _type in links:
-            model.add_artist_link(artist_id, _type, links[_type])
+    for link_type, target in links.items():
+        model.add_artist_link(artist_id, link_type, target)
 
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
