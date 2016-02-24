@@ -38,7 +38,7 @@
         {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, None) }}
 	</div>
     {% if release.thumb_art_url %}
-        <a href="{{ release.full_art_url }}"><img class="album-cover" src="{{ release.thumb_art_url }}"/></a>
+        <a class="album-cover" href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a>
     {% endif %}
 </section>
 
