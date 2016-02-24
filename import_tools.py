@@ -1,4 +1,4 @@
-import re, os, urllib.request
+import re, os, urllib.request, requests
 import chromatography
 import wikipedia
 from unidecode import unidecode
@@ -13,11 +13,27 @@ def slugify(text, delim=u'-'):
         result.extend(unidecode(word).split())
     return delim.join(result).lower()
 
+def get_wikipedia_summary(page):
+    """page can be a title (string) or a wikipedia.WikipediaPage"""
+    
+    if isinstance(page, str):
+        page = wikipedia.page(page, auto_suggest=True, redirect=True)
+        
+    response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
+        action="query",
+        format="json",
+        prop="extracts",
+        titles=page.title,
+        exintro=""
+    )).json()
+
+    return response["query"]["pages"][page.pageid]["extract"]
+    
 def get_description(artist_name):
     categories = ['musician', 'band', 'rapper']
     try:
         page = wikipedia.page(artist_name)
-        description = page.summary
+        description = get_wikipedia_summary(page)
         for link in page.links:
             if 'disambiguation' in link:
                 disambiguation_page = wikipedia.page(link)
@@ -29,7 +45,7 @@ def get_description(artist_name):
     except wikipedia.exceptions.DisambiguationError as disambiguation:
         for name in disambiguation.options:
             if any(word in name for word in categories):
-                return wikipedia.summary(name)
+                return get_wikipedia_summary(name)
     except wikipedia.exceptions.PageError:
         pass
     return None
