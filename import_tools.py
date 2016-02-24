@@ -28,19 +28,27 @@ def get_wikipedia_summary(page):
     )).json()
 
     return response["query"]["pages"][page.pageid]["extract"]
+
+def guess_wikipedia_page(artist_name):
+    categories = ["musician", "band", "rapper"]
     
-def get_description(artist_name):
-    categories = ['musician', 'band', 'rapper']
     try:
         page = wikipedia.page(artist_name)
-        return get_wikipedia_summary(page)
+        return page.title
+        
     except wikipedia.exceptions.DisambiguationError as disambiguation:
         for name in disambiguation.options:
-            if any(word in name for word in categories):
-                return get_wikipedia_summary(name)
+            if any(category in name for category in categories):
+                return name
+                
     except wikipedia.exceptions.PageError:
         pass
+        
     return None
+    
+def get_description(artist_name):
+    page = guess_wikipedia_page(artist_name)
+    return get_wikipedia_summary(page) if page else None
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
