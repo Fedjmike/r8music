@@ -34,6 +34,12 @@ def guess_wikipedia_page(artist_name):
     
     try:
         page = wikipedia.page(artist_name)
+        
+        for link in page.links[:10]:
+            if "disambiguation" in link:
+                disambiguation_page = wikipedia.page(link)
+                #Opening the disambiguation page will raise a DisambiguationError
+
         return page.title
         
     except wikipedia.exceptions.DisambiguationError as disambiguation:
