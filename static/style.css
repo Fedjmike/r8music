@@ -311,14 +311,6 @@ ol:not(.small).rating {
     filter: brightness(110%);
 }
 
-.tracks time {
-	float: right;
-}
-
-.tracks li:nth-child(2n) {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-
 /*Albums*/
 
 .album-main {
@@ -339,6 +331,14 @@ ol:not(.small).rating {
 
 .columns .album-main {
     width: 25em;
+}
+
+.tracks time {
+	float: right;
+}
+
+.tracks li:nth-child(2n) {
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .album-cover {
