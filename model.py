@@ -77,7 +77,7 @@ class Model:
         
     #Artist
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "incomplete", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
     def add_artist(self, name, description, incomplete=None):
         #Todo document "incomplete"
@@ -104,8 +104,7 @@ class Model:
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
         
-        query = "select * from artists where slug=?" if isinstance(artist, str) \
-                else "select * from artists where id=?"
+        query = "select id, name, slug from artists where %s=?" % ("slug" if isinstance(artist, str) else "id")
         return self._make_artist(self.query_unique(query, artist))
         
     def get_release_artists(self, release_id):
@@ -113,7 +112,7 @@ class Model:
         
         return [
             self._make_artist(row) for row in
-            self.query("select id, name, slug, incomplete from"
+            self.query("select id, name, slug from"
                        " (select artist_id from authorships where release_id=?)"
                        " join artists on artist_id = artists.id", release_id)
         ]
