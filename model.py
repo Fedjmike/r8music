@@ -206,10 +206,9 @@ class Model:
             #Join them using authorships
             self.query_unique("select " + self._release_columns + " from"
                               " (select artists.id as artist_id from artists where artists.slug=?)"
-                              " inner join authorships using (artist_id)"
-                              " inner join (select " + self._release_columns_rename + 
-                              "             from releases where releases.slug=?)"
-                              " using (release_id)", artist_slug, release_slug)
+                              " natural join authorships natural join"
+                              " (select " + self._release_columns_rename + " from releases where releases.slug=?)",
+                              artist_slug, release_slug)
         )
         
     def get_release_colors(self, release_id):
