@@ -1,5 +1,5 @@
 {% macro login_form(standalone=False) -%}
-    <form action={{ url_for("login") }} method="post">
+    <form action={{ url_for("login") }} method="post" class="clearfix">
         <dl>
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
@@ -13,7 +13,7 @@
 {%- endmacro %}
 
 {% macro register_form(standalone=False) -%}
-    <form action={{ url_for("register") }} method="post">
+    <form action={{ url_for("register") }} method="post" class="clearfix">
         <dl>
             <dt>Username</dt> <dd><input type="text" name="username" /></dd>
             <dt>Password</dt> <dd><input type="password" name="password" /></dd>
