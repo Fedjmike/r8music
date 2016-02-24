@@ -111,11 +111,7 @@ def import_artist(artist_name):
     links = get_links(artist_mbid)
     if links:
         for _type in links:
-            try:
-                link_type_id = model.query_unique("select id from link_types where link_type = ?", _type)[0]
-            except NotFound:
-                link_type_id = model.insert("insert into link_types (link_type) values (?)", _type)
-            model.insert("insert into artist_links (artist_id, link_type_id, link_target) values (?, ?, ?)", artist_id, link_type_id, links[_type])
+            model.add_artist_link(artist_id, _type, links[_type])
 
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)

@@ -9,15 +9,16 @@ create table artists (
 drop table if exists artist_links;
 create table artist_links (
     artist_id integer not null,
-    link_type_id text not null,
-    link_target text not null,
-    foreign key (link_type_id) references link_types(id)
+    type_id text not null,
+    target text not null,
+    primary key (artist_id, type_id),
+    foreign key (type_id) references link_types(id)
 );
 
 drop table if exists link_types;
 create table link_types (
     id integer primary key autoincrement,
-    link_type text not null
+    type text not null
 );
 
 

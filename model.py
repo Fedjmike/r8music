@@ -119,6 +119,16 @@ class Model:
     def get_artist_description(self, artist_id):
         return self.query_unique("select description from artist_descriptions where artist_id = (?)", artist_id)[0]
 
+    def add_artist_link(self, artist_id, link_type, target):
+        try:
+            (link_type_id,) = self.query_unique("select id from link_types where type=?", link_type)
+            
+        except NotFound:
+            link_type_id = self.insert("insert into link_types (type) values (?)", link_type)
+            
+        self.insert("insert into artist_links (artist_id, type_id, target)"
+                    " values (?, ?, ?)", artist_id, link_type_id, target)
+
     #Release
     
     Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
