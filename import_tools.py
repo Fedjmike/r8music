@@ -4,7 +4,7 @@ import wikipedia
 from collections import namedtuple
 from itertools import combinations
 from unidecode import unidecode
-from colorsys import rgb_to_hsv as bad_hsv
+from colorsys import rgb_to_hls as bad_hls
 
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
@@ -62,17 +62,17 @@ def get_description(artist_name):
     page = guess_wikipedia_page(artist_name)
     return get_wikipedia_summary(page) if page else None
 
-HSV = namedtuple("HSV", ["hue", "saturation", "value"])
+HLS = namedtuple("HLS", ["hue", "lightness", "saturation"])
 rgb_to_hex = lambda color: "#%02x%02x%02x" % color
-rgb_to_hsv = lambda color: HSV(*bad_hsv(*(c/255 for c in color)))
+rgb_to_hls = lambda color: HLS(*bad_hls(*(c/255 for c in color)))
     
 def hue_difference(pair):
     hues = [rgb_to_hls(c).hue for c in pair]
     return abs(hues[0] - hues[1])
     
 def valid_color(color):
-    h, s, v = rgb_to_hsv(color)
-    return s > 0.3 and v > 0.4 and v < 0.95
+    hue, lightness, saturation = rgb_to_hls(color)
+    return saturation > 0.3 and lightness < 0.48 and lightness > 0.325
 
 def get_palette(album_art_url):
     print("Getting palette...")
@@ -84,7 +84,7 @@ def get_palette(album_art_url):
         #Select the two colours with hues most different to each other
         most_different = max(combinations(palette, 2), key=hue_difference)
         #Put the brightest of these second
-        most_different = sorted(most_different, key=lambda c: rgb_to_hsv(c).value)
+        most_different = sorted(most_different, key=lambda c: rgb_to_hls(c).lightness)
         #And then any other colours
         palette = most_different + [c for c in palette if c not in most_different]
         
