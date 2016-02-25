@@ -2,6 +2,7 @@ import re, os, urllib.request, requests
 from chromatography import Chromatography, ChromatographyException
 import wikipedia
 from collections import namedtuple
+from itertools import combinations
 from unidecode import unidecode
 from colorsys import rgb_to_hsv as bad_hsv
 
@@ -64,7 +65,11 @@ def get_description(artist_name):
 HSV = namedtuple("HSV", ["hue", "saturation", "value"])
 rgb_to_hex = lambda color: "#%02x%02x%02x" % color
 rgb_to_hsv = lambda color: HSV(*bad_hsv(*(c/255 for c in color)))
-
+    
+def hue_difference(pair):
+    hues = [rgb_to_hls(c).hue for c in pair]
+    return abs(hues[0] - hues[1])
+    
 def valid_color(color):
     h, s, v = rgb_to_hsv(color)
     return s > 0.3 and v > 0.4 and v < 0.95
@@ -75,7 +80,14 @@ def get_palette(album_art_url):
         tempname, _ = urllib.request.urlretrieve(album_art_url)
         palette = Chromatography(tempname).get_highlights(3, valid_color)
         os.remove(tempname)
-        palette[:2] = sorted(palette[:2], key=lambda p:rgb_to_hsv(p).value)
+        
+        #Select the two colours with hues most different to each other
+        most_different = max(combinations(palette, 2), key=hue_difference)
+        #Put the brightest of these second
+        most_different = sorted(most_different, key=lambda c: rgb_to_hsv(c).value)
+        #And then any other colours
+        palette = most_different + [c for c in palette if c not in most_different]
+        
         return [rgb_to_hex(color) for color in palette]
     except (ChromatographyException, OSError):
         return [None, None, None]
