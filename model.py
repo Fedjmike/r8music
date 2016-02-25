@@ -3,7 +3,7 @@ from functools import cmp_to_key, lru_cache
 from datetime import datetime
 from collections import namedtuple
 from werkzeug import check_password_hash, generate_password_hash
-from flask import g
+from flask import g, url_for
 
 from import_tools import slugify, get_wikipedia_urls
 
@@ -93,7 +93,7 @@ class Model:
     def _make_artist(self, row):
         #Always need to know the releases, might as well get them eagerly
         return self.Artist(*row,
-            releases=self.get_releases_by_artist(row["id"]),
+            releases=self.get_releases_by_artist(row["id"], row["slug"]),
             get_image_url=lambda: None,
             get_description=lambda: self.get_artist_description(row["id"]),
             get_wikipedia_urls=lambda: get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
@@ -105,15 +105,22 @@ class Model:
         query = "select id, name, slug from artists where %s=?" % ("slug" if isinstance(artist, str) else "id")
         return self._make_artist(self.query_unique(query, artist))
         
-    def get_release_artists(self, release_id):
+    def get_release_artists(self, release_id, primary_artist_id=None):
         """Get all the artists who authored a release"""
         
-        return [
+        artists = [
             self._make_artist(row) for row in
             self.query("select id, name, slug from"
                        " (select artist_id from authorships where release_id=?)"
                        " join artists on artist_id = artists.id", release_id)
         ]
+        
+        if primary_artist_id:
+            #Put the primary artist first
+            ((index, primary_artist),) = [(i, a) for i, a in enumerate(artists) if a.id == primary_artist_id]
+            return [primary_artist] + artists[:index] + artists[index+1:]
+        
+        return artists
         
     def get_artist_description(self, artist_id):
         return self.query_unique("select description from artist_descriptions where artist_id = (?)", artist_id)[0]
@@ -142,7 +149,8 @@ class Model:
 
     #Release
     
-    Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
+    Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url",
+                                     "url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
     
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
@@ -167,19 +175,32 @@ class Model:
         self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
                     release_id, artist_id)
     
-    def _make_release(self, row):
-        release_id = row["release_id"]
+    def _make_release(self, row, primary_artist_id=None, primary_artist_slug=None):
+        release_id = row[0]
+        release_slug = row[2]
+        
+        if not primary_artist_id:
+            primary_artist_id, primary_artist_slug = \
+                self.query_unique("select id, slug from"
+                                  " (select artist_id from authorships where release_id=?)"
+                                  " join artists on artist_id = artists.id limit 1", release_id)
+        
+        elif not primary_artist_slug:
+            primary_artist_slug = self.query_unique("select slug from artists where id=?", primary_artist_id)
         
         return self.Release(*row,
-            get_artists=lambda: self.get_release_artists(release_id),
+            url=url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug),
+            get_artists=lambda: self.get_release_artists(release_id, primary_artist_id),
             get_colors=lambda: self.get_release_colors(release_id),
             get_tracks=lambda: self.get_release_tracks(release_id),
             get_rating_stats=lambda: self.get_release_rating_stats(release_id)
         )
         
-    def get_releases_by_artist(self, artist_id):
+    def get_releases_by_artist(self, artist_id, artist_slug=None):
+        """artist_slug is optional but saves having to look it up"""
+        
         return [
-            self._make_release(row) for row in
+            self._make_release(row, artist_id, artist_slug) for row in
             self.query("select " + self._release_columns + " from"
                        " (select release_id from authorships where artist_id=?)"
                        " join releases on releases.id = release_id", artist_id)
@@ -197,16 +218,17 @@ class Model:
         ]
         
     def get_release(self, artist_slug, release_slug):
-        return self._make_release(
-            #Select the artist and release rows with the right slugs
-            # (first, to make the join small)
-            #Join them using authorships
-            self.query_unique("select " + self._release_columns + " from"
+        #Select the artist and release rows with the right slugs
+        # (first, to make the join small)
+        #Join them using authorships
+        artist_id, *row = \
+            self.query_unique("select artist_id, " + self._release_columns + " from"
                               " (select artists.id as artist_id from artists where artists.slug=?)"
                               " natural join authorships natural join"
                               " (select " + self._release_columns_rename + " from releases where releases.slug=?)",
                               artist_slug, release_slug)
-        )
+
+        return self._make_release(row, artist_id, artist_slug)
         
     def get_release_colors(self, release_id):
         return self.query_unique("select color1, color2, color3 from release_colors"

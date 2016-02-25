@@ -10,7 +10,7 @@
     <ol class="releases">
     {% for release in releases | sort(attribute="date") %}
         <li>
-            <h2><time>{{ release.date[:4] }}</time> <a href={{ url_for("release_page", release_slug=release.slug, artist_slug=release.get_artists()[0].slug) }}>{{ release.title }}</a></h2>
+            <h2><time>{{ release.date[:4] }}</time> <a href={{ release.url }}>{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>
@@ -21,7 +21,7 @@
     {% for release in releases | sort(attribute="date") %}
         <li>
             {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, "inset small") }}
-            <a href={{ url_for("release_page", release_slug=release.slug, artist_slug=release.get_artists()[0].slug) }}>
+            <a href={{ release.url }}>
                 <div><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
                 <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>
             </a>
