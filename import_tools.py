@@ -1,8 +1,9 @@
 import re, os, urllib.request, requests
-import chromatography
+from chromatography import Chromatography, ChromatographyException
 import wikipedia
+from collections import namedtuple
 from unidecode import unidecode
-from colorsys import rgb_to_hsv
+from colorsys import rgb_to_hsv as bad_hsv
 
 _punct_re = re.compile(r'[\t !:"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
@@ -60,24 +61,21 @@ def get_description(artist_name):
     page = guess_wikipedia_page(artist_name)
     return get_wikipedia_summary(page) if page else None
 
-def rgb_to_hex(rgb):
-    return '#%02x%02x%02x' % rgb
+HSV = namedtuple("HSV", ["hue", "saturation", "value"])
+rgb_to_hex = lambda color: "#%02x%02x%02x" % color
+rgb_to_hsv = lambda color: HSV(*bad_hsv(*(c/255 for c in color)))
 
-
-def valid_pixel(pixel):
-    (h, s, v) = rgb_to_hsv(pixel[0]/255, pixel[1]/255, pixel[2]/255)
-    if s > 0.3 and v > 0.4 and v < 0.95:
-        return True
-    return False
+def valid_color(color):
+    h, s, v = rgb_to_hsv(color)
+    return s > 0.3 and v > 0.4 and v < 0.95
 
 def get_palette(album_art_url):
     print("Getting palette...")
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
-        c = chromatography.Chromatography(tempname)
-        palette = c.get_highlights(3, valid_pixel)
-        palette[:2] = sorted(palette[:2], key=lambda p:rgb_to_hsv(p[0]/255, p[1]/255, p[2]/255)[2])
+        palette = Chromatography(tempname).get_highlights(3, valid_color)
         os.remove(tempname)
+        palette[:2] = sorted(palette[:2], key=lambda p:rgb_to_hsv(p).value)
         return [rgb_to_hex(color) for color in palette]
-    except (chromatography.ChromatographyException, OSError):
+    except (ChromatographyException, OSError):
         return [None, None, None]
