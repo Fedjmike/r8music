@@ -71,10 +71,6 @@ def prepare_release(release):
     release['full-art-url'], release['thumb-art-url'] \
         = get_album_art_urls(release['group-id'])
 
-    if release['thumb-art-url']:
-        release['palette'] = import_tools.get_palette(release['thumb-art-url'])
-    else:
-        release['palette'] = [None, None, None]
     print("Getting deets for release " + release['id'] + "...")
     result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
     release['tracks'] = result['release']['medium-list'][0]['track-list']
@@ -131,7 +127,6 @@ def import_artist(artist_name):
             release['type'],
             release['full-art-url'],
             release['thumb-art-url'],
-            release['palette'],
             release['id'] #mbid
         )
         

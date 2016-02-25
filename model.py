@@ -5,7 +5,7 @@ from collections import namedtuple
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g, url_for
 
-from import_tools import slugify, get_wikipedia_urls
+from import_tools import slugify, get_wikipedia_urls, get_palette
 
 # TODO: Modify query_db so "[i for (i,) in." is unnecessary.
 
@@ -157,20 +157,24 @@ class Model:
     _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
     #todo rename the actual columns
 
-    def add_release(self, title, date, type, full_art_url, thumb_arl_url, palette, mbid):
+    def add_release(self, title, date, type, full_art_url, thumb_arl_url, mbid):
         slug = generate_slug(title, self.db, "releases")
         
         release_id = self.insert("insert into releases (title, slug, date, type, full_art_url, thumb_art_url)"
                                  " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_arl_url)
 
-        self.insert("insert into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
-                    release_id, palette[0], palette[1], palette[2])
-                    
+        self.add_palette(release_id, thumb_art_url)
+        
         self.insert("insert into release_externals (release_id, mbid) values (?, ?)",
                     release_id, mbid)
                     
         return release_id
-    
+        
+    def add_palette(self, release_id, image_url=None):
+        palette = get_palette(image_url) if image_url else [None, None, None]
+        self.insert("replace into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
+                    release_id, *palette)
+                    
     def add_author(self, release_id, artist_id):
         self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
                     release_id, artist_id)
