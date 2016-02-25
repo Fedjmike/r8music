@@ -1,6 +1,6 @@
+from math import sqrt
+from collections import namedtuple
 from PIL import Image
-from random import sample
-from colorsys import rgb_to_hsv
 
 class ChromatographyException(Exception):
     pass
@@ -8,29 +8,28 @@ class ChromatographyException(Exception):
 class NotEnoughValidPixels(ChromatographyException):
     pass
 
-class MalformedImage(ChromatographyException):
-    pass
-
-def sq_euclidian_distance(pixel1, pixel2):
-    return sum([(pixel1[i]-pixel2[i])**2 for i in [0, 1, 2]])
-
-def bright_pixel(pixel):
-    (h, s, v) = rgb_to_hsv(pixel[0]/255, pixel[1]/255, pixel[2]/255)
-    if s + v > 1.4:
-        return True
-    return False
+def sq_distance(l, r):
+    return sum((a-b)**2 for a, b in zip(l, r))
 
 class Cluster(object):
-    def __init__(self, centroid):
-        self.centroid = centroid
-        self.pixels = [centroid]
-
+    def __init__(self, initial_color):
+        self.frequency = 1
+        self.sum = initial_color
+        self.range = 800
+        
+    def fits_in(self, color):
+        distance = sq_distance(color, self.get_mean())
+        fits = distance < self.range
+        
+        if fits:
+            self.sum = [p+q for p, q in zip(color, self.sum)]
+            self.frequency += 1
+            self.range += distance/self.frequency
+            
+        return fits
+        
     def get_mean(self):
-        mean_value = tuple([int(sum(x)/len(self.pixels)) for x in zip(*self.pixels)])
-        return mean_value
-
-    def size(self):
-        return len(self.pixels)
+        return tuple(int(part/self.frequency) for part in self.sum)
 
 
 class Chromatography(object):
@@ -39,45 +38,22 @@ class Chromatography(object):
         self.scale_image()
         
     def scale_image(self):
-        (height, width) = self.img.size
+        height, width = self.img.size
         target_area = 10000
-        ratio = (height*width/target_area)
+        ratio = sqrt(height*width/target_area)
         self.img = self.img.resize((int(height/ratio), int(width/ratio)), Image.ANTIALIAS)
 
-    def get_palette(self, k=4, filter_pixels=None):
-        all_pixels = list(self.img.getdata())
-        #try:
-        self.pixels = list(filter(filter_pixels, all_pixels))
-        #except TypeError:
-        #    raise MalformedImage
-        # TODO: Pick the initial centroids in a better way
-        try:
-            centroids = sample(self.pixels, k)
-        # Not enough pixels to sample the initial centroids from
-        except (ValueError, TypeError):
-            raise NotEnoughValidPixels
-
-        while True:
-            new_centroids = self.new_centroids(centroids)
-            if sum([sq_euclidian_distance(a, b) for (a, b) in zip(centroids, new_centroids)]) < 10:
-                break
-            centroids = new_centroids
-        centroids = self.sort_centroids(centroids)
-        return centroids
-
-    def get_highlights(self, k=4, filter_pixels=None):
-        palette = self.get_palette(k*2, filter_pixels)
-        highlights = self.sort_centroids(palette)[k:2*k]
-        return list(reversed(highlights))
-
-    def sort_centroids(self, centroids):
-        clusters = [Cluster(c) for c in centroids]
-        sorted_clusters = sorted(clusters, key=lambda c: sum([sq_euclidian_distance(c.centroid, centroid)*c.size() for centroid in centroids]))
-        # sorted_clusters = sorted(clusters, key=lambda c: c.size())
-        return [c.centroid for c in sorted_clusters]
-
-    def new_centroids(self, centroids):
-        clusters = [Cluster(centroid) for centroid in centroids]
-        for pixel in self.pixels:
-            min(clusters, key=lambda c: sq_euclidian_distance(pixel, c.centroid)).pixels.append(pixel)
-        return [c.get_mean() for c in clusters]
+    def get_highlights(self, n=3, valid_color=None):
+        colors = [p for p in self.img.getdata() if valid_color(p)]
+        
+        if len(colors) == 0:
+            raise NotEnoughValidPixels()
+            
+        clusters = []
+        
+        for color in colors:
+            if not any(c.fits_in(color) for c in clusters):
+                 clusters.append(Cluster(color))
+                 
+        top_clusters = sorted(clusters, key=lambda c: c.frequency, reverse=True)
+        return [c.get_mean() for c in top_clusters[:n]]

@@ -72,7 +72,7 @@ def hue_difference(pair):
     
 def valid_color(color):
     hue, lightness, saturation = rgb_to_hls(color)
-    return saturation > 0.3 and lightness < 0.48 and lightness > 0.325
+    return saturation > 0.3 and lightness < 0.6 and lightness > 0.35
 
 def get_palette(album_art_url):
     print("Getting palette...")
@@ -81,12 +81,19 @@ def get_palette(album_art_url):
         palette = Chromatography(tempname).get_highlights(3, valid_color)
         os.remove(tempname)
         
-        #Select the two colours with hues most different to each other
-        most_different = max(combinations(palette, 2), key=hue_difference)
-        #Put the brightest of these second
-        most_different = sorted(most_different, key=lambda c: rgb_to_hls(c).lightness)
-        #And then any other colours
-        palette = most_different + [c for c in palette if c not in most_different]
+        try:
+            #Select the two colours with hues most different to each other
+            most_different = max(combinations(palette, 2), key=hue_difference)
+            #Put the brightest of these second
+            most_different = sorted(most_different, key=lambda c: rgb_to_hls(c).lightness)
+            #And then any other colours
+            palette = most_different + [c for c in palette if c not in most_different]
+            
+        except:
+            pass
+            
+        if len(palette) < 3:
+            palette += [palette[0]] * (3 - len(palette))
         
         return [rgb_to_hex(color) for color in palette]
     except (ChromatographyException, OSError):
