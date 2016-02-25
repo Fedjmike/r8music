@@ -157,11 +157,11 @@ class Model:
     _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
     #todo rename the actual columns
 
-    def add_release(self, title, date, type, full_art_url, thumb_arl_url, mbid):
+    def add_release(self, title, date, type, full_art_url, thumb_art_url, mbid):
         slug = generate_slug(title, self.db, "releases")
         
         release_id = self.insert("insert into releases (title, slug, date, type, full_art_url, thumb_art_url)"
-                                 " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_arl_url)
+                                 " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_art_url)
 
         self.add_palette(release_id, thumb_art_url)
         
