@@ -88,12 +88,11 @@ ol.nav {
 .nav .banner {
     font-size: 1.17em;
     font-weight: bold;
-    position: relative;
-    top: 0.06em;
 }
 
 .nav li {
     display: inline-block;
+    vertical-align: middle;
 }
 
 .nav * + li:before {
