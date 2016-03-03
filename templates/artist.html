@@ -12,7 +12,8 @@
         
         <header><h1>{{ artist.name }}</h1></header>
         
-        <p>{{ artist.get_description() | safe }}</p>
+        {% set description = artist.get_description() %}
+        <p>{{ description | safe if description else "" }}</p>
         
         {% set wp_urls = artist.get_wikipedia_urls() %}
         {% if wp_urls %}

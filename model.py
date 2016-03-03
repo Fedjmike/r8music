@@ -91,12 +91,20 @@ class Model:
         return artist_id
         
     def _make_artist(self, row):
+        def get_artist_wikipedia_urls():
+            try:
+                return get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
+            
+            except NotFound:
+                return None
+        
+    
         #Always need to know the releases, might as well get them eagerly
         return self.Artist(*row,
             releases=self.get_releases_by_artist(row["id"], row["slug"]),
             get_image_url=lambda: None,
             get_description=lambda: self.get_artist_description(row["id"]),
-            get_wikipedia_urls=lambda: get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
+            get_wikipedia_urls=get_artist_wikipedia_urls
         )
         
     def get_artist(self, artist):
