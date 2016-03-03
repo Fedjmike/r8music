@@ -84,14 +84,13 @@ ol.nav {
     font-size: 1.17em;
 }
 
-.nav .banner {
-    font-size: 1.17em;
-    font-weight: bold;
-}
-
 .nav li {
     display: inline-block;
-    vertical-align: middle;
+}
+
+.nav > li > * {
+    line-height: 2rem;
+    display: inline-block;
 }
 
 .nav * + li:before {
@@ -99,6 +98,16 @@ ol.nav {
     font-size: 1.2em;
     position: relative;
     top: 0.125em;
+}
+
+.nav .banner {
+    font-size: 1.17em;
+    font-weight: bold;
+}
+
+.nav #user-more {
+    /*Relies on JS, enabled by JS*/
+    display: none;
 }
 
 form.small {
@@ -141,11 +150,6 @@ form.small input[type="submit"].material-icons {
 
 form.small input:focus ~ input[type="submit"]:hover {
     cursor: pointer;
-}
-
-.nav #user-more {
-    /*Relies on JS, enabled by JS*/
-    display: none;
 }
 
 ol.rating {
