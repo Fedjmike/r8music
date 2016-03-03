@@ -17,7 +17,13 @@
     <script src="/static/r8music.js"></script>
     
     <style>
-    {% if accent_color_1 %}
+    {% if not accent_color_1 %}
+        {% set accent_color_1 = "#4078c0" %}
+    {% endif %}
+    {% if not accent_color_2 %}
+        {% set accent_color_2 = "#4078c0" %}
+    {% endif %}
+    
     a {
         color: {{ accent_color_1 }};
     }
@@ -33,15 +39,11 @@
         background-color: {{ accent_color_1 }};
     }
     
-    {% endif %}
-
-    {% if accent_color_2 %}
     ol:not(small).rating,
     #average-rating,
     input[type="submit"] {
         background-color: {{ accent_color_2 }};
     }
-    {% endif %}
     </style>
 </head>
 <body>
