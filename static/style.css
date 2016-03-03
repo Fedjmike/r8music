@@ -111,9 +111,14 @@ ol.nav {
 }
 
 form.small {
-    display: inline-block;
+    display: inline-flex;
     margin-right: 0.2em;
     font-size: 0.8rem;
+}
+
+form.small > * {
+    vertical-align: middle;
+    float: none;
 }
 
 form.small input[type="text"] {
