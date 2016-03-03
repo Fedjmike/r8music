@@ -97,4 +97,6 @@ def get_palette(album_art_url):
         
         return [rgb_to_hex(color) for color in palette]
     except (ChromatographyException, OSError):
+        import traceback
+        traceback.print_exc()
         return [None, None, None]

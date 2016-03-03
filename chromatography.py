@@ -8,6 +8,12 @@ class ChromatographyException(Exception):
 class NotEnoughValidPixels(ChromatographyException):
     pass
 
+class BadColorMode(ChromatographyException):
+    pass
+
+class NotImplemented(ChromatographyException):
+    pass
+
 def sq_distance(l, r):
     return sum((a-b)**2 for a, b in zip(l, r))
 
@@ -44,6 +50,13 @@ class Chromatography(object):
         self.img = self.img.resize((int(height/ratio), int(width/ratio)), Image.ANTIALIAS)
 
     def get_highlights(self, n=3, valid_color=None):
+        if self.img.mode != "RGB":
+            #B&W, no colours
+            if self.img.mode in ["1", "L"]:
+                raise BadColorMode("Can't extract colours from black and white image with colour mode " + self.img.mode)
+                
+            raise NotImplemented("Not implemented for images with colour mode " + self.img.mode)
+        
         colors = [p for p in self.img.getdata() if valid_color(p)]
         
         if len(colors) == 0:
