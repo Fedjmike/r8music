@@ -23,19 +23,28 @@ def get_album_art_urls(release_group_id):
         return None, None
 
 def get_links(artist_mbid):
-    result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
     other_types = {'www.facebook.com': 'facebook',
                    'twitter.com': 'twitter',
                    'plus.google.com': 'google plus',
                    'en.wikipedia.org': 'wikipedia'}
+                   
+    def split_link(_type, url):
+        _, domain, path, _, _, _ = urlparse(url)
+        if domain in other_types:
+            target = path[len("/wiki/"):] \
+                     if "wikipedia" == other_types[domain] and path.startswith("/wiki/") \
+                     else url
+            return other_types[domain], target
+        else:
+            return _type, url
+            
     try:
+        #todo optimize get_artists calls
+        result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
         links = {}
         for item in result['artist']['url-relation-list']:
-            domain = urlparse(item['target']).netloc
-            if domain in other_types:
-                links[other_types[domain]] = item['target']
-                continue
-            links[item['type']] = item['target']
+            _type, target = split_link(item['type'], item['target'])
+            links[_type] = target
     except KeyError:
         pass
     return links
