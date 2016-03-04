@@ -1,5 +1,6 @@
 import os, time, requests
 from urllib.parse import urlparse, urljoin
+from multiprocessing import Pool
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from werkzeug import generate_password_hash
@@ -15,6 +16,8 @@ app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
 #losing your session when the server restarts
 app.secret_key = os.urandom(24)
+
+app_pool = None
 
 def model():
     if not hasattr(g, "model"):
@@ -160,6 +163,19 @@ def artist_page(slug):
     except NotFound:
         return page_not_found()
 
+@app.route("/artists/add", methods=["GET", "POST"])
+@needs_auth
+def add_artist():
+    if request.method == "GET":
+        return render_template("add_artist.html")
+        
+    else:
+        #todo allow mbid
+        #todo ajax progress
+        artist_name = request.form["artist-name"]
+        app_pool.apply_async(import_artist, (artist_name,))
+        return redirect_back()
+    
 @app.route("/user/<slug>")
 @with_user
 def user_page(slug):
@@ -285,6 +301,7 @@ def recover_password():
 #
 
 if __name__ == "__main__":
+    app_pool = Pool(processes=4)
     init_db()
     app.add_url_rule("/<slug>/", view_func=artist_page)
     app.run(debug=True)
