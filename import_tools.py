@@ -68,7 +68,10 @@ rgb_to_hls = lambda color: HLS(*bad_hls(*(c/255 for c in color)))
     
 def hue_difference(pair):
     hues = [rgb_to_hls(c).hue for c in pair]
-    return abs(hues[0] - hues[1])
+    diff = abs(hues[0] - hues[1])
+    #Hue is a circular dimension. The most different colours are
+    #those half way from each other
+    return 1 - abs(0.5 - diff)
     
 def valid_color(color):
     hue, lightness, saturation = rgb_to_hls(color)
