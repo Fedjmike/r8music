@@ -343,6 +343,10 @@ ol:not(.small).rating {
     min-width: 23em;
 }
 
+.tracks li {
+    margin-right: 0.4em;
+}
+
 .tracks time {
 	float: right;
 }
@@ -358,6 +362,7 @@ ol:not(.small).rating {
 
 .album-cover img {
     max-width: 20em;
+    margin-right: 1em;
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }
 
@@ -373,6 +378,10 @@ ol:not(.small).rating {
     font-size: 1rem;
     font-weight: bold;
     color: white;
+}
+
+#more-from {
+    margin-bottom: -0.1em;
 }
 
 /*Artists*/

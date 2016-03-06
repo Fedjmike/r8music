@@ -45,13 +45,13 @@
 {% for artist in release.get_artists() %}
 <section>
 	<header>
-        <h3><em>More from</em></h3>
+        <h3 name="more-from"><em>More from</em></h3>
         <h1>{{ artist.name }}</h1>
     </header>
 	
 	{{ release_list(artist.releases | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id)) }} 
     
-	<p>{{ artist.get_description() | safe }}</p>
+	<p>{{ artist.get_description() | safe if description else "" }}</p>
 </section>
 {% endfor %}
 {% endblock %}

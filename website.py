@@ -170,13 +170,13 @@ def release_post(release_id):
             
         #No rating field sent
         except (KeyError):
-            return jsonify(error=1)
+            return jsonify(error=1), 400
         
     elif request.values["action"] == "unrate":
         model().unset_release_rating(release_id, request.user.id)
     
     else:
-        return jsonify(error=1)
+        return jsonify(error=1), 400
         
     rating_stats = model().get_release_rating_stats(release_id)
     return jsonify(error=0,
