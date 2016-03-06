@@ -33,8 +33,16 @@ header, p, ol, ul {
 	margin: 1em 0;
 }
 
+p {
+    color: #333;
+}
+
 .tight {
     margin: 0.3em 0;
+}
+
+.de-emph {
+    color: #aaa;
 }
 
 h1 {
@@ -339,16 +347,33 @@ ol:not(.small).rating {
     width: 25em;
 }
 
-.tracks {
+ol.tracks {
     min-width: 23em;
+    color: #333;
+    counter-reset: item;
+    margin-left: 0;
+    padding-left: 0;
 }
 
 .tracks li {
+    display: block;
+    margin-left: 1.5em;
     margin-right: 0.4em;
+}
+
+.tracks li:before {
+    display: inline-block;
+    content: counter(item) ". ";
+    text-align: right;
+    counter-increment: item;
+    width: 1.5em;
+    margin-left: -1.5em;
+    color: #aaa;
 }
 
 .tracks time {
 	float: right;
+    color: #aaa;
 }
 
 .tracks li:nth-child(2n) {
