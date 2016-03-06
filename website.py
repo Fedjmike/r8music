@@ -1,4 +1,5 @@
 import os, time, requests
+from collections import namedtuple
 from urllib.parse import urlparse, urljoin
 from multiprocessing import Pool
 
@@ -127,12 +128,14 @@ def with_user(f):
     decorated.__name__ = f.__name__
     return decorated
 
+UserID = namedtuple("UserID", ["id"])
+
 def needs_auth(f):
     """A decorator for pages that require authentication"""
     def decorated(*args, **kwargs):
-        request.user_id = get_user_id()
+        request.user = UserID(get_user_id())
         
-        if request.user_id == None:
+        if request.user.id == None:
             #todo
             #todo send JSON for some pages (e.g. rating, with UI info)
             return "Not authenticated", 403
@@ -189,7 +192,7 @@ def user_page(slug):
 @app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
 @needs_auth
 def change_rating(release_id, rating):
-    model().set_release_rating(release_id, request.user_id, rating)
+    model().set_release_rating(release_id, request.user.id, rating)
     rating_stats = model().get_release_rating_stats(release_id)
 
     return jsonify(error=0,
@@ -199,7 +202,7 @@ def change_rating(release_id, rating):
 @app.route("/unrate/<int:release_id>", methods=["POST"])
 @needs_auth
 def remove_rating(release_id):
-    model().unset_release_rating(release_id, request.user_id)
+    model().unset_release_rating(release_id, request.user.id)
     rating_stats = model().get_release_rating_stats(release_id)
 
     return jsonify(error=0,
