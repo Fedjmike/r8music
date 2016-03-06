@@ -10,31 +10,15 @@ function updateAverageRating(msg) {
     }
 }
 
-function unrateRelease(clicked_element, release_id) {
-    $.ajax({
-        method: "POST",
-        url: "/unrate/" + release_id
-        
-    }).done(function (msg) {
-        if (msg.error)
-            return;
-            
-        clicked_element.classList.remove("selected");
-        updateAverageRating(msg);
-    })
-}
-
 function rateRelease(clicked_element, release_id, rating) {
     /*User clicked the already selected rating
        => unrate*/
-    if (clicked_element.classList.contains("selected")) {
-        unrateRelease(clicked_element, release_id);
-        return;
-    }
+    unrating = clicked_element.classList.contains("selected");
     
     $.ajax({
         method: "POST",
-        url: "/rate/" + release_id + "/" + rating
+        url: "/release/" + release_id,
+        data: {action: unrating ? "unrate" : "rate", rating: rating}
         
     }).done(function (msg) {
         if (msg.error)
@@ -42,12 +26,17 @@ function rateRelease(clicked_element, release_id, rating) {
             
         /*Success, update rating widget*/
         
-        var siblings = clicked_element.parentNode.children;
+        if (unrating)
+            clicked_element.classList.remove("selected");
         
-        for (var i = 0; i < siblings.length; i++)
-            siblings[i].classList.remove("selected");
+        else {
+            var siblings = clicked_element.parentNode.children;
             
-        clicked_element.classList.add("selected");
+            for (var i = 0; i < siblings.length; i++)
+                siblings[i].classList.remove("selected");
+                
+            clicked_element.classList.add("selected");
+        }
         
         updateAverageRating(msg);
     });

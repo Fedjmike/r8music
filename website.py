@@ -146,15 +146,42 @@ def needs_auth(f):
     decorated.__name__ = f.__name__
     return decorated
     
-@app.route("/<artist_slug>/<release_slug>")
+@app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @with_user
 def release_page(artist_slug, release_slug):
     try:
         release = model().get_release(artist_slug, release_slug)
-        return render_template("release.html", release=release, user=request.user)
         
     except NotFound:
         return page_not_found(what="release")
+
+    if request.method == "GET":
+        return render_template("release.html", release=release, user=request.user)
+        
+    else:
+        return release_post(release.id)
+
+@app.route("/release/<int:release_id>", methods=["POST"])
+@needs_auth
+def release_post(release_id):
+    if request.values["action"] == "rate":
+        try:
+            model().set_release_rating(release_id, request.user.id, request.values["rating"])
+            
+        #No rating field sent
+        except (KeyError):
+            return jsonify(error=1)
+        
+    elif request.values["action"] == "unrate":
+        model().unset_release_rating(release_id, request.user.id)
+    
+    else:
+        return jsonify(error=1)
+        
+    rating_stats = model().get_release_rating_stats(release_id)
+    return jsonify(error=0,
+                   ratingAverage=rating_stats.average,
+                   ratingFrequency=rating_stats.frequency)
 
 #Routing is done later because /<slug>/ would override other routes
 @with_user
@@ -188,26 +215,6 @@ def user_page(slug):
         
     except NotFound:
         return page_not_found(what="user")
-
-@app.route("/rate/<int:release_id>/<int:rating>", methods=["POST"])
-@needs_auth
-def change_rating(release_id, rating):
-    model().set_release_rating(release_id, request.user.id, rating)
-    rating_stats = model().get_release_rating_stats(release_id)
-
-    return jsonify(error=0,
-                   ratingAverage=rating_stats.average,
-                   ratingFrequency=rating_stats.frequency)
-
-@app.route("/unrate/<int:release_id>", methods=["POST"])
-@needs_auth
-def remove_rating(release_id):
-    model().unset_release_rating(release_id, request.user.id)
-    rating_stats = model().get_release_rating_stats(release_id)
-
-    return jsonify(error=0,
-                   ratingAverage=rating_stats.average,
-                   ratingFrequency=rating_stats.frequency)
 
 def failed_recaptcha(recaptcha_response, remote_addr):
     response = requests.post(
