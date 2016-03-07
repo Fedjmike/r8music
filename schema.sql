@@ -71,13 +71,13 @@ create table links (
     type_id text not null,
     target text not null,
     primary key (id, type_id),
-    foreign key (id) references objects(id)
+    foreign key (id) references objects(id),
     foreign key (type_id) references link_types(id)
 );
 
 drop table if exists link_types;
 create table link_types (
-    id integer primary key autoincrement,
+    id integer primary key,
     type text not null
 );
 
