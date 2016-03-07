@@ -6,7 +6,7 @@
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
 {% block content %}
-<section class="clearfix {% if release.thumb_art_url %} two columns {% endif %}">
+<section>
 	<div class="album-main">
 		<header>
             <h1>
@@ -32,7 +32,7 @@
                 {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
             </li>
         {% endfor %}
-        {% if runtime %}
+        {% if runtime and tracks | length != 1 %}
             <li class="total clearfix"><time>{{ runtime }}</time></li>
         {% endif %}
 		</ol>

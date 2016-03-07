@@ -1,7 +1,6 @@
-import os, time, requests
+import os, time, requests, multiprocessing.pool
 from collections import namedtuple
 from urllib.parse import urlparse, urljoin
-from multiprocessing import Pool
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from werkzeug import generate_password_hash
@@ -311,7 +310,7 @@ def recover_password():
 #
 
 if __name__ == "__main__":
-    app_pool = Pool(processes=4)
+    app_pool = multiprocessing.pool.ThreadPool(processes=4)
     init_db()
     app.add_url_rule("/<slug>/", view_func=artist_page)
     app.run(debug=True)

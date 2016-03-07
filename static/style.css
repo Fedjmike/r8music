@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    line-height: 1.25em;
 }
 
 html, body {
@@ -33,12 +34,17 @@ header, p, ol, ul {
 	margin: 1em 0;
 }
 
-p {
-    color: #333;
-}
-
 .tight {
     margin: 0.3em 0;
+}
+
+p {
+    color: #333;
+    line-height: 1.35em;
+}
+
+ol > li {
+    line-height: 1.3em;
 }
 
 .de-emph {
@@ -337,7 +343,6 @@ ol:not(.small).rating {
 
 ol.action > li {
     margin-left: 1em;
-    width: 6.5em;
 }
 
 .action a {
@@ -369,12 +374,11 @@ ol.action > li {
     content: ' &';
 }
 
-.columns .album-main {
+.album-main {
     width: 25em;
 }
 
 ol.tracks {
-    min-width: 23em;
     color: #333;
     counter-reset: item;
     margin-left: 0;
@@ -407,6 +411,10 @@ ol.tracks {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
+.tracks li:only-child {
+    border-bottom: 2px solid rgba(0,0,0, 0.03);
+}
+
 .tracks .total {
     margin-top: 0.1em;
     margin-bottom: -0.6em;
@@ -422,7 +430,7 @@ ol.tracks {
 }
 
 .album-cover img {
-    max-width: 20em;
+    max-width: 21em;
     margin-right: 1em;
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }
@@ -573,11 +581,6 @@ section {
 		margin: 0 auto;
 		width: 50em;
 	}
-
-    .two.columns > :nth-child(2n+1) {
-        float: left;
-        margin-right: 4em;
-    }
 }
 
 /*Large screen*/

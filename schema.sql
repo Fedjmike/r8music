@@ -20,7 +20,7 @@ create table releases (
     id integer not null,
     title text not null,
     slug text not null,
-    'date' text not null,
+    date text not null,
     type text not null,
     full_art_url text,
     thumb_art_url text,

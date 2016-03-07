@@ -80,7 +80,7 @@ class Model:
     def add_artist(self, name, description, incomplete=None):
         #Todo document "incomplete"
         
-        slug = generate_slug(name, self.db, "artists")
+        slug = generate_slug(name, self, "artists")
         
         artist_id = self.new_id(ObjectType.artist)
         self.insert("insert into artists (id, name, slug, incomplete) values (?, ?, ?, ?)",
@@ -142,7 +142,7 @@ class Model:
     #todo rename the actual columns
 
     def add_release(self, title, date, type, full_art_url, thumb_art_url, mbid):
-        slug = generate_slug(title, self.db, "releases")
+        slug = generate_slug(title, self, "releases")
         
         release_id = self.new_id(ObjectType.release)
         self.insert("insert into releases (id, title, slug, date, type, full_art_url, thumb_art_url)"
@@ -217,7 +217,7 @@ class Model:
     Track = namedtuple("Track", ["title", "runtime"])
     
     def add_track(self, release_id, title, position, runtime):
-        slug = generate_slug(title, self.db, "tracks")
+        slug = generate_slug(title, self, "tracks")
         
         track_id = self.new_id(ObjectType.track)
         self.insert("insert into tracks (id, release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?, ?)",
