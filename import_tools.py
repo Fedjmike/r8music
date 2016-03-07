@@ -1,5 +1,5 @@
 import re, os, urllib.request, requests
-from chromatography import Chromatography, ChromatographyException
+from chromatography import *
 import wikipedia
 from collections import namedtuple
 from itertools import combinations
