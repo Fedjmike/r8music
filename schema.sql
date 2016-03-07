@@ -1,3 +1,5 @@
+-- Music objects
+
 drop table if exists artists;
 create table artists (
     id integer primary key,
@@ -5,22 +7,6 @@ create table artists (
     slug text not null,
     incomplete text
 );
-
-drop table if exists artist_links;
-create table artist_links (
-    artist_id integer not null,
-    type_id text not null,
-    target text not null,
-    primary key (artist_id, type_id),
-    foreign key (type_id) references link_types(id)
-);
-
-drop table if exists link_types;
-create table link_types (
-    id integer primary key autoincrement,
-    type text not null
-);
-
 
 drop table if exists releases;
 create table releases (
@@ -31,13 +17,6 @@ create table releases (
     type text not null,
     full_art_url text,
     thumb_art_url text
-);
-
-drop table if exists release_externals;
-create table release_externals (
-    release_id integer primary key,
-    mbid text not null,
-    foreign key (release_id) references releases(id)
 );
 
 drop table if exists authorships;
@@ -59,6 +38,15 @@ create table tracks (
     runtime integer
 );
 
+-- Object attachments
+
+drop table if exists release_externals;
+create table release_externals (
+    release_id integer primary key,
+    mbid text not null,
+    foreign key (release_id) references releases(id)
+);
+
 drop table if exists release_palettes;
 create table release_palettes (
     release_id integer primary key,
@@ -74,6 +62,23 @@ create table artist_descriptions (
     description text,
     foreign key (artist_id) references artists(id)
 );
+
+drop table if exists artist_links;
+create table artist_links (
+    artist_id integer not null,
+    type_id text not null,
+    target text not null,
+    primary key (artist_id, type_id),
+    foreign key (type_id) references link_types(id)
+);
+
+drop table if exists link_types;
+create table link_types (
+    id integer primary key autoincrement,
+    type text not null
+);
+
+-- Users
 
 drop table if exists users;
 create table users (

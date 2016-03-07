@@ -132,31 +132,6 @@ class Model:
         
         return artists
         
-    def get_artist_description(self, artist_id):
-        return self.query_unique("select description from artist_descriptions where artist_id = (?)", artist_id)[0]
-
-    def add_artist_link(self, artist_id, link_type, target):
-        try:
-            (link_type_id,) = self.query_unique("select id from link_types where type=?", link_type)
-            
-        except NotFound:
-            link_type_id = self.insert("insert into link_types (type) values (?)", link_type)
-            
-        self.insert("insert into artist_links (artist_id, type_id, target)"
-                    " values (?, ?, ?)", artist_id, link_type_id, target)
-
-    def get_artist_link(self, artist_id, link_type):
-        """link_type can either be the string that identifies a link, or its id"""
-        
-        @lru_cache(maxsize=128)
-        def get_link_type_id(link_type):
-            return self.query_unique("select id from link_types where type=?", link_type)[0]
-
-        link_type_id = get_link_type_id(link_type) if isinstance(link_type, str) else link_type
-    
-        return self.query_unique("select target from artist_links"
-                                 " where artist_id=? and type_id=?", artist_id, link_type_id)[0]
-
     #Releases
     
     Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url",
@@ -180,11 +155,6 @@ class Model:
                     
         return release_id
         
-    def add_palette_from_image(self, release_id, image_url=None):
-        palette = get_palette(image_url) if image_url else [None, None, None]
-        self.insert("replace into release_palettes (release_id, color1, color2, color3) values (?, ?, ?, ?)",
-                    release_id, *palette)
-                    
     def add_author(self, release_id, artist_id):
         self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
                     release_id, artist_id)
@@ -244,33 +214,6 @@ class Model:
 
         return self._make_release(row, artist_id, artist_slug)
         
-    def get_release_palette(self, release_id):
-        return self.query_unique("select color1, color2, color3 from release_palettes"
-                                 " where release_id=?", release_id)
-        
-    #Ratings
-    
-    RatingStats = namedtuple("RatingStats", ["average", "frequency"])
-        
-    def set_release_rating(self, release_id, user_id, rating):
-        self.execute("replace into ratings (release_id, user_id, rating, creation)"
-                     " values (?, ?, ?, ?)", release_id, user_id, rating, now_isoformat())
-
-    def unset_release_rating(self, release_id, user_id):
-        # TODO: Error if no rating present?
-        self.execute("delete from ratings"
-                     " where release_id=? and user_id=?", release_id, user_id)
-        
-    def get_release_rating_stats(self, release_id):
-        try:
-            ratings = [r for (r,) in self.query("select rating from ratings where release_id=?", release_id)]
-            frequency = len(ratings)
-            average = sum(ratings) / frequency
-            return self.RatingStats(average=average, frequency=frequency)
-            
-        except ZeroDivisionError:
-            return self.RatingStats(average=None, frequency=0)
-        
     #Tracks
     
     Track = namedtuple("Track", ["title", "runtime"])
@@ -296,6 +239,65 @@ class Model:
             in self.query("select title, runtime from tracks where release_id=?", release_id)
         ], runtime(total_runtime)
 
+    #Attachments
+    
+    def add_palette_from_image(self, release_id, image_url=None):
+        palette = get_palette(image_url) if image_url else [None, None, None]
+        self.insert("replace into release_palettes (release_id, color1, color2, color3) values (?, ?, ?, ?)",
+                    release_id, *palette)
+                    
+    def get_release_palette(self, release_id):
+        return self.query_unique("select color1, color2, color3 from release_palettes"
+                                 " where release_id=?", release_id)
+        
+    def get_artist_description(self, artist_id):
+        return self.query_unique("select description from artist_descriptions where artist_id = (?)", artist_id)[0]
+
+    def add_artist_link(self, artist_id, link_type, target):
+        try:
+            (link_type_id,) = self.query_unique("select id from link_types where type=?", link_type)
+            
+        except NotFound:
+            link_type_id = self.insert("insert into link_types (type) values (?)", link_type)
+            
+        self.insert("insert into artist_links (artist_id, type_id, target)"
+                    " values (?, ?, ?)", artist_id, link_type_id, target)
+
+    def get_artist_link(self, artist_id, link_type):
+        """link_type can either be the string that identifies a link, or its id"""
+        
+        @lru_cache(maxsize=128)
+        def get_link_type_id(link_type):
+            return self.query_unique("select id from link_types where type=?", link_type)[0]
+
+        link_type_id = get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+    
+        return self.query_unique("select target from artist_links"
+                                 " where artist_id=? and type_id=?", artist_id, link_type_id)[0]
+        
+    #Ratings
+    
+    RatingStats = namedtuple("RatingStats", ["average", "frequency"])
+        
+    def set_release_rating(self, release_id, user_id, rating):
+        self.execute("replace into ratings (release_id, user_id, rating, creation)"
+                     " values (?, ?, ?, ?)", release_id, user_id, rating, now_isoformat())
+
+    def unset_release_rating(self, release_id, user_id):
+        # TODO: Error if no rating present?
+        self.execute("delete from ratings"
+                     " where release_id=? and user_id=?", release_id, user_id)
+        
+    def get_release_rating_stats(self, release_id):
+        try:
+            ratings = [r for (r,) in self.query("select rating from ratings where release_id=?", release_id)]
+            frequency = len(ratings)
+            average = sum(ratings) / frequency
+            return self.RatingStats(average=average, frequency=frequency)
+            
+        except ZeroDivisionError:
+            return self.RatingStats(average=None, frequency=0)
+        
     #Users
     
     User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
