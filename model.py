@@ -194,9 +194,9 @@ class Model:
         return [
             self._make_release(row) for row in
             self.query("select " + self._release_columns + " from"
-                       " (select object_id from ratings where user_id=?"
+                       " (select object_id as release_id from ratings where user_id=?"
                        + (" and rating=?)" if rating else ")") +
-                       " join releases on releases.id = object_id", user_id, rating)
+                       " join releases on releases.id = release_id", user_id, rating)
         ]
         
     def get_release(self, artist_slug, release_slug):
