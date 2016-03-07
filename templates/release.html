@@ -65,7 +65,8 @@
 	
 	{{ release_list(artist.releases | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id)) }} 
     
-	<p>{{ artist.get_description() | safe if description else "" }}</p>
+    {% set description = artist.get_description() %}
+	<p>{{ description | safe if description else "" }}</p>
 </section>
 {% endfor %}
 {% endblock %}
