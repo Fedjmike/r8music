@@ -2,6 +2,7 @@ import itertools, sqlite3
 from functools import cmp_to_key, lru_cache
 from datetime import datetime
 from collections import namedtuple
+from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g, url_for
 
@@ -43,7 +44,11 @@ def generate_slug(text, db, table):
     slug_candidate = slugify(text)
     return avoid_collison(slug_candidate, db, table)
     
-    
+class ObjectType(Enum):
+    artist = 1
+    release = 2
+    track = 3
+
 class Model:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
@@ -75,6 +80,11 @@ class Model:
         self.db.commit()
         return cursor.lastrowid
         
+    #IDs
+    
+    def new_id(self, type):
+        return self.insert("insert into objects (type) values (?)", type.value)
+        
     #Artists
     
     Artist = namedtuple("Artist", ["id", "name", "slug", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
@@ -84,10 +94,11 @@ class Model:
         
         slug = generate_slug(name, self.db, "artists")
         
-        artist_id = self.insert("insert into artists (name, slug, incomplete) values (?, ?, ?)",
-                                name, slug, incomplete)
-                                
-        self.insert("insert into artist_descriptions (artist_id, description) values (?, ?)",
+        artist_id = self.new_id(ObjectType.artist)
+        self.insert("insert into artists (id, name, slug, incomplete) values (?, ?, ?, ?)",
+                    artist_id, name, slug, incomplete)
+        
+        self.insert("insert into descriptions (id, description) values (?, ?)",
                     artist_id, description)
                     
         return artist_id
@@ -95,7 +106,7 @@ class Model:
     def _make_artist(self, row):
         def get_artist_wikipedia_urls():
             try:
-                return get_wikipedia_urls(self.get_artist_link(row["id"], "wikipedia"))
+                return get_wikipedia_urls(self.get_link(row["id"], "wikipedia"))
             
             except NotFound:
                 return None
@@ -105,7 +116,7 @@ class Model:
         return self.Artist(*row,
             releases=self.get_releases_by_artist(row["id"], row["slug"]),
             get_image_url=lambda: None,
-            get_description=lambda: self.get_artist_description(row["id"]),
+            get_description=lambda: self.get_description(row["id"]),
             get_wikipedia_urls=get_artist_wikipedia_urls
         )
         
@@ -145,13 +156,12 @@ class Model:
     def add_release(self, title, date, type, full_art_url, thumb_art_url, mbid):
         slug = generate_slug(title, self.db, "releases")
         
-        release_id = self.insert("insert into releases (title, slug, date, type, full_art_url, thumb_art_url)"
-                                 " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_art_url)
+        release_id = self.new_id(ObjectType.release)
+        self.insert("insert into releases (id, title, slug, date, type, full_art_url, thumb_art_url)"
+                    " values (?, ?, ?, ?, ?, ?, ?)", release_id, title, slug, date, type, full_art_url, thumb_art_url)
 
         self.add_palette_from_image(release_id, thumb_art_url)
-        
-        self.insert("insert into release_externals (release_id, mbid) values (?, ?)",
-                    release_id, mbid)
+        self.add_link(release_id, "musicbrainz", mbid)
                     
         return release_id
         
@@ -175,9 +185,9 @@ class Model:
         return self.Release(*row,
             url=url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug),
             get_artists=lambda: self.get_release_artists(release_id, primary_artist_id),
-            get_palette=lambda: self.get_release_palette(release_id),
+            get_palette=lambda: self.get_palette(release_id),
             get_tracks=lambda: self.get_release_tracks(release_id),
-            get_rating_stats=lambda: self.get_release_rating_stats(release_id)
+            get_rating_stats=lambda: self.get_rating_stats(release_id)
         )
         
     def get_releases_by_artist(self, artist_id, artist_slug=None):
@@ -196,9 +206,9 @@ class Model:
         return [
             self._make_release(row) for row in
             self.query("select " + self._release_columns + " from"
-                       " (select release_id from ratings where user_id=?"
+                       " (select object_id from ratings where user_id=?"
                        + (" and rating=?)" if rating else ")") +
-                       " join releases on releases.id = release_id", user_id, rating)
+                       " join releases on releases.id = object_id", user_id, rating)
         ]
         
     def get_release(self, artist_slug, release_slug):
@@ -220,9 +230,10 @@ class Model:
     
     def add_track(self, release_id, title, position, runtime):
         slug = generate_slug(title, self.db, "tracks")
-                    
-        self.insert("insert into tracks (release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?)",
-                    release_id, title, slug, position, runtime)
+        
+        track_id = self.new_id(ObjectType.track)
+        self.insert("insert into tracks (id, release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?, ?)",
+                    track_id, release_id, title, slug, position, runtime)
 
     def get_release_tracks(self, release_id):
         total_runtime = None
@@ -239,58 +250,55 @@ class Model:
             in self.query("select title, runtime from tracks where release_id=?", release_id)
         ], runtime(total_runtime)
 
-    #Attachments
+    #Object attachments
     
-    def add_palette_from_image(self, release_id, image_url=None):
+    def add_palette_from_image(self, id, image_url=None):
         palette = get_palette(image_url) if image_url else [None, None, None]
-        self.insert("replace into release_palettes (release_id, color1, color2, color3) values (?, ?, ?, ?)",
-                    release_id, *palette)
-                    
-    def get_release_palette(self, release_id):
-        return self.query_unique("select color1, color2, color3 from release_palettes"
-                                 " where release_id=?", release_id)
+        self.insert("replace into palettes (id, color1, color2, color3)"
+                    " values (?, ?, ?, ?)", id, *palette)
         
-    def get_artist_description(self, artist_id):
-        return self.query_unique("select description from artist_descriptions where artist_id = (?)", artist_id)[0]
+    def get_palette(self, id):
+        return self.query_unique("select color1, color2, color3 from palettes where id=?", id)
+        
+    def get_description(self, id):
+        return self.query_unique("select description from descriptions where id = (?)", id)[0]
 
-    def add_artist_link(self, artist_id, link_type, target):
+    @lru_cache(maxsize=128)
+    def _get_link_type_id(self, link_type):
         try:
-            (link_type_id,) = self.query_unique("select id from link_types where type=?", link_type)
+            return self.query_unique("select id from link_types where type=?", link_type)[0]
             
         except NotFound:
-            link_type_id = self.insert("insert into link_types (type) values (?)", link_type)
-            
-        self.insert("insert into artist_links (artist_id, type_id, target)"
-                    " values (?, ?, ?)", artist_id, link_type_id, target)
+            return self.insert("insert into link_types (type) values (?)", link_type)
+        
+    def add_link(self, id, link_type, target):
+        self.insert("insert into links (id, type_id, target)"
+                    " values (?, ?, ?)", id, self._get_link_type_id(link_type), target)
 
-    def get_artist_link(self, artist_id, link_type):
+    def get_link(self, id, link_type):
         """link_type can either be the string that identifies a link, or its id"""
         
-        @lru_cache(maxsize=128)
-        def get_link_type_id(link_type):
-            return self.query_unique("select id from link_types where type=?", link_type)[0]
-
-        link_type_id = get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+        link_type_id = self._get_link_type_id(link_type) if isinstance(link_type, str) else link_type
     
-        return self.query_unique("select target from artist_links"
-                                 " where artist_id=? and type_id=?", artist_id, link_type_id)[0]
+        return self.query_unique("select target from links"
+                                 " where id=? and type_id=?", id, link_type_id)[0]
         
     #Ratings
     
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
-    def set_release_rating(self, release_id, user_id, rating):
-        self.execute("replace into ratings (release_id, user_id, rating, creation)"
-                     " values (?, ?, ?, ?)", release_id, user_id, rating, now_isoformat())
+    def set_rating(self, object_id, user_id, rating):
+        self.execute("replace into ratings (object_id, user_id, rating, creation)"
+                     " values (?, ?, ?, ?)", object_id, user_id, rating, now_isoformat())
 
-    def unset_release_rating(self, release_id, user_id):
+    def unset_rating(self, object_id, user_id):
         # TODO: Error if no rating present?
         self.execute("delete from ratings"
-                     " where release_id=? and user_id=?", release_id, user_id)
+                     " where object_id=? and user_id=?", object_id, user_id)
         
-    def get_release_rating_stats(self, release_id):
+    def get_rating_stats(self, object_id):
         try:
-            ratings = [r for (r,) in self.query("select rating from ratings where release_id=?", release_id)]
+            ratings = [r for (r,) in self.query("select rating from ratings where object_id=?", object_id)]
             frequency = len(ratings)
             average = sum(ratings) / frequency
             return self.RatingStats(average=average, frequency=frequency)
@@ -314,7 +322,7 @@ class Model:
                 % ("name" if isinstance(user, str) else "id")
         user_id, name, creation = self.query_unique(query, user)
         
-        ratings = dict(self.query("select release_id, rating from ratings"
+        ratings = dict(self.query("select object_id, rating from ratings"
                                   " where ratings.user_id=?", user_id))
                                 
         return self._make_user(user_id, name, creation, ratings)

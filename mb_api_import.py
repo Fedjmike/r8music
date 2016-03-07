@@ -114,12 +114,12 @@ def import_artist(artist_name):
     print("Getting links...")
     links = get_links(artist_mbid)
     for link_type, target in links.items():
-        model.add_artist_link(artist_id, link_type, target)
+        model.add_link(artist_id, link_type, target)
             
     if "wikipedia" not in links:
         print("Guessing wikipedia link...")
         title = import_tools.guess_wikipedia_page(artist_name)
-        model.add_artist_link(artist_id, "wikipedia", title)
+        model.add_link(artist_id, "wikipedia", title)
 
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
