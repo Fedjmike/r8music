@@ -280,13 +280,19 @@ class Model:
                     release_id, title, slug, position, runtime)
 
     def get_release_tracks(self, release_id):
+        total_runtime = None
+        
+        def runtime(milliseconds):
+            if milliseconds:
+                nonlocal total_runtime
+                total_runtime = milliseconds + (total_runtime or 0)
+                return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
+        
         #todo sort by position
         return [
-            self.Track(title,
-                       "%d:%02d" % (runtime//60000, (runtime/1000) % 60) if runtime else None)
-            for title, runtime
+            self.Track(title, runtime(milliseconds)) for title, milliseconds
             in self.query("select title, runtime from tracks where release_id=?", release_id)
-        ]
+        ], runtime(total_runtime)
 
     #User
     

@@ -361,7 +361,7 @@ ol.tracks {
     margin-right: 0.4em;
 }
 
-.tracks li:before {
+.tracks li:not(.total):before {
     display: inline-block;
     content: counter(item) ". ";
     text-align: right;
@@ -376,8 +376,17 @@ ol.tracks {
     color: #aaa;
 }
 
-.tracks li:nth-child(2n) {
+.tracks li:not(.total):nth-child(2n) {
     background-color: rgba(0, 0, 0, 0.03);
+}
+
+.tracks .total {
+    margin-top: 0.1em;
+    margin-bottom: -0.6em;
+}
+
+.tracks .total:nth-child(2n) {
+    border-top: 2px solid rgba(0,0,0, 0.03);
 }
 
 .album-cover {

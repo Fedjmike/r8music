@@ -27,12 +27,16 @@
 		</header>
 		
 		<ol class="tracks">
-        {% for track in release.get_tracks() %}
+        {% set tracks, runtime = release.get_tracks() %}
+        {% for track in tracks %}
 			<li>
                 {{ track.title }}
                 {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
             </li>
         {% endfor %}
+        {% if runtime %}
+            <li class="total clearfix"><time>{{ runtime }}</time></li>
+        {% endif %}
 		</ol>
 	  
         {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, None) }}
