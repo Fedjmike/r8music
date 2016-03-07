@@ -59,8 +59,8 @@ create table tracks (
     runtime integer
 );
 
-drop table if exists release_colors;
-create table release_colors (
+drop table if exists release_palettes;
+create table release_palettes (
     release_id integer primary key,
     color1 text,
     color2 text,

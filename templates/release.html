@@ -3,9 +3,7 @@
 
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
 
-{% set accent_color_1 = release.get_colors()[0] %}
-{% set accent_color_2 = release.get_colors()[1] %}
-{% set accent_color_3 = release.get_colors()[2] %}
+{% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
 {% block content %}
 <section class="clearfix {% if release.thumb_art_url %} two columns {% endif %}">

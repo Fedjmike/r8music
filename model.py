@@ -160,7 +160,7 @@ class Model:
     #Releases
     
     Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url",
-                                     "url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
+                                     "url", "get_tracks", "get_artists", "get_palette", "get_rating_stats"])
     
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
@@ -173,16 +173,16 @@ class Model:
         release_id = self.insert("insert into releases (title, slug, date, type, full_art_url, thumb_art_url)"
                                  " values (?, ?, ?, ?, ?, ?)", title, slug, date, type, full_art_url, thumb_art_url)
 
-        self.add_palette(release_id, thumb_art_url)
+        self.add_palette_from_image(release_id, thumb_art_url)
         
         self.insert("insert into release_externals (release_id, mbid) values (?, ?)",
                     release_id, mbid)
                     
         return release_id
         
-    def add_palette(self, release_id, image_url=None):
+    def add_palette_from_image(self, release_id, image_url=None):
         palette = get_palette(image_url) if image_url else [None, None, None]
-        self.insert("replace into release_colors (release_id, color1, color2, color3) values (?, ?, ?, ?)",
+        self.insert("replace into release_palettes (release_id, color1, color2, color3) values (?, ?, ?, ?)",
                     release_id, *palette)
                     
     def add_author(self, release_id, artist_id):
@@ -205,7 +205,7 @@ class Model:
         return self.Release(*row,
             url=url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug),
             get_artists=lambda: self.get_release_artists(release_id, primary_artist_id),
-            get_colors=lambda: self.get_release_colors(release_id),
+            get_palette=lambda: self.get_release_palette(release_id),
             get_tracks=lambda: self.get_release_tracks(release_id),
             get_rating_stats=lambda: self.get_release_rating_stats(release_id)
         )
@@ -244,8 +244,8 @@ class Model:
 
         return self._make_release(row, artist_id, artist_slug)
         
-    def get_release_colors(self, release_id):
-        return self.query_unique("select color1, color2, color3 from release_colors"
+    def get_release_palette(self, release_id):
+        return self.query_unique("select color1, color2, color3 from release_palettes"
                                  " where release_id=?", release_id)
         
     #Ratings
