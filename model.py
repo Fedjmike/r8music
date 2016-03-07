@@ -29,13 +29,15 @@ def detect_collision(slug_candidate, db, table):
         return True
     return False
 
-def avoid_collison(slug_candidate, db, table):
-    if not detect_collision(slug_candidate, db, table):
-        return slug_candidate
+def avoid_collison(name, db, table):
+    if not detect_collision(name, db, table):
+        return name
 
     for i in itertools.count(1):
-        if not detect_collision(slug_candidate + "-" + str(i), db, table):
-            return slug_candidate + "-" + str(i)
+        slug = "%s-%d" % (name, i)
+        
+        if not detect_collision(slug, db, table):
+            return slug
 
 def generate_slug(text, db, table):
     slug_candidate = slugify(text)
@@ -73,7 +75,7 @@ class Model:
         self.db.commit()
         return cursor.lastrowid
         
-    #Artist
+    #Artists
     
     Artist = namedtuple("Artist", ["id", "name", "slug", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
@@ -155,7 +157,7 @@ class Model:
         return self.query_unique("select target from artist_links"
                                  " where artist_id=? and type_id=?", artist_id, link_type_id)[0]
 
-    #Release
+    #Releases
     
     Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url",
                                      "url", "get_tracks", "get_artists", "get_colors", "get_rating_stats"])
@@ -246,7 +248,7 @@ class Model:
         return self.query_unique("select color1, color2, color3 from release_colors"
                                  " where release_id=?", release_id)
         
-    #Rating
+    #Ratings
     
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
@@ -269,7 +271,7 @@ class Model:
         except ZeroDivisionError:
             return self.RatingStats(average=None, frequency=0)
         
-    #Track
+    #Tracks
     
     Track = namedtuple("Track", ["title", "runtime"])
     
@@ -294,7 +296,7 @@ class Model:
             in self.query("select title, runtime from tracks where release_id=?", release_id)
         ], runtime(total_runtime)
 
-    #User
+    #Users
     
     User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
     
@@ -306,8 +308,8 @@ class Model:
     def get_user(self, user):
         """Get user by id or by slug"""
         
-        query = "select id, name, creation from users where name=?" if isinstance(user, str) \
-                else "select id, name, creation from users where id=?"
+        query =   "select id, name, creation from users where %s=?" \
+                % ("name" if isinstance(user, str) else "id")
         user_id, name, creation = self.query_unique(query, user)
         
         ratings = dict(self.query("select release_id, rating from ratings"
