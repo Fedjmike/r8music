@@ -233,10 +233,9 @@ class Model:
                 total_runtime = milliseconds + (total_runtime or 0)
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
         
-        #todo sort by position
         return [
             self.Track(title, runtime(milliseconds)) for title, milliseconds
-            in self.query("select title, runtime from tracks where release_id=?", release_id)
+            in self.query("select title, runtime from tracks where release_id=? order by position asc", release_id)
         ], runtime(total_runtime)
 
     #Object attachments
