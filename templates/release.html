@@ -38,7 +38,19 @@
             <li class="total clearfix"><time>{{ runtime }}</time></li>
         {% endif %}
 		</ol>
-	  
+		
+        <ol class="action inline">
+            <li><a class="clickable" href=#>
+                <i class="material-icons">playlist_add</i>Will listen to
+            </a></li>
+            <li><a class="clickable" href=#>
+                <i class="material-icons">headset</i>Listened to
+            </a></li>
+            <li><a class="clickable" href=#>
+                <i class="material-icons">share</i>Share
+            </a></li>
+        </ol>
+	    
         {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, None) }}
 	</div>
     {% if release.thumb_art_url %}

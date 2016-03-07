@@ -87,6 +87,14 @@ ol.nav, ol.rating, ol.releases {
 	margin: 0;
 }
 
+ol.inline {
+    margin: 0.5em 0;
+}
+
+ol.inline > li {
+    display: inline-block;
+}
+
 ol.nav {
     display: inline-block;
     font-size: 1.17em;
@@ -323,6 +331,24 @@ ol:not(.small).rating {
     -webkit-filter: brightness(107%);
     -ff-filter: brightness(110%);
     filter: brightness(110%);
+}
+
+/*Actions and action lists*/
+
+ol.action > li {
+    margin-left: 1em;
+    width: 6.5em;
+}
+
+.action a {
+    color: #888;
+}
+
+.action i.material-icons {
+    margin-top: -0.2em;
+    margin-right: 0.15em;
+    font-size: 1rem;
+    vertical-align: middle;
 }
 
 /*Albums*/
