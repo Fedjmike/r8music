@@ -1,4 +1,5 @@
-import itertools, sqlite3
+import sqlite3
+from itertools import count
 from functools import cmp_to_key, lru_cache
 from datetime import datetime
 from collections import namedtuple
@@ -24,25 +25,12 @@ def connect_db():
     db.row_factory = sqlite3.Row
     return db
 
-def detect_collision(slug_candidate, db, table):
-    result = db.execute('select count(*) from {} where slug=?'.format(table), (slug_candidate,)).fetchall()
-    if result[0][0] > 0:
-        return True
-    return False
-
-def avoid_collison(name, db, table):
-    if not detect_collision(name, db, table):
-        return name
-
-    for i in itertools.count(1):
-        slug = "%s-%d" % (name, i)
-        
-        if not detect_collision(slug, db, table):
-            return slug
-
-def generate_slug(text, db, table):
-    slug_candidate = slugify(text)
-    return avoid_collison(slug_candidate, db, table)
+def generate_slug(name, model, table):
+    query = "select count(*) from {} where slug=?".format(table)
+    is_free = lambda slug: model.query_unique(query, slug)[0] == 0
+    
+    candidates = (slugify(name) + ("-%d" % n if n else "") for n in count(0))
+    return next(filter(is_free, candidates))
     
 class ObjectType(Enum):
     artist = 1
