@@ -29,7 +29,8 @@ def generate_slug(name, model, table):
     query = "select count(*) from {} where slug=?".format(table)
     is_free = lambda slug: model.query_unique(query, slug)[0] == 0
     
-    candidates = (slugify(name) + ("-%d" % n if n else "") for n in count(0))
+    slug = slugify(name)
+    candidates = (slug + ("-%d" % n if n else "") for n in count(0))
     return next(filter(is_free, candidates))
     
 class ObjectType(Enum):

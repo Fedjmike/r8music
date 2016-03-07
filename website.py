@@ -312,5 +312,5 @@ def recover_password():
 if __name__ == "__main__":
     app_pool = multiprocessing.pool.ThreadPool(processes=4)
     init_db()
-    app.add_url_rule("/<slug>/", view_func=artist_page)
+    app.add_url_rule("/<slug>", view_func=artist_page)
     app.run(debug=True)

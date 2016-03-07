@@ -99,7 +99,12 @@ def get_palette(album_art_url):
             palette += [palette[0]] * (3 - len(palette))
         
         return [rgb_to_hex(color) for color in palette]
+    
+    except (NotEnoughValidPixels, BadColorMode):
+        pass
+    
     except (ChromatographyException, OSError):
         import traceback
         traceback.print_exc()
-        return [None, None, None]
+    
+    return [None, None, None]
