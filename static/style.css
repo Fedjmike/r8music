@@ -409,24 +409,28 @@ ol.tracks {
 
 .tracks li {
     display: block;
-    margin-left: 1.5em;
     margin-right: 0.4em;
 }
 
 .tracks li:not(.total):before {
     display: inline-block;
-    content: counter(item) ". ";
-    text-align: right;
+    content: counter(item);
     counter-increment: item;
-    width: 1.5em;
-    margin-left: -1.5em;
+    width: 1.1em;
+    text-align: right;
+    padding-right: 0.15em;
     color: #aaa;
+    background: rgba(250,250,250, 0.4);
+    background: linear-gradient(to right, rgba(250,250,250, 1) 0%, rgba(250,250,250, 0) 100%);
 }
 
 .tracks time {
+    line-height: 1.3em;
 	float: right;
-    margin-right: 0.1em;
+    padding-right: 0.2em;
     color: #aaa;
+    background: rgba(250,250,250, 0.4);
+    background: linear-gradient(to left, rgba(250,250,250, 1) 0%, rgba(250,250,250, 0) 50%);
 }
 
 .tracks li:not(.total):nth-child(2n) {
