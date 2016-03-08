@@ -124,7 +124,6 @@ ol.main.nav {
     border-bottom-left-radius: 0.4em;
     border-bottom-right-radius: 0.4em;
     overflow: hidden;
-    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
 }
 
 .main.nav > li > * {
@@ -208,10 +207,8 @@ ol.rating {
     
     border: 2px solid rgba(0,0,0, 0);
     border-radius: 0.7rem;
-    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
     
     color: white;
-    text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
     font-weight: bold;
 }
 
@@ -322,7 +319,6 @@ ol:not(.small).rating {
     border-radius: 0.3em;
     overflow: hidden;
     margin-bottom: 0.3em;
-    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.15);
 }
 
 .small.releases.grid > li {
@@ -458,7 +454,6 @@ ol.tracks {
 .album-cover img {
     max-width: 21em;
     margin-right: 1em;
-    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }
 
 #average-rating {
@@ -467,8 +462,6 @@ ol.tracks {
     vertical-align: text-top;
 
     border-radius: 0.5em;
-    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
-    text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
     
     font-size: 1rem;
     font-weight: bold;
@@ -485,7 +478,6 @@ ol.tracks {
     float: right;
     max-width: 15em;
     margin: 1em 0em 1em 1em;
-    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
 }
 
 /*Comes with the description HTML from wikipedia. Hacky! todo fix*/
@@ -537,8 +529,6 @@ input[type="submit"] {
     padding: 1px 0.3em;
     border: 2px solid rgba(0,0,0,0);
     border-radius: 0.3em;
-    
-    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
     color: white;
 }
 
@@ -573,7 +563,6 @@ input[type="submit"]:active {
     margin-left: -19.5em;
     
     background: white;
-    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
     border-radius: 0.2em;
 }
 
@@ -581,6 +570,37 @@ input[type="submit"]:active {
     width: 10em;
     padding: 0.25em;
     margin-left: -10.5em;
+}
+
+/*Glows and shadows*/
+
+.main.nav,
+.rating, #average-rating
+input[type="submit"] {
+    box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
+}
+
+.rating, #average-rating {
+    text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
+}
+
+.rating, #average-rating,
+input[type="submit"] {
+    color: white;
+}
+
+.popup > div {
+    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
+}
+
+.artist-image,
+.album-cover img {
+    /*Glowed border*/
+    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
+}
+
+.releases.grid > li div {
+    box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.15);
 }
 
 /*Layout*/
