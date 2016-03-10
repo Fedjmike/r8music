@@ -285,12 +285,12 @@ class Model:
             explain=lambda: type.explain(object_id)
         )
     
-    def set_rating(self, object_id, user_id, rating):
+    def set_rating(self, user_id, object_id, rating):
         action_id = self.add_action(user_id, object_id, ActionType.rate)
         self.execute("insert into ratings (action_id, rating)"
                      " values (?, ?)", action_id, rating)
 
-    def unset_rating(self, object_id, user_id):
+    def unset_rating(self, user_id, object_id):
         # TODO: Error if no rating present?
         action_id = self.add_action(user_id, object_id, ActionType.unrate)
         

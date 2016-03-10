@@ -165,14 +165,14 @@ def release_page(artist_slug, release_slug):
 def release_post(release_id):
     if request.values["action"] == "rate":
         try:
-            model().set_rating(release_id, request.user.id, request.values["rating"])
+            model().set_rating(request.user.id, release_id, request.values["rating"])
             
         #No rating field sent
         except (KeyError):
             return jsonify(error=1), 400
         
     elif request.values["action"] == "unrate":
-        model().unset_rating(release_id, request.user.id)
+        model().unset_rating(request.user.id, release_id)
     
     else:
         return jsonify(error=1), 400
