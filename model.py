@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, arrow
 from itertools import count
 from functools import cmp_to_key, lru_cache
 from datetime import datetime
@@ -37,6 +37,16 @@ class ObjectType(Enum):
     artist = 1
     release = 2
     track = 3
+
+class ActionType(Enum):
+    rate = 1
+    unrate = 2
+    listen = 3
+    unlisten = 4
+    
+    @property
+    def simple_past(self):
+        return ["rated", "unrated", "listened to", "unlistened"][self.value]
 
 class Model:
     def __init__(self, connect_db=connect_db):
@@ -139,7 +149,7 @@ class Model:
     
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
-    _release_columns_rename = "releases.id as release_id, title, slug, date, type, full_art_url, thumb_art_url"
+    _release_columns_rename = "releases.id as release_id, title, slug, date, releases.type, full_art_url, thumb_art_url"
     #todo rename the actual columns
 
     def add_release(self, title, date, type, full_art_url, thumb_art_url, mbid):
@@ -187,17 +197,6 @@ class Model:
             self.query("select " + self._release_columns + " from"
                        " (select release_id from authorships where artist_id=?)"
                        " join releases on releases.id = release_id", artist_id)
-        ]
-        
-    def get_releases_rated_by_user(self, user_id, rating=None):
-        """Get all the releases rated by a user, and only those rated
-           a certain value, if given"""
-        return [
-            self._make_release(row) for row in
-            self.query("select " + self._release_columns + " from"
-                       " (select object_id as release_id from ratings where user_id=?"
-                       + (" and rating=?)" if rating else ")") +
-                       " join releases on releases.id = release_id", user_id, rating)
         ]
         
     def get_release(self, artist_slug, release_slug):
@@ -271,22 +270,44 @@ class Model:
         return self.query_unique("select target from links"
                                  " where id=? and type_id=?", id, link_type_id)[0]
         
-    #Ratings
+    #Actions
     
+    Action = namedtuple("Action", ["id", "user_id", "object_id", "type", "creation", "explain"])
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
+    def add_action(self, user_id, object_id, type):
+        return self.insert("insert into actions (user_id, object_id, type, creation)"
+                           " values (?, ?, ?, ?)", user_id, object_id, type.value, now_isoformat())
+        
+    def _make_action(self, user_id, action_id, object_id, type_id, creation):
+        type = ActionType(type_id)
+        return self.Action(action_id, user_id, object_id, type, arrow.get(creation).datetime,
+            explain=lambda: type.explain(object_id)
+        )
+    
     def set_rating(self, object_id, user_id, rating):
-        self.execute("replace into ratings (object_id, user_id, rating, creation)"
-                     " values (?, ?, ?, ?)", object_id, user_id, rating, now_isoformat())
+        action_id = self.add_action(user_id, object_id, ActionType.rate)
+        self.execute("insert into ratings (action_id, rating)"
+                     " values (?, ?)", action_id, rating)
 
     def unset_rating(self, object_id, user_id):
         # TODO: Error if no rating present?
-        self.execute("delete from ratings"
-                     " where object_id=? and user_id=?", object_id, user_id)
+        action_id = self.add_action(user_id, object_id, ActionType.unrate)
         
     def get_rating_stats(self, object_id):
+        ratings = [
+            rating for type, rating in
+            self.query("select type, rating from"
+                       " (select id, user_id, type from actions"
+                       "  where object_id=? and (type=? or type=?) order by creation asc)"
+                       " left join ratings on id = action_id group by user_id",
+                       object_id, ActionType.rate.value, ActionType.unrate.value)
+            if type == ActionType.rate.value
+        ]
+        
+        print(ratings)
+
         try:
-            ratings = [r for (r,) in self.query("select rating from ratings where object_id=?", object_id)]
             frequency = len(ratings)
             average = sum(ratings) / frequency
             return self.RatingStats(average=average, frequency=frequency)
@@ -294,13 +315,42 @@ class Model:
         except ZeroDivisionError:
             return self.RatingStats(average=None, frequency=0)
         
+    def get_user_ratings(self, user_id):
+        rows = \
+            self.query("select object_id, type, rating from"
+                       " (select id, object_id, type from actions"
+                       "  where user_id=? and (type=? or type=?) order by creation asc)"
+                       " left join ratings on id = action_id group by object_id",
+                       user_id, ActionType.rate.value, ActionType.unrate.value)
+        
+        return {
+            object_id: rating
+            for object_id, type, rating in rows
+            if type == ActionType.rate.value
+        }
+        
+    def get_releases_rated_by_user(self, user_id):
+        releases = [
+            (rating, self._make_release(row)) for rating, *row in \
+            self.query("select rating, " + self._release_columns_rename + " from"
+                       " (select action_id, object_id, type as action_type from"
+                       "  (select id as action_id, object_id, type from actions"
+                       "   where user_id=? and (type=? or type=?) order by creation asc)"
+                       "  group by object_id) natural join ratings"
+                       " join releases on id = object_id where action_type=?",
+                       user_id, ActionType.rate.value, ActionType.unrate.value, ActionType.rate.value)
+        ]
+        
+        releases_by_rating = {n: [r for rating, r in releases if rating == n] for n in range(1, 9)}
+        return releases_by_rating
+        
     #Users
     
     User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
     
     def _make_user(self, _id, name, creation, ratings):
         return self.User(_id, name, creation, ratings,
-            get_releases_rated=lambda rating=None: self.get_releases_rated_by_user(_id, rating)
+            get_releases_rated=lambda: self.get_releases_rated_by_user(_id),
         )
     
     def get_user(self, user):
@@ -310,8 +360,7 @@ class Model:
                 % ("name" if isinstance(user, str) else "id")
         user_id, name, creation = self.query_unique(query, user)
         
-        ratings = dict(self.query("select object_id, rating from ratings"
-                                  " where ratings.user_id=?", user_id))
+        ratings = self.get_user_ratings(user_id)
                                 
         return self._make_user(user_id, name, creation, ratings)
         

@@ -93,13 +93,20 @@ create table users (
     creation text not null
 );
 
+drop table if exists actions;
+create table actions (
+    id integer primary key,
+    user_id integer not null,
+    object_id integer not null,
+    type integer not null,
+    creation text not null,
+    foreign key (user_id) references users(id),
+    foreign key (object_id) references objects(id)
+);
+
 drop table if exists ratings;
 create table ratings (
-    object_id integer not null,
-    user_id integer not null,
+    action_id integer not null,
     rating integer not null,
-    creation text not null,
-    primary key (object_id, user_id)
-    foreign key (object_id) references objects(id),
-    foreign key (user_id) references users(id)
+    foreign key (action_id) references actions(id)
 );
