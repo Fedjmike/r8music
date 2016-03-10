@@ -20,7 +20,7 @@ create table releases (
     id integer not null,
     title text not null,
     slug text not null,
-    date text not null,
+    date text not null, -- ISO 8601 date
     type text not null,
     full_art_url text,
     thumb_art_url text,
@@ -43,7 +43,7 @@ create table tracks (
     title text not null,
     slug text not null,
     position integer not null,
-    runtime integer,
+    runtime integer, -- In milliseconds
     foreign key (id) references objects(id)
 );
 
@@ -52,6 +52,7 @@ create table tracks (
 drop table if exists palettes;
 create table palettes (
     id integer primary key,
+    -- As an #rrggbb hex code, inc. hash
     color1 text,
     color2 text,
     color3 text,
@@ -90,7 +91,7 @@ create table users (
     pw_hash text not null,
     email text,
     fullname text,
-    creation text not null
+    creation text not null -- ISO 8601 date
 );
 
 drop table if exists actions;
@@ -98,8 +99,8 @@ create table actions (
     id integer primary key,
     user_id integer not null,
     object_id integer not null,
-    type integer not null,
-    creation text not null,
+    type integer not null, -- model.ActionType enum
+    creation text not null, -- ISO 8601 date
     foreign key (user_id) references users(id),
     foreign key (object_id) references objects(id)
 );
