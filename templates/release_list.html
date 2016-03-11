@@ -16,14 +16,23 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_grid(releases, user=None, class=None) -%}
+{% macro release_grid(releases, user=None, class=None, artist_not_date=False) -%}
     <ol class="releases grid {{ class if class else '' }}">
     {% for release in releases | sort(attribute="date") %}
         <li>
             {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, "inset small") }}
             <a href={{ release.url }}>
                 <div><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
-                <span>{{ release.title }}<br/>{{ release.date[:4] }}</span>
+                <span class="title">
+                    {% if artist_not_date %}
+                        <strong>{{ release.title }}</strong><br/>
+                        {% for artist in release.get_artists() %}
+                            <span class="author">{{ artist.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        {{ release.title }}<br/>{{ release.date[:4] }}
+                    {% endif %}
+                </span>
             </a>
         </li>
     {% endfor %}

@@ -17,7 +17,7 @@
     {% if rated[n] %}
         <h2>{{ n }}</h2>
         <!-- TODO show own ratings? confusing? -->
-        {{ release_grid(rated[n], user) }}
+        {{ release_grid(rated[n], user, "small", artist_not_date=True) }}
     {% endif %}
 {% endfor %}
 

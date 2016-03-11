@@ -43,10 +43,6 @@ p {
     line-height: 1.35em;
 }
 
-ol > li {
-    line-height: 1.3em;
-}
-
 .de-emph {
     color: #aaa;
 }
@@ -318,7 +314,15 @@ ol:not(.small).rating {
     height: 9em;
     border-radius: 0.3em;
     overflow: hidden;
-    margin-bottom: 0.3em;
+}
+
+.releases .title {
+    display: block;
+    padding-top: 0.4em;
+}
+
+.small.releases .title {
+    font-size: 0.9em;
 }
 
 .small.releases.grid > li {
@@ -391,8 +395,9 @@ ol.action > li {
     display: block;
 }
 
-.author:not(:last-of-type):after {
-    content: ' &';
+.album-main .author:not(:last-of-type):after,
+.releases .author:not(:first-of-type):before {
+    content: ' & ';
 }
 
 .album-main {
@@ -409,6 +414,7 @@ ol.tracks {
 
 .tracks li {
     display: block;
+    line-height: 1.3em;
 }
 
 .tracks li:not(.total):before {
