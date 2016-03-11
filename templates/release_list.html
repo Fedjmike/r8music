@@ -23,17 +23,18 @@
             {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, "inset small") }}
             <a href={{ release.url }}>
                 <div><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
-                <span class="title">
-                    {% if artist_not_date %}
-                        <strong>{{ release.title }}</strong><br/>
-                        {% for artist in release.get_artists() %}
-                            <span class="author">{{ artist.name }}</span>
-                        {% endfor %}
-                    {% else %}
-                        {{ release.title }}<br/>{{ release.date[:4] }}
-                    {% endif %}
-                </span>
+                {% if not artist_not_date %}
+                    <span class="title">{{ release.title }}<br/>{{ release.date[:4] }}</span>
             </a>
+                {% else %}
+                    <strong class="title">{{ release.title }}</strong>
+            </a>
+                    <span>
+                    {% for artist in release.get_artists() %}
+                        <span class="title author"><a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a></span>
+                    {% endfor %}
+                    </span>
+                {% endif %}
         </li>
     {% endfor %}
     </ol>

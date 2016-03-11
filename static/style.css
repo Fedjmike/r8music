@@ -314,11 +314,11 @@ ol:not(.small).rating {
     height: 9em;
     border-radius: 0.3em;
     overflow: hidden;
+    margin-bottom: 0.4em;
 }
 
 .releases .title {
     display: block;
-    padding-top: 0.4em;
 }
 
 .small.releases .title {
@@ -395,8 +395,7 @@ ol.action > li {
     display: block;
 }
 
-.album-main .author:not(:last-of-type):after,
-.releases .author:not(:first-of-type):before {
+.author:not(:last-of-type):after {
     content: ' & ';
 }
 
