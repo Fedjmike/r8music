@@ -2,7 +2,7 @@ import sqlite3, arrow
 from itertools import count
 from functools import cmp_to_key, lru_cache
 from datetime import datetime
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g, url_for
@@ -43,6 +43,10 @@ class ActionType(Enum):
     unrate = 2
     listen = 3
     unlisten = 4
+    list = 5
+    unlist = 6
+    share = 7
+    unshare = 8
     
     @property
     def simple_past(self):
@@ -294,6 +298,27 @@ class Model:
         # TODO: Error if no rating present?
         action_id = self.add_action(user_id, object_id, ActionType.unrate)
         
+    def get_active_actions_by_user(self, user_id, object_id):
+        latest_by_type = defaultdict(lambda: "0") #A date older than all others
+        
+        #Oldest of each action type, by that user on that object
+        latest_by_type.update({
+            type: creation for type, creation in
+            self.query("select * from"
+                       " (select type, creation from actions"
+                       "  where user_id=? and object_id=? order by creation asc)"
+                       " group by type", user_id, object_id)
+        })
+        
+        #Pairs of actions and those that undo them
+        actions = ["list", "listen", "share"]
+        action_pairs = [(name, ActionType[name].value, ActionType["un" + name].value)
+                        for name in actions]
+        
+        #Actions done more recently than undone
+        return [name for name, action, antiaction in action_pairs
+                if latest_by_type[action] > latest_by_type[antiaction]]
+        
     def get_rating_stats(self, object_id):
         ratings = [
             rating for type, rating in
@@ -346,11 +371,12 @@ class Model:
         
     #Users
     
-    User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated"])
+    User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated", "get_active_actions"])
     
     def _make_user(self, _id, name, creation, ratings):
         return self.User(_id, name, creation, ratings,
             get_releases_rated=lambda: self.get_releases_rated_by_user(_id),
+            get_active_actions=lambda object_id: self.get_active_actions_by_user(_id, object_id)
         )
     
     def get_user(self, user):

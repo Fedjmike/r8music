@@ -8,7 +8,7 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from model import Model, connect_db, NotFound, AlreadyExists
+from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist
 
 g_recaptcha_secret = "todo config"
@@ -174,24 +174,34 @@ def release_page(artist_slug, release_slug):
 @app.route("/release/<int:release_id>", methods=["POST"])
 @needs_auth
 def release_post(release_id):
-    if request.values["action"] == "rate":
+    def rating_stats():
+        rating_stats = model().get_rating_stats(release_id)
+        return jsonify(error=0,
+                       ratingAverage=rating_stats.average,
+                       ratingFrequency=rating_stats.frequency)
+
+    try:
+        action = ActionType[request.values["action"]]
+        
+    except KeyError:
+        return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
+    
+    if action == ActionType.rate:
         try:
             model().set_rating(request.user.id, release_id, request.values["rating"])
+            return rating_stats()
             
         #No rating field sent
         except (KeyError):
             return jsonify(error=1), 400
         
-    elif request.values["action"] == "unrate":
+    elif action == ActionType.unrate:
         model().unset_rating(request.user.id, release_id)
+        return rating_stats()
     
     else:
-        return jsonify(error=1), 400
-        
-    rating_stats = model().get_rating_stats(release_id)
-    return jsonify(error=0,
-                   ratingAverage=rating_stats.average,
-                   ratingFrequency=rating_stats.frequency)
+        model().add_action(request.user.id, release_id, action)
+        return jsonify(error=0)
 
 #Routing is done later because /<slug>/ would override other routes
 @with_user

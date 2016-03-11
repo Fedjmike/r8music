@@ -42,6 +42,26 @@ function rateRelease(clicked_element, release_id, rating) {
     });
 }
 
+function handleReleaseAction(event) {
+    event.preventDefault();
+    clickable = this;
+    action = clickable.name;
+    undo = clickable.classList.contains("selected");
+    
+    $.ajax({
+        method: "POST",
+        url: "/release/" + clickable.dataset.releaseId,
+        data: {"action": undo ? "un" + action : action}
+        
+    }).done(function (msg) {
+        if (msg.error)
+            return;
+        
+        classes = clickable.classList;
+        classes[undo ? "remove" : "add"]("selected");
+    })
+}
+
 $(document).ready(function ($) {
     $("a#login").click(function (event) {
         event.preventDefault();
@@ -71,4 +91,6 @@ $(document).ready(function ($) {
         if ($("form#search [name='query']").val() == "")
             event.preventDefault();
     });
+    
+    $(".action .clickable").click(handleReleaseAction);
 });
