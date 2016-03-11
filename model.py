@@ -50,7 +50,7 @@ class ActionType(Enum):
     
     @property
     def simple_past(self):
-        return ["rated", "unrated", "listened to", "unlistened"][self.value]
+        return ["rated", "unrated", "listened to", "unlistened", "list", "unlist", "share", "unshare"][self.value-1]
 
 class Model:
     def __init__(self, connect_db=connect_db):
@@ -330,8 +330,6 @@ class Model:
             if type == ActionType.rate.value
         ]
         
-        print(ratings)
-
         try:
             frequency = len(ratings)
             average = sum(ratings) / frequency
