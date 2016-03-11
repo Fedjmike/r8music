@@ -362,7 +362,7 @@ class Model:
         
         ratings = self.get_user_ratings(user_id)
                                 
-        return self._make_user(user_id, name, creation, ratings)
+        return self._make_user(user_id, name, arrow.get(creation).datetime, ratings)
         
     def register_user(self, name, password, email=None, fullname=None):
         """Try to add a new user to the database.

@@ -1,6 +1,7 @@
 import os, time, requests, multiprocessing.pool
 from collections import namedtuple
 from urllib.parse import urlparse, urljoin
+from datetime import datetime
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from werkzeug import generate_password_hash
@@ -55,6 +56,16 @@ def get_redirect_target():
     
 def redirect_back():
     return redirect(get_redirect_target())
+
+def friendly_datetime(then):
+    """Omit what is common between the given date and the current date"""
+    now = datetime.now()
+
+    #d is the day number, b is the short month name, Y is the year, X is the time
+    format =      "%d %b %Y, %X" if then.year != now.year \
+             else "%d %b, %X" if then.date() != now.date() \
+             else "%X"
+    return then.strftime(format)
 
 # 
 
@@ -313,4 +324,5 @@ if __name__ == "__main__":
     app_pool = multiprocessing.pool.ThreadPool(processes=4)
     init_db()
     app.add_url_rule("/<slug>", view_func=artist_page)
+    app.jinja_env.globals.update(friendly_datetime=friendly_datetime)
     app.run(debug=True)

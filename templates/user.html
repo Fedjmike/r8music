@@ -7,7 +7,7 @@
 <header><h1>User: {{ that_user.name }}</h1></header>
 
 <p>
-    Joined <time>{{ that_user.creation }}</time><br/>
+    Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>
     {% set rated_no = that_user.ratings | length %}
     Rated {{ rated_no }} release{{ 's' if rated_no != 1 else '' }}
 </p>
