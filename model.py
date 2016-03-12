@@ -224,7 +224,7 @@ class Model:
         
     #Tracks
     
-    Track = namedtuple("Track", ["title", "runtime"])
+    Track = namedtuple("Track", ["id", "title", "runtime"])
     
     def add_track(self, release_id, title, position, runtime):
         slug = generate_slug(title, self, "tracks")
@@ -243,8 +243,8 @@ class Model:
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
         
         return [
-            self.Track(title, runtime(milliseconds)) for title, milliseconds
-            in self.query("select title, runtime from tracks where release_id=? order by position asc", release_id)
+            self.Track(id, title, runtime(milliseconds)) for id, title, milliseconds
+            in self.query("select id, title, runtime from tracks where release_id=? order by position asc", release_id)
         ], runtime(total_runtime)
 
     #Object attachments
