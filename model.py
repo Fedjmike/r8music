@@ -185,8 +185,14 @@ class Model:
         elif not primary_artist_slug:
             primary_artist_slug = self.query_unique("select slug from artists where id=?", primary_artist_id)
         
-        return self.Release(*row,
-            url=url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug),
+        try:
+            url = url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug)
+            
+        #Outside Flask app context
+        except RuntimeError:
+            url = None
+        
+        return self.Release(*row, url=url,
             get_artists=lambda: self.get_release_artists(release_id, primary_artist_id),
             get_palette=lambda: self.get_palette(release_id),
             get_tracks=lambda: self.get_release_tracks(release_id),
@@ -406,3 +412,41 @@ class Model:
         user_id, db_hash = self.query_unique("select id, pw_hash from users where name=?", user_slug)
         matches = check_password_hash(db_hash, given_password)
         return (matches, user_id if matches else None)
+        
+    #Misc
+    
+    def remove_artist(self, artist):
+        """Removes all releases but not the artists collaborated with.
+           artist can be a slug or id"""
+        
+        def remove_attachments(object_id):
+            self.execute("delete from palettes where id=?", object_id)
+            self.execute("delete from descriptions where id=?", object_id)
+            self.execute("delete from links where id=?", object_id)
+            
+        def remove_actions(object_id):
+            self.execute("delete from ratings where action_id in"
+                         " (select id from actions where object_id=?)", object_id)
+            self.execute("delete from actions where object_id=?", object_id)
+            
+        def remove_object(object_id, table):
+            remove_attachments(object_id)
+            remove_actions(object_id)
+            self.execute("delete from " + table + " where id=?", object_id)
+            self.execute("delete from objects where id=?", object_id)
+        
+        def remove_tracks(release_id):
+            tracks, _ = self.get_release_tracks(release_id)
+            
+            for track in tracks:
+                remove_object(track.id, "tracks")
+            
+        def remove_releases(artist_id):
+            for release in self.get_releases_by_artist(artist_id):
+                remove_tracks(release.id)
+                remove_object(release.id, "releases")
+                
+        artist = self.get_artist(artist)
+        
+        remove_releases(artist.id)
+        remove_object(artist.id, "artists")
