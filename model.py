@@ -450,3 +450,24 @@ class Model:
         
         remove_releases(artist.id)
         remove_object(artist.id, "artists")
+
+if __name__ == "__main__":
+    import sys
+    from contextlib import closing
+    
+    with closing(Model()) as model:
+        command = sys.argv[1]
+        args = sys.argv[2:]
+        
+        if command == "remove_artist":
+            if len(args) == 0:
+                print("No artists given")
+                
+            for artist in args:
+                model.remove_artist(artist)
+            
+        elif command == "import_artist":
+            raise NotImplemented()
+            
+        else:
+            print("Command not selected")
