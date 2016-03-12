@@ -276,7 +276,7 @@ class Model:
         
     #Actions
     
-    Action = namedtuple("Action", ["id", "user_id", "object_id", "type", "creation", "explain"])
+    Action = namedtuple("Action", ["id", "user_id", "object_id", "type", "creation"])
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
     def add_action(self, user_id, object_id, type):
@@ -284,10 +284,7 @@ class Model:
                            " values (?, ?, ?, ?)", user_id, object_id, type.value, now_isoformat())
         
     def _make_action(self, user_id, action_id, object_id, type_id, creation):
-        type = ActionType(type_id)
-        return self.Action(action_id, user_id, object_id, type, arrow.get(creation).datetime,
-            explain=lambda: type.explain(object_id)
-        )
+        return self.Action(action_id, user_id, object_id, ActionType(type_id), arrow.get(creation).datetime)
     
     def set_rating(self, user_id, object_id, rating):
         action_id = self.add_action(user_id, object_id, ActionType.rate)
