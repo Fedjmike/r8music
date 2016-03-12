@@ -13,12 +13,14 @@
 </p>
 
 {% set rated = that_user.get_releases_rated() %}
+<div class="grids-list">
 {% for n in range(8, 0, -1) %}
-    {% if rated[n] %}
-        <h2>{{ n }}</h2>
-        <!-- TODO show own ratings? confusing? -->
+    <!-- TODO show own ratings? confusing? -->
+    <div><div>
+        <header><h2>{{ n }}</h2></header>
         {{ release_grid(rated[n], user, "small", artist_not_date=True) }}
-    {% endif %}
+    </div></div>
 {% endfor %}
+</div>
 
 {% endblock %}
