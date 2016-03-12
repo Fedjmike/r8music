@@ -338,6 +338,7 @@ ol:not(.small).rating {
     font-size: 0.65rem;
 }
 
+.releases.grid > li:last-child,
 :not(.small).releases.grid > li:nth-child(5n),
 .small.releases.grid > li:nth-child(6n) {
     margin-right: 0;
