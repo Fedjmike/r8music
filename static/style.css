@@ -504,7 +504,7 @@ ol.references {
     color: #ccc;
 }
 
-.grids-list > div > div {
+.grids-list > * > div {
     display: inline-block;
 }
 

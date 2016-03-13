@@ -16,10 +16,10 @@
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}
     <!-- TODO show own ratings? confusing? -->
-    <div><div>
-        <header><h2>{{ n }}</h2></header>
+    <section><div>
+        <header><h1>{{ n }}</h1></header>
         {{ release_grid(rated[n], user, "small", artist_not_date=True) }}
-    </div></div>
+    </div></section>
 {% endfor %}
 </div>
 
