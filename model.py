@@ -90,7 +90,7 @@ class Model:
         
     #Artists
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "releases", "get_image_url", "get_description", "get_wikipedia_urls"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
     def add_artist(self, name, description, incomplete=None):
         #Todo document "incomplete"
@@ -114,10 +114,8 @@ class Model:
             except NotFound:
                 return None
         
-    
-        #Always need to know the releases, might as well get them eagerly
         return self.Artist(*row,
-            releases=self.get_releases_by_artist(row["id"], row["slug"]),
+            get_releases=lambda: self.get_releases_by_artist(row["id"], row["slug"]),
             get_image_url=lambda: None,
             get_description=lambda: self.get_description(row["id"]),
             get_wikipedia_urls=get_artist_wikipedia_urls

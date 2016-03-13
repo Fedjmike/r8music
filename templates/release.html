@@ -67,7 +67,7 @@
         <h1>{{ artist.name }}</h1>
     </header>
 	
-	{{ release_list(artist.releases | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id)) }} 
+	{{ release_list(artist.get_releases() | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id)) }} 
     
     {% set description = artist.get_description() %}
 	<p>{{ description | safe if description else "" }}</p>
