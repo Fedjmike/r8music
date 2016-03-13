@@ -127,6 +127,7 @@ class Model:
         query = "select id, name, slug from artists where %s=?" % ("slug" if isinstance(artist, str) else "id")
         return self._make_artist(self.query_unique(query, artist))
         
+    @lru_cache(maxsize=512)
     def get_release_artists(self, release_id, primary_artist_id=None):
         """Get all the artists who authored a release"""
         
