@@ -8,7 +8,7 @@
 
 {% macro release_list(releases) -%}
     <ol class="releases">
-    {% for release in releases | sort(attribute="date") %}
+    {% for release in releases %}
         <li>
             <h2><time>{{ release.date[:4] }}</time> <a href={{ release.url }}>{{ release.title }}</a></h2>
         </li>
@@ -18,7 +18,7 @@
 
 {% macro release_grid(releases, user=None, class=None, artist_not_date=False) -%}
     <ol class="releases grid {{ class if class else '' }}">
-    {% for release in releases | sort(attribute="date") %}
+    {% for release in releases %}
         <li>
             {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, "inset small") }}
             <a href={{ release.url }}>
