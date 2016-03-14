@@ -13,7 +13,7 @@ function updateAverageRating(msg) {
 function rateRelease(clicked_element, release_id, rating) {
     /*User clicked the already selected rating
        => unrate*/
-    unrating = clicked_element.classList.contains("selected");
+    var unrating = clicked_element.classList.contains("selected");
     
     $.ajax({
         method: "POST",
@@ -44,9 +44,9 @@ function rateRelease(clicked_element, release_id, rating) {
 
 function handleReleaseAction(event) {
     event.preventDefault();
-    clickable = this;
-    action = clickable.name;
-    undo = clickable.classList.contains("selected");
+    var clickable = this;
+    var action = clickable.name;
+    var undo = clickable.classList.contains("selected");
     
     $.ajax({
         method: "POST",
@@ -57,7 +57,7 @@ function handleReleaseAction(event) {
         if (msg.error)
             return;
         
-        classes = clickable.classList;
+        var classes = clickable.classList;
         classes[undo ? "remove" : "add"]("selected");
     })
 }
