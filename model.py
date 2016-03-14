@@ -355,8 +355,8 @@ class Model:
         }
         
     def get_releases_rated_by_user(self, user_id):
-        releases = [
-            (rating, self._make_release(row)) for rating, *row in \
+        return [
+            (self._make_release(row), rating) for rating, *row in \
             self.query("select rating, " + self._release_columns_rename + " from"
                        " (select action_id, object_id, type as action_type from"
                        "  (select id as action_id, object_id, type from actions"
@@ -365,9 +365,6 @@ class Model:
                        " join releases on id = object_id where action_type=?",
                        user_id, ActionType.rate.value, ActionType.unrate.value, ActionType.rate.value)
         ]
-        
-        releases_by_rating = {n: [r for rating, r in releases if rating == n] for n in range(1, 9)}
-        return releases_by_rating
         
     #Users
     

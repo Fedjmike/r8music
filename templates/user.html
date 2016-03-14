@@ -12,13 +12,15 @@
     Rated {{ rated_no }} release{{ 's' if rated_no != 1 else '' }}
 </p>
 
-{% set rated = that_user.get_releases_rated() %}
+{% set ratings = that_user.get_releases_rated() %}
+{% set by_rating = group_by_rating(ratings) %}
+
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}
     <!-- TODO show own ratings? confusing? -->
     <section><div>
         <header><h1>{{ n }}</h1></header>
-        {{ release_grid(rated[n], user, "small", artist_not_date=True) }}
+        {{ release_grid(by_rating[n], user, "small", artist_not_date=True) }}
     </div></section>
 {% endfor %}
 </div>

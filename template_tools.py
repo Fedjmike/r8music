@@ -11,9 +11,14 @@ def friendly_datetime(then):
              else "%X"
     return then.strftime(format)
 
+def group_by_rating(ratings):
+    """Take a list of tuples of (release, rating)"""
+    
+    return {n: [r for rating, r in releases if rating == n] for n in range(1, 9)}
+    
 #
 
-template_tools = [friendly_datetime]
+template_tools = [friendly_datetime, group_by_rating]
 
 def add_template_tools(app):
     functions = {f.__name__: f for f in template_tools}
