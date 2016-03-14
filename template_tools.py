@@ -14,10 +14,10 @@ def friendly_datetime(then):
 def group_by_rating(ratings):
     """Take a list of tuples of (release, rating)"""
 
-    release_name = lambda release: release.get_artists()[0].name
+    release_key = lambda release: (release.get_artists()[0].name, release.date)
     get_rated = lambda n: [release for release, rating in ratings if rating == n]
     
-    return {n: sorted(get_rated(n), key=release_name) for n in range(1, 9)}
+    return {n: sorted(get_rated(n), key=release_key) for n in range(1, 9)}
     
 #
 
