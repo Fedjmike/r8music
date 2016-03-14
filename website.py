@@ -10,6 +10,7 @@ from sqlite3 import IntegrityError
 
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist
+from template_tools import add_template_tools
 
 g_recaptcha_secret = "todo config"
 
@@ -56,16 +57,6 @@ def get_redirect_target():
     
 def redirect_back():
     return redirect(get_redirect_target())
-
-def friendly_datetime(then):
-    """Omit what is common between the given date and the current date"""
-    now = datetime.now()
-
-    #d is the day number, b is the short month name, Y is the year, X is the time
-    format =      "%d %b %Y, %X" if then.year != now.year \
-             else "%d %b, %X" if then.date() != now.date() \
-             else "%X"
-    return then.strftime(format)
 
 # 
 
@@ -333,6 +324,8 @@ def recover_password():
 if __name__ == "__main__":
     app_pool = multiprocessing.pool.ThreadPool(processes=4)
     init_db()
+    
+    add_template_tools(app)
+    
     app.add_url_rule("/<slug>", view_func=artist_page)
-    app.jinja_env.globals.update(friendly_datetime=friendly_datetime)
     app.run(debug=True)
