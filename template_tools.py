@@ -2,6 +2,17 @@ from datetime import datetime
 from collections import defaultdict
 import json
 
+def pluralize(noun):
+    vowels = ["a", "e", "i", "o", "u"]
+    inflection =      "es" if noun.endswith("o") and noun[-2] not in vowels \
+                 else "es" if any(noun.endswith(suffix) for suffix in ["s", "z", "sh", "ch"]) \
+                 else "ies" if noun.endswith("y") \
+                 else "s"
+    return noun + inflection
+    
+def n_things(n, noun):
+    return "%d %s" % (n, noun if n == 1 else pluralize(noun))
+    
 def friendly_datetime(then):
     """Omit what is common between the given date and the current date"""
     now = datetime.now()
@@ -37,7 +48,7 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
+template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)

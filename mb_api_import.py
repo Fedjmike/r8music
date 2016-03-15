@@ -46,7 +46,7 @@ def get_links(artist_mbid):
             _type, target = split_link(item['type'], item['target'])
             links[_type] = target
     except KeyError:
-        pass
+        print("Error getting links:", e)
     return links
 
 def get_releases(mbid, processed_release_mbids):

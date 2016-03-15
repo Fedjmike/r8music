@@ -5,11 +5,11 @@
 {% block content %}
 <header><h1>Artists</h1></header>
 
+<p>Is an artist missing? <a href={{ url_for("add_artist") }}>Add them to the database</a>.</p>
+
 <ol>
 {% for artist in artists %}
     <li><a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a></li>
 {% endfor %}
 </ol>
-
-<p>Is an artist missing? <a href={{ url_for("add_artist") }}>Add them to the database</a>.</p>
 {% endblock %}

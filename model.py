@@ -1,6 +1,6 @@
 import sqlite3, arrow
 from itertools import count
-from functools import cmp_to_key, lru_cache
+from functools import lru_cache
 from datetime import datetime
 from collections import namedtuple, defaultdict
 from enum import Enum
