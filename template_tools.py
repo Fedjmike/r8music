@@ -1,5 +1,6 @@
 from datetime import datetime
 from collections import defaultdict
+import json
 
 def friendly_datetime(then):
     """Omit what is common between the given date and the current date"""
@@ -19,10 +20,25 @@ def group_by_rating(ratings):
     
     return {n: sorted(get_rated(n), key=release_key) for n in range(1, 9)}
     
+def get_release_year_counts(ratings):
+    """Take a list of tuples of (release, rating)"""
+    counts = defaultdict(lambda: 0)
+    
+    for release, _ in ratings:
+        year = int(release.date[:4])
+        counts[year] += 1
+        
+    return counts
+    
+def get_user_datasets(ratings):
+    return {
+        "ratingCounts": [len(group) for group in group_by_rating(ratings).values()]
+    }
+    
 #
 
-template_tools = [friendly_datetime, group_by_rating]
+template_tools = [friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
-    functions = {f.__name__: f for f in template_tools}
+    functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
     app.jinja_env.globals.update(**functions)

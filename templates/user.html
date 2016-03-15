@@ -3,17 +3,28 @@
 
 {% block title %}User '{{ that_user.name }}' {{ super() }}{% endblock %}
 
-{% block content %}
-<header><h1>User: {{ that_user.name }}</h1></header>
+{% set chart_js = True %}
 
-<p>
-    Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>
-    {% set rated_no = that_user.ratings | length %}
-    Rated {{ rated_no }} release{{ 's' if rated_no != 1 else '' }}
-</p>
+{% block content %}
+
+<section class="clearfix">
+    <canvas class="chart" id="user-chart" width="400" height="200"></canvas>
+
+    <header><h1>User: {{ that_user.name }}</h1></header>
+
+    <p>
+        Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>
+        {% set rated_no = that_user.ratings | length %}
+        Rated {{ rated_no }} release{{ 's' if rated_no != 1 else '' }}
+    </p>
+</section>
 
 {% set ratings = that_user.get_releases_rated() %}
 {% set by_rating = group_by_rating(ratings) %}
+
+<script>
+var userDatasets = {{ json_dumps(get_user_datasets(ratings)) | safe }};
+</script>
 
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}

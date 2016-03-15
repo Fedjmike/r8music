@@ -508,6 +508,12 @@ ol.references {
     display: inline-block;
 }
 
+.chart {
+    float: right;
+    width: 21em;
+    height: 11em;
+}
+
 /*Forms*/
 
 form dl {

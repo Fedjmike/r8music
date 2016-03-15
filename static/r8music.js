@@ -93,4 +93,10 @@ $(document).ready(function ($) {
     });
     
     $(".action .clickable").click(handleReleaseAction);
+    
+    var ctx = document.getElementById("user-chart").getContext("2d");
+    var userChart = new Chart(ctx).Bar({
+        labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
+        datasets: [{data: userDatasets.ratingCounts}]
+    });
 });
