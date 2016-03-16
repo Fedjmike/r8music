@@ -14,13 +14,12 @@
     <link rel="shortcut icon" href="/static/favicon.png" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script src="/static/r8music.js"></script>
     
     {% if chart_js %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+        <script src="/static/Chart.StackedBar.js"></script>
     {% endif %}
     
-    <style>
     {% if not accent_color_1 %}
         {% set accent_color_1 = "#0088ce" %}
     {% endif %}
@@ -28,6 +27,13 @@
         {% set accent_color_2 = "#0088ce" %}
     {% endif %}
     
+    <script>
+    var palette = ["{{ accent_color_1 }}", "{{ accent_color_2 }}"];
+    </script>
+    
+    <script src="/static/r8music.js"></script>
+    
+    <style>
     a {
         color: {{ accent_color_1 }};
     }
