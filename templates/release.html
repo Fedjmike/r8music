@@ -13,7 +13,7 @@
                 {{ release.title }}
                 {% set average_rating = release.get_rating_stats().average %}
                 <span id="average-rating-section" style="{{ '' if average_rating else 'display: none;' }}">
-                    <span id="average-rating">{{ average_rating }}</span>
+                    <span id="average-rating">{{ "%.1f" % average_rating }}</span>
                 </span>
             </h1>
 			<h2 class="byline">
