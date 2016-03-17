@@ -187,7 +187,7 @@ form.small input[type="submit"]:active {
 form.small input[type="submit"].material-icons {
     font-size: 1.35em;
     width: 1.4em;
-    padding: 0.075em 0 0.025em 0;
+    padding: 0;
 }
 
 form.small input:focus ~ input[type="submit"]:hover {
