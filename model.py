@@ -402,6 +402,10 @@ class Model:
                        
         return self._make_user(user_id, name, creation, {})
     
+    def set_user_pw(self, user_slug, password):
+        self.execute("update users set pw_hash=? where name=?" ,
+                     generate_password_hash(password), user_slug)
+    
     def user_pw_hash_matches(self, given_password, user_slug):
         """For security, the hash is never stored anywhere except the databse.
            For added security, it doesn't even leave this function."""
@@ -464,6 +468,9 @@ if __name__ == "__main__":
             
         elif command == "import_artist":
             raise NotImplemented()
+            
+        elif command == "set_pw":
+            model.set_user_pw(args[0], args[1])
             
         else:
             print("Command not selected")
