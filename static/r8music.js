@@ -62,14 +62,16 @@ function handleReleaseAction(event) {
     })
 }
 
-Chart.defaults.global.animation = false;
+if (typeof Chart !== "undefined") {
+    Chart.defaults.global.animation = false;
 
-Chart.defaults.global.scaleLineColor = palette[1];
-Chart.defaults.global.scaleFontFamily = "Signika";
-Chart.defaults.global.scaleFontSize = 14;
+    Chart.defaults.global.scaleLineColor = palette[1];
+    Chart.defaults.global.scaleFontFamily = "Signika";
+    Chart.defaults.global.scaleFontSize = 14;
 
-Chart.defaults.Bar.barStrokeWidth = 1.5;
-Chart.defaults.Bar.barValueSpacing = 1;
+    Chart.defaults.Bar.barStrokeWidth = 1.5;
+    Chart.defaults.Bar.barValueSpacing = 1;
+}
 
 $(document).ready(function ($) {
     $("a#login").click(function (event) {
@@ -103,14 +105,16 @@ $(document).ready(function ($) {
     
     $(".action .clickable").click(handleReleaseAction);
     
-    var ctx = document.getElementById("user-chart").getContext("2d");
-    var userChart = new Chart(ctx).Bar({
-        labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
-        datasets: [{
-            data: userDatasets.ratingCounts,
-            strokeColor: palette[0],
-            fillColor: "rgba(0,0,0, 0)",
-            highlightFill: palette[0]
-        }]
-    });
+    if (typeof Chart !== "undefined") {
+        var ctx = document.getElementById("user-chart").getContext("2d");
+        var userChart = new Chart(ctx).Bar({
+            labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
+            datasets: [{
+                data: userDatasets.ratingCounts,
+                strokeColor: palette[0],
+                fillColor: "rgba(0,0,0, 0)",
+                highlightFill: palette[0]
+            }]
+        });
+    }
 });
