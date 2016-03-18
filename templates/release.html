@@ -25,12 +25,14 @@
 		</header>
 		
 		<ol class="tracks">
-        {% set tracks, runtime = release.get_tracks() %}
-        {% for track in tracks %}
-			<li>
-                {{ track.title }}
-                {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
-            </li>
+        {% set trackses, runtime = release.get_tracks() %}
+        {% for tracks in trackses %}
+            {% for track in tracks %}
+    			<li>
+                    {{ track.title }}
+                    {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
+                </li>
+            {% endfor %}
         {% endfor %}
         {% if runtime and tracks | length != 1 %}
             <li class="total clearfix"><time>{{ runtime }}</time></li>
