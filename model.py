@@ -1,5 +1,5 @@
 import sqlite3, arrow
-from itertools import count
+from itertools import count, groupby
 from functools import lru_cache
 from datetime import datetime
 from collections import namedtuple, defaultdict
@@ -240,11 +240,19 @@ class Model:
                 nonlocal total_runtime
                 total_runtime = milliseconds + (total_runtime or 0)
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
-        
-        return [
-            self.Track(id, title, runtime(milliseconds)) for id, title, milliseconds
-            in self.query("select id, title, runtime from tracks where release_id=? order by position asc", release_id)
-        ], runtime(total_runtime)
+
+        all_tracks = [
+            (id, title, position, medium_position, milliseconds) for id, title, position, medium_position, milliseconds \
+            in self.query("select id, title, position, medium_position, runtime from tracks where release_id=?", release_id)
+        ]
+        grouped_by_medium = [list(g) for k, g in groupby(sorted(all_tracks, key=lambda x: x[3]), key=lambda x: x[3])]
+        tracks = [
+            [self.Track(id, title, runtime(milliseconds)) for id, title, _, _, milliseconds in medium] \
+            for medium in grouped_by_medium
+        ]
+
+        return tracks, runtime(total_runtime)
+
 
     #Object attachments
     

@@ -43,6 +43,7 @@ create table tracks (
     title text not null,
     slug text not null,
     position integer not null,
+    medium_position integer not null,
     runtime integer, -- In milliseconds
     foreign key (id) references objects(id)
 );
