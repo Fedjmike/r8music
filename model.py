@@ -225,12 +225,12 @@ class Model:
     
     Track = namedtuple("Track", ["id", "title", "runtime"])
     
-    def add_track(self, release_id, title, position, runtime):
+    def add_track(self, release_id, title, position, medium_position, runtime):
         slug = generate_slug(title, self, "tracks")
         
         track_id = self.new_id(ObjectType.track)
-        self.insert("insert into tracks (id, release_id, title, slug, position, runtime) values (?, ?, ?, ?, ?, ?)",
-                    track_id, release_id, title, slug, position, runtime)
+        self.insert("insert into tracks (id, release_id, title, slug, position, medium_position, runtime) values (?, ?, ?, ?, ?, ?, ?)",
+                    track_id, release_id, title, slug, position, medium_position, runtime)
 
     def get_release_tracks(self, release_id):
         total_runtime = None

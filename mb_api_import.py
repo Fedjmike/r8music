@@ -84,7 +84,11 @@ def prepare_release(release):
 
     print("Getting deets for release " + release['id'] + "...")
     result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
-    release['tracks'] = result['release']['medium-list'][0]['track-list']
+    release['tracks'] = []
+    for medium in result['release']['medium-list']:
+    	for track in medium['track-list']:
+    		track['medium-position'] = medium['position']
+    		release['tracks'].append(track)
     release['artists'] = result['release']['artist-credit']
 
 def import_artist(artist_name):
@@ -169,6 +173,7 @@ def import_artist(artist_name):
                 release_id,
                 track['recording']['title'],
                 int(track['position']),
+                int(track['medium-position']),
                 length
             )
 
