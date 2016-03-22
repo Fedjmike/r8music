@@ -223,7 +223,7 @@ class Model:
         
     #Tracks
     
-    Track = namedtuple("Track", ["id", "title", "runtime"])
+    Track = namedtuple("Track", ["id", "title", "side", "runtime"])
     
     def add_track(self, release_id, title, position, side, runtime):
         slug = generate_slug(title, self, "tracks")
@@ -241,15 +241,15 @@ class Model:
                 total_runtime = milliseconds + (total_runtime or 0)
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
 
-        all_tracks = self.query("select id, title, position, side, runtime from tracks where release_id=?", release_id)
-        track_no = len(all_tracks)
-        grouped_by_side = [list(g) for k, g in groupby(sorted(all_tracks, key=lambda x: x.side), key=lambda x: x.side)]
         tracks = [
-            [self.Track(id, title, runtime(milliseconds)) for id, title, _, _, milliseconds in medium] \
-            for side in grouped_by_side
+            self.Track(*row, runtime=runtime(milliseconds)) for milliseconds, *row in
+            self.query("select runtime, id, title, side from tracks"
+                       " where release_id=? order by side asc, position asc", release_id)
         ]
-
-        return tracks, runtime(total_runtime), track_no
+        
+        track_no = len(tracks)
+        sides = groupby(tracks, lambda track: track.side)
+        return [list(tracks) for side_no, tracks in sides], runtime(total_runtime), track_no
 
 
     #Object attachments
