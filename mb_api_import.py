@@ -84,11 +84,8 @@ def prepare_release(release):
 
     print("Getting deets for release " + release['id'] + "...")
     result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
-    release['tracks'] = []
-    for medium in result['release']['medium-list']:
-    	for track in medium['track-list']:
-    		track['side'] = medium['position']
-    		release['tracks'].append(track)
+    mediums = sorted(result['release']['medium-list'], key=lambda m: m["position"])
+    release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
 def import_artist(artist_name):
@@ -163,18 +160,19 @@ def import_artist(artist_name):
             except TypeError:
                 pass
 
-        for track in release['tracks']:
-            try:
-                length = track['recording']['length']
-            except KeyError:
-                length = None
-            model.add_track(
-                release_id,
-                track['recording']['title'],
-                int(track['position']),
-                int(track['side']),
-                length
-            )
+        for side, tracks in enumerate(release['tracks']):
+            for track in tracks:
+                try:
+                    length = track['recording']['length']
+                except KeyError:
+                    length = None
+                model.add_track(
+                    release_id,
+                    track['recording']['title'],
+                    int(track['position']),
+                    side,
+                    length
+                )
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
