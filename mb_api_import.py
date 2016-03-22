@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/python3
 
 import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
