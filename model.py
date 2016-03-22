@@ -242,13 +242,14 @@ class Model:
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
 
         all_tracks = self.query("select id, title, position, side, runtime from tracks where release_id=?", release_id)
+        track_no = len(all_tracks)
         grouped_by_side = [list(g) for k, g in groupby(sorted(all_tracks, key=lambda x: x.side), key=lambda x: x.side)]
         tracks = [
             [self.Track(id, title, runtime(milliseconds)) for id, title, _, _, milliseconds in medium] \
             for side in grouped_by_side
         ]
 
-        return tracks, runtime(total_runtime)
+        return tracks, runtime(total_runtime), track_no
 
 
     #Object attachments
