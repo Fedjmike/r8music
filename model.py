@@ -23,34 +23,7 @@ def connect_db():
     db.row_factory = sqlite3.Row
     return db
 
-def generate_slug(name, model, table):
-    query = "select count(*) from {} where slug=?".format(table)
-    is_free = lambda slug: model.query_unique(query, slug)[0] == 0
-    
-    slug = slugify(name)
-    candidates = (slug + ("-%d" % n if n else "") for n in count(0))
-    return next(filter(is_free, candidates))
-    
-class ObjectType(Enum):
-    artist = 1
-    release = 2
-    track = 3
-
-class ActionType(Enum):
-    rate = 1
-    unrate = 2
-    listen = 3
-    unlisten = 4
-    list = 5
-    unlist = 6
-    share = 7
-    unshare = 8
-    
-    @property
-    def simple_past(self):
-        return ["rated", "unrated", "listened to", "unlistened", "list", "unlist", "share", "unshare"][self.value-1]
-
-class Model:
+class GeneralModel:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
         
@@ -80,7 +53,35 @@ class Model:
         cursor.execute(query, args)
         self.db.commit()
         return cursor.lastrowid
+
+def generate_slug(name, model, table):
+    query = "select count(*) from {} where slug=?".format(table)
+    is_free = lambda slug: model.query_unique(query, slug)[0] == 0
+    
+    slug = slugify(name)
+    candidates = (slug + ("-%d" % n if n else "") for n in count(0))
+    return next(filter(is_free, candidates))
+    
+class ObjectType(Enum):
+    artist = 1
+    release = 2
+    track = 3
+
+class ActionType(Enum):
+    rate = 1
+    unrate = 2
+    listen = 3
+    unlisten = 4
+    list = 5
+    unlist = 6
+    share = 7
+    unshare = 8
+    
+    @property
+    def simple_past(self):
+        return ["rated", "unrated", "listened to", "unlistened", "list", "unlist", "share", "unshare"][self.value-1]
         
+class Model(GeneralModel):
     #IDs
     
     def new_id(self, type):
