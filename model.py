@@ -9,8 +9,6 @@ from flask import g, url_for
 
 from import_tools import slugify, get_wikipedia_urls, get_palette
 
-# TODO: Modify query_db so "[i for (i,) in." is unnecessary.
-
 class NotFound(Exception):
     pass
     
