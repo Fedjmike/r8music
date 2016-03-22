@@ -225,12 +225,12 @@ class Model:
     
     Track = namedtuple("Track", ["id", "title", "runtime"])
     
-    def add_track(self, release_id, title, position, medium_position, runtime):
+    def add_track(self, release_id, title, position, side, runtime):
         slug = generate_slug(title, self, "tracks")
         
         track_id = self.new_id(ObjectType.track)
-        self.insert("insert into tracks (id, release_id, title, slug, position, medium_position, runtime) values (?, ?, ?, ?, ?, ?, ?)",
-                    track_id, release_id, title, slug, position, medium_position, runtime)
+        self.insert("insert into tracks (id, release_id, title, slug, position, side, runtime) values (?, ?, ?, ?, ?, ?, ?)",
+                    track_id, release_id, title, slug, position, side, runtime)
 
     def get_release_tracks(self, release_id):
         total_runtime = None
@@ -241,14 +241,11 @@ class Model:
                 total_runtime = milliseconds + (total_runtime or 0)
                 return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
 
-        all_tracks = [
-            (id, title, position, medium_position, milliseconds) for id, title, position, medium_position, milliseconds \
-            in self.query("select id, title, position, medium_position, runtime from tracks where release_id=?", release_id)
-        ]
-        grouped_by_medium = [list(g) for k, g in groupby(sorted(all_tracks, key=lambda x: x[3]), key=lambda x: x[3])]
+        all_tracks = self.query("select id, title, position, side, runtime from tracks where release_id=?", release_id)
+        grouped_by_side = [list(g) for k, g in groupby(sorted(all_tracks, key=lambda x: x.side), key=lambda x: x.side)]
         tracks = [
             [self.Track(id, title, runtime(milliseconds)) for id, title, _, _, milliseconds in medium] \
-            for medium in grouped_by_medium
+            for side in grouped_by_side
         ]
 
         return tracks, runtime(total_runtime)

@@ -87,7 +87,7 @@ def prepare_release(release):
     release['tracks'] = []
     for medium in result['release']['medium-list']:
     	for track in medium['track-list']:
-    		track['medium-position'] = medium['position']
+    		track['side'] = medium['position']
     		release['tracks'].append(track)
     release['artists'] = result['release']['artist-credit']
 
@@ -172,7 +172,7 @@ def import_artist(artist_name):
                 release_id,
                 track['recording']['title'],
                 int(track['position']),
-                int(track['medium-position']),
+                int(track['side']),
                 length
             )
 
