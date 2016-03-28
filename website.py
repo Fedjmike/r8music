@@ -11,7 +11,7 @@ from sqlite3 import IntegrityError
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist
 from template_tools import add_template_tools
-from tools import basic_decorator
+from tools import basic_decorator, decorator_with_args
 
 g_recaptcha_secret = "todo config"
 
@@ -237,6 +237,13 @@ def failed_recaptcha(recaptcha_response, remote_addr):
     
     return not response["success"]
 
+@decorator_with_args
+def sanitize_new_password(view, new_password, again):
+    if new_password != again:
+        return "LOL you typed your password wrong"
+        
+    return view()
+    
 @app.route("/register", methods=["GET", "POST"])
 def register():
     #todo check not logged in
@@ -255,26 +262,45 @@ def register():
         if failed_recaptcha(recaptcha_response, request.remote_addr):
             return "Sorry, you appear to be a robot"
         
-        if password != verify_password:
-            return "LOL you typed your password wrong"
-            
-        #todo more restrictions, slugging
-        elif len(name) < 4:
-            return "Your username must be 4 characters or longer"
-            
-        try:
-            if email == "":
-                email = None
+        @sanitize_new_password(password, verify_password)
+        def register(email=email):
+            #todo more restrictions, slugging
+            if len(name) < 4:
+                return "Your username must be 4 characters or longer"
+                
+            try:
+                if email == "":
+                    email = None
+                    
+                user = model().register_user(name, password, email)
+                #Automatically log them in
+                set_user(user.name, user.id)
+                
+                return redirect_back()
+                
+            except AlreadyExists:
+                #error
+                return "Username %s already taken" % name
         
-            user = model().register_user(name, password, email)
-            #Automatically log them in
-            set_user(user.name, user.id)
+        return register()
+
+@decorator_with_args
+def confirm_password(view, user, password):
+    """Runs a view, if the credentials given are correct, otherwise
+    displays an error. `user` may be an id or name. Passes the
+    corresponding user_id into the given view."""
+    try:
+        matches, user_id = model().user_pw_hash_matches(user, password)
+        
+        if matches:
+            return view(user_id)
+
+        else:
+            return "Incorrect password for " + str(user)
             
-            return redirect_back()
-            
-        except AlreadyExists:
-            #error
-            return "Username %s already taken" % name
+    except NotFound:
+        #error
+        return "User {} not found".format(user)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -287,20 +313,13 @@ def login():
     else:
         name = request.form["username"]
         password = request.form["password"]
-        
-        try:
-            matches, user_id = model().user_pw_hash_matches(name, password)
+
+        @confirm_password(name, password)
+        def login(user_id):
+            set_user(name, user_id)
+            return redirect_back()
             
-            if matches:
-                set_user(name, user_id)
-                return redirect_back()
-                
-            else:
-                return "Incorrect password for %s" % name
-            
-        except NotFound:
-            #error
-            return "User %s not found" % name
+        return login()
 
 @app.route("/logout")
 def logout():
