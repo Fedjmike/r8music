@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "release_list.html" import release_list, release_grid %}
 
-{% block title %}User '{{ that_user.name }}' {{ super() }}{% endblock %}
+{% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
 
 {% set chart_js = True %}
 
@@ -10,7 +10,7 @@
 <section class="clearfix">
     <canvas class="chart" id="user-chart" width="400" height="200"></canvas>
 
-    <header><h1>User: {{ that_user.name }}</h1></header>
+    <header><h1>{{ that_user.name }}</h1></header>
 
     <p>
         Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>

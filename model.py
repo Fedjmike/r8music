@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sqlite3, arrow
 from itertools import count, groupby
 from functools import lru_cache
@@ -411,7 +413,7 @@ class Model(GeneralModel):
         self.execute("update users set pw_hash=? where name=?" ,
                      generate_password_hash(password), user_slug)
     
-    def user_pw_hash_matches(self, given_password, user_slug):
+    def user_pw_hash_matches(self, user, given_password):
         """For security, the hash is never stored anywhere except the databse.
            For added security, it doesn't even leave this function."""
         user_id, db_hash = self.query_unique("select id, pw_hash from users where name=?", user_slug)

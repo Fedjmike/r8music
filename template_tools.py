@@ -24,7 +24,7 @@ def friendly_datetime(then):
     return then.strftime(format)
 
 def group_by_rating(ratings):
-    """Take a list of tuples of (release, rating)"""
+    """Takes a list of tuples of (release, rating)"""
 
     release_key = lambda release: (release.get_artists()[0].name, release.date)
     get_rated = lambda n: [release for release, rating in ratings if rating == n]

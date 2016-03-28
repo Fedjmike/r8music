@@ -120,16 +120,16 @@ def set_user(name, _id):
     session["user"] = {"name": name, "id": _id}
 
 @basic_decorator
-def with_user(f):
+def with_user(view):
     """A decorator for pages that (can) use the logged in User, but
        do not *require* authentication."""
     request.user = get_user()
-    return f()
+    return view()
 
 UserID = namedtuple("UserID", ["id"])
 
 @basic_decorator
-def needs_auth(f):
+def needs_auth(view):
     """A decorator for pages that require authentication"""
     request.user = UserID(get_user_id())
     
@@ -139,7 +139,7 @@ def needs_auth(f):
         return "Not authenticated", 403
     
     else:
-        return f()
+        return view()
     
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @with_user
@@ -289,7 +289,7 @@ def login():
         password = request.form["password"]
         
         try:
-            matches, user_id = model().user_pw_hash_matches(password, name)
+            matches, user_id = model().user_pw_hash_matches(name, password)
             
             if matches:
                 set_user(name, user_id)

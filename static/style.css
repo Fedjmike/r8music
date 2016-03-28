@@ -462,7 +462,7 @@ ol.tracks {
 }
 
 .album-cover img {
-    max-width: 21em;
+    width: 21em;
     margin-right: 1em;
 }
 
