@@ -11,6 +11,7 @@ from sqlite3 import IntegrityError
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist
 from template_tools import add_template_tools
+from tools import basic_decorator
 
 g_recaptcha_secret = "todo config"
 
@@ -118,34 +119,27 @@ def get_user():
 def set_user(name, _id):
     session["user"] = {"name": name, "id": _id}
 
+@basic_decorator
 def with_user(f):
     """A decorator for pages that (can) use the logged in User, but
        do not *require* authentication."""
-    def decorated(*args, **kwargs):
-        request.user = get_user()
-        return f(*args, **kwargs)
-        
-    #Make the name appear the same, for routing and debugging
-    decorated.__name__ = f.__name__
-    return decorated
+    request.user = get_user()
+    return f()
 
 UserID = namedtuple("UserID", ["id"])
 
+@basic_decorator
 def needs_auth(f):
     """A decorator for pages that require authentication"""
-    def decorated(*args, **kwargs):
-        request.user = UserID(get_user_id())
-        
-        if request.user.id == None:
-            #todo
-            #todo send JSON for some pages (e.g. rating, with UI info)
-            return "Not authenticated", 403
-        
-        else:
-            return f(*args, **kwargs)
-        
-    decorated.__name__ = f.__name__
-    return decorated
+    request.user = UserID(get_user_id())
+    
+    if request.user.id == None:
+        #todo
+        #todo send JSON for some pages (e.g. rating, with UI info)
+        return "Not authenticated", 403
+    
+    else:
+        return f()
     
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @with_user
