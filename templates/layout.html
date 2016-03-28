@@ -89,6 +89,7 @@
                     </li>
                     <li><a id="logout" href={{ url_for("logout") }}>log out</a></li>
                     <div class="small popup"><div class="popup-content" id="user-popup">
+                        <a class="right" href={{ url_for("set_password") }}>change your password</a><br/>
                         <a class="right" id="logout" href={{ url_for("logout") }}>log out</a><br/>
                     </div></div>
                 {% elif not dont_display_login_register %}

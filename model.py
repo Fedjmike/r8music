@@ -409,14 +409,20 @@ class Model(GeneralModel):
                        
         return self._make_user(user_id, name, creation, {})
     
-    def set_user_pw(self, user_slug, password):
-        self.execute("update users set pw_hash=? where name=?" ,
-                     generate_password_hash(password), user_slug)
+    def set_user_pw(self, user, password):
+        """user can be a slug or an id"""
+        column =  "name" if isinstance(user, str) else "id"
+        self.execute("update users set pw_hash=? where %s=?" % column,
+                     generate_password_hash(password), user)
     
     def user_pw_hash_matches(self, user, given_password):
-        """For security, the hash is never stored anywhere except the databse.
+        """Confirm the password (hash) of a user, by name or by id.
+           For security, the hash is never stored anywhere except the databse.
            For added security, it doesn't even leave this function."""
-        user_id, db_hash = self.query_unique("select id, pw_hash from users where name=?", user_slug)
+           
+        column =  "name" if isinstance(user, str) else "id"
+        user_id, db_hash = self.query_unique("select id, pw_hash from users"
+                                             " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
         return (matches, user_id if matches else None)
         

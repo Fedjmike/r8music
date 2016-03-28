@@ -302,6 +302,26 @@ def confirm_password(view, user, password):
         #error
         return "User {} not found".format(user)
 
+@app.route("/set-password", methods=["GET", "POST"])
+@needs_auth
+def set_password():
+    if request.method == "GET":
+        #todo https
+        return render_template("set_password.html")
+        
+    else:
+        password = request.form["password"]
+        new_password = request.form["new-password"]
+        verify_new_password = request.form["verify-new-password"]
+        
+        @sanitize_new_password(new_password, verify_new_password)
+        @confirm_password(request.user.id, password)
+        def set_password(user_id):
+            model().set_user_pw(user_id, new_password)
+            return redirect_back()
+            
+        return set_password()
+        
 @app.route("/login", methods=["GET", "POST"])
 def login():
     #todo check not logged in
