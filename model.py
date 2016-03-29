@@ -448,10 +448,11 @@ class Model(GeneralModel):
             self.execute("delete from objects where id=?", object_id)
         
         def remove_tracks(release_id):
-            tracks, _ = self.get_release_tracks(release_id)
+            sides, _, _ = self.get_release_tracks(release_id)
             
-            for track in tracks:
-                remove_object(track.id, "tracks")
+            for side in sides:
+                for track in side:
+                    remove_object(track.id, "tracks")
             
         def remove_releases(artist_id):
             for release in self.get_releases_by_artist(artist_id):
