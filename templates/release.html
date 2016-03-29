@@ -55,7 +55,8 @@
             </a></li>
         </ol>
 	    
-        {{ rating_widget(release, user.ratings[release.id] if user and release.id in user.ratings, None) }}
+        {% set ratings = user.get_ratings() if user else {} %}
+        {{ rating_widget(release, ratings[release.id] if release.id in ratings, None) }}
 	</div>
     {% if release.thumb_art_url %}
         <a class="album-cover" href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a>

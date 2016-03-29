@@ -14,7 +14,7 @@
 
     <p>
         Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>
-        {% set rated_no = that_user.ratings | length %}
+        {% set rated_no = that_user.get_ratings() | length %}
         Rated {{ n_things(rated_no, "release") }}
     </p>
 </section>

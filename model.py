@@ -375,10 +375,11 @@ class Model(GeneralModel):
         
     #Users
     
-    User = namedtuple("User", ["id", "name", "creation", "ratings", "get_releases_rated", "get_active_actions"])
+    User = namedtuple("User", ["id", "name", "creation", "get_ratings", "get_releases_rated", "get_active_actions"])
     
-    def _make_user(self, _id, name, creation, ratings):
-        return self.User(_id, name, creation, ratings,
+    def make_user(self, _id, name, creation):
+        return self.User(_id, name, creation,
+            get_ratings=lambda: self.get_user_ratings(_id),
             get_releases_rated=lambda: self.get_releases_rated_by_user(_id),
             get_active_actions=lambda object_id: self.get_active_actions_by_user(_id, object_id)
         )
@@ -390,9 +391,7 @@ class Model(GeneralModel):
                 % ("name" if isinstance(user, str) else "id")
         user_id, name, creation = self.query_unique(query, user)
         
-        ratings = self.get_user_ratings(user_id)
-                                
-        return self._make_user(user_id, name, arrow.get(creation).datetime, ratings)
+        return self.make_user(user_id, name, arrow.get(creation).datetime)
         
     def register_user(self, name, password, email=None, fullname=None):
         """Try to add a new user to the database.
@@ -407,7 +406,7 @@ class Model(GeneralModel):
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
                               name, generate_password_hash(password), email, fullname, creation)
                        
-        return self._make_user(user_id, name, creation, {})
+        return self.make_user(user_id, name, creation)
     
     def set_user_pw(self, user, password):
         """user can be a slug or an id"""
@@ -421,10 +420,10 @@ class Model(GeneralModel):
            For added security, it doesn't even leave this function."""
            
         column =  "name" if isinstance(user, str) else "id"
-        user_id, db_hash = self.query_unique("select id, pw_hash from users"
+        db_hash, *row = self.query_unique("select pw_hash, id, name, creation from users"
                                              " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
-        return (matches, user_id if matches else None)
+        return matches, self.make_user(*row)
         
     #Misc
     

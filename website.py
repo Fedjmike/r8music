@@ -102,22 +102,16 @@ def search_post():
 def search_results(query=None):
     return render_template("search_results.html", search={"query": query, "results": []})
 
-def get_user_id():
-    try:
-        return session["user"]["id"]
-        
-    except (TypeError, KeyError):
-        return None
-        
 def get_user():
     try:
-        return model().get_user(session["user"]["id"])
-        
-    except (NotFound, TypeError, KeyError):
+        row = [session["user"][key] for key in ("id", "name", "creation")]
+        return model().make_user(*row)
+    
+    except TypeError:
         return None
 
-def set_user(name, _id):
-    session["user"] = {"name": name, "id": _id}
+def set_user(user):
+    session["user"] = {"id": user.id, "name": user.name, "creation": user.creation}
 
 @basic_decorator
 def with_user(view):
@@ -126,14 +120,12 @@ def with_user(view):
     request.user = get_user()
     return view()
 
-UserID = namedtuple("UserID", ["id"])
-
 @basic_decorator
 def needs_auth(view):
     """A decorator for pages that require authentication"""
-    request.user = UserID(get_user_id())
+    request.user = get_user()
     
-    if request.user.id == None:
+    if not request.user:
         #todo
         #todo send JSON for some pages (e.g. rating, with UI info)
         return "Not authenticated", 403
@@ -274,7 +266,7 @@ def register():
                     
                 user = model().register_user(name, password, email)
                 #Automatically log them in
-                set_user(user.name, user.id)
+                set_user(user)
                 
                 return redirect_back()
                 
@@ -288,19 +280,19 @@ def register():
 def confirm_password(view, user, password):
     """Runs a view, if the credentials given are correct, otherwise
     displays an error. `user` may be an id or name. Passes the
-    corresponding user_id into the given view."""
+    corresponding user object into the given view."""
     try:
-        matches, user_id = model().user_pw_hash_matches(user, password)
+        matches, user = model().user_pw_hash_matches(user, password)
         
         if matches:
-            return view(user_id)
+            return view(user)
 
         else:
-            return "Incorrect password for " + str(user)
+            return "Incorrect password for '%s'" % user.name
             
     except NotFound:
         #error
-        return "User {} not found".format(user)
+        return "User '%s' not found" % user.name
 
 @app.route("/set-password", methods=["GET", "POST"])
 @needs_auth
@@ -316,8 +308,8 @@ def set_password():
         
         @sanitize_new_password(new_password, verify_new_password)
         @confirm_password(request.user.id, password)
-        def set_password(user_id):
-            model().set_user_pw(user_id, new_password)
+        def set_password(user):
+            model().set_user_pw(user.id, new_password)
             return redirect_back()
             
         return set_password()
@@ -335,8 +327,8 @@ def login():
         password = request.form["password"]
 
         @confirm_password(name, password)
-        def login(user_id):
-            set_user(name, user_id)
+        def login(user):
+            set_user(user)
             return redirect_back()
             
         return login()
