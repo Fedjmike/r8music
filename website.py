@@ -107,7 +107,7 @@ def get_user():
         row = [session["user"][key] for key in ("id", "name", "creation")]
         return model().make_user(*row)
     
-    except TypeError:
+    except (KeyError, TypeError):
         return None
 
 def set_user(user):
