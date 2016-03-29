@@ -20,10 +20,10 @@
 </section>
 
 {% set ratings = that_user.get_releases_rated() %}
-{% set by_rating = group_by_rating(ratings) %}
+{% set by_rating, user_datasets = get_user_datasets(ratings) %}
 
 <script>
-var userDatasets = {{ json_dumps(get_user_datasets(ratings)) | safe }};
+var userDatasets = {{ json_dumps(user_datasets) | safe }};
 </script>
 
 <div class="grids-list">

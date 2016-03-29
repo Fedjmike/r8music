@@ -23,32 +23,58 @@ def friendly_datetime(then):
              else "%X"
     return then.strftime(format)
 
+#Rating datasets
+
 def group_by_rating(ratings):
-    """Takes a list of tuples of (release, rating)"""
+    """Turns [(release, rating)] into {rating: [release]}"""
 
     release_key = lambda release: (release.get_artists()[0].name, release.date)
     get_rated = lambda n: [release for release, rating in ratings if rating == n]
     
     return {n: sorted(get_rated(n), key=release_key) for n in range(1, 9)}
     
-def get_release_year_counts(ratings):
-    """Take a list of tuples of (release, rating)"""
-    counts = defaultdict(lambda: 0)
+range_of = lambda list: range(min(list), max(list))
     
-    for release, _ in ratings:
+def get_release_year_counts(ratings):
+    counts = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0, 0])
+    
+    for release, rating in ratings:
         year = int(release.date[:4])
-        counts[year] += 1
-        
-    return counts
+        counts[year][rating-1] += 1
+
+    #Fill in the missing years within the range
+    for year in range_of(counts):
+        if year not in counts:
+            counts[year] = counts.default_factory()
+    
+    #[(year, (,,,,,,,,))]
+    items = sorted(counts.items(), key=lambda kv: kv[0])
+    #Transpose the table into [year], [(,,,,,,,,)]
+    years, year_counts = zip(*items)
+    
+    #Return the year counts and year counts by rating
+    #[year], [count], [[count]]
+    return years, list(map(sum, year_counts)), list(zip(*year_counts))
     
 def get_user_datasets(ratings):
-    return {
-        "ratingCounts": [len(group) for group in group_by_rating(ratings).values()]
+    """Takes [(release, rating)] and gives various interesting datasets"""
+    
+    if not ratings:
+        return defaultdict(lambda: [])
+    
+    releases, _ = zip(*ratings)
+    by_rating = group_by_rating(ratings)
+    years, year_counts, year_counts_by_rating = get_release_year_counts(ratings)
+    
+    return by_rating, {
+        "ratingCounts": [len(releases) for releases in by_rating.values()],
+        "releaseYearCounts": (years, year_counts),
+        "releaseYearCountsByRating": (years, year_counts_by_rating),
     }
     
 #
 
-template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
+template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
