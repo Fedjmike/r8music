@@ -477,7 +477,11 @@ if __name__ == "__main__":
                 print("No artists given")
                 
             for artist in args:
-                model.remove_artist(artist)
+                try:
+                    model.remove_artist(artist)
+                    
+                except NotFound:
+                    print("Artist %s not found" % artist)
             
         elif command == "import_artist":
             raise NotImplemented()
