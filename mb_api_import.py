@@ -45,7 +45,7 @@ def get_links(artist_mbid):
         for item in result['artist']['url-relation-list']:
             _type, target = split_link(item['type'], item['target'])
             links[_type] = target
-    except KeyError:
+    except KeyError as e:
         print("Error getting links:", e)
     return links
 
