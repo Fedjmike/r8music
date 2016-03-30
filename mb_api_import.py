@@ -101,9 +101,10 @@ def import_artist(artist_name):
     # If not, import as a new artist into the database
     try:
         (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
+        (mb_type_id,) = model.query_unique('select id from link_types where type="musicbrainz"')
         processed_release_mbids = [
             row['target'] for row in
-            model.query('select target from links l join authorships a on l.id = a.release_id where artist_id=? and l.type="musicbrainz"', artist_id)
+            model.query('select target from links l join authorships a on l.id = a.release_id where artist_id=? and type_id=?', artist_id, mb_type_id)
         ]
         
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
