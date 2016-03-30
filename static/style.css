@@ -226,10 +226,8 @@ ol:not(.small).rating {
     text-align: center;
 }
 
-.inset.rating {
-    position: relative;
-    top: 8.95rem;
-    z-index: 999;
+.inset > .rating {
+    display: inline-block;
     border: 2px solid rgba(255,255,255, 0.7);
 }
 
@@ -300,8 +298,6 @@ ol:not(.small).rating {
 
 .releases.grid > li {
     display: inline-block;
-    /*To get rid of the gap created by the rating widget*/
-    margin-top: -1.8rem;
     margin-bottom: 1rem;
     /*9x5 + 1.03x4 = 49.12 < 50 (page width)*/
     width: 9rem;
@@ -309,6 +305,17 @@ ol:not(.small).rating {
     
     vertical-align: top;
     text-align: center;
+}
+
+.releases.grid > li > .inset {
+    position: relative;
+    height: 0;
+    z-index: 99;
+    top: 6.85rem;
+}
+
+.small.releases.grid > li > .inset {
+    top: 5.6rem;
 }
 
 .releases.grid > li div {
@@ -344,10 +351,6 @@ ol:not(.small).rating {
 :not(.small).releases.grid > li:nth-child(5n),
 .small.releases.grid > li:nth-child(6n) {
     margin-right: 0;
-}
-
-.small.grid .inset.rating {
-    top: 7.5rem;
 }
 
 .releases.grid > li img {
