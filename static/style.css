@@ -298,7 +298,7 @@ ol:not(.small).rating {
 
 .releases.grid > li {
     display: inline-block;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     /*9x5 + 1.03x4 = 49.12 < 50 (page width)*/
     width: 9rem;
     margin-right: 1.03rem;
@@ -584,7 +584,6 @@ input[type="submit"]:active {
     height: 0em;
     float: right;
     position: relative;
-    top: 0.5em;
     left: 0.5em;
     z-index: 999;
     font-size: 1rem;
