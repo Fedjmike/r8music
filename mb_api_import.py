@@ -88,13 +88,19 @@ def prepare_release(release):
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
-def import_artist(artist_mbid=None, artist_name=None):
+class MBID(str):
+    pass
+    
+def import_artist(artist):
+    """artist may either be the name or MBID"""
+    
     print("Querying MB for artist info...")
-    if artist_mbid:
+    if isinstance(artist, MBID):
+        artist_mbid = artist
         result = musicbrainzngs.get_artist_by_id(artist_mbid)
         artist_name = result['artist']['name']
     else:
-        result = musicbrainzngs.search_artists(artist=artist_name)
+        result = musicbrainzngs.search_artists(artist=artist)
         artist_mbid = result['artist-list'][0]['id']
         artist_name = result['artist-list'][0]['name']
 

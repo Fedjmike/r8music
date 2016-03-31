@@ -9,7 +9,7 @@ from contextlib import closing
 from sqlite3 import IntegrityError
 
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
-from mb_api_import import import_artist
+from mb_api_import import import_artist, MBID
 from import_tools import search_artists
 from template_tools import add_template_tools
 from tools import basic_decorator, decorator_with_args
@@ -203,7 +203,7 @@ def add_artist():
     else:
         if "artist-id" in request.form:
             #todo ajax progress
-            artist_id = request.form["artist-id"]
+            artist_id = MBID(request.form["artist-id"])
             app_pool.apply_async(import_artist, (artist_id,))
             return redirect_back()
             
