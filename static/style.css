@@ -296,14 +296,21 @@ ol:not(.small).rating {
     padding-right: 0.3em;
 }
 
+.releases.grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    /*Expand the width to allow room for the margins of the left
+      and right columns*/
+    margin: 0 -0.625em;
+}
+
 .releases.grid > li {
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    /*9x5 + 1.03x4 = 49.12 < 50 (page width)*/
-    width: 9rem;
-    margin-right: 1.03rem;
+    margin-bottom: 1.5em !important;
+    /*9x5 + (0.625x2)x4 = 50 (page width)*/
+    width: 9em;
+    margin: 0 0.625em;
     
-    vertical-align: top;
     text-align: center;
 }
 
@@ -311,7 +318,7 @@ ol:not(.small).rating {
     position: relative;
     height: 0;
     z-index: 99;
-    top: 6.85rem;
+    top: 6.85em;
 }
 
 .small.releases.grid > li > .inset {
@@ -320,7 +327,7 @@ ol:not(.small).rating {
 
 .releases.grid .cover {
     width: 100%;
-    height: 9rem;
+    height: 9em;
     border-radius: 0.3em;
     overflow: hidden;
     margin-bottom: 0.4em;
@@ -335,8 +342,9 @@ ol:not(.small).rating {
 }
 
 .small.releases.grid > li {
+    /*7.5x6 + (0.5x2)x5 = 50 (page width)*/
     width: 7.5em;
-    margin-right: 0.78em;
+    margin: 0 0.5em;
 }
 
 .small.releases.grid .cover {
@@ -345,12 +353,6 @@ ol:not(.small).rating {
 
 .small.releases.grid .small.rating li {
     font-size: 0.65rem;
-}
-
-.releases.grid > li:last-child,
-:not(.small).releases.grid > li:nth-child(5n),
-.small.releases.grid > li:nth-child(6n) {
-    margin-right: 0;
 }
 
 .releases.grid > li img {
