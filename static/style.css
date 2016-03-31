@@ -196,18 +196,78 @@ form.small input:focus ~ input[type="submit"]:hover {
     cursor: pointer;
 }
 
-ol.rating {
-	display: inline-block;
-    margin: 0.2rem 0;
+.button, .rating {
+    margin: 0.2rem 0 !important;
     overflow: hidden;
-    /*Whitespace between the list items becomes hidden*/
-    font-size: 0;
     
     border: 2px solid rgba(0,0,0, 0);
     border-radius: 0.7rem;
-    
-    color: white;
     font-weight: bold;
+}
+
+.button, .button a, .rating {
+    color: white;
+    text-decoration: none !important;
+}
+
+:not(.composite).button .button-content {
+    padding: 0 0.4em;
+}
+
+:not(.composite).button:hover {
+    cursor: pointer;
+}
+
+:not(.composite).button:hover .button-content {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.button .selected {
+	background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.button .selected:hover {
+	background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+ol.button {
+    display: inline-flex;
+    vertical-align: top;
+}
+
+ol.button > li {
+    display: inline-block;
+}
+
+ol.button > li > .button-content {
+    display: block;
+    padding: 0 0.3em;
+    text-align: center;
+}
+
+.button i.material-icons {
+    margin-top: -0.2em;
+    margin-right: 0.15em;
+    font-size: 1rem;
+    vertical-align: middle;
+}
+
+ol.button > li:first-child > .button-content {
+    padding-left: 0.4em;
+}
+
+ol.button > li:last-child > .button-content {
+    padding-right: 0.4em;
+}
+
+ol.button > li > .button-content:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+ol.rating {
+    /*Whitespace between the list items becomes hidden*/
+    font-size: 0;
 }
 
 ol:not(.small).rating {
