@@ -60,13 +60,13 @@ def get_user_datasets(ratings):
     """Takes [(release, rating)] and gives various interesting datasets"""
     
     if not ratings:
-        return defaultdict(lambda: [])
+        return None
     
     releases, _ = zip(*ratings)
     by_rating = group_by_rating(ratings)
     years, year_counts, year_counts_by_rating = get_release_year_counts(ratings)
     
-    return by_rating, {
+    return {
         "ratingCounts": [len(releases) for releases in by_rating.values()],
         "releaseYearCounts": (years, year_counts),
         "releaseYearCountsByRating": (years, year_counts_by_rating),
@@ -74,7 +74,7 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), get_user_datasets]
+template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
