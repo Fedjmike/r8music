@@ -88,11 +88,10 @@ def prepare_release(release):
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
-def import_artist(artist_name):
+def import_artist(artist_mbid):
     print("Querying MB for artist info...")
-    result = musicbrainzngs.search_artists(artist=artist_name)
-    artist_info = result['artist-list'][0]
-    artist_mbid = artist_info['id']
+    result = musicbrainzngs.get_artist_by_id(artist_mbid)
+    artist_name = result['artist']['name']
 
     model = Model()
 
@@ -110,7 +109,7 @@ def import_artist(artist_name):
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
-        artist_id = model.add_artist(artist_info['name'], import_tools.get_description(artist_info['name']))
+        artist_id = model.add_artist(artist_name, import_tools.get_description(artist_name))
         processed_release_mbids = []
 
     print("Getting links...")

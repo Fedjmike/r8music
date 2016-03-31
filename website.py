@@ -10,6 +10,7 @@ from sqlite3 import IntegrityError
 
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist
+from import_tools import search_artists
 from template_tools import add_template_tools
 from tools import basic_decorator, decorator_with_args
 
@@ -171,7 +172,7 @@ def release_post(release_id):
         #No rating field sent
         except (KeyError):
             return jsonify(error=1), 400
-        
+
     elif action == ActionType.unrate:
         model().unset_rating(request.user.id, release_id)
         return rating_stats()
@@ -197,11 +198,16 @@ def add_artist():
         return render_template("add_artist.html")
         
     else:
-        #todo allow mbid
-        #todo ajax progress
-        artist_name = request.form["artist-name"]
-        app_pool.apply_async(import_artist, (artist_name,))
-        return redirect_back()
+        if "artist-id" in request.form:
+            #todo ajax progress
+            artist_id = request.form["artist-id"]
+            app_pool.apply_async(import_artist, (artist_id,))
+            return redirect_back()
+        else:
+            artist_name = request.form["artist-name"]
+            artists = search_artists(artist_name)
+            return render_template("add_artist_search_results.html", artists=artists)
+
     
 @app.route("/user/<slug>")
 @with_user

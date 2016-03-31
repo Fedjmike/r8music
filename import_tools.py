@@ -1,6 +1,7 @@
 import re, os, urllib.request, requests
 from chromatography import *
 import wikipedia
+import musicbrainzngs as mb
 from collections import namedtuple
 from itertools import combinations
 from unidecode import unidecode
@@ -108,3 +109,9 @@ def get_palette(album_art_url):
         traceback.print_exc()
     
     return [None, None, None]
+
+def search_artists(artist_name):
+    mb.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+    r = mb.search_artists(artist=artist_name)
+    artists = r['artist-list']
+    return artists
