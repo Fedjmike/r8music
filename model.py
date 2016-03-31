@@ -463,25 +463,52 @@ class Model(GeneralModel):
         
         remove_releases(artist.id)
         remove_object(artist.id, "artists")
+        
+    def remove_user(self, user):
+        def remove_actions(user_id):
+            self.execute("delete from ratings where action_id in"
+                         " (select id from actions where user_id=?)", user_id)
+            self.execute("delete from actions where user_id=?", user_id)
+            
+        user = self.get_user(user)
+        
+        remove_actions(user.id)
+        self.execute("delete from users where id=?", user.id)
 
 if __name__ == "__main__":
     import sys
     from contextlib import closing
     
     with closing(Model()) as model:
-        command = sys.argv[1]
-        args = sys.argv[2:]
+        program, command, *sys.argv = sys.argv
         
-        if command == "remove_artist":
-            if len(args) == 0:
-                print("No artists given")
+        if command == "remove":
+            try:
+                noun, *args = sys.argv
+                action =      model.remove_artist if noun == "artist" \
+                         else model.remove_user if noun == "user" \
+                         else None
                 
-            for artist in args:
-                try:
-                    model.remove_artist(artist)
+                for obj in args:
+                    try:
+                        action(obj)
+                        
+                    except NotFound:
+                        print("%s not found" % obj)
+                
+                if not action:
+                    raise TypeError()
+                
+                elif len(args) == 0:
+                    print("No arguments given to `%s %s`" % (command, noun))
                     
-                except NotFound:
-                    print("Artist %s not found" % artist)
+            #Unpacked []
+            except ValueError:
+                print("No subcommand given to `%s`" % command)
+                
+            #Called None
+            except TypeError:
+                print("Invalid subcommand `%s` given to `%s`" % (noun, command))
             
         elif command == "import_artist":
             raise NotImplemented()
