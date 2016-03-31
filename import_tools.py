@@ -82,7 +82,7 @@ def get_palette(album_art_url):
     print("Getting palette...")
     try:
         tempname, _ = urllib.request.urlretrieve(album_art_url)
-        palette = Chromatography(tempname).get_highlights(3, valid_color)
+        palette = Chromatography(tempname).get_highlights(4, valid_color)
         os.remove(tempname)
         
         try:
@@ -99,7 +99,7 @@ def get_palette(album_art_url):
         if len(palette) < 3:
             palette += [palette[0]] * (3 - len(palette))
         
-        return [rgb_to_hex(color) for color in palette]
+        return [rgb_to_hex(color) for color in palette[:3]]
     
     except (NotEnoughValidPixels, BadColorMode):
         pass
