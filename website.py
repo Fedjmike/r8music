@@ -103,14 +103,23 @@ def users_index():
     users = model().query("select name from users")
     return render_template("users_index.html", users=users)
 
-@app.route("/search", methods=["POST"])
-def search_post():
-    query = encode_query_str(request.form["query"])
-    #Redirect to a GET with the query in the path
-    return redirect(url_for("search_results", query=query))
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if request.method == "GET":
+        return render_template("search.html")
+        
+    else:
+        query = encode_query_str(request.form["query"])
+        #Redirect to a GET with the query in the path
+        return redirect(url_for("search_results", query=query))
 
 @app.route("/search/<query>", methods=["GET"])
+@app.route("/search/", methods=["GET"])
 def search_results(query=None):
+    if not query:
+        return redirect(url_for("search"))
+
+    query = decode_query_str(query)
     return render_template("search_results.html", search={"query": query, "results": []})
 
 def get_user():

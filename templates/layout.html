@@ -75,13 +75,10 @@
                 <li><a href={{ url_for("users_index") }}>users</a></li>
             </ol>
             <ol class="nav right">
-                <li>
-                    <form action="/search" method="post" class="small" id="search">
-                        <input type="text" name="query" placeholder="Search r8music"
-                               {% if search_query %}value="{{ search_query }}" {% endif %} />
-                        <input type="submit" class="material-icons" value="search">
-                    </form>
-                </li>
+                {%if not dont_display_search %}
+                    {% from "forms.html" import search_form %}
+                    <li>{{ search_form(search_query) }}</li>
+                {% endif %}
                 {% if session.user %}
                     <li>
                         <a href={{ url_for("user_page", slug=session.user.name) }}>{{ session.user.name }}</a>

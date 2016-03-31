@@ -48,3 +48,11 @@
         </dl>
     </form>
 {%- endmacro %}
+
+{% macro search_form(search_query=None) -%}
+    <form action="/search" method="post" class="small" id="search">
+        <input type="text" name="query" placeholder="Search r8music"
+               {% if search_query %}value="{{ search_query }}" {% endif %} />
+        <input type="submit" class="material-icons" value="search">
+    </form>
+{%- endmacro %}
