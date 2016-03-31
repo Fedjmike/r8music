@@ -11,6 +11,7 @@
 		<tr>
 			<td><input type="radio" name="artist-id" value="{{ artist.id }}"></td>
 			<td>{{ artist.name }}</td>
+			<td>{% if artist.area %} {{ artist.area.name }}{% endif %}</td>
 		</tr>
 	{% endfor %}
 	</table>
