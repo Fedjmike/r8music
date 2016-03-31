@@ -5,19 +5,25 @@
 {% block content %}
 <header><h1>Add an artist</h1></header>
 
+<p>Choose the artist to import.</p>
+
 <form action={{ url_for("add_artist") }} method="post" class="clearfix">
-	<table>
 	{% for artist in artists %}
-        <tr>
-            {% set id = "result-%d" % loop.index %}
-            <td><input type="radio" name="artist-id" id={{ id }} value={{ artist.id }}></td>
-            <td><label for={{ id }}>{{ artist.name }}</label></td>
-            <td><label for={{ id }}>{{ artist.disambiguation if artist.disambiguation else '' }}</label></td>
-            <td><label for={{ id }}>{{ artist.area.name if artist.area else '' }}</label></td>
-        </tr>
+        <label>
+            <input type="radio" name="artist-id" value={{ artist.id }}>
+            {{ artist.name }}
+            <span class="de-emph">
+                {{      ' (%s)' % artist.disambiguation if artist.disambiguation
+                   else ' (%s)' % artist.area.name if artist.area
+                   else '' }}
+            </span>
+        </label>
+        </br>
 	{% endfor %}
-	</table>
-	<input type="submit" value="Add">
-    <p>The artist will be added to a queue. It may take a few minutes until the artist is in the database.</p>
+    
+    <div>
+        <input type="submit" value="Add">
+        <p>The artist will be added to a queue. It may take a few minutes until the artist is in the database.</p>
+    </div>
 </form>
 {% endblock %}
