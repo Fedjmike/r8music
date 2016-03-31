@@ -209,9 +209,14 @@ def add_artist():
             
         else:
             artist_name = request.form["artist-name"]
-            artists = search_artists(artist_name)
-            return render_template("add_artist_search_results.html", artists=artists)
+            query = "+".join(artist_name.split(" "))
+            return redirect(url_for("add_artist_search_results", query=query))
 
+@app.route("/add-artist-search/<query>", methods=["GET"])
+@needs_auth
+def add_artist_search_results(query=None):
+    artists = search_artists(query.replace("+", " "))
+    return render_template("add_artist_search_results.html", artists=artists)
     
 @app.route("/user/<slug>")
 @with_user
