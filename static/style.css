@@ -382,6 +382,24 @@ ol.action > li {
     color: #aaa;
 }
 
+/*
+.clickable.selected .when-unselected,
+.clickable:not(.selected) .when-selected,
+.clickable.delayed:hover .when-selected {
+    display: none;
+}
+
+.clickable:not(.selected) .when-selected-hovered,
+.clickable:not(.delayed) .when-selected-hovered,
+.clickable.delayed:not(:hover) .when-selected-hovered {
+    display: none;
+}
+*/
+
+.when-selected, .when-selected-hovered {
+    display: none;
+}
+
 .action i.material-icons {
     margin-top: -0.2em;
     margin-right: 0.15em;

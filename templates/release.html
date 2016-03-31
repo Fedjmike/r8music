@@ -43,15 +43,15 @@
             {% set active_actions = user.get_active_actions(release.id) if user else [] %}
             <li><a class="clickable {{ 'selected' if 'list' in active_actions else '' }}"
                    name="list" href=# data-release-id={{ release.id }}>
-                <i class="material-icons">playlist_add</i>Will listen to
+                <i class="material-icons">playlist_add</i><span class="when-unselected">Will listen to</span><span class="when-selected">Will listen to</span><span class="when-selected-hovered">Remove?</span>
             </a></li>
             <li><a class="clickable {{ 'selected' if 'listen' in active_actions else '' }}"
                    name="listen" href=# data-release-id={{ release.id }}>
-                <i class="material-icons">headset</i>Listened to
+                <i class="material-icons">headset</i><span class="when-unselected">Listened to</span><span class="when-selected">Listened to</span><span class="when-selected-hovered">Undo listen?</span>
             </a></li>
             <li><a class="clickable {{ 'selected' if 'share' in active_actions else '' }}"
                    name="share" href=# data-release-id={{ release.id }}>
-                <i class="material-icons">share</i>Share
+                <i class="material-icons">share</i><span class="when-unselected">Share</span><span class="when-selected">Shared</span><span class="when-selected-hovered">Unshare?</span>
             </a></li>
         </ol>
 	    
