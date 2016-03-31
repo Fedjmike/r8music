@@ -62,6 +62,14 @@ def get_redirect_target():
 def redirect_back():
     return redirect(get_redirect_target())
 
+def encode_query_str(query):
+    #Not a bijection, ' ' and '+' both go to '+'.
+    #TODO replace '+' with '%2B', without url_for HTTP encoding the percent itself
+    return "+".join(query.split(" "))
+    
+def decode_query_str(query):
+    return query.replace("+", " ")
+    
 # 
 
 @app.before_request
@@ -97,7 +105,7 @@ def users_index():
 
 @app.route("/search", methods=["POST"])
 def search_post():
-    query = request.form["query"]
+    query = encode_query_str(request.form["query"])
     #Redirect to a GET with the query in the path
     return redirect(url_for("search_results", query=query))
 
@@ -208,14 +216,13 @@ def add_artist():
             return redirect_back()
             
         else:
-            artist_name = request.form["artist-name"]
-            query = "+".join(artist_name.split(" "))
+            query = encode_query_string(request.form["artist-name"])
             return redirect(url_for("add_artist_search_results", query=query))
 
 @app.route("/add-artist-search/<query>", methods=["GET"])
 @needs_auth
 def add_artist_search_results(query=None):
-    artists = search_artists(query.replace("+", " "))
+    artists = search_artists(decode_query_string(query))
     return render_template("add_artist_search_results.html", artists=artists)
     
 @app.route("/user/<slug>")
