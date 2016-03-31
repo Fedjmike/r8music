@@ -56,6 +56,8 @@ def get_redirect_target():
     for target in request.values.get("next"), request.referrer:
         if target and is_safe_url(target):
             return target
+            
+    return "/"
     
 def redirect_back():
     return redirect(get_redirect_target())
@@ -112,6 +114,7 @@ def get_user():
         return None
 
 def set_user(user):
+    #Can't store the user obj directly as methods can't be seralized
     session["user"] = {"id": user.id, "name": user.name, "creation": user.creation}
 
 @basic_decorator
@@ -203,6 +206,7 @@ def add_artist():
             artist_id = request.form["artist-id"]
             app_pool.apply_async(import_artist, (artist_id,))
             return redirect_back()
+            
         else:
             artist_name = request.form["artist-name"]
             artists = search_artists(artist_name)

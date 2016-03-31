@@ -9,10 +9,10 @@
 	<table>
 	{% for artist in artists %}
 		<tr>
-			<td><input type="radio" name="artist-id" value="{{ artist.id }}"></td>
+			<td><input type="radio" name="artist-id" value={{ artist.id }}></td>
 			<td>{{ artist.name }}</td>
-			<td>{% if artist.disambiguation %} {{ artist.disambiguation }}{% endif %}</td>
-			<td>{% if artist.area %} {{ artist.area.name }}{% endif %}</td>
+			<td>{{ artist.disambiguation if artist.disambiguation else '' }}</td>
+			<td>{{ artist.area.name if artist.area else '' }}</td>
 		</tr>
 	{% endfor %}
 	</table>
