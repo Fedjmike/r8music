@@ -232,7 +232,7 @@ def add_artist():
 @app.route("/add-artist-search/<query>", methods=["GET"])
 @needs_auth
 def add_artist_search_results(query=None):
-    artists = search_artists(decode_query_string(query))
+    artists = search_artists(decode_query_str(query))
     return render_template("add_artist_search_results.html", artists=artists)
     
 @app.route("/user/<slug>")
