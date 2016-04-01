@@ -425,6 +425,24 @@ class Model(GeneralModel):
         matches = check_password_hash(db_hash, given_password)
         return matches, self.make_user(*row)
         
+    #Search
+    
+    def search(self, query):
+        def build_index():
+            self.execute("drop table if exists artists_indexed")
+            self.execute("create virtual table artists_indexed using fts4 (tokenize=unicode61, id integer, name text)")
+            self.execute("insert into artists_indexed (id, name) select id, name from artists")
+         
+        build_index()
+        
+        return [
+            {"type": "artist", "name": name, "url": url_for("artist_page", slug=slug)}
+            for name, slug in
+            self.query("select artists.name, slug from"
+                       " (select id as indexed_id from artists_indexed where name match (?))"
+                       " join artists on artists.id = indexed_id", query)
+        ]
+    
     #Misc
     
     def remove_artist(self, artist):
