@@ -539,8 +539,11 @@ ol.references {
 
 .search {
     display: inline-flex;
-    font-size: 0.8rem;
     vertical-align: middle;
+}
+
+form.small .search {
+    font-size: 0.8rem;
 }
 
 .search > input[type="text"] {
@@ -554,8 +557,8 @@ ol.references {
 }
 
 .search > input[type="submit"] {
-    height: 1.44rem;
-    padding: 0.08em 0.025em 0 0;
+    height: 1.333em;
+    padding: 0.06em 0.2em 0 0.2em;
 
     box-shadow: none;
     background: white;
@@ -568,7 +571,6 @@ ol.references {
 
 .search > input:focus ~ input[type="submit"],
 .search > input[type="submit"]:active {
-    border: 2px solid rgba(0,0,0,0);
     color: white;
 }
 
