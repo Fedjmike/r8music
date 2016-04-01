@@ -4,9 +4,13 @@
 
 <!-- For the search bar in layout.html -->
 {% set search_query = search.query %}
+{% set dont_display_search = True %}
 
 {% block content %}
 <section>
+    {% from "forms.html" import search_form %}
+    <div class="right">{{ search_form(search_query) }}</div>
+	
 	<header>
         <h1>&lsquo;{{ search.query }}&rsquo;</h1>
         <h3>Search results</h3>
