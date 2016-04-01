@@ -226,7 +226,7 @@ def add_artist():
             return redirect_back()
             
         else:
-            query = encode_query_string(request.form["artist-name"])
+            query = encode_query_str(request.form["artist-name"])
             return redirect(url_for("add_artist_search_results", query=query))
 
 @app.route("/add-artist-search/<query>", methods=["GET"])
