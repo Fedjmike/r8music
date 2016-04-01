@@ -313,7 +313,6 @@ ol:not(.small).rating {
 .releases.grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     /*Expand the width to allow room for the margins of the left
       and right columns*/
     margin: 0 -0.625em;
@@ -518,6 +517,10 @@ ol.references {
 
 .grids-list {
     text-align: center;
+}
+
+.grids-list .grid {
+    justify-content: center;
 }
 
 .grids-list header {
