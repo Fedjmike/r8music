@@ -44,12 +44,12 @@
     
     input[type="text"]:focus,
     input[type="password"]:focus,
-    form.small input:focus ~ input[type="submit"] {
+    .search > input:focus ~ input[type="submit"] {
         border-color: {{ accent_color_1 }};
     }
     
-    form.small input:focus ~ input[type="submit"],
-    form.small input[type="submit"]:active {
+    .search > input:focus ~ input[type="submit"],
+    .search > input[type="submit"]:active {
         background-color: {{ accent_color_1 }};
     }
     

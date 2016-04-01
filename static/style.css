@@ -537,13 +537,13 @@ ol.references {
 
 /*Search*/
 
-form.small {
+.search {
     display: inline-flex;
     font-size: 0.8rem;
     vertical-align: middle;
 }
 
-form.small input[type="text"] {
+.search > input[type="text"] {
     width: 15em;
     padding: 0.1em 0.3em 0.05em 0.3em;
     font-size: inherit;
@@ -553,7 +553,7 @@ form.small input[type="text"] {
     border-bottom-right-radius: 0;
 }
 
-form.small input[type="submit"] {
+.search > input[type="submit"] {
     height: 1.44rem;
     padding: 0.08em 0.025em 0 0;
 
@@ -566,18 +566,18 @@ form.small input[type="submit"] {
     border-bottom-left-radius: 0;
 }
 
-form.small input:focus ~ input[type="submit"],
-form.small input[type="submit"]:active {
+.search > input:focus ~ input[type="submit"],
+.search > input[type="submit"]:active {
     border: 2px solid rgba(0,0,0,0);
     color: white;
 }
 
-form.small input[type="submit"].material-icons {
+.search > input[type="submit"].material-icons {
     font-size: 1.35em;
-    width: 1.4em;
+    width: 1.6em;
 }
 
-form.small input:focus ~ input[type="submit"]:hover {
+.search > input:focus ~ input[type="submit"]:hover {
     cursor: pointer;
 }
 
