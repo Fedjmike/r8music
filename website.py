@@ -119,7 +119,8 @@ def search_results(query=None):
     if not query:
         return redirect(url_for("search"))
 
-    results = model().search(decode_query_str(query))
+    query = decode_query_str(query)
+    results = model().search(query)
     return render_template("search_results.html", search={"query": query, "results": results})
 
 def get_user():
