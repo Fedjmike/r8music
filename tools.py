@@ -1,6 +1,9 @@
 #Yo dawg I heard you like decorating so I made some decorators to 
 #decorate your decorators into decorators
 
+def disguise(f, disguise):
+    f.__name__ = disguise.__name__
+
 def basic_decorator(decorator):
     """Turns a given function (`decorator`) into a decorator. This function
     takes one argument (`f`), which is the function to be decorated.
@@ -25,12 +28,13 @@ def basic_decorator(decorator):
     def decorated_decorator(f):
         def decorated_f(*f_args, **f_kwargs):
             call_f = lambda *extra_f_args: f(*(extra_f_args + f_args), **f_kwargs)
+            disguise(call_f, f)
             return decorator(call_f)
         
-        decorated_f.__name__ = f.__name__
+        disguise(decorated_f, f)
         return decorated_f
     
-    decorated_decorator.__name__ = decorator.__name__
+    disguise(decorated_decorator, decorator)
     return decorated_decorator
 
 @basic_decorator

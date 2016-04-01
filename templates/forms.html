@@ -6,7 +6,7 @@
             <dd><input type="submit" value="Sign in" /></dd>
             <a href={{ url_for("recover_password") }}>Recover password</a>
             {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}">
+                <input type="hidden" name="next" value="{{ request.referrer }}" />
             {% endif %}
         </dl>
     </form>
@@ -27,7 +27,7 @@
             <dd><input type="submit" value="Register" /></dd>
             
             {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}">
+                <input type="hidden" name="next" value="{{ request.referrer }}" />
             {% endif %}
         </dl>
     </form>
@@ -43,7 +43,7 @@
             <dd><input type="submit" value="Change" /></dd>
             
             {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}">
+                <input type="hidden" name="next" value="{{ request.referrer }}" />
             {% endif %}
         </dl>
     </form>
@@ -53,6 +53,6 @@
     <form action="/search" method="post" class="small" id="search">
         <input type="text" name="query" placeholder="Search r8music"
                {% if search_query %}value="{{ search_query }}" {% endif %} />
-        <input type="submit" class="material-icons" value="search">
+        <input type="submit" class="material-icons" value="search" />
     </form>
 {%- endmacro %}

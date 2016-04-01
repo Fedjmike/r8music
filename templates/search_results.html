@@ -1,6 +1,6 @@
 ﻿{% extends "layout.html" %}
 
-{% block title %}Search results {{ super() }}{% endblock %}
+{% block title %}'{{ search.query }}' &ndash; Search results {{ super() }}{% endblock %}
 
 <!-- For the search bar in layout.html -->
 {% set search_query = search.query %}
@@ -11,7 +11,7 @@
         <h1>&lsquo;{{ search.query }}&rsquo;</h1>
         <h3>Search results</h3>
     </header>
-	
+    
     {% if not search.results %}
         <p>No matches! Try <a href={{ url_for("add_artist") }}>adding the artist to the database?</a></p>
     {% else %}
