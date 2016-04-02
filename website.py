@@ -244,8 +244,12 @@ def add_artist():
             return redirect(url_for("add_artist_search_results", query=query))
 
 @app.route("/add-artist-search/<query>", methods=["GET"])
+@app.route("/add-artist-search/", methods=["GET"])
 @needs_auth
 def add_artist_search_results(query=None):
+    if not query:
+        return redirect(url_for("add_artist"))
+        
     artists = search_artists(decode_query_str(query))
     return render_template("add_artist_search_results.html", artists=artists)
     
