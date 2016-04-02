@@ -81,10 +81,19 @@ ol, ul {
     clear: both;
 }
 
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 /*Input elements*/
 
-input[type="text"],
-input[type="password"] {
+input[type=text],
+input[type=password] {
     height: 1.8em;
     padding: 0.3em;
     border: 2px solid rgba(0,0,0, 0.15);
@@ -92,25 +101,25 @@ input[type="password"] {
     outline: none;
 }
 
-input[type="submit"] {
+input[type=submit] {
     padding: 1px 0.3em;
     border: 2px solid rgba(0,0,0,0);
     border-radius: 0.3em;
     color: white;
 }
 
-input[type="submit"]:hover {
+input[type=submit]:hover {
     border: 2px solid rgba(0,0,0,0.25);
 }
 
-input[type="submit"]:active {
+input[type=submit]:active {
     position: relative;
     top: 1px;
     left: 1px;
     box-shadow: none;
 }
 
-input[type="radio"] {
+input[type=radio] {
     margin-left: 0.75em;
 }
 
@@ -563,7 +572,7 @@ form.small .search {
     border-bottom-right-radius: 0;
 }
 
-.search > input[type="submit"] {
+.search > input[type=submit] {
     height: 1.333em;
     padding: 0.06em 0.2em 0 0.2em;
 
@@ -576,17 +585,17 @@ form.small .search {
     border-bottom-left-radius: 0;
 }
 
-.search > input:focus ~ input[type="submit"],
-.search > input[type="submit"]:active {
+.search > input:focus ~ input[type=submit],
+.search > input[type=submit]:active {
     color: white;
 }
 
-.search > input[type="submit"].material-icons {
+.search > input[type=submit].material-icons {
     font-size: 1.35em;
     width: 1.6em;
 }
 
-.search > input:focus ~ input[type="submit"]:hover {
+.search > input:focus ~ input[type=submit]:hover {
     cursor: pointer;
 }
 
@@ -622,7 +631,7 @@ form.small .search {
 
 .main.nav,
 .rating, #average-rating,
-input[type="submit"] {
+input[type=submit] {
     box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
 }
 
@@ -631,7 +640,7 @@ input[type="submit"] {
 }
 
 .rating, #average-rating,
-input[type="submit"] {
+input[type=submit] {
     color: white;
 }
 

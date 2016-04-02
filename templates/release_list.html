@@ -1,5 +1,5 @@
 {% macro rating_widget(release, selected, class) -%}
-    <ol class="{{ class if class else '' }} rating">
+    <ol class="{{ class if class else '' }} rating unselectable">
     {% for n in range(8, 0, -1) %}
         <li {{ 'class=selected' if n == selected }} onclick='rateRelease(this, {{ release.id }}, {{ n }});'>{{ n }}</li>
     {% endfor %}
