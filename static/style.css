@@ -110,6 +110,10 @@ input[type="submit"]:active {
     box-shadow: none;
 }
 
+input[type="radio"] {
+    margin-left: 0.75em;
+}
+
 /*Forms*/
 
 form dl {

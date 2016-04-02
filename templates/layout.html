@@ -76,8 +76,8 @@
             </ol>
             <ol class="nav right">
                 {%if not dont_display_search %}
-                    {% from "forms.html" import search_form %}
-                    <li>{{ search_form(search_query, full=False) }}</li>
+                    {% from "forms.html" import small_search_form %}
+                    <li>{{ small_search_form() }}</li>
                 {% endif %}
                 {% if session.user %}
                     <li>

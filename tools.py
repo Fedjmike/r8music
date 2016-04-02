@@ -1,3 +1,9 @@
+def chop_suffix(str, suffix):
+    if not str.endswith(suffix):
+        raise ValueError()
+    
+    return str[:-len(suffix)]
+
 #Yo dawg I heard you like decorating so I made some decorators to 
 #decorate your decorators into decorators
 

@@ -49,12 +49,35 @@
     </form>
 {%- endmacro %}
 
-{% macro search_form(search_query=None, full=True) -%}
+{% macro small_search_form(previous_search=None) -%}
     <form action="/search" method="post" class="{{ '' if full else 'small' }}" id="search">
         <div class="search">
             <input type="text" name="query" placeholder="Search r8music"
-                   {% if search_query %} value="{{ search_query }}" {% endif %} />
+                   {% if previous_search and previous_search.query %} value="{{ previous_search.query }}" {% endif %} />
             <input type="submit" class="material-icons" value="search" />
         </div>
+    </form>
+{% endmacro %}
+
+{% macro search_form(previous_search=None, full=True) -%}
+    <form action="/search" method="post" class="{{ '' if full else 'small' }}" id="search">
+        <dl>
+            <dd class="search">
+                <input type="text" name="query" placeholder="Search r8music"
+                       {% if previous_search and previous_search.query %} value="{{ previous_search.query }}" {% endif %} />
+                <input type="submit" class="material-icons" value="search" />
+            </dd>
+            <dd>
+            {% if full %}
+                {% for type in ["artists", "users"] %}
+                    <label>
+                        <input type="radio" name="type" value={{ type }}
+                               {{ 'checked' if previous_search and previous_search.args.type == type else '' }} />
+                        {{ type.capitalize() }}
+                    </label>
+                {% endfor %}
+            {% endif %}
+            </dd>
+        </dl>
     </form>
 {%- endmacro %}

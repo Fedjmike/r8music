@@ -9,6 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import g, url_for
 
+from tools import chop_suffix
 from import_tools import slugify, get_wikipedia_urls, get_palette
 
 class NotFound(Exception):
@@ -427,20 +428,35 @@ class Model(GeneralModel):
         
     #Search
     
-    def search(self, query):
+    def search(self, query, type):
+        if type in ["artists", "users"]:
+            #Used to construct SQL strings, must be safe
+            table = type
+        
+        else:
+            #error?
+            return []
+        
         def build_index():
-            self.execute("drop table if exists artists_indexed")
-            self.execute("create virtual table artists_indexed using fts4 (tokenize=unicode61, id integer, name text)")
-            self.execute("insert into artists_indexed (id, name) select id, name from artists")
+            self.execute("drop table if exists %s_indexed" % table)
+            self.execute("create virtual table %s_indexed using fts4 (tokenize=unicode61, id integer, name text)" % table)
+            self.execute("insert into %s_indexed (id, name) select id, name from %s" % (table, table))
          
         build_index()
         
+        endpoint = chop_suffix(type, "s") + "_page"
+        
+        columns = {
+            "artists": "name, slug",
+            "users": "name, name as slug"
+        }[type]
+        
         return [
-            {"type": "artist", "name": name, "url": url_for("artist_page", slug=slug)}
+            {"type": type, "name": name, "url": url_for(endpoint, slug=slug)}
             for name, slug in
-            self.query("select artists.name, slug from"
-                       " (select id as indexed_id from artists_indexed where name match (?))"
-                       " join artists on artists.id = indexed_id", query)
+            self.query(("select %s from" % columns) +
+                       " (select id as indexed_id from %s_indexed where name match (?) limit 20)"
+                       " join %s on %s.id = indexed_id" % (table, table, table), query)
         ]
     
     #Misc

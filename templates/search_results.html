@@ -2,14 +2,12 @@
 
 {% block title %}'{{ search.query }}' &ndash; Search results {{ super() }}{% endblock %}
 
-<!-- For the search bar in layout.html -->
-{% set search_query = search.query %}
 {% set dont_display_search = True %}
 
 {% block content %}
 <section>
     {% from "forms.html" import search_form %}
-    <div class="right">{{ search_form(search_query) }}</div>
+    <div class="right">{{ search_form(search) }}</div>
 	
 	<header>
         <h1>&lsquo;{{ search.query }}&rsquo;</h1>
@@ -21,10 +19,7 @@
     {% else %}
         <ol class="search-results">
         {% for result in search.results %}
-            <li>
-                <a href="TODO narrow to this type">{{ result.type }}</a>:
-                <a href="{{ result.url }}">{{ result.name }}</a>
-            </li>
+            <li><a href="{{ result.url }}">{{ result.name }}</a></li>
         {% endfor %}
         </ol>
     {% endif %}

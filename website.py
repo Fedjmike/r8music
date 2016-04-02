@@ -103,15 +103,25 @@ def users_index():
     users = model().query("select name from users")
     return render_template("users_index.html", users=users)
 
+default_search_args = {"type": "artists"}
+search_args = default_search_args.keys()
+
+def only_valid_search_args(args, filter_out=False):
+    return {k: v for k, v in args.items() if k in search_args}
+
 @app.route("/search", methods=["GET", "POST"])
 def search():
     if request.method == "GET":
-        return render_template("search.html")
+        return render_template("search.html", search={"args": default_search_args})
         
     else:
         query = encode_query_str(request.form["query"])
+        args = only_valid_search_args(request.form)
+        #Only args different from the default
+        args = {k: v for k, v in args.items() if v != default_search_args[k]}
+        
         #Redirect to a GET with the query in the path
-        return redirect(url_for("search_results", query=query))
+        return redirect(url_for("search_results", query=query, **args))
 
 @app.route("/search/<query>", methods=["GET"])
 @app.route("/search/", methods=["GET"])
@@ -120,8 +130,12 @@ def search_results(query=None):
         return redirect(url_for("search"))
 
     query = decode_query_str(query)
-    results = model().search(query)
-    return render_template("search_results.html", search={"query": query, "results": results})
+    args = default_search_args.copy()
+    args.update(only_valid_search_args(request.args))
+    
+    results = model().search(query, **args)
+    return render_template("search_results.html",
+            search={"query": query, "args": args, "results": results})
 
 def get_user():
     try:
