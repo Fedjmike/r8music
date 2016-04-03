@@ -94,7 +94,7 @@ class Model(GeneralModel):
     
     Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
-    def add_artist(self, name, description, incomplete=None):
+    def add_artist(self, name, incomplete=None):
         #Todo document "incomplete"
         
         slug = generate_slug(name, self, "artists")
@@ -103,10 +103,11 @@ class Model(GeneralModel):
         self.insert("insert into artists (id, name, slug, incomplete) values (?, ?, ?, ?)",
                     artist_id, name, slug, incomplete)
         
+        return artist_id
+        
+    def add_artist_description(self, artist_id, description):
         self.insert("insert into descriptions (id, description) values (?, ?)",
                     artist_id, description)
-                    
-        return artist_id
         
     def _make_artist(self, row):
         def get_artist_wikipedia_urls():

@@ -4,7 +4,7 @@ import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-import import_tools
+from import_tools import guess_wikipedia_page, get_wikipedia_summary
 from model import Model, NotFound
 
 album_art_base_url = 'http://coverartarchive.org/release-group/'
@@ -31,12 +31,12 @@ def get_links(artist_mbid):
     def split_link(_type, url):
         _, domain, path, _, _, _ = urlparse(url)
         if domain in other_types:
-            target = path[len("/wiki/"):] \
-                     if "wikipedia" == other_types[domain] and path.startswith("/wiki/") \
-                     else url
-            return other_types[domain], target
-        else:
-            return _type, url
+            _type = other_types[domain]
+            
+        target = path[len("/wiki/"):] \
+                 if "wikipedia" == _type and path.startswith("/wiki/") \
+                 else url
+        return _type, target
             
     try:
         #todo optimize get_artists calls
@@ -120,7 +120,7 @@ def import_artist(artist):
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
-        artist_id = model.add_artist(artist_name, import_tools.get_description(artist_name))
+        artist_id = model.add_artist(artist_name)
         processed_release_mbids = []
 
     print("Getting links...")
@@ -130,9 +130,11 @@ def import_artist(artist):
             
     if "wikipedia" not in links:
         print("Guessing wikipedia link...")
-        title = import_tools.guess_wikipedia_page(artist_name)
+        links["wikipedia"] = title = guess_wikipedia_page(artist_name)
         model.add_link(artist_id, "wikipedia", title)
 
+    model.add_artist_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
+        
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
     pool.map(prepare_release, releases)
@@ -159,7 +161,6 @@ def import_artist(artist):
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
                         artist['artist']['name'],
-                        import_tools.get_description(artist['artist']['name']),
                         artist['artist']['id'] #mbid
                     )
                     
