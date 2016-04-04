@@ -273,7 +273,7 @@ class Model(GeneralModel):
             return ""
 
     @lru_cache(maxsize=128)
-    def _get_link_type_id(self, link_type):
+    def get_link_type_id(self, link_type):
         try:
             return self.query_unique("select id from link_types where type=?", link_type)[0]
             
@@ -282,12 +282,12 @@ class Model(GeneralModel):
         
     def add_link(self, id, link_type, target):
         self.insert("insert into links (id, type_id, target)"
-                    " values (?, ?, ?)", id, self._get_link_type_id(link_type), target)
+                    " values (?, ?, ?)", id, self.get_link_type_id(link_type), target)
 
     def get_link(self, id, link_type):
         """link_type can either be the string that identifies a link, or its id"""
         
-        link_type_id = self._get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+        link_type_id = self.get_link_type_id(link_type) if isinstance(link_type, str) else link_type
     
         return self.query_unique("select target from links"
                                  " where id=? and type_id=?", id, link_type_id)[0]
