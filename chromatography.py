@@ -70,3 +70,56 @@ class Chromatography(object):
                  
         top_clusters = sorted(clusters, key=lambda c: c.frequency, reverse=True)
         return [c.get_mean() for c in top_clusters[:n]]
+
+#
+
+import os
+from itertools import combinations
+from colorsys import rgb_to_hls as bad_hls
+from urllib.request import urlretrieve
+
+HLS = namedtuple("HLS", ["hue", "lightness", "saturation"])
+rgb_to_hex = lambda color: "#%02x%02x%02x" % color
+rgb_to_hls = lambda color: HLS(*bad_hls(*(c/255 for c in color)))
+    
+def hue_difference(pair):
+    hues = [rgb_to_hls(c).hue for c in pair]
+    diff = abs(hues[0] - hues[1])
+    #Hue is a circular dimension. The most different colours are
+    #those half way from each other
+    return 1 - abs(0.5 - diff)
+    
+def valid_color(color):
+    hue, lightness, saturation = rgb_to_hls(color)
+    return saturation > 0.3 and lightness < 0.6 and lightness > 0.35
+
+def get_palette(album_art_url):
+    try:
+        tempname, _ = urlretrieve(album_art_url)
+        palette = Chromatography(tempname).get_highlights(3, valid_color)
+        os.remove(tempname)
+        
+        try:
+            #Select the two colours with hues most different to each other
+            most_different = max(combinations(palette, 2), key=hue_difference)
+            #Put the brightest of these second
+            most_different = sorted(most_different, key=lambda c: rgb_to_hls(c).lightness)
+            #And then any other colours
+            palette = most_different + [c for c in palette if c not in most_different]
+            
+        except:
+            pass
+            
+        if len(palette) < 3:
+            palette += [palette[0]] * (3 - len(palette))
+        
+        return [rgb_to_hex(color) for color in palette]
+    
+    except (NotEnoughValidPixels, BadColorMode):
+        pass
+    
+    except (ChromatographyException, OSError):
+        import traceback
+        traceback.print_exc()
+    
+    return [None, None, None]

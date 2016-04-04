@@ -1,4 +1,4 @@
-import os, time, requests, multiprocessing.pool
+import time, requests, multiprocessing.pool
 from collections import namedtuple
 from urllib.parse import urlparse, urljoin
 from datetime import datetime
@@ -10,9 +10,8 @@ from sqlite3 import IntegrityError
 
 from model import Model, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist, MBID
-from import_tools import search_artists
 from template_tools import add_template_tools
-from tools import basic_decorator, decorator_with_args
+from tools import basic_decorator, decorator_with_args, search_artists
 
 g_recaptcha_secret = "todo config"
 

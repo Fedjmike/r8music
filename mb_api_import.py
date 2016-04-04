@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys, requests, arrow, musicbrainzngs
+import requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-from import_tools import guess_wikipedia_page, get_wikipedia_summary
+from tools import guess_wikipedia_page, get_wikipedia_summary
 from model import Model, NotFound
 
 album_art_base_url = 'http://coverartarchive.org/release-group/'

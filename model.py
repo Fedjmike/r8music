@@ -7,10 +7,10 @@ from datetime import datetime
 from collections import namedtuple, defaultdict
 from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
-from flask import g, url_for
+from flask import url_for
 
-from tools import chop_suffix
-from import_tools import slugify, get_wikipedia_urls, get_palette
+from tools import chop_suffix, slugify, get_wikipedia_urls
+from chromatography import get_palette
 
 class NotFound(Exception):
     pass
