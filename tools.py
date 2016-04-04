@@ -1,6 +1,9 @@
 import re
 from unidecode import unidecode
 
+def flatten(lists):
+    return [item for list in lists for item in list]
+
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):
         raise ValueError()

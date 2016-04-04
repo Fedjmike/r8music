@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import chop_suffix, slugify, get_wikipedia_urls
+from tools import flatten, chop_suffix, slugify, get_wikipedia_urls
 from chromatography import get_palette
 
 class NotFound(Exception):
@@ -313,6 +313,10 @@ class Model(GeneralModel):
         # TODO: Error if no rating present?
         action_id = self.add_action(user_id, object_id, ActionType.unrate)
         
+    def move_actions(self, dest_id, src_id):
+        """Moves all actions from one object to another"""
+        self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
+        
     def get_active_actions_by_user(self, user_id, object_id):
         latest_by_type = defaultdict(lambda: "0") #A date older than all others
         
@@ -513,7 +517,54 @@ class Model(GeneralModel):
         
         remove_actions(user.id)
         self.execute("delete from users where id=?", user.id)
-
+        
+    def merge_artists(self, dest_artist, src_artist):
+        """Moves all actions from one artist, their releases and tracks
+           to another and theirs. Then removes the source artist.
+           Raises an exception if it fails to find a place to move any
+           user action."""
+        
+        class MergeError(Exception): pass
+        
+        def matches(objects, candidates):
+            """Uniquely match every object with a candidate"""
+            
+            for object in objects:
+                try:
+                    match = next(c for c in candidates if object.title == c.title)
+                    #Don't match this one against any others
+                    candidates.remove(match)
+                    
+                    yield object, match
+                
+                except StopIteration:
+                    raise MergeError("Couldn't match %s, id: %d title: %s" \
+                                     % (type(object).__name__, object.id, object.title))
+        
+        def move_track_actions(dest_release, src_release):
+            #get_tracks returns (sides, runtime, track_no)
+            src_tracks = flatten(src_release.get_tracks()[0])
+            dest_tracks = flatten(dest_release.get_tracks()[0])
+            
+            for src_track, dest_track in matches(src_tracks, dest_tracks):
+                self.move_actions(dest_track.id, src_track.id)
+                
+        def move_release_actions(dest_artist, src_artist):
+            dest_releases = dest_artist.get_releases()
+            src_releases = src_artist.get_releases()
+            
+            for src_release, dest_release in matches(src_releases, dest_releases):
+                move_track_actions(dest_release, src_release)
+                self.move_actions(dest_release.id, src_release.id)
+                
+        dest_artist = self.get_artist(dest_artist)
+        src_artist = self.get_artist(src_artist)
+        
+        move_release_actions( dest_artist, src_artist)
+        self.move_actions(dest_artist.id, src_artist.id)
+            
+        self.remove_artist(src_artist.id)
+        
 if __name__ == "__main__":
     import sys
     from contextlib import closing
