@@ -266,7 +266,11 @@ class Model(GeneralModel):
         return self.query_unique("select color1, color2, color3 from palettes where id=?", id)
         
     def get_description(self, id):
-        return self.query_unique("select description from descriptions where id = (?)", id)[0]
+        try:
+            return self.query_unique("select description from descriptions where id = (?)", id)[0]
+            
+        except NotFound:
+            return ""
 
     @lru_cache(maxsize=128)
     def _get_link_type_id(self, link_type):
