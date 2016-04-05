@@ -32,7 +32,7 @@ var userDatasets = {{ json_dumps(user_datasets) | safe }};
     <!-- TODO show own ratings? confusing? -->
     <section><div>
         <header><h1>{{ n }}</h1></header>
-        {{ release_grid(by_rating[n], user, "small", artist_not_date=True) }}
+        {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
     </div></section>
 {% endfor %}
 </div>

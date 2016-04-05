@@ -25,13 +25,14 @@ def friendly_datetime(then):
 
 #Rating datasets
 
+def sort_by_artist(releases):
+    artist_then_date = lambda release: (release.get_artists()[0].name, release.date)
+    return sorted(releases, key=artist_then_date)
+
 def group_by_rating(ratings):
     """Turns [(release, rating)] into {rating: [release]}"""
-
-    release_key = lambda release: (release.get_artists()[0].name, release.date)
     get_rated = lambda n: [release for release, rating in ratings if rating == n]
-    
-    return {n: sorted(get_rated(n), key=release_key) for n in range(1, 9)}
+    return {n: get_rated(n) for n in range(1, 9)}
     
 range_of = lambda list: range(min(list), max(list))
     
@@ -74,7 +75,7 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), group_by_rating, get_user_datasets]
+template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
