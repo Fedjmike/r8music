@@ -1,4 +1,4 @@
-import time, requests, multiprocessing.pool
+import os, time, requests, multiprocessing.pool
 from collections import namedtuple
 from urllib.parse import urlparse, urljoin
 from datetime import datetime
