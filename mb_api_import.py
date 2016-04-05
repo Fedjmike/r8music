@@ -106,12 +106,11 @@ def import_artist(artist):
 
     model = Model()
 
-    # Check if the artist's MBID matches the 'incomplete' field of any other artists
-    # If so, get the artist_id and set the 'incomplete' field to NULL
-    # If not, import as a new artist into the database
+    mb_type_id = model.get_link_type_id("musicbrainz")
+    
     try:
+        #Imported incompletely
         (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
-        mb_type_id = model.get_link_type_id("musicbrainz")
         processed_release_mbids = [
             row['target'] for row in
             model.query('select target from links l join authorships a on l.id = a.release_id where artist_id=? and type_id=?', artist_id, mb_type_id)
@@ -120,8 +119,16 @@ def import_artist(artist):
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
-        artist_id = model.add_artist(artist_name)
-        processed_release_mbids = []
+        try:
+            #Complete
+            (artist_id,) = model.query_unique('select id from links where type_id=? and target=?', mb_type_id, artist_mbid)
+            print("Already imported")
+            return
+
+        #Not in db
+        except NotFound:
+            artist_id = model.add_artist(artist_name, artist_mbid)
+            processed_release_mbids = []
 
     print("Getting links...")
     links = get_links(artist_mbid)
@@ -161,7 +168,8 @@ def import_artist(artist):
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
                         artist['artist']['name'],
-                        artist['artist']['id'] #mbid
+                        artist['artist']['id'], #mbid
+                        incomplete=True
                     )
                     
                     processed_artist_mbids[artist['artist']['id']] = featured_artist_id

@@ -94,14 +94,15 @@ class Model(GeneralModel):
     
     Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image_url", "get_description", "get_wikipedia_urls"])
         
-    def add_artist(self, name, incomplete=None):
+    def add_artist(self, name, mbid, incomplete=False):
         #Todo document "incomplete"
         
         slug = generate_slug(name, self, "artists")
         
         artist_id = self.new_id(ObjectType.artist)
         self.insert("insert into artists (id, name, slug, incomplete) values (?, ?, ?, ?)",
-                    artist_id, name, slug, incomplete)
+                    artist_id, name, slug, mbid if incomplete else None)
+        self.add_link(artist_id, "musicbrainz", mbid)
         
         return artist_id
         
