@@ -371,8 +371,10 @@ class Model(GeneralModel):
             if type == ActionType.rate.value
         }
         
-    def get_releases_rated_by_user(self, user_id):
-        return [
+    def get_releases_actioned_by_user(self, user_id):
+        action_values = lambda *actions: [ActionType[action].value for action in actions]
+    
+        rated = [
             (self._make_release(row), rating) for rating, *row in \
             self.query("select rating, " + self._release_columns_rename + " from"
                        " (select action_id, object_id, type as action_type from"
@@ -380,17 +382,33 @@ class Model(GeneralModel):
                        "   where user_id=? and (type=? or type=?) order by creation asc)"
                        "  group by object_id) natural join ratings"
                        " join releases on id = object_id where action_type=?",
-                       user_id, ActionType.rate.value, ActionType.unrate.value, ActionType.rate.value)
+                       user_id, *action_values("rate", "unrate", "rate"))
         ]
+        
+        listened = [
+            self._make_release(row) for row in \
+            self.query("select " + self._release_columns_rename + " from"
+                       " (select action_id, object_id, type as action_type from"
+                       "  (select id as action_id, object_id, type from actions"
+                       "   where user_id=? and (type=? or type=?) order by creation asc)"
+                       "  group by object_id)"
+                       " join releases on id = object_id where action_type=?",
+                       user_id, *action_values("listen", "unlisten", "listen"))
+        ]
+        
+        rated_ids = [release.id for release, rating in rated]
+        listened_unrated = filter(lambda release: release.id not in rated_ids, listened)
+        
+        return rated, listened_unrated
         
     #Users
     
-    User = namedtuple("User", ["id", "name", "creation", "get_ratings", "get_releases_rated", "get_active_actions"])
+    User = namedtuple("User", ["id", "name", "creation", "get_ratings", "get_releases_actioned", "get_active_actions"])
     
     def make_user(self, _id, name, creation):
         return self.User(_id, name, creation,
             get_ratings=lambda: self.get_user_ratings(_id),
-            get_releases_rated=lambda: self.get_releases_rated_by_user(_id),
+            get_releases_actioned=lambda: self.get_releases_actioned_by_user(_id),
             get_active_actions=lambda object_id: self.get_active_actions_by_user(_id, object_id)
         )
     
