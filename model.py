@@ -102,7 +102,7 @@ class Model(GeneralModel):
         artist_id = self.new_id(ObjectType.artist)
         self.insert("insert into artists (id, name, slug, incomplete) values (?, ?, ?, ?)",
                     artist_id, name, slug, mbid if incomplete else None)
-        self.add_link(artist_id, "musicbrainz", mbid)
+        self.set_link(artist_id, "musicbrainz", mbid)
         
         return artist_id
         
@@ -112,11 +112,7 @@ class Model(GeneralModel):
         
     def _make_artist(self, row):
         def get_artist_wikipedia_urls():
-            try:
-                return get_wikipedia_urls(self.get_link(row["id"], "wikipedia"))
-            
-            except NotFound:
-                return None
+            return get_wikipedia_urls(self.get_link(row["id"], "wikipedia"))
         
         return self.Artist(*row,
             get_releases=lambda: self.get_releases_by_artist(row["id"], row["slug"]),
@@ -167,7 +163,7 @@ class Model(GeneralModel):
                     " values (?, ?, ?, ?, ?, ?, ?)", release_id, title, slug, date, type, full_art_url, thumb_art_url)
 
         self.add_palette_from_image(release_id, thumb_art_url)
-        self.add_link(release_id, "musicbrainz", mbid)
+        self.set_link(release_id, "musicbrainz", mbid)
                     
         return release_id
         
@@ -281,17 +277,21 @@ class Model(GeneralModel):
         except NotFound:
             return self.insert("insert into link_types (type) values (?)", link_type)
         
-    def add_link(self, id, link_type, target):
-        self.insert("insert into links (id, type_id, target)"
+    def set_link(self, id, link_type, target):
+        self.insert("insert or replace into links (id, type_id, target)"
                     " values (?, ?, ?)", id, self.get_link_type_id(link_type), target)
 
     def get_link(self, id, link_type):
         """link_type can either be the string that identifies a link, or its id"""
         
-        link_type_id = self.get_link_type_id(link_type) if isinstance(link_type, str) else link_type
-    
-        return self.query_unique("select target from links"
+        try:
+            link_type_id = self.get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+            
+            return self.query_unique("select target from links"
                                  " where id=? and type_id=?", id, link_type_id)[0]
+        
+        except NotFound:
+            return None
         
     #Actions
     

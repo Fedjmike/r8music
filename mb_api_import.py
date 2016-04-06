@@ -133,12 +133,12 @@ def import_artist(artist):
     print("Getting links...")
     links = get_links(artist_mbid)
     for link_type, target in links.items():
-        model.add_link(artist_id, link_type, target)
+        model.set_link(artist_id, link_type, target)
             
     if "wikipedia" not in links:
         print("Guessing wikipedia link...")
         links["wikipedia"] = title = guess_wikipedia_page(artist_name)
-        model.add_link(artist_id, "wikipedia", title)
+        model.set_link(artist_id, "wikipedia", title)
 
     model.add_artist_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
         
