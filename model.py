@@ -92,7 +92,7 @@ class Model(GeneralModel):
         
     #Artists
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image_url", "get_description", "get_wikipedia_urls"])
+    Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image", "get_description", "get_wikipedia_urls"])
         
     def add_artist(self, name, mbid, incomplete=False):
         #Todo document "incomplete"
@@ -116,7 +116,7 @@ class Model(GeneralModel):
         
         return self.Artist(*row,
             get_releases=lambda: self.get_releases_by_artist(row["id"], row["slug"]),
-            get_image_url=lambda: None,
+            get_image=lambda: (self.get_link(row["id"], "image_thumb"), self.get_link(row["id"], "image")),
             get_description=lambda: self.get_description(row["id"]),
             get_wikipedia_urls=get_artist_wikipedia_urls
         )

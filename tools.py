@@ -94,18 +94,39 @@ def search_artists(artist_name):
 import requests
 import wikipedia
 
-def get_wikipedia_summary(title):
+def _wikipedia_query(titles, **args):
     response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
         action="query",
         format="json",
+        titles=titles,
+        **args
+    )).json()
+    
+    return list(response["query"]["pages"].values())
+
+def get_wikipedia_summary(title):
+    pages = _wikipedia_query(
         prop="extracts",
-        #todo request in bulk
         titles=title,
         exintro=""
-    )).json()
+    )
 
-    pages = list(response["query"]["pages"].values())
     return pages[0]["extract"]
+
+def get_wikipedia_images(title):
+    pages = _wikipedia_query(
+        generator="images",
+        prop="imageinfo",
+        iiprop="url",
+        iiurlwidth=400,
+        titles=title,
+    )
+
+    blacklist = ["File:Commons-logo.svg"]
+
+    return ((page["imageinfo"][0][key] for key in ["thumburl", "url"])
+            for page in pages
+            if page["title"] not in blacklist)
 
 def guess_wikipedia_page(artist_name):
     categories = ["musician", "band", "rapper"]

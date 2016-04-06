@@ -5,9 +5,9 @@
 
 {% block content %}
     <div class="clearfix">
-        {% set image = artist.get_image_url() %}
+        {% set thumb, image = artist.get_image() %}
         {% if image %}
-            <a href={{ image }}><img class="artist-image" src={{ image }}></a>
+            <a href={{ image }}><img class="artist-image" src={{ thumb }}></a>
         {% endif %}
         
         <header><h1>{{ artist.name }}</h1></header>
