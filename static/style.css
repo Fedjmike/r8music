@@ -90,6 +90,10 @@ ol, ul {
     user-select: none;
 }
 
+.material-icons.tiny {
+    font-size: 15px;
+}
+
 /*Input elements*/
 
 input[type=text],
