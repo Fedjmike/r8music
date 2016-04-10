@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 
-{% block title %}Add an artist: search results {{ super() }}{% endblock %}
+{% block title %}'{{ query }}' search results - Add an artist {{ super() }}{% endblock %}
 
 {% block content %}
 <header><h1>Add an artist</h1></header>
+
+<form action={{ url_for("add_artist") }} method="post" class="clearfix">
+    <input type="text" name="artist-name" placeholder="Artist name" value="{{ query }}">
+</form>
 
 <p>Choose the artist to import.</p>
 

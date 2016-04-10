@@ -249,8 +249,9 @@ def add_artist_search_results(query=None):
     if not query:
         return redirect(url_for("add_artist"))
         
-    artists = search_artists(decode_query_str(query))
-    return render_template("add_artist_search_results.html", artists=artists)
+    query = decode_query_str(query)
+    artists = search_artists(query)
+    return render_template("add_artist_search_results.html", artists=artists, query=query)
     
 @app.route("/user/<slug>")
 @with_user
