@@ -198,18 +198,15 @@ def release_post(release_id):
     except KeyError:
         return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
     
-    if action == ActionType.rate:
+    if action in [ActionType.rate, ActionType.unrate]:
         try:
-            model().set_rating(request.user.id, release_id, request.values["rating"])
+            rating = request.values["rating"] if action == ActionType.rate else None
+            model().set_rating(request.user.id, release_id, rating)
             return rating_stats()
             
         #No rating field sent
-        except (KeyError):
+        except KeyError:
             return jsonify(error=1), 400
-
-    elif action == ActionType.unrate:
-        model().unset_rating(request.user.id, release_id)
-        return rating_stats()
     
     else:
         model().add_action(request.user.id, release_id, action)

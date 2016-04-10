@@ -22,13 +22,12 @@ def now_isoformat():
     return datetime.now().isoformat()
 
 def connect_db():
-    db = sqlite3.connect("sample.db")
-    db.row_factory = sqlite3.Row
-    return db
+    return sqlite3.connect("sample.db")
 
 class GeneralModel:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
+        self.db.row_factory = sqlite3.Row
         
     def close(self):
         self.db.close()
@@ -36,11 +35,15 @@ class GeneralModel:
     def query(self, query, *args):
         return self.db.execute(query, args).fetchall()
         
-    def query_unique(self, query, *args):
+    def query_unique(self, query, *args, fallback=None):
         result = self.query(query, *args)
         
         if len(result) == 0:
-            raise NotFound()
+            if fallback:
+                return fallback
+            
+            else:
+                raise NotFound()
             
         elif len(result) != 1:
             raise Exception("Result wasn't unique, '%s' with %s" % (query, str(args)))
@@ -93,19 +96,14 @@ class Artist(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "slug"])
         
-        self.get_releases=lambda: model.get_releases_by_artist(self.id, self.slug)
-        self.get_image=lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
-        self.get_description=lambda: model.get_description(self.id)
-        self.get_wikipedia_urls=lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
+        self.get_releases = lambda: model.get_releases_by_artist(self)
+        self.get_image = lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
+        self.get_description = lambda: model.get_description(self.id)
+        self.get_wikipedia_urls = lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
         self.init_from_row(row, ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url"])
-        
-        self.get_artists=lambda: model.get_release_artists(self.id, primary_artist_id)
-        self.get_palette=lambda: model.get_palette(self.id)
-        self.get_tracks=lambda: model.get_release_tracks(self.id)
-        self.get_rating_stats=lambda: model.get_rating_stats(self.id)
         
         try:
             self.url = url_for("release_page", release_slug=self.slug, artist_slug=primary_artist_slug)
@@ -114,14 +112,19 @@ class Release(ModelObject):
         except RuntimeError:
             self.url = None
         
+        self.get_artists = lambda: model.get_release_artists(self.id, primary_artist_id)
+        self.get_palette = lambda: model.get_palette(self.id)
+        self.get_tracks = lambda: model.get_release_tracks(self.id)
+        self.get_rating_stats = lambda: model.get_rating_stats(self.id)
+        
 class User(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "creation"])
         self.creation = arrow.get(self.creation).datetime
         
-        self.get_ratings=lambda: model.get_user_ratings(self.id)
-        self.get_releases_actioned=lambda: model.get_releases_actioned_by_user(self.id)
-        self.get_active_actions=lambda object_id: model.get_active_actions_by_user(self.id, object_id)
+        self.get_ratings = lambda: model.get_user_ratings(self.id)
+        self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
+        self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
 
 class Model(GeneralModel):
     #IDs
@@ -142,10 +145,6 @@ class Model(GeneralModel):
         self.set_link(artist_id, "musicbrainz", mbid)
         
         return artist_id
-        
-    def add_artist_description(self, artist_id, description):
-        self.insert("insert into descriptions (id, description) values (?, ?)",
-                    artist_id, description)
         
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
@@ -194,17 +193,16 @@ class Model(GeneralModel):
         self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
                     release_id, artist_id)
     
-    def get_releases_by_artist(self, artist_id, artist_slug=None):
-        """artist_slug is optional but saves having to look it up"""
+    def get_releases_by_artist(self, artist):
+        """artist is either the id or Artist object"""
         
-        if not artist_slug:
-            artist_slug = self.query_unique("select slug from artists where id=?", artist_id)
+        artist = artist if isinstance(artist, Artist) else self.get_artist(artist)
         
         return [
-            Release(self, row, artist_id, artist_slug) for row in
+            Release(self, row, artist.id, artist.slug) for row in
             self.query("select " + self._release_columns + " from"
                        " (select release_id from authorships where artist_id=?)"
-                       " join releases on releases.id = release_id", artist_id)
+                       " join releases on releases.id = release_id", artist.id)
         ]
         
     def get_release(self, artist_slug, release_slug):
@@ -259,15 +257,17 @@ class Model(GeneralModel):
                     " values (?, ?, ?, ?)", id, *palette)
         
     def get_palette(self, id):
-        return self.query_unique("select color1, color2, color3 from palettes where id=?", id)
+        return self.query_unique("select color1, color2, color3 from palettes"
+                                 " where id=?", id, fallback=(None, None, None))
+        
+    def add_description(self, artist_id, description):
+        self.insert("insert into descriptions (id, description)"
+                    " values (?, ?)", artist_id, description)
         
     def get_description(self, id):
-        try:
-            return self.query_unique("select description from descriptions where id = (?)", id)[0]
-            
-        except NotFound:
-            return ""
-
+        return self.query_unique("select description from descriptions"
+                                 " where id = (?)", id, fallback=("",))[0]
+        
     @lru_cache(maxsize=128)
     def get_link_type_id(self, link_type):
         try:
@@ -283,14 +283,10 @@ class Model(GeneralModel):
     def get_link(self, id, link_type):
         """link_type can either be the string that identifies a link, or its id"""
         
-        try:
-            link_type_id = self.get_link_type_id(link_type) if isinstance(link_type, str) else link_type
+        link_type_id = self.get_link_type_id(link_type) if isinstance(link_type, str) else link_type
             
-            return self.query_unique("select target from links"
-                                 " where id=? and type_id=?", id, link_type_id)[0]
-        
-        except NotFound:
-            return None
+        return self.query_unique("select target from links where id=? and type_id=?",
+                                 id, link_type_id, fallback=(None,))[0]
         
     #Actions
     
@@ -304,15 +300,13 @@ class Model(GeneralModel):
     def _make_action(self, user_id, action_id, object_id, type_id, creation):
         return self.Action(action_id, user_id, object_id, ActionType(type_id), arrow.get(creation).datetime)
     
-    def set_rating(self, user_id, object_id, rating):
-        action_id = self.add_action(user_id, object_id, ActionType.rate)
-        self.execute("insert into ratings (action_id, rating)"
-                     " values (?, ?)", action_id, rating)
-
-    def unset_rating(self, user_id, object_id):
-        # TODO: Error if no rating present?
-        action_id = self.add_action(user_id, object_id, ActionType.unrate)
+    def set_rating(self, user_id, object_id, rating=None):
+        action_id = self.add_action(user_id, object_id, ActionType["rate" if rating else "unrate"])
         
+        if rating:
+            self.execute("insert into ratings (action_id, rating)"
+                         " values (?, ?)", action_id, rating)
+    
     def move_actions(self, dest_id, src_id):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
@@ -507,21 +501,21 @@ class Model(GeneralModel):
             self.execute("delete from " + table + " where id=?", object_id)
             self.execute("delete from objects where id=?", object_id)
         
-        def remove_tracks(release_id):
-            sides, _, _ = self.get_release_tracks(release_id)
+        def remove_tracks(release):
+            sides, _, _ = release.get_tracks()
             
             for side in sides:
                 for track in side:
                     remove_object(track.id, "tracks")
             
-        def remove_releases(artist_id):
-            for release in self.get_releases_by_artist(artist_id):
-                remove_tracks(release.id)
+        def remove_releases(artist):
+            for release in artist.get_releases():
+                remove_tracks(release)
                 remove_object(release.id, "releases")
                 
         artist = self.get_artist(artist)
         
-        remove_releases(artist.id)
+        remove_releases(artist)
         remove_object(artist.id, "artists")
         
     def remove_user(self, user):

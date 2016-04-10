@@ -29,7 +29,6 @@ var userDatasets = {{ json_dumps(user_datasets) | safe }};
 
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}
-    <!-- TODO show own ratings? confusing? -->
     <section><div>
         <header><h1>{{ n }}</h1></header>
         {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}

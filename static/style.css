@@ -543,6 +543,7 @@ ol.references {
 .grids-list header {
     border-bottom: 2px solid rgba(0,0,0, 0.05);
     color: #ccc;
+    margin-bottom: 1.5em;
 }
 
 .grids-list > * > div {
