@@ -8,7 +8,7 @@ from werkzeug import generate_password_hash
 from contextlib import closing
 from sqlite3 import IntegrityError
 
-from model import Model, connect_db, NotFound, AlreadyExists, ActionType
+from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
 from tools import basic_decorator, decorator_with_args, search_artists
@@ -139,7 +139,7 @@ def search_results(query=None):
 def get_user():
     try:
         row = [session["user"][key] for key in ("id", "name", "creation")]
-        return model().make_user(*row)
+        return User(model(), row)
     
     except (KeyError, TypeError):
         return None

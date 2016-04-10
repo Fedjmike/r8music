@@ -83,7 +83,46 @@ class ActionType(Enum):
     @property
     def simple_past(self):
         return ["rated", "unrated", "listened to", "unlistened", "list", "unlist", "share", "unshare"][self.value-1]
+
+class ModelObject:
+    def init_from_row(self, row, columns):
+        for column, value in zip(columns, row):
+            setattr(self, column, value)
         
+class Artist(ModelObject):
+    def __init__(self, model, row):
+        self.init_from_row(row, ["id", "name", "slug"])
+        
+        self.get_releases=lambda: model.get_releases_by_artist(self.id, self.slug)
+        self.get_image=lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
+        self.get_description=lambda: model.get_description(self.id)
+        self.get_wikipedia_urls=lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
+
+class Release(ModelObject):
+    def __init__(self, model, row, primary_artist_id, primary_artist_slug):
+        self.init_from_row(row, ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url"])
+        
+        self.get_artists=lambda: model.get_release_artists(self.id, primary_artist_id)
+        self.get_palette=lambda: model.get_palette(self.id)
+        self.get_tracks=lambda: model.get_release_tracks(self.id)
+        self.get_rating_stats=lambda: model.get_rating_stats(self.id)
+        
+        try:
+            self.url = url_for("release_page", release_slug=self.slug, artist_slug=primary_artist_slug)
+            
+        #Outside Flask app context
+        except RuntimeError:
+            self.url = None
+        
+class User(ModelObject):
+    def __init__(self, model, row):
+        self.init_from_row(row, ["id", "name", "creation"])
+        self.creation = arrow.get(self.creation).datetime
+        
+        self.get_ratings=lambda: model.get_user_ratings(self.id)
+        self.get_releases_actioned=lambda: model.get_releases_actioned_by_user(self.id)
+        self.get_active_actions=lambda object_id: model.get_active_actions_by_user(self.id, object_id)
+
 class Model(GeneralModel):
     #IDs
     
@@ -92,8 +131,6 @@ class Model(GeneralModel):
         
     #Artists
     
-    Artist = namedtuple("Artist", ["id", "name", "slug", "get_releases", "get_image", "get_description", "get_wikipedia_urls"])
-        
     def add_artist(self, name, mbid, incomplete=False):
         #Todo document "incomplete"
         
@@ -110,29 +147,18 @@ class Model(GeneralModel):
         self.insert("insert into descriptions (id, description) values (?, ?)",
                     artist_id, description)
         
-    def _make_artist(self, row):
-        def get_artist_wikipedia_urls():
-            return get_wikipedia_urls(self.get_link(row["id"], "wikipedia"))
-        
-        return self.Artist(*row,
-            get_releases=lambda: self.get_releases_by_artist(row["id"], row["slug"]),
-            get_image=lambda: (self.get_link(row["id"], "image_thumb"), self.get_link(row["id"], "image")),
-            get_description=lambda: self.get_description(row["id"]),
-            get_wikipedia_urls=get_artist_wikipedia_urls
-        )
-        
     def get_artist(self, artist):
         """Retrieve artist info by id or by slug"""
         
         query = "select id, name, slug from artists where %s=?" % ("slug" if isinstance(artist, str) else "id")
-        return self._make_artist(self.query_unique(query, artist))
+        return Artist(self, self.query_unique(query, artist))
         
     @lru_cache(maxsize=512)
     def get_release_artists(self, release_id, primary_artist_id=None):
         """Get all the artists who authored a release"""
         
         artists = [
-            self._make_artist(row) for row in
+            Artist(self, row) for row in
             self.query("select id, name, slug from"
                        " (select artist_id from authorships where release_id=?)"
                        " join artists on artist_id = artists.id", release_id)
@@ -146,9 +172,6 @@ class Model(GeneralModel):
         return artists
         
     #Releases
-    
-    Release = namedtuple("Release", ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url",
-                                     "url", "get_tracks", "get_artists", "get_palette", "get_rating_stats"])
     
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
@@ -171,38 +194,14 @@ class Model(GeneralModel):
         self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
                     release_id, artist_id)
     
-    def _make_release(self, row, primary_artist_id=None, primary_artist_slug=None):
-        release_id = row[0]
-        release_slug = row[2]
-        
-        if not primary_artist_id:
-            primary_artist_id, primary_artist_slug = \
-                self.query_unique("select id, slug from"
-                                  " (select artist_id from authorships where release_id=?)"
-                                  " join artists on artist_id = artists.id limit 1", release_id)
-        
-        elif not primary_artist_slug:
-            primary_artist_slug = self.query_unique("select slug from artists where id=?", primary_artist_id)
-        
-        try:
-            url = url_for("release_page", release_slug=release_slug, artist_slug=primary_artist_slug)
-            
-        #Outside Flask app context
-        except RuntimeError:
-            url = None
-        
-        return self.Release(*row, url=url,
-            get_artists=lambda: self.get_release_artists(release_id, primary_artist_id),
-            get_palette=lambda: self.get_palette(release_id),
-            get_tracks=lambda: self.get_release_tracks(release_id),
-            get_rating_stats=lambda: self.get_rating_stats(release_id)
-        )
-        
     def get_releases_by_artist(self, artist_id, artist_slug=None):
         """artist_slug is optional but saves having to look it up"""
         
+        if not artist_slug:
+            artist_slug = self.query_unique("select slug from artists where id=?", artist_id)
+        
         return [
-            self._make_release(row, artist_id, artist_slug) for row in
+            Release(self, row, artist_id, artist_slug) for row in
             self.query("select " + self._release_columns + " from"
                        " (select release_id from authorships where artist_id=?)"
                        " join releases on releases.id = release_id", artist_id)
@@ -219,7 +218,7 @@ class Model(GeneralModel):
                               " (select " + self._release_columns_rename + " from releases where releases.slug=?)",
                               artist_slug, release_slug)
 
-        return self._make_release(row, artist_id, artist_slug)
+        return Release(self, row, artist_id, artist_slug)
         
     #Tracks
     
@@ -372,6 +371,16 @@ class Model(GeneralModel):
             if type == ActionType.rate.value
         }
         
+    def _make_release(self, row):
+        release_id = row[0]
+        
+        primary_artist_id, primary_artist_slug = \
+            self.query_unique("select id, slug from"
+                              " (select artist_id from authorships where release_id=?)"
+                              " join artists on artist_id = artists.id limit 1", release_id)
+        
+        return Release(self, row, primary_artist_id, primary_artist_slug)
+        
     def get_releases_actioned_by_user(self, user_id):
         action_values = lambda *actions: [ActionType[action].value for action in actions]
     
@@ -404,23 +413,12 @@ class Model(GeneralModel):
         
     #Users
     
-    User = namedtuple("User", ["id", "name", "creation", "get_ratings", "get_releases_actioned", "get_active_actions"])
-    
-    def make_user(self, _id, name, creation):
-        return self.User(_id, name, creation,
-            get_ratings=lambda: self.get_user_ratings(_id),
-            get_releases_actioned=lambda: self.get_releases_actioned_by_user(_id),
-            get_active_actions=lambda object_id: self.get_active_actions_by_user(_id, object_id)
-        )
-    
     def get_user(self, user):
         """Get user by id or by slug"""
         
         query =   "select id, name, creation from users where %s=?" \
                 % ("name" if isinstance(user, str) else "id")
-        user_id, name, creation = self.query_unique(query, user)
-        
-        return self.make_user(user_id, name, arrow.get(creation).datetime)
+        return User(self, self.query_unique(query, user))
         
     def register_user(self, name, password, email=None, fullname=None):
         """Try to add a new user to the database.
@@ -435,7 +433,7 @@ class Model(GeneralModel):
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
                               name, generate_password_hash(password), email, fullname, creation)
                        
-        return self.make_user(user_id, name, creation)
+        return User(self, [user_id, name, creation])
     
     def set_user_pw(self, user, password):
         """user can be a slug or an id"""
@@ -452,7 +450,7 @@ class Model(GeneralModel):
         db_hash, *row = self.query_unique("select pw_hash, id, name, creation from users"
                                              " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
-        return matches, self.make_user(*row)
+        return matches, User(self, row)
         
     #Search
     
