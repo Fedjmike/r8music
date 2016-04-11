@@ -112,9 +112,29 @@ class Release(ModelObject):
         except RuntimeError:
             self.url = None
         
-        self.get_artists = lambda: model.get_release_artists(self.id, primary_artist_id)
+        def get_artists():
+            artists = model.get_release_artists(self.id)
+            
+            #Put the primary artist first
+            ((index, primary_artist),) = [(i, a) for i, a in enumerate(artists) if a.id == primary_artist_id]
+            return [primary_artist] + artists[:index] + artists[index+1:]
+            
+        def get_tracks():
+            tracks = model.get_release_tracks(self.id)
+            track_no = len(tracks)
+            total_runtime = sum(track.runtime for track in tracks)
+            
+            def runtime_str(milliseconds):
+                if milliseconds:
+                    return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
+
+            tracks = [track._replace(runtime=runtime_str(track.runtime)) for track in tracks]
+            sides = groupby(tracks, lambda track: track.side)
+            return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no
+            
+        self.get_artists = get_artists
+        self.get_tracks = get_tracks
         self.get_palette = lambda: model.get_palette(self.id)
-        self.get_tracks = lambda: model.get_release_tracks(self.id)
         self.get_rating_stats = lambda: model.get_rating_stats(self.id)
         
 class User(ModelObject):
@@ -153,22 +173,15 @@ class Model(GeneralModel):
         return Artist(self, self.query_unique(query, artist))
         
     @lru_cache(maxsize=512)
-    def get_release_artists(self, release_id, primary_artist_id=None):
+    def get_release_artists(self, release_id):
         """Get all the artists who authored a release"""
         
-        artists = [
+        return [
             Artist(self, row) for row in
             self.query("select id, name, slug from"
                        " (select artist_id from authorships where release_id=?)"
                        " join artists on artist_id = artists.id", release_id)
         ]
-        
-        if primary_artist_id:
-            #Put the primary artist first
-            ((index, primary_artist),) = [(i, a) for i, a in enumerate(artists) if a.id == primary_artist_id]
-            return [primary_artist] + artists[:index] + artists[index+1:]
-        
-        return artists
         
     #Releases
     
@@ -230,24 +243,11 @@ class Model(GeneralModel):
                     track_id, release_id, title, slug, position, side, runtime)
 
     def get_release_tracks(self, release_id):
-        total_runtime = None
-        
-        def runtime(milliseconds):
-            if milliseconds:
-                nonlocal total_runtime
-                total_runtime = milliseconds + (total_runtime or 0)
-                return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
-
-        tracks = [
-            self.Track(*row, runtime=runtime(milliseconds)) for milliseconds, *row in
-            self.query("select runtime, id, title, side from tracks"
+        return [
+            self.Track(*row) for row in
+            self.query("select id, title, side, runtime from tracks"
                        " where release_id=? order by side asc, position asc", release_id)
         ]
-        
-        track_no = len(tracks)
-        sides = groupby(tracks, lambda track: track.side)
-        return [list(tracks) for side_no, tracks in sides], runtime(total_runtime), track_no
-
 
     #Object attachments
     
