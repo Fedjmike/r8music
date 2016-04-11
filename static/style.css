@@ -421,8 +421,20 @@ ol.action > li {
 
 /*Albums*/
 
+.album {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .album-main {
-	display: inline-block;
+    /*Matches the navbar*/
+    width: 25em;
+}
+
+.album-cover {
+	margin-top: 2em;
+    margin-right: 1em;
 }
 
 .byline .author:after {
@@ -435,11 +447,6 @@ ol.action > li {
 
 .author:not(:last-of-type):after {
     content: ' & ';
-}
-
-.album-main {
-    /*Matches the navbar*/
-    width: 25em;
 }
 
 ol.tracks {
@@ -491,14 +498,8 @@ ol.tracks {
     border-top: 2px solid rgba(0,0,0, 0.03);
 }
 
-.album-cover {
-	margin-top: 3.5em;
-    float: right;
-}
-
 .album-cover img {
     width: 21em;
-    margin-right: 1em;
 }
 
 #average-rating {
