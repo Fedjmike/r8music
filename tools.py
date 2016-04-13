@@ -91,8 +91,8 @@ def search_artists(artist_name):
     
 #
 
-import requests
-import wikipedia
+import re, requests, wikipedia
+from bs4 import BeautifulSoup
 
 def _wikipedia_query(titles, **args):
     response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
@@ -113,20 +113,25 @@ def get_wikipedia_summary(title):
 
     return pages[0]["extract"]
 
-def get_wikipedia_images(title):
-    pages = _wikipedia_query(
-        generator="images",
-        prop="imageinfo",
-        iiprop="url",
-        iiurlwidth=400,
-        titles=title,
-    )
-
-    blacklist = ["File:Commons-logo.svg"]
-
-    return ((page["imageinfo"][0][key] for key in ["thumburl", "url"])
-            for page in pages
-            if page["title"] not in blacklist)
+def get_wikipedia_image(title):
+    url, _ = get_wikipedia_urls(title)
+    html = BeautifulSoup(requests.get(url).text)
+    
+    try:
+        image_link = html.select(".infobox a.image")[0]
+        
+        full_href = image_link["href"]
+        full_url = "https://en.wikipedia.org" + full_href if full_href.startswith("/wiki/") else full_href
+        
+        #srcset is a list of images of different sizes, with scales
+        thumbs = re.findall("(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
+        #Get the largest image, by the scale
+        thumb_url, scale = max(thumbs, key=lambda thumb_scale: thumb_scale[1])
+        
+        return thumb_url, full_url
+        
+    except IndexError:
+        return None
 
 def guess_wikipedia_page(artist_name):
     categories = ["musician", "band", "rapper"]

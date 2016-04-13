@@ -4,7 +4,7 @@ import requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_images
+from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image
 from model import Model, NotFound
 
 album_art_base_url = 'http://coverartarchive.org/release-group/'
@@ -143,10 +143,10 @@ def import_artist(artist):
     print("Scraping wikipedia...")
     model.add_artist_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
     try:
-        image_thumb, image = next(get_wikipedia_images(links["wikipedia"]))
+        image_thumb, image = get_wikipedia_image(links["wikipedia"])
         model.set_link(artist_id, "image", image)
         model.set_link(artist_id, "image_thumb", image_thumb)
-    except StopIteration:    
+    except TypeError:    
         pass
         
     pool = ThreadPool(8)
