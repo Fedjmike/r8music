@@ -122,7 +122,7 @@ class Release(ModelObject):
         def get_tracks():
             tracks = model.get_release_tracks(self.id)
             track_no = len(tracks)
-            total_runtime = sum(track.runtime for track in tracks)
+            total_runtime = sum(track.runtime for track in tracks if track.runtime)
             
             def runtime_str(milliseconds):
                 if milliseconds:
