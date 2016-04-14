@@ -15,6 +15,9 @@ create table artists (
     foreign key (id) references objects(id)
 );
 
+create index artist_id_index on artists(id);
+create index artist_slug_index on artists(slug);
+
 drop table if exists releases;
 create table releases (
     id integer not null,
@@ -27,6 +30,9 @@ create table releases (
     foreign key (id) references objects(id)
 );
 
+create index release_id_index on releases(id);
+create index release_slug_index on releases(slug);
+
 drop table if exists authorships;
 create table authorships (
     release_id integer not null,
@@ -35,6 +41,9 @@ create table authorships (
     foreign key (release_id) references releases(id),
     foreign key (artist_id) references artists(id)
 );
+
+create index authorship_index on authorships(release_id, artist_id);
+create index authorship_artist_index on authorships(artist_id);
 
 drop table if exists tracks;
 create table tracks (
@@ -47,6 +56,8 @@ create table tracks (
     runtime integer, -- In milliseconds
     foreign key (id) references objects(id)
 );
+
+create index track_release_index on tracks(release_id);
 
 -- Object attachments
 
@@ -66,6 +77,8 @@ create table descriptions (
     description text,
     foreign key (id) references objects(id)
 );
+
+create index description_id_index on descriptions(id);
 
 drop table if exists links;
 create table links (
@@ -95,6 +108,8 @@ create table users (
     creation text not null -- ISO 8601 date
 );
 
+create index user_name_index on users(name);
+
 drop table if exists actions;
 create table actions (
     id integer primary key,
@@ -112,3 +127,5 @@ create table ratings (
     rating integer not null,
     foreign key (action_id) references actions(id)
 );
+
+create index rating_id_index on ratings(action_id);
