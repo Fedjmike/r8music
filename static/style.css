@@ -569,8 +569,20 @@ ol.references {
 
 .chart {
     float: right;
+}
+
+.chart canvas {
     width: 21em;
     height: 11em;
+}
+
+.chart form {
+    text-align: center;
+}
+
+.chart input[type=radio] {
+    margin-left: 0.75em;
+    margin-right: 0.2em;
 }
 
 /*Search*/

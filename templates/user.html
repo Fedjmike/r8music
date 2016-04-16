@@ -8,7 +8,13 @@
 {% block content %}
 
 <section class="clearfix">
-    <canvas class="chart" id="user-chart" width="400" height="200"></canvas>
+    <div class="chart">
+        <canvas id="user-chart" width="400" height="200"></canvas>
+        <form>
+            <label><input type="radio" name="chart-select" value="rating-counts" checked="true">Ratings</label>
+            <label><input type="radio" name="chart-select" value="year-counts">Years</label>
+        </form>
+    </div>
 
     <header><h1>{{ that_user.name }}</h1></header>
 
