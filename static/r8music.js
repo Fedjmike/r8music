@@ -94,6 +94,11 @@ function renderYearCounts(canvas) {
     
     var [labels, data] = userDatasets.releaseYearCounts;
     
+    /*Pad the front of the dataset to the start of a decade*/
+    var extraYears = labels[0] % 10;
+    data = Array(extraYears).fill(0).concat(data);
+    labels = [labels[0] - extraYears].concat(Array(extraYears-1).fill("")).concat(labels);
+    
     //todo: this is shit
     labels = labels.map(year => year % 10 == 0 ? year : "");
     
