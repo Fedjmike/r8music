@@ -73,34 +73,9 @@ if (typeof Chart !== "undefined") {
     Chart.defaults.Bar.barValueSpacing = 1;
 }
 
-function renderRatingCounts(canvas) {
+function renderBarChart(canvas, labels, data) {
     if ("chart" in canvas)
         canvas.chart.destroy();
-    
-    canvas.chart = new Chart(canvas.getContext("2d")).Bar({
-        labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
-        datasets: [{
-            data: userDatasets.ratingCounts,
-            strokeColor: palette[0],
-            fillColor: "rgba(0,0,0, 0)",
-            highlightFill: palette[0]
-        }]
-    });
-}
-
-function renderYearCounts(canvas) {
-    if ("chart" in canvas)
-        canvas.chart.destroy();
-    
-    var [labels, data] = userDatasets.releaseYearCounts;
-    
-    /*Pad the front of the dataset to the start of a decade*/
-    var extraYears = labels[0] % 10;
-    data = Array(extraYears).fill(0).concat(data);
-    labels = [labels[0] - extraYears].concat(Array(extraYears-1).fill("")).concat(labels);
-    
-    //todo: this is shit
-    labels = labels.map(year => year % 10 == 0 ? year : "");
     
     canvas.chart = new Chart(canvas.getContext("2d")).Bar({
         labels: labels,
@@ -111,6 +86,25 @@ function renderYearCounts(canvas) {
             highlightFill: palette[0]
         }]
     });
+}
+
+function renderRatingCounts(canvas) {
+    var ratings = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    renderBarChart(canvas, ratings, userDatasets.ratingCounts);
+}
+
+function renderYearCounts(canvas) {
+    var [labels, data] = userDatasets.releaseYearCounts;
+    
+    /*Pad the front of the dataset to the start of a decade*/
+    var extraYears = labels[0] % 10;
+    data = Array(extraYears).fill(0).concat(data);
+    labels = [labels[0] - extraYears].concat(Array(extraYears-1).fill("")).concat(labels);
+    
+    //todo: this is shit
+    labels = labels.map(year => year % 10 == 0 ? year : "");
+    
+    renderBarChart(canvas, labels, data);
 }
 
 $(document).ready(function ($) {
