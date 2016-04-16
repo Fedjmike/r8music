@@ -58,9 +58,27 @@
         {% set ratings = user.get_ratings() if user else {} %}
         {{ rating_widget(release, ratings[release.id] if release.id in ratings, None) }}
 	</div>
-    {% if release.thumb_art_url %}
-        <a class="album-cover" href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a>
-    {% endif %}
+    <div class="album-cover">
+        {% if release.thumb_art_url %}
+            <a href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a><br/>
+        {% endif %}
+        <div class="next-albums">
+            {% for artist, previous, next in release.get_next_releaseses() %}
+                {% if previous or next %}
+                    {% if loop.index != 1 %}
+                        <div>By <a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a>:</div>
+                    {% endif %}
+                    {% if previous %}
+                        <a href={{ previous.url }} class="previous">&larr; {{ previous.title }} [{{ previous.date[:4] }}]</a>
+                    {% endif %}
+                    {% if next %}
+                        <a href={{ next.url }} class="next">{{ next.title }} [{{ next.date[:4] }}] &rarr;</a>
+                    {% endif %}
+                    <br/>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 </section>
 
 {% for artist in release.get_artists() %}

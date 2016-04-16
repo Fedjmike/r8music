@@ -132,8 +132,24 @@ class Release(ModelObject):
             sides = groupby(tracks, lambda track: track.side)
             return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no
             
+        def get_next_releaseses():
+            for artist in get_artists():
+                #If this release is an album, only consider albums
+                predicate =      (lambda r: True) if self.release_type != "Album" \
+                            else (lambda release: release.release_type == "Album")
+                other_releases = sorted(filter(predicate, artist.get_releases()),
+                                        key=lambda release: release.date)
+                
+                #The index of this release
+                index = next(i for i, r in enumerate(other_releases) if r.id == self.id)
+                
+                previous = other_releases[index-1] if index != 0 else None
+                _next = other_releases[index+1] if index != len(other_releases)-1 else None
+                yield artist, previous, _next
+            
         self.get_artists = get_artists
         self.get_tracks = get_tracks
+        self.get_next_releaseses = get_next_releaseses
         self.get_palette = lambda: model.get_palette(self.id)
         self.get_rating_stats = lambda: model.get_rating_stats(self.id)
         

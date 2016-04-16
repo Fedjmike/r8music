@@ -498,8 +498,24 @@ ol.tracks {
     border-top: 2px solid rgba(0,0,0, 0.03);
 }
 
+.album-cover,
 .album-cover img {
     width: 21em;
+}
+
+.album-cover .next-albums {
+    padding: 0.4em 0.5em 0 0.5em;
+    font-size: 0.9em;
+}
+
+.next-albums > * {
+    display: inline-block;
+    padding: 0.25em 0;
+    max-width: 20em;
+}
+
+.next-albums .next {
+    float: right;
 }
 
 #average-rating {
