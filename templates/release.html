@@ -29,7 +29,7 @@
         {% for tracks in sides %}
             {% for track in tracks %}
     			<li>
-                    {{ track.title }}
+                    <span class="track-title">{{ track.title }}</span>
                     {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
                 </li>
             {% endfor %}
