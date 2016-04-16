@@ -206,6 +206,7 @@ ol.main.nav {
     color: white;
     opacity: 0.6;
     text-shadow: 1px 1px 3px rgba(0,0,0, 0.7);
+    transition: opacity 0.1s;
 }
 
 .main.nav > li > a:hover {
@@ -266,6 +267,10 @@ ol:not(.small).rating {
     border-radius: 0.5rem;
     background-color: rgba(0,0,0,0.4);
     font-weight: normal;
+}
+
+.small.grid .small.rating {
+    border-radius: 0.5rem;
 }
 
 .small.rating li {
@@ -466,9 +471,9 @@ ol.tracks {
     content: counter(item);
     counter-increment: item;
     width: 1.1em;
+    padding-right: 0.15em;
     text-align: right;
     vertical-align: top;
-    padding-right: 0.15em;
     color: #aaa;
 }
 
@@ -478,8 +483,7 @@ ol.tracks {
 }
 
 .tracks time {
-    line-height: 1.3em;
-	float: right;
+    float: right;
     color: #aaa;
 }
 
@@ -511,7 +515,7 @@ ol.tracks {
 }
 
 .album-cover .next-albums {
-    padding: 0.4em 0.5em 0 0.5em;
+    padding: 0.15em 0.5em 0 0.5em;
     font-size: 0.9em;
 }
 
