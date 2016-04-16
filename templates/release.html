@@ -39,7 +39,7 @@
         {% endif %}
 		</ol>
 		
-        <ol class="action inline">
+        <ol class="action inline unselectable">
             {% set active_actions = user.get_active_actions(release.id) if user else [] %}
             <li><a class="clickable {{ 'selected' if 'list' in active_actions else '' }}"
                    name="list" href=# data-release-id={{ release.id }}>

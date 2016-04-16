@@ -116,7 +116,7 @@ class Release(ModelObject):
             artists = model.get_release_artists(self.id)
             
             #Put the primary artist first
-            ((index, primary_artist),) = [(i, a) for i, a in enumerate(artists) if a.id == primary_artist_id]
+            index, primary_artist = next((i, a) for i, a in enumerate(artists) if a.id == primary_artist_id)
             return [primary_artist] + artists[:index] + artists[index+1:]
             
         def get_tracks():
@@ -337,7 +337,7 @@ class Model(GeneralModel):
             rating for type, rating in
             self.query("select type, rating from"
                        " (select id, user_id, type from actions"
-                       "  where object_id=? and (type=? or type=?) order by creation asc)"
+                       "  where object_id=? and type in (?, ?) order by creation asc)"
                        " left join ratings on id = action_id group by user_id",
                        object_id, ActionType.rate.value, ActionType.unrate.value)
             if type == ActionType.rate.value
@@ -355,7 +355,7 @@ class Model(GeneralModel):
         rows = \
             self.query("select object_id, type, rating from"
                        " (select id, object_id, type from actions"
-                       "  where user_id=? and (type=? or type=?) order by creation asc)"
+                       "  where user_id=? and type in (?, ?) order by creation asc)"
                        " left join ratings on id = action_id group by object_id",
                        user_id, ActionType.rate.value, ActionType.unrate.value)
         
@@ -379,22 +379,22 @@ class Model(GeneralModel):
         action_values = lambda *actions: [ActionType[action].value for action in actions]
     
         rated = [
-            (self._make_release(row), rating) for rating, *row in \
+            (self._make_release(row), rating) for rating, *row in
             self.query("select rating, " + self._release_columns_rename + " from"
                        " (select action_id, object_id, type as action_type from"
                        "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and (type=? or type=?) order by creation asc)"
+                       "   where user_id=? and type in (?, ?) order by creation asc)"
                        "  group by object_id) natural join ratings"
                        " join releases on id = object_id where action_type=?",
                        user_id, *action_values("rate", "unrate", "rate"))
         ]
         
         listened = [
-            self._make_release(row) for row in \
+            self._make_release(row) for row in
             self.query("select " + self._release_columns_rename + " from"
                        " (select action_id, object_id, type as action_type from"
                        "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and (type=? or type=?) order by creation asc)"
+                       "   where user_id=? and type in (?, ?) order by creation asc)"
                        "  group by object_id)"
                        " join releases on id = object_id where action_type=?",
                        user_id, *action_values("listen", "unlisten", "listen"))

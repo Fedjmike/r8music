@@ -3,7 +3,7 @@
 drop table if exists objects;
 create table objects (
     id integer primary key,
-    type int not null
+    type int not null -- model.ObjectType enum
 );
 
 drop table if exists artists;
