@@ -26,6 +26,9 @@ def friendly_datetime(then):
              else "today at %X"
     return then.strftime(format)
 
+def relative_datetime(then):
+    return then.humanize()
+    
 #Rating datasets
 
 def sort_by_artist(releases):
@@ -78,7 +81,7 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [n_things, full_datetime, friendly_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
+template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
