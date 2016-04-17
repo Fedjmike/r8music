@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import requests, arrow, musicbrainzngs
+import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
