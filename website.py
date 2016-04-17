@@ -138,15 +138,14 @@ def search_results(query=None):
 
 def get_user():
     try:
-        row = [session["user"][key] for key in ("id", "name", "creation")]
-        return User(model(), row)
+        return model().get_user(session["user"]["id"])
     
     except (KeyError, TypeError):
         return None
 
 def set_user(user):
     #Can't store the user obj directly as methods can't be seralized
-    session["user"] = {"id": user.id, "name": user.name, "creation": user.creation}
+    session["user"] = {"id": user.id, "name": user.name}
 
 @basic_decorator
 def with_user(view):
