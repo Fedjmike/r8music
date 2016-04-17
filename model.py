@@ -157,7 +157,7 @@ class User(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "creation"])
         self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
-        self.timezone = "+01:00"
+        self.timezone = model.get_user_timezone(self.id)
         
         self.get_ratings = lambda: model.get_user_ratings(self.id)
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
@@ -431,7 +431,7 @@ class Model(GeneralModel):
                 % ("name" if isinstance(user, str) else "id")
         return User(self, self.query_unique(query, user))
         
-    def register_user(self, name, password, email=None, fullname=None):
+    def register_user(self, name, password, email=None, fullname=None, timezone=None):
         """Try to add a new user to the database.
            Perhaps counterintuitively, for security hashing the password is
            delayed until this function. Better that you accidentally hash
@@ -443,7 +443,9 @@ class Model(GeneralModel):
         creation = now_isoformat()
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
                               name, generate_password_hash(password), email, fullname, creation)
-                       
+        
+        self.set_user_timezone(user_id, timezone)
+        
         return User(self, [user_id, name, creation])
     
     def set_user_pw(self, user, password):
@@ -462,6 +464,14 @@ class Model(GeneralModel):
                                              " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
         return matches, User(self, row)
+        
+    def set_user_timezone(self, user_id, timezone="Europe/London"):
+        self.execute("insert into user_timezones (user_id, timezone)"
+                     "values (?, ?)", user_id, timezone)
+        
+    def get_user_timezone(self, user_id):
+        return self.query_unique("select timezone from user_timezones"
+                                 " where user_id=?", user_id, fallback=("Europe/London",))[0]
         
     #Search
     

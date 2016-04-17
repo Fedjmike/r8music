@@ -110,6 +110,15 @@ create table users (
 
 create index user_name_index on users(name);
 
+drop table if exists user_timezones;
+create table user_timezones (
+    user_id integer primary key,
+    timezone text not null, -- [+-]\d\d:\d\d
+    foreign key (user_id) references users(id)
+);
+
+-- Actions
+
 drop table if exists actions;
 create table actions (
     id integer primary key,
