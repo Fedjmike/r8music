@@ -7,6 +7,11 @@
 
 {% block content %}
 
+{% macro full_and_friendly_datetime(datetime) -%}
+    {% set datetime = datetime.to(user.timezone) %}
+    <time title="{{ full_datetime(datetime) }}">{{ friendly_datetime(datetime) }}</time>
+{%- endmacro %}
+
 <section class="clearfix">
     <div class="chart">
         <canvas id="user-chart" width="400" height="200"></canvas>
@@ -19,8 +24,8 @@
     <header><h1>{{ that_user.name }}</h1></header>
 
     <p>
-        Joined <time>{{ friendly_datetime(that_user.creation) }}</time><br/>
         {% set rated_no = that_user.get_ratings() | length %}
+        Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
         Rated {{ n_things(rated_no, "release") }}
     </p>
 </section>

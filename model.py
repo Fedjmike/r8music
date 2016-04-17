@@ -156,7 +156,8 @@ class Release(ModelObject):
 class User(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "creation"])
-        self.creation = arrow.get(self.creation).datetime
+        self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
+        self.timezone = "+01:00"
         
         self.get_ratings = lambda: model.get_user_ratings(self.id)
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)

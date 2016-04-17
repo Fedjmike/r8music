@@ -12,15 +12,18 @@ def pluralize(noun):
     
 def n_things(n, noun):
     return "%d %s" % (n, noun if n == 1 else pluralize(noun))
+
+def full_datetime(then):
+    return then.strftime("%A, %d %B %Y at %X")
     
 def friendly_datetime(then):
     """Omit what is common between the given date and the current date"""
     now = datetime.now()
 
     #d is the day number, b is the short month name, Y is the year, X is the time
-    format =      "%d %b %Y, %X" if then.year != now.year \
-             else "%d %b, %X" if then.date() != now.date() \
-             else "%X"
+    format =      "%d %B %Y at %X" if then.year != now.year \
+             else "%d %B at %X" if then.date() != now.date() \
+             else "today at %X"
     return then.strftime(format)
 
 #Rating datasets
@@ -75,7 +78,7 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [n_things, friendly_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
+template_tools = [n_things, full_datetime, friendly_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
