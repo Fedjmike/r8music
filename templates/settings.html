@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}Settings {{ super() }}{% endblock %}
+
+{% block content %}
+
+<header>
+    <h1>Settings</h1>
+    <h3>Logged in as <a href={{ url_for("user_page", slug=user.name) }}>{{ user.name }}</a></h3>
+</header>
+
+<form action={{ url_for("user_settings") }} method="post" class="clearfix">
+    <dl>
+        <dt>Email address</dt> <dd><input type="text" name="email" value="{{ user.email }}" /></dd>
+        <dt>Timezone</dt> <dd><input type="text" name="timezone" value="{{ user.timezone }}" /></dd>
+        
+        <dd><input type="submit" value="Save changes" /></dd>
+    </dl>
+</form>
+
+{% endblock %}

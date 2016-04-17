@@ -155,7 +155,7 @@ class Release(ModelObject):
         
 class User(ModelObject):
     def __init__(self, model, row):
-        self.init_from_row(row, ["id", "name", "creation"])
+        self.init_from_row(row, ["id", "name", "email", "creation"])
         self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
         self.timezone = model.get_user_timezone(self.id)
         
@@ -427,7 +427,7 @@ class Model(GeneralModel):
     def get_user(self, user):
         """Get user by id or by slug"""
         
-        query =   "select id, name, creation from users where %s=?" \
+        query =   "select id, name, email, creation from users where %s=?" \
                 % ("name" if isinstance(user, str) else "id")
         return User(self, self.query_unique(query, user))
         
@@ -446,7 +446,7 @@ class Model(GeneralModel):
         
         self.set_user_timezone(user_id, timezone)
         
-        return User(self, [user_id, name, creation])
+        return User(self, [user_id, name, email, creation])
     
     def set_user_pw(self, user, password):
         """user can be a slug or an id"""
@@ -460,13 +460,16 @@ class Model(GeneralModel):
            For added security, it doesn't even leave this function."""
            
         column =  "name" if isinstance(user, str) else "id"
-        db_hash, *row = self.query_unique("select pw_hash, id, name, creation from users"
+        db_hash, *row = self.query_unique("select pw_hash, id, name, email, creation from users"
                                              " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
         return matches, User(self, row)
         
+    def set_user_email(self, user_id, email):
+        self.execute("update users set email=? where id=?", email, user_id)
+        
     def set_user_timezone(self, user_id, timezone="Europe/London"):
-        self.execute("insert into user_timezones (user_id, timezone)"
+        self.execute("replace into user_timezones (user_id, timezone)"
                      "values (?, ?)", user_id, timezone)
         
     def get_user_timezone(self, user_id):

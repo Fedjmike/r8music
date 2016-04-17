@@ -360,6 +360,25 @@ def set_password():
             
         return set_password()
         
+@app.route("/settings", methods=["GET", "POST"])
+@needs_auth
+def user_settings():
+    if request.method == "GET":
+        return render_template("settings.html", user=request.user)
+    
+    else:
+        email, timezone = (request.form[key] if key in request.form else None
+                           for key in ["email", "timezone"])
+        
+        #Allow the user to set email to an empty string
+        if email is not None:
+            model().set_user_email(request.user.id, email)
+            
+        if timezone:
+            model().set_user_timezone(request.user.id, timezone)
+        
+        return redirect(url_for("user_settings"))
+        
 @app.route("/login", methods=["GET", "POST"])
 def login():
     #todo check not logged in
