@@ -315,7 +315,7 @@ class Model(GeneralModel):
                            " values (?, ?, ?, ?)", user_id, object_id, type.value, now_isoformat())
         
     def _make_action(self, user_id, action_id, object_id, type_id, creation):
-        return self.Action(action_id, user_id, object_id, ActionType(type_id), arrow.get(creation).datetime)
+        return self.Action(action_id, user_id, object_id, ActionType(type_id), arrow.get(creation))
     
     def set_rating(self, user_id, object_id, rating=None):
         action_id = self.add_action(user_id, object_id, ActionType["rate" if rating else "unrate"])
