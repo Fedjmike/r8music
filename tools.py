@@ -130,7 +130,7 @@ def get_wikipedia_image(title):
         
         return thumb_url, full_url
         
-    except IndexError:
+    except (IndexError, KeyError):
         return None
 
 def guess_wikipedia_page(artist_name):
