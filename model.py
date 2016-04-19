@@ -162,6 +162,7 @@ class User(ModelObject):
         self.get_ratings = lambda: model.get_user_ratings(self.id)
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
         self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
+        self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
 
 class Model(GeneralModel):
     #IDs
@@ -475,6 +476,19 @@ class Model(GeneralModel):
     def get_user_timezone(self, user_id):
         return self.query_unique("select timezone from user_timezones"
                                  " where user_id=?", user_id, fallback=("Europe/London",))[0]
+        
+    def set_user_rating_description(self, user_id, rating, description):
+        self.execute("replace into user_rating_descriptions (user_id, rating, description)"
+                     " values (?, ?, ?)", user_id, rating, description)
+        
+    def get_user_rating_descriptions(self, user_id):
+        descriptions = defaultdict(lambda: None)
+        descriptions.update({
+            rating: description for rating, description in
+            self.query("select rating, description from user_rating_descriptions"
+                       " where user_id=?", user_id)
+        })
+        return descriptions
         
     #Search
     

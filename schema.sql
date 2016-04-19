@@ -117,6 +117,16 @@ create table user_timezones (
     foreign key (user_id) references users(id)
 );
 
+drop table if exists user_rating_descriptions;
+create table user_rating_descriptions (
+    user_id integer not null,
+    rating integer not null,
+    description text not null,
+    foreign key (user_id) references users(id)
+);
+
+create index user_rating_description_index on user_rating_descriptions(user_id, rating);
+
 -- Actions
 
 drop table if exists actions;
