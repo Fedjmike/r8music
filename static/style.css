@@ -156,6 +156,20 @@ form input[type="submit"] {
     float: right;
 }
 
+[contenteditable].single-line {
+    white-space: nowrap;
+    width:200px;
+    overflow: hidden;
+} 
+[contenteditable].single-line br {
+    display:none;
+
+}
+[contenteditable].single-line * {
+    display:inline;
+    white-space:nowrap;
+}
+
 /*Custom lists*/
 
 ol.inline, ol.nav, ol.rating, ol.releases {
