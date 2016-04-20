@@ -13,7 +13,7 @@ html, body {
 html {
 	font-family: Signika, sans-serif;
     font-size: 12pt;
-	font-weight: 300;
+    font-weight: 300;
     text-rendering: optimizeLegibility;
     overflow-y: scroll;
     background: repeating-linear-gradient(
@@ -157,8 +157,6 @@ form input[type="submit"] {
 }
 
 [contenteditable].single-line {
-    white-space: nowrap;
-    width:200px;
     overflow: hidden;
 } 
 [contenteditable].single-line br {
@@ -167,7 +165,6 @@ form input[type="submit"] {
 }
 [contenteditable].single-line * {
     display:inline;
-    white-space:nowrap;
 }
 
 /*Custom lists*/
@@ -586,6 +583,10 @@ ol.references {
     display: inline-block;
 }
 
+.rating-description + .edit-sign {
+    width: 0;
+}
+
 .rating-description:not(:hover) + .edit-sign {
     visibility: hidden;
 }
@@ -603,8 +604,11 @@ ol.references {
     text-align: center;
 }
 
-.chart input[type=radio] {
+.chart label {
     margin-left: 0.75em;
+}
+
+.chart input[type=radio] {
     margin-right: 0.2em;
 }
 

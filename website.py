@@ -25,9 +25,7 @@ def model():
         
     return g.model
 
-@app.teardown_appcontext
-def close_model(exception):
-    model().close()
+app.teardown_appcontext(lambda exception: model().close())
 
 def init_db():
     return

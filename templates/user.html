@@ -47,9 +47,9 @@ var userDatasets = {{ json_dumps(user_datasets) | safe }};
 {% for n in range(8, 0, -1) %}
     <section><div>
         <header><h1>{{ n }}
-            {% if rating_description[n] %}
-            &ndash; &ldquo;<span class="{{ editable }} rating-description single-line"
-                                 data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
+            {% if rating_description[n] %} &ndash;
+            &ldquo;<span class="{{ editable }} rating-description single-line"
+                         data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
              {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
             {% endif %}
         </h1></header>
