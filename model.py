@@ -487,7 +487,7 @@ class Model(GeneralModel):
                          " where user_id=? and rating=?", user_id, rating)
         
     def get_user_rating_descriptions(self, user_id):
-        descriptions = defaultdict(lambda: None)
+        descriptions = {8: "Amazing", 7: "Excellent", 6: "Great", 5: "Very good", 4: "Good", 3: "Alright", 2: "One or two good parts", 1: "Nothing good"}
         descriptions.update({
             rating: description for rating, description in
             self.query("select rating, description from user_rating_descriptions"
