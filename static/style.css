@@ -368,10 +368,15 @@ ol:not(.small).rating {
     height: 0;
     z-index: 99;
     top: 6.85em;
+    transition: opacity 0.08s;
 }
 
 .small.releases.grid > li > .inset {
     top: 5.6rem;
+}
+
+.releases.grid > li:not(:hover) > .inset {
+    opacity: 0;
 }
 
 .releases.grid .cover {
@@ -408,17 +413,6 @@ ol:not(.small).rating {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.releases a img {
-    /*Chrome has some rendering issues*/
-    transition: /*-webkit-filter 0.1s,*/ -ff-filter 0.1s, filter 0.1s;
-}
-
-.releases a:hover img {
-    -webkit-filter: brightness(107%);
-    -ff-filter: brightness(110%);
-    filter: brightness(110%);
 }
 
 /*Actions and action lists*/
