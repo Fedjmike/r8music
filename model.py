@@ -478,8 +478,13 @@ class Model(GeneralModel):
                                  " where user_id=?", user_id, fallback=("Europe/London",))[0]
         
     def set_user_rating_description(self, user_id, rating, description):
-        self.execute("replace into user_rating_descriptions (user_id, rating, description)"
-                     " values (?, ?, ?)", user_id, rating, description)
+        if description:
+            self.execute("replace into user_rating_descriptions (user_id, rating, description)"
+                         " values (?, ?, ?)", user_id, rating, description)
+        
+        else:
+            self.execute("delete from user_rating_descriptions"
+                         " where user_id=? and rating=?", user_id, rating)
         
     def get_user_rating_descriptions(self, user_id):
         descriptions = defaultdict(lambda: None)

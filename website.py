@@ -3,6 +3,7 @@ from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
 from contextlib import closing
+from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType
 from mb_api_import import import_artist, MBID
@@ -374,6 +375,26 @@ def user_settings():
             model().set_user_timezone(request.user.id, timezone)
         
         return redirect(url_for("user_settings"))
+        
+@app.route("/rating-descriptions", methods=["GET", "POST"])
+@needs_auth
+def rating_descriptions():
+    try:
+        rating, description = (request.form[key] for key in ["rating", "description"])
+        
+        rating = int(rating)
+        description = BeautifulSoup(description).get_text().strip()
+        
+        if description == "":
+            description = None
+        
+        model().set_user_rating_description(request.user.id, rating, description)
+        
+        description = model().get_user_rating_descriptions(request.user.id)[rating]
+        return jsonify(error=0, description=description)
+    
+    except KeyError:
+        return jsonify(error=1), 400
         
 @app.route("/login", methods=["GET", "POST"])
 def login():

@@ -152,4 +152,18 @@ $(document).ready(function ($) {
         /*Trigger a change on the default checked radio to create a chart*/
         $("input[type=radio][name=chart-select]:checked").change();
     }
+    
+    $(".editable.rating-description")
+    .attr("contenteditable", "plaintext-only")
+    .blur(function (event) {
+        var description = event.target.innerHTML;
+        var rating = event.target.dataset.rating;
+        
+        $.post("/rating-descriptions", {rating: rating, description: description}, function (msg) {
+            if (msg.error)
+                return; //todo
+            
+            event.target.innerHTML = msg.description;
+        });
+    });
 });

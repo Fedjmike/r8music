@@ -40,10 +40,17 @@
 var userDatasets = {{ json_dumps(user_datasets) | safe }};
 </script>
 
+{% set editable = 'editable' if that_user.id == user.id else '' %}
+
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}
     <section><div>
-        <header><h1>{{ n }} {{ ('&ndash; &ldquo;' + rating_description[n] + '&rdquo;') | safe if rating_description[n] else ''}}</h1></header>
+        <header><h1>{{ n }}
+            {% if rating_description[n] %}
+            &ndash; &ldquo;<span class="{{ editable }} rating-description single-line"
+                                 data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
+            {% endif %}
+        </h1></header>
         {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
     </div></section>
 {% endfor %}
