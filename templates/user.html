@@ -8,7 +8,8 @@
 {% block content %}
 
 {% macro full_and_friendly_datetime(datetime) -%}
-    {% set datetime = datetime.to(user.timezone) %}
+    {% set timezone = user.timezone if user else "UTC" %}
+    {% set datetime = datetime.to(timezone) %}
     <time title="{{ full_datetime(datetime) }}">{{ friendly_datetime(datetime) }}</time>
 {%- endmacro %}
 
