@@ -154,7 +154,7 @@ $(document).ready(function ($) {
     }
     
     $(".editable.rating-description")
-    .attr("contenteditable", "plaintext-only")
+    .attr("contenteditable", "")
     .blur(function (event) {
         var description = event.target.innerHTML;
         var rating = event.target.dataset.rating;
