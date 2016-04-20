@@ -469,9 +469,9 @@ class Model(GeneralModel):
     def set_user_email(self, user_id, email):
         self.execute("update users set email=? where id=?", email, user_id)
         
-    def set_user_timezone(self, user_id, timezone="Europe/London"):
+    def set_user_timezone(self, user_id, timezone=None):
         self.execute("replace into user_timezones (user_id, timezone)"
-                     "values (?, ?)", user_id, timezone)
+                     "values (?, ?)", user_id, timezone if timezone else "Europe/London")
         
     def get_user_timezone(self, user_id):
         return self.query_unique("select timezone from user_timezones"
