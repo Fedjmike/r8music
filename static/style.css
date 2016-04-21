@@ -12,7 +12,6 @@ html, body {
 
 html {
 	font-family: Signika, sans-serif;
-    font-size: 12pt;
     font-weight: 300;
     text-rendering: optimizeLegibility;
     overflow-y: scroll;
@@ -200,7 +199,6 @@ ol.nav {
 
 ol.main.nav {
     display: inline-flex;
-    width: 25em;
     -webkit-filter: contrast(110%);
     filter: contrast(110%);
     border-bottom-left-radius: 0.4em;
@@ -431,20 +429,8 @@ ol.action > li {
 
 /*Albums*/
 
-.album {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.album-main {
-    /*Matches the navbar*/
-    width: 25em;
-}
-
 .album-cover {
 	margin-top: 2em;
-    margin-right: 1em;
 }
 
 .byline .author:after {
@@ -484,7 +470,6 @@ ol.tracks {
 
 .track-title {
     display: inline-block;
-    max-width: 21em;
 }
 
 .tracks time {
@@ -514,9 +499,12 @@ ol.tracks {
     border-top: 2px solid rgba(0,0,0, 0.03);
 }
 
-.album-cover,
+.album-cover {
+    margin-left: 1.5em;
+}
+
 .album-cover img {
-    width: 21em;
+    max-width: 100%;
 }
 
 .album-cover .next-albums {
@@ -527,7 +515,6 @@ ol.tracks {
 .next-albums > * {
     display: inline-block;
     padding: 0.25em 0;
-    max-width: 20em;
 }
 
 .next-albums .next {
@@ -722,7 +709,8 @@ input[type=submit] {
 /*Layout*/
 
 .page {
-    padding: 0 1.5em 1em;
+    padding: 0 0.75em 1em;
+    overflow: hidden;
 }
 
 ol.nav {
@@ -737,16 +725,78 @@ section {
     display: inline-block;
 }
 
-/*Computer*/
+/*Mobile*/
+@media only screen and (max-width: 600px) {
+    .tracks time {
+        margin-right: 0.3em;
+    }
+    
+    .album-main {
+        max-width: 25em;
+        margin: 0 auto;
+    }
+    
+    .album-cover {
+        max-width: 15em;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/*Full page*/
 @media only screen and (min-width: 600px) {
     .page {
 		margin: 0 auto;
-		width: 50em;
+		max-width: 50em;
+        padding: 0 1.5em 1em;
 	}
+
+	ol.main.nav,
+    .album-main {
+        width: 25em;
+    }
+    
+    .album {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .album-main {
+        flex-shrink: 0;
+    }
+    
+    .track-title {
+        max-width: 21em;
+    }
+
+    .album-cover {
+        width: 21em;
+        margin-right: 0.5em;
+    }
+    
+    .next-albums > * {
+        max-width: 20em;
+    }
 }
 
-/*Large screen*/
-@media only screen and (min-width: 1000px) and (min-height: 900px) {
+html {
+    font-size: 10.5pt;
+}
+
+@media (min-width: 775px) {
+    html {
+        font-size: 11pt;
+    }
+}
+
+@media (min-width: 850px) {
+    html {
+        font-size: 12pt;
+    }
+}
+
+@media (min-width: 1000px) and (min-height: 900px) {
     html {
         font-size: 13pt;
     }
