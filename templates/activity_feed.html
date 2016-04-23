@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, object_link, user_link %}
+{% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
 {% macro explain_action(action, same_user=False) -%}
     {% if same_user %}
@@ -20,7 +20,7 @@
     {% for action in actions %}
         <li>
             <span>{{ explain_action(action, same_user) }}</span>
-            <time class="de-emph" title="{{ full_datetime(action.creation) }}">{{ relative_datetime(action.creation) }}</time>
+            {{ event_datetime(action.creation) }}
         </li>
     {% endfor %}
     </ol>

@@ -4,6 +4,10 @@
     <time title="{{ full_datetime(datetime) }}">{{ friendly_datetime(datetime) }}</time>
 {%- endmacro %}
 
+{% macro event_datetime(datetime) -%}
+    <time class="de-emph" title="{{ full_datetime(datetime) }}">{{ relative_datetime(datetime) }}</time>
+{%- endmacro %}
+
 {% macro artist_link(artist) -%}
     <a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a>
 {%- endmacro %}
