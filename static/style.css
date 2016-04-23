@@ -201,8 +201,8 @@ ol.main.nav {
     display: inline-flex;
     -webkit-filter: brightness(107%);
     filter: brightness(107%);
-    border-bottom-left-radius: 0.4em;
-    border-bottom-right-radius: 0.4em;
+    border-bottom-left-radius: 0.2em;
+    border-bottom-right-radius: 0.2em;
     overflow: hidden;
 }
 
@@ -719,15 +719,16 @@ input[type=submit] {
 
 .page {
     padding: 0 0.75em 1em;
-    overflow: hidden;
 }
 
 ol.nav {
-    margin-bottom: 0.75em;
+    margin-bottom: 0.5em;
 }
 
 section {
-	margin-bottom: 3em;
+    padding-top: 0.25em !important;
+	margin-bottom: 3em !important;
+    border-radius: 0.1em;
 }
 
 .columns > * {
@@ -763,6 +764,10 @@ section {
 	ol.main.nav,
     .album-main {
         width: 25em;
+    }
+    
+    ol:not(.main).nav {
+        margin-bottom: 1.5em;
     }
     
     .album {

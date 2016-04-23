@@ -4,6 +4,7 @@
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
+<section class="content page">
     <div class="clearfix">
         {% set thumb, image = artist.get_image() %}
         {% if image %}
@@ -24,8 +25,12 @@
     
     {% set albums = artist.get_releases() | selectattr("release_type", "equalto", "Album") | list %}
     {% if albums %}
-        <header><h3>Albums</h3></header>
-        {{ release_grid(albums | sort(attribute="date"), user) }}
+</section>
+<section class="content page">
+    <header><h2>Albums</h2></header>
+    {{ release_grid(albums | sort(attribute="date"), user) }}
+</section>
+<section class="content page">
     {% endif %}
     
     {% set others = artist.get_releases() | rejectattr("release_type", "equalto", "Album") | list %}

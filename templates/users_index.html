@@ -4,11 +4,13 @@
 {% block title %}Users index {{ super() }}{% endblock %}
 
 {% block content %}
-<header><h1>Users</h1></header>
+<section class="page content">
+    <header><h1>Users</h1></header>
 
-<ol>
-{% for user in users %}
-    <li>{{ user_link(user) }}</li>
-{% endfor %}
-</ol>
+    <ol>
+    {% for user in users %}
+        <li>{{ user_link(user) }}</li>
+    {% endfor %}
+    </ol>
+</section>
 {% endblock %}

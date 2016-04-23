@@ -7,6 +7,8 @@
 {% set dont_display_login_register = True %}
 
 {% block content %}
-<header><h1>Login</h1></header>
-{{ login_form(True) }}
+<section class="page content">
+    <header><h1>Login</h1></header>
+    {{ login_form(True) }}
+</section>
 {% endblock %}

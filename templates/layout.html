@@ -66,44 +66,42 @@
     </style>
 </head>
 <body>
-	<div class="page content">
-        <div class="clearfix">
-            <ol class="main nav unselectable">
-                <li><a href="/" class="banner">r8music</a></li>
-                <li><a href={{ url_for("artists_index") }}>artists</a></li>
-                <li><a href="#">genres</a></li>
-                <li><a href="#">toplists</a></li>
-                <li><a href={{ url_for("users_index") }}>users</a></li>
-            </ol>
-            <ol class="nav right">
-            {%if not dont_display_search %}
-                {% from "forms.html" import small_search_form %}
-                <li>{{ small_search_form() }}</li>
-            {% endif %}
-            {% if session.user %}
-                <li>
-                    <a href={{ url_for("user_page", slug=session.user.name) }}>{{ session.user.name }}</a>
-                    <a id="user-more" href="">&#9662;</a>
-                </li>
-                <li><a id="logout" href={{ url_for("logout") }}>log out</a></li>
-                <div class="small popup"><div class="popup-content" id="user-popup">
-                    <a class="right" href={{ url_for("set_password") }}>change your password</a><br/>
-                    <a class="right" href={{ url_for("user_settings") }}>settings</a><br/>
-                    <a class="right" id="logout" href={{ url_for("logout") }}>log out</a><br/>
-                </div></div>
-            {% elif not dont_display_login_register %}
-                <li><a id="login" href={{ url_for("login") }}>sign in</a></li>
-                <li><a id="register" href={{ url_for("register") }}>register</a></li>
-                <div class="popup">
-                    {% from "forms.html" import login_form, register_form %}
-                    <div class="popup-content" id="login-popup">{{ login_form() }}</div>
-                    <div class="popup-content" id="register-popup">{{ register_form() }}</div>
-                </div>
-            {% endif %}
-            </ol>
-        </div>
-		{% block content %}{% endblock %}
+	<div class="page clearfix">
+        <ol class="main nav unselectable">
+            <li><a href="/" class="banner">r8music</a></li>
+            <li><a href={{ url_for("artists_index") }}>artists</a></li>
+            <li><a href="#">genres</a></li>
+            <li><a href="#">toplists</a></li>
+            <li><a href={{ url_for("users_index") }}>users</a></li>
+        </ol>
+        <ol class="nav right">
+        {%if not dont_display_search %}
+            {% from "forms.html" import small_search_form %}
+            <li>{{ small_search_form() }}</li>
+        {% endif %}
+        {% if session.user %}
+            <li>
+                <a href={{ url_for("user_page", slug=session.user.name) }}>{{ session.user.name }}</a>
+                <a id="user-more" href="">&#9662;</a>
+            </li>
+            <li><a id="logout" href={{ url_for("logout") }}>log out</a></li>
+            <div class="small popup"><div class="popup-content" id="user-popup">
+                <a class="right" href={{ url_for("set_password") }}>change your password</a><br/>
+                <a class="right" href={{ url_for("user_settings") }}>settings</a><br/>
+                <a class="right" id="logout" href={{ url_for("logout") }}>log out</a><br/>
+            </div></div>
+        {% elif not dont_display_login_register %}
+            <li><a id="login" href={{ url_for("login") }}>sign in</a></li>
+            <li><a id="register" href={{ url_for("register") }}>register</a></li>
+            <div class="popup">
+                {% from "forms.html" import login_form, register_form %}
+                <div class="popup-content" id="login-popup">{{ login_form() }}</div>
+                <div class="popup-content" id="register-popup">{{ register_form() }}</div>
+            </div>
+        {% endif %}
+        </ol>
 	</div>
+    {% block content %}{% endblock %}
     
 <script type="text/javascript">
 var sc_project=10828447; 

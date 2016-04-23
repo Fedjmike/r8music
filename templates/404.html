@@ -3,9 +3,11 @@
 {% block title %}404 - {{ what.capitalize() if what else 'Page' }} not found {{ super() }}{% endblock %}
 
 {% block content %}
-<header>
-    <h1>{{ what.capitalize() if what else 'Page' }} not found</h1>
-    <h3>r8music.com{{ request.path }}</h3>
-</header>
-<p>:(</p>
+<section class="page content">
+    <header>
+        <h1>{{ what.capitalize() if what else 'Page' }} not found</h1>
+        <h3>r8music.com{{ request.path }}</h3>
+    </header>
+    <p>:(</p>
+</section>
 {% endblock %}

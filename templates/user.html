@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<section class="clearfix">
+<section class="clearfix page content">
     <div class="chart">
         <canvas id="user-chart" width="400" height="200"></canvas>
         <form>
@@ -57,7 +57,7 @@ var userDatasets = {{ json_dumps(user_datasets) | safe }};
 
 <div class="grids-list">
 {% for n in range(8, 0, -1) %}
-    <section><div>
+    <section class="page content"><div>
         <header><h1>{{ n }}
             {% if rating_description[n] %} &ndash;
             &ldquo;<span class="{{ editable }} rating-description single-line"

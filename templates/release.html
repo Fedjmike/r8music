@@ -7,7 +7,7 @@
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
 {% block content %}
-<section class="album">
+<section class="album page content">
 	<div class="album-main">
 		<header>
             <h1>
@@ -83,7 +83,7 @@
 </section>
 
 {% for artist in release.get_artists() %}
-<section>
+<section class="page content">
 	<header>
         <h3 id="more-from"><em>More from</em></h3>
         <h1>{{ artist.name }}</h1>
