@@ -1,6 +1,5 @@
 from datetime import datetime
 from collections import defaultdict
-import json
 
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
@@ -87,6 +86,8 @@ def url_for_user(user):
     return url_for("user_page", slug=user.name)
     
 #
+
+import json
 
 template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets, url_for_user]
 

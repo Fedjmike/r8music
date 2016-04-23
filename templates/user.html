@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "macros.html" import full_and_friendly_datetime %}
 {% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
@@ -6,12 +7,6 @@
 {% set chart_js = True %}
 
 {% block content %}
-
-{% macro full_and_friendly_datetime(datetime) -%}
-    {% set timezone = user.timezone if user else "UTC" %}
-    {% set datetime = datetime.to(timezone) %}
-    <time title="{{ full_datetime(datetime) }}">{{ friendly_datetime(datetime) }}</time>
-{%- endmacro %}
 
 <section class="clearfix">
     <div class="chart">

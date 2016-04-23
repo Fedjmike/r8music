@@ -1,3 +1,9 @@
+{% macro full_and_friendly_datetime(datetime) -%}
+    {% set timezone = request.user.timezone if request.user else "UTC" %}
+    {% set datetime = datetime.to(timezone) %}
+    <time title="{{ full_datetime(datetime) }}">{{ friendly_datetime(datetime) }}</time>
+{%- endmacro %}
+
 {% macro artist_link(artist) -%}
     <a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a>
 {%- endmacro %}

@@ -199,8 +199,8 @@ ol.nav {
 
 ol.main.nav {
     display: inline-flex;
-    -webkit-filter: contrast(110%);
-    filter: contrast(110%);
+    -webkit-filter: brightness(107%);
+    filter: brightness(107%);
     border-bottom-left-radius: 0.4em;
     border-bottom-right-radius: 0.4em;
     overflow: hidden;
@@ -214,7 +214,7 @@ ol.main.nav {
 .main.nav > li > a {
     color: white;
     opacity: 0.6;
-    text-shadow: 1px 1px 3px rgba(0,0,0, 0.7);
+    text-shadow: 1px 1px 3px rgba(0,0,0, 1);
     transition: opacity 0.1s;
 }
 
