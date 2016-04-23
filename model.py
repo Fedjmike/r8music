@@ -164,6 +164,7 @@ class User(ModelObject):
         self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
+        self.get_activity_feed = lambda: model.get_activity_feed(self.id)
 
 class Model(GeneralModel):
     #IDs
@@ -309,15 +310,15 @@ class Model(GeneralModel):
         
     #Actions
     
-    Action = namedtuple("Action", ["id", "user_id", "object_id", "type", "creation"])
+    Action = namedtuple("Action", ["id", "user", "object", "type", "creation"])
     RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
     def add_action(self, user_id, object_id, type):
         return self.insert("insert into actions (user_id, object_id, type, creation)"
                            " values (?, ?, ?, ?)", user_id, object_id, type.value, now_isoformat())
         
-    def _make_action(self, user_id, action_id, object_id, type_id, creation):
-        return self.Action(action_id, user_id, object_id, ActionType(type_id), arrow.get(creation))
+    def _make_action(self, user, action_id, object, type_id, creation):
+        return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
     
     def set_rating(self, user_id, object_id, rating=None):
         action_id = self.add_action(user_id, object_id, ActionType["rate" if rating else "unrate"])
@@ -330,6 +331,35 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
         
+    #todo auth
+    def get_actions_by_user(self, user_id):
+        #generator, limit
+        return [
+            self._make_action(user_id, *row) for row in
+            self.query("select id, object_id, type, creation from actions"
+                       " where user_id=? order by creation desc", user_id)
+        ]
+        
+    def get_activity_feed(self, user_id, limit=10, offset=0):
+        return [
+            #todo not just releases
+            self._make_action(dict(id=user_id, name=user_name), id,
+                              dict(id=object_id, title=object_title,
+                                   url=url_for("release_page", artist_slug=artist_slug, release_slug=object_slug),
+                                   artists=[dict(name=artist_name, slug=artist_slug)]),
+                              type, creation)
+            for id, type, creation, user_id, user_name,
+                object_id, object_title, object_slug, artist_name, artist_slug in
+            self.query("select a.id, a.type, a.creation, u.id, u.name,"
+                       " r.id, r.title, r.slug, artists.name, artists.slug from"
+                       " followerships join actions a using (user_id)"
+                       " join users u on user_id = u.id"
+                       " join releases r on object_id = r.id"
+                       " join authorships on object_id = release_id"
+                       " join artists on artist_id = artists.id"
+                       " where follower=? group by object_id order by a.creation desc limit ? offset ?", user_id, limit, offset)
+       ]
+       
     def get_active_actions_by_user(self, user_id, object_id):
         latest_by_type = defaultdict(lambda: "0") #A date older than all others
         

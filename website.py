@@ -83,10 +83,6 @@ def after_request(response):
 def page_not_found(e=None, what=None):
     return render_template("404.html", what=what), 404
 
-@app.route("/")
-def homepage():
-    return render_template("layout.html")
-
 @app.route("/artists")
 def artists_index():
     artists = model().query("select * from artists")
@@ -243,7 +239,12 @@ def add_artist_search_results(query=None):
     query = decode_query_str(query)
     artists = search_artists(query)
     return render_template("add_artist_search_results.html", artists=artists, query=query)
-    
+
+@app.route("/")
+@with_user
+def homepage():
+    return render_template("activity_feed.html")
+
 @app.route("/user/<slug>", methods=["GET", "POST"])
 @with_user
 def user_page(slug):

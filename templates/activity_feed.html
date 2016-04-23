@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% from "macros.html" import artist_link, object_link, user_link %}
+
+{% macro explain_action(action, same_user=False) -%}
+    {% if same_user %}
+        {{ action.type.simple_past.capitalize() }}
+    {% else %}
+        {{ user_link(action.user) }}
+        {{ action.type.simple_past }}
+    {% endif %}
+    {% for artist in action.object.artists %}
+        <span class="author">{{ artist_link(artist) }}</span>
+    {% endfor %}
+    &ndash;
+    {{ object_link(action.object) }}
+{%- endmacro %}
+
+{% macro action_list(actions, same_user=False) -%}
+    <ol class="user-actions">
+    {% for action in actions %}
+        <li>
+            <span>{{ explain_action(action, same_user) }}</span>
+            <time class="de-emph" title="{{ full_datetime(action.creation) }}">{{ relative_datetime(action.creation) }}</time>
+        </li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{% block title %}r8music{% endblock %}
+
+{% block content %}
+
+<header><h1>Recent activity</h1></header>
+
+{% if request.user %}
+    {{ action_list(request.user.get_activity_feed()) }}
+{% endif %}
+
+{% endblock %}
