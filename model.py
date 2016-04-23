@@ -85,7 +85,7 @@ class ActionType(Enum):
     
     @property
     def simple_past(self):
-        return ["rated", "unrated", "listened to", "unlistened", "list", "unlist", "share", "unshare"][self.value-1]
+        return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared"][self.value-1]
 
 class ModelObject:
     def init_from_row(self, row, columns):

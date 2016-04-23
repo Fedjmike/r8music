@@ -168,7 +168,7 @@ form input[type="submit"] {
 
 /*Custom lists*/
 
-ol.inline, ol.nav, ol.rating, ol.releases {
+ol.inline, ol.nav, ol.rating, ol.releases, ol.user-actions {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -422,6 +422,16 @@ ol.action > li {
     vertical-align: middle;
 }
 
+/*Author "lists"*/
+
+.author:not(:last-of-type) {
+    display: block;
+}
+
+.author:not(:last-of-type):after {
+    content: ' & ';
+}
+
 /*Albums*/
 
 .album-cover {
@@ -430,14 +440,6 @@ ol.action > li {
 
 .byline .author:after {
     content: ', ';
-}
-
-.author:not(:last-of-type) {
-    display: block;
-}
-
-.author:not(:last-of-type):after {
-    content: ' & ';
 }
 
 ol.tracks {
