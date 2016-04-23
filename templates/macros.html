@@ -1,0 +1,7 @@
+{% macro artist_link(artist) -%}
+    <a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a>
+{%- endmacro %}
+
+{% macro user_link(user) -%}
+    <a href={{ url_for("user_page", slug=user.name) }}>{{ user.name }}</a>
+{%- endmacro %}

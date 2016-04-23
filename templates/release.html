@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "macros.html" import artist_link %}
 {% from "release_list.html" import release_list, rating_widget %}
 
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
@@ -18,7 +19,7 @@
             </h1>
 			<h2 class="byline">
             {% for artist in release.get_artists() %}
-                <span class="author"><a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a></span>
+                <span class="author">{{ artist_link(artist) }}</span>
             {% endfor %}
                 <time>{{ release.date[:4] }}</time>
             </h2>
@@ -66,7 +67,7 @@
             {% for artist, previous, next in release.get_next_releaseses() %}
                 {% if previous or next %}
                     {% if loop.index != 1 %}
-                        <div>By <a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a>:</div>
+                        <div>By {{ artist_link(artist) }}:</div>
                     {% endif %}
                     {% if previous %}
                         <a href={{ previous.url }} class="previous">&larr; {{ previous.title }} [{{ previous.date[:4] }}]</a>

@@ -17,6 +17,7 @@
 {%- endmacro %}
 
 {% macro release_grid(releases, user=None, class=None, artist_not_date=False) -%}
+    {% from "macros.html" import artist_link %}
     <ol class="releases grid {{ class if class else '' }}">
     {% set ratings = user.get_ratings() if user else {} %}
     {% for release in releases %}
@@ -34,7 +35,7 @@
             </a>
                     <span>
                     {% for artist in release.get_artists() %}
-                        <span class="title author"><a href={{ url_for("artist_page", slug=artist.slug) }}>{{ artist.name }}</a></span>
+                        <span class="title author">{{ artist_link(artist) }}</span>
                     {% endfor %}
                     </span>
                 {% endif %}

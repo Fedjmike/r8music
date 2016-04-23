@@ -35,9 +35,9 @@
         <p>
         {% if following_since %}
             Started following {{ full_and_friendly_datetime(following_since) }}<br/>
-            <a href={{ url_for("user_page", slug=that_user.name) + "?action=unfollow" }}>Unfollow</a>
+            <a href={{ url_for_user(that_user) + "?action=unfollow" }}>Unfollow</a>
         {% else %}
-            <a href={{ url_for("user_page", slug=that_user.name) + "?action=follow" }}>Follow</a>
+            <a href={{ url_for_user(that_user) + "?action=follow" }}>Follow</a>
         {% endif %}
         </p>
     {% endif %}

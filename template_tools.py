@@ -81,7 +81,14 @@ def get_user_datasets(ratings):
     
 #
 
-template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets]
+from flask import url_for
+
+def url_for_user(user):
+    return url_for("user_page", slug=user.name)
+    
+#
+
+template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets, url_for_user]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)
