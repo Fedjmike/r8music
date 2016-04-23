@@ -602,6 +602,12 @@ ol.references {
     margin-right: 0.2em;
 }
 
+/*Activity feed*/
+
+.user-actions .author {
+    display: inline;
+}
+
 /*Search*/
 
 .search {

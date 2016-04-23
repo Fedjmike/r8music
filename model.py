@@ -342,24 +342,35 @@ class Model(GeneralModel):
         ]
         
     def get_activity_feed(self, user_id, limit=10, offset=0):
-        return [
-            #todo not just releases
-            self._make_action(dict(id=user_id, name=user_name), id,
-                              dict(id=object_id, title=object_title,
-                                   url=url_for("release_page", artist_slug=artist_slug, release_slug=object_slug),
-                                   artists=[dict(name=artist_name, slug=artist_slug)]),
-                              type, creation)
-            for id, type, creation, user_id, user_name,
-                object_id, object_title, object_slug, artist_name, artist_slug in
-            self.query("select a.id, a.type, a.creation, u.id, u.name,"
-                       " r.id, r.title, r.slug, artists.name, artists.slug from"
-                       " followerships join actions a using (user_id)"
-                       " join users u on user_id = u.id"
-                       " join releases r on object_id = r.id"
-                       " join authorships on object_id = release_id"
-                       " join artists on artist_id = artists.id"
-                       " where follower=? group by object_id order by a.creation desc limit ? offset ?", user_id, limit, offset)
-       ]
+        #todo not just releases
+        rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
+                          " r.id, r.title, r.slug, artists.name, artists.slug from"
+                          " followerships join actions a using (user_id)"
+                          " join users u on user_id = u.id"
+                          " join releases r on object_id = r.id"
+                          " join authorships on object_id = release_id"
+                          " join artists on artist_id = artists.id"
+                          " where follower=? order by a.creation desc"
+                          " limit ? offset ?", user_id, limit, offset)
+        
+        object_id = lambda row: row[5]
+        artist_name = lambda row: row[8]
+        artist_slug = lambda row: row[9]
+        
+        for object_id, rows in groupby(rows, object_id):
+            rows = list(rows) #groupby uses generators
+            artists = [dict(name=artist_name(row), slug=artist_slug(row)) for row in rows]
+            
+            (id, type, creation, user_id, user_name,
+             object_id, object_title, object_slug, _, _), *_ = rows
+            
+            release_url = url_for("release_page", artist_slug=artists[0]["slug"], release_slug=object_slug)
+            
+            yield self._make_action(
+                dict(id=user_id, name=user_name), id,
+                dict(id=object_id, title=object_title, artists=artists, url=release_url),
+                type, creation
+            )
        
     def get_active_actions_by_user(self, user_id, object_id):
         latest_by_type = defaultdict(lambda: "0") #A date older than all others
