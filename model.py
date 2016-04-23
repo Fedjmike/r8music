@@ -359,7 +359,9 @@ class Model(GeneralModel):
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
-            artists = [dict(name=artist_name(row), slug=artist_slug(row)) for row in rows]
+            artists = (dict(name=artist_name(row), slug=artist_slug(row)) for row in rows)
+            #Remove duplicates
+            artists = [a for a, _ in groupby(artists)]
             
             (id, type, creation, user_id, user_name,
              object_id, object_title, object_slug, _, _), *_ = rows
