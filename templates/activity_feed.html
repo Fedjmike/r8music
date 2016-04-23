@@ -29,11 +29,10 @@
 {% block title %}r8music{% endblock %}
 
 {% block content %}
-<section class="page content">
-    <header><h1>Recent activity</h1></header>
-    
     {% if request.user %}
-        {{ action_list(request.user.get_activity_feed()) }}
+        <section class="page content">
+            <header><h1>Recent activity</h1></header>
+            {{ action_list(request.user.get_activity_feed()) }}
+        </section>
     {% endif %}
-</section>
 {% endblock %}
