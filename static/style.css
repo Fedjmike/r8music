@@ -363,15 +363,10 @@ ol:not(.small).rating {
     height: 0;
     z-index: 99;
     top: 6.85em;
-    transition: opacity 0.08s;
 }
 
 .small.releases.grid > li > .inset {
     top: 5.6rem;
-}
-
-.releases.grid > li:not(:hover) > .inset {
-    opacity: 0;
 }
 
 .releases.grid .cover {
@@ -568,6 +563,14 @@ ol.references {
 
 .grids-list > * > div {
     display: inline-block;
+}
+    
+.grids-list li > .inset {
+    transition: opacity 0.08s;
+}
+
+.grids-list li:not(:hover) > .inset {
+    opacity: 0;
 }
 
 .rating-description + .edit-sign {
