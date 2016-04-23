@@ -127,6 +127,20 @@ create table user_rating_descriptions (
 
 create index user_rating_description_index on user_rating_descriptions(user_id, rating);
 
+-- Followers
+
+drop table if exists followerships;
+create table followerships (
+    follower integer not null,
+    user_id integer not null,
+    creation integer not null, -- Seconds since Unix epoch
+    primary key (follower, user_id),
+    foreign key (follower) references users(id),
+    foreign key (user_id) references users(id)
+);
+
+create index followership_index on followerships(follower, user_id, creation);
+
 -- Actions
 
 drop table if exists actions;

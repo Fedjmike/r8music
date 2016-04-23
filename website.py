@@ -1,4 +1,4 @@
-import os, time, requests, multiprocessing.pool
+import os, time, requests, multiprocessing.pool, sqlite3
 from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
@@ -244,15 +244,37 @@ def add_artist_search_results(query=None):
     artists = search_artists(query)
     return render_template("add_artist_search_results.html", artists=artists, query=query)
     
-@app.route("/user/<slug>")
+@app.route("/user/<slug>", methods=["GET", "POST"])
 @with_user
 def user_page(slug):
     try:
         that_user = model().get_user(slug)
-        return render_template("user.html", that_user=that_user, user=request.user)
         
     except NotFound:
-        return page_not_found(what="user")
+        return      (jsonify(error=1), 404) if request.method == "POST" \
+               else page_not_found(what="user")
+    
+    if request.values:
+        try:
+            action = {
+                "follow": model().follow,
+                "unfollow": model().unfollow
+            }[request.values["action"]]
+            
+            action(request.user.id, that_user.id)
+        
+        except (KeyError, sqlite3.Error):
+            return jsonify(error=1), 400
+    
+    if request.method == "POST":
+        return jsonify(error=0)
+        
+    elif request.values:
+        #Redirect so that the user doesn't stay on the action URL
+        return redirect(url_for("user_page", slug=slug))
+        
+    else:
+        return render_template("user.html", that_user=that_user, user=request.user)
 
 def failed_recaptcha(recaptcha_response, remote_addr):
     response = requests.post(

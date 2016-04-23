@@ -163,6 +163,7 @@ class User(ModelObject):
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
         self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
+        self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
 
 class Model(GeneralModel):
     #IDs
@@ -494,6 +495,20 @@ class Model(GeneralModel):
                        " where user_id=?", user_id)
         })
         return descriptions
+        
+    def follow(self, follower_id, user_id):
+        creation = arrow.utcnow().timestamp
+        self.execute("insert into followerships (follower, user_id, creation)"
+                     " values (?, ?, ?)", follower_id, user_id, creation)
+                     
+    def unfollow(self, follower_id, user_id):
+        self.execute("delete from followerships where follower=? and user_id=?",
+                     follower_id, user_id)
+        
+    def get_following_since(self, follower_id, user_id):
+        rows = self.query("select creation from followerships"
+                          " where follower=? and user_id=?", follower_id, user_id)
+        return arrow.get(rows[0]["creation"]) if rows else None
         
     #Search
     
