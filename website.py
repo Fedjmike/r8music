@@ -157,15 +157,25 @@ def needs_auth(view):
     
     else:
         return view()
+
+def from_ajax():
+    return request.method == "POST"
+
+@decorator_with_args
+def handle_not_found(f, what=None):
+    """Not to be used with pages to which a form POSTs"""
+    try:
+        return f()
+    
+    except NotFound:
+        return      (jsonify(error=1), 404) if from_ajax() \
+               else page_not_found(what=what)
     
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
+@handle_not_found(what="release")
 @with_user
 def release_page(artist_slug, release_slug):
-    try:
-        release = model().get_release(artist_slug, release_slug)
-        
-    except NotFound:
-        return page_not_found(what="release")
+    release = model().get_release(artist_slug, release_slug)
 
     if request.method == "GET":
         return render_template("release.html", release=release, user=request.user)
@@ -203,14 +213,11 @@ def release_post(release_id):
         return jsonify(error=0)
 
 #Routing is done later because /<slug>/ would override other routes
+@handle_not_found()
 @with_user
 def artist_page(slug):
-    try:
-        artist = model().get_artist(slug)
-        return render_template("artist.html", artist=artist, user=request.user)
-        
-    except NotFound:
-        return page_not_found()
+    artist = model().get_artist(slug)
+    return render_template("artist.html", artist=artist, user=request.user)
 
 @app.route("/artists/add", methods=["GET", "POST"])
 @needs_auth
@@ -246,14 +253,10 @@ def homepage():
     return render_template("activity_feed.html")
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
+@handle_not_found(what="user")
 @with_user
 def user_page(slug):
-    try:
-        that_user = model().get_user(slug)
-        
-    except NotFound:
-        return      (jsonify(error=1), 404) if request.method == "POST" \
-               else page_not_found(what="user")
+    that_user = model().get_user(slug)
     
     if request.values:
         try:
@@ -267,11 +270,11 @@ def user_page(slug):
         except (KeyError, sqlite3.Error):
             return jsonify(error=1), 400
     
-    if request.method == "POST":
+    if from_ajax():
         return jsonify(error=0)
         
     elif request.values:
-        #Redirect so that the user doesn't stay on the action URL
+        #Redirect so that the user doesn't stay on the action URL / form submission
         return redirect(url_for("user_page", slug=slug))
         
     else:
