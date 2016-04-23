@@ -163,6 +163,7 @@ class User(ModelObject):
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
         self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
+        self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         self.get_activity_feed = lambda: model.get_activity_feed(self.id)
 
@@ -534,6 +535,13 @@ class Model(GeneralModel):
     def unfollow(self, follower_id, user_id):
         self.execute("delete from followerships where follower=? and user_id=?",
                      follower_id, user_id)
+        
+    def get_followers(self, user_id):
+        return [
+            dict(name=name, since=arrow.get(creation)) for name, creation in
+            self.query("select u.name, f.creation from users u join followerships f on u.id = follower"
+                       " where user_id=?", user_id)
+        ]
         
     def get_following_since(self, follower_id, user_id):
         rows = self.query("select creation from followerships"

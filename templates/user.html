@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import full_and_friendly_datetime %}
+{% from "macros.html" import full_and_friendly_datetime, event_datetime %}
 {% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
@@ -21,8 +21,13 @@
 
     <p>
         {% set rated_no = that_user.get_ratings() | length %}
+        {% set followers = that_user.get_followers() %}
+        
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
-        Rated {{ n_things(rated_no, "release") }}
+        Rated {{ n_things(rated_no, "release") }}<br/>
+
+        {% set followers = that_user.get_followers() %}
+        {{ n_things(followers | length, "follower") }}
     </p>
     
     {% if user and that_user.id != user.id %}
