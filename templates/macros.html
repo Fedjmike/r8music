@@ -5,6 +5,8 @@
 {%- endmacro %}
 
 {% macro event_datetime(datetime) -%}
+    {% set timezone = request.user.timezone if request.user else "UTC" %}
+    {% set datetime = datetime.to(timezone) %}
     <time class="de-emph" title="{{ full_datetime(datetime) }}">{{ relative_datetime(datetime) }}</time>
 {%- endmacro %}
 
