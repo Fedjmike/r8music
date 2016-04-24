@@ -700,11 +700,11 @@ if __name__ == "__main__":
     import sys
     
     with Model() as model:
-        program, command, *sys.argv = sys.argv
+        program, command, *args = sys.argv
         
         if command == "remove":
             try:
-                noun, *args = sys.argv
+                noun, *args = args
                 action =      model.remove_artist if noun == "artist" \
                          else model.remove_user if noun == "user" \
                          else None
