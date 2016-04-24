@@ -105,7 +105,7 @@ create table users (
     pw_hash text not null,
     email text,
     fullname text,
-    creation text not null -- ISO 8601 date
+    creation integer not null -- Unix timestamp
 );
 
 create index user_name_index on users(name);
@@ -133,7 +133,7 @@ drop table if exists followerships;
 create table followerships (
     follower integer not null,
     user_id integer not null,
-    creation integer not null, -- Seconds since Unix epoch
+    creation integer not null, -- Unix timestamp
     primary key (follower, user_id),
     foreign key (follower) references users(id),
     foreign key (user_id) references users(id)
@@ -149,7 +149,7 @@ create table actions (
     user_id integer not null,
     object_id integer not null,
     type integer not null, -- model.ActionType enum
-    creation text not null, -- ISO 8601 date
+    creation integer not null, -- Unix timestamp
     foreign key (user_id) references users(id),
     foreign key (object_id) references objects(id)
 );

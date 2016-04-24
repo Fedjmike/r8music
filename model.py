@@ -4,7 +4,6 @@ import sqlite3, arrow
 from itertools import count, groupby
 from functools import lru_cache
 from operator import itemgetter
-from datetime import datetime
 from collections import namedtuple, defaultdict
 from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
@@ -20,9 +19,6 @@ class NotFound(Exception):
 class AlreadyExists(Exception):
     pass
     
-def now_isoformat():
-    return datetime.now().isoformat()
-
 def connect_db():
     return sqlite3.connect("sample.db")
 
@@ -167,7 +163,7 @@ class Release(ModelObject):
 class User(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "email", "creation"])
-        self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
+        self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
         
         def get_active_actions(object_id):
@@ -345,7 +341,7 @@ class Model(GeneralModel):
         
     def add_action(self, user_id, object_id, type):
         return self.insert("insert into actions (user_id, object_id, type, creation)"
-                           " values (?, ?, ?, ?)", user_id, object_id, type.value, now_isoformat())
+                           " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
         
     def _make_action(self, user, action_id, object, type_id, creation):
         return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
@@ -484,7 +480,7 @@ class Model(GeneralModel):
         if self.query("select id from users where name=?", name):
             raise AlreadyExists()
             
-        creation = now_isoformat()
+        creation = arrow.utcnow().timestamp
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
                               name, generate_password_hash(password), email, fullname, creation)
         
