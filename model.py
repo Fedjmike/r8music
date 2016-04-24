@@ -11,6 +11,7 @@ from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
 from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls
+from template_tools import url_for_release
 from chromatography import get_palette
 
 class NotFound(Exception):
@@ -120,13 +121,7 @@ class Artist(ModelObject):
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
         self.init_from_row(row, ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url"])
-        
-        try:
-            self.url = url_for("release_page", release_slug=self.slug, artist_slug=primary_artist_slug)
-            
-        #Outside Flask app context
-        except RuntimeError:
-            self.url = None
+        self.url = url_for_release(self.slug, primary_artist_slug)
         
         def get_artists():
             artists = model.get_release_artists(self.id)
@@ -194,6 +189,16 @@ class User(ModelObject):
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         self.get_activity_feed = lambda: model.get_activity_feed(self.id)
+        
+class Action(ModelObject):
+    def __init__(self, id, type, creation, user_id, user_name,
+                 object_id, object_title, object_slug, artists):
+        self.id = id
+        self.type = type
+        self.creation = arrow.get(creation)
+        self.user = dict(id=user_id, name=user_name)
+        self.object = dict(id=object_id, title=object_title, artists=artists,
+                           url=url_for_release(artists[0]["slug"], object_slug))
 
 class Model(GeneralModel):
     #IDs
@@ -384,17 +389,9 @@ class Model(GeneralModel):
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
                        for row in uniq(rows, key=artist_slug)]
             
-            (id, type, creation, user_id, user_name,
-             object_id, object_title, object_slug, _, _), *_ = rows
-            
-            release_url = url_for("release_page", artist_slug=artists[0]["slug"], release_slug=object_slug)
-            
-            yield self._make_action(
-                dict(id=user_id, name=user_name), id,
-                dict(id=object_id, title=object_title, artists=artists, url=release_url),
-                type, creation
-            )
-       
+            row = list(rows[0])[:8] #Excluding artist columns
+            yield Action(*row, artists=artists)
+        
     def get_latest_actions_by_type(self, user_id, object_id):
         return {
             type: creation for type, creation in

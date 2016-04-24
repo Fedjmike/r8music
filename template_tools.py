@@ -85,6 +85,14 @@ from flask import url_for
 def url_for_user(user):
     return url_for("user_page", slug=user.name)
     
+def url_for_release(artist, release):
+    try:
+        return url_for("release_page", artist_slug=artist, release_slug=release)
+        
+    #Outside Flask app context
+    except RuntimeError:
+        return None
+    
 #
 
 import json
