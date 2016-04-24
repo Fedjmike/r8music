@@ -3,6 +3,16 @@ from unidecode import unidecode
 
 def flatten(lists):
     return [item for list in lists for item in list]
+    
+def uniq(iter, key=lambda x: x):
+    seen = set()
+    
+    for item in iter:
+        item_key = key(item)
+        
+        if item_key not in seen:
+            seen.add(item_key)
+            yield item
 
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):

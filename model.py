@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, chop_suffix, slugify, get_wikipedia_urls
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls
 from chromatography import get_palette
 
 class NotFound(Exception):
@@ -359,9 +359,8 @@ class Model(GeneralModel):
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
-            artists = (dict(name=artist_name(row), slug=artist_slug(row)) for row in rows)
-            #Remove duplicates
-            artists = [a for a, _ in groupby(artists)]
+            artists = [dict(name=artist_name(row), slug=artist_slug(row))
+                       for row in uniq(rows, key=artist_slug)]
             
             (id, type, creation, user_id, user_name,
              object_id, object_title, object_slug, _, _), *_ = rows
