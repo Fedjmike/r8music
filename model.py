@@ -3,6 +3,7 @@
 import sqlite3, arrow
 from itertools import count, groupby
 from functools import lru_cache
+from operator import itemgetter
 from datetime import datetime
 from collections import namedtuple, defaultdict
 from enum import Enum
@@ -174,7 +175,7 @@ class User(ModelObject):
         self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
         self.timezone = model.get_user_timezone(self.id)
         
-        self.get_ratings = lambda: model.get_user_ratings(self.id)
+        self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
         self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
@@ -224,8 +225,7 @@ class Model(GeneralModel):
     #Handle selection/renaming for joins
     _release_columns = "release_id, title, slug, date, type, full_art_url, thumb_art_url"
     _release_columns_rename = "releases.id as release_id, title, slug, date, releases.type, full_art_url, thumb_art_url"
-    #todo rename the actual columns
-
+    
     def add_release(self, title, date, type, full_art_url, thumb_art_url, mbid):
         slug = generate_slug(title, self, "releases")
         
@@ -243,9 +243,7 @@ class Model(GeneralModel):
                     release_id, artist_id)
     
     def get_releases_by_artist(self, artist):
-        """artist is either the id or Artist object"""
-        
-        artist = artist if isinstance(artist, Artist) else self.get_artist(artist)
+        """artist is the Artist object"""
         
         return [
             Release(self, row, artist.id, artist.slug) for row in
@@ -367,9 +365,7 @@ class Model(GeneralModel):
                           " where follower=? order by a.creation desc"
                           " limit ? offset ?", user_id, limit, offset)
         
-        object_id = lambda row: row[5]
-        artist_name = lambda row: row[8]
-        artist_slug = lambda row: row[9]
+        object_id, artist_name, artist_slug = (itemgetter(n) for n in [5, 8, 9])
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
@@ -419,7 +415,7 @@ class Model(GeneralModel):
             if type == ActionType.rate.value
         ]
         
-    def get_user_ratings(self, user_id):
+    def get_ratings_by_user(self, user_id):
         rows = \
             self.query("select object_id, type, rating from"
                        " (select id, object_id, type from actions"
