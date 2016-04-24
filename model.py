@@ -175,9 +175,21 @@ class User(ModelObject):
         self.creation = arrow.get(self.creation).replace(hours=+4) #Was stored in EDT, shift to UTC
         self.timezone = model.get_user_timezone(self.id)
         
+        def get_active_actions(object_id):
+            latest_by_type = defaultdict(lambda: "0") #A date older than all others
+            latest_by_type.update(model.get_latest_actions_by_type(self.id, object_id))
+            
+            #Pairs of actions and those that undo them
+            action_pairs = [(name, ActionType[name].value, ActionType["un" + name].value)
+                            for name in ["list", "listen", "share"]]
+            
+            #Actions done more recently than undone
+            return [name for name, action, antiaction in action_pairs
+                    if latest_by_type[action] > latest_by_type[antiaction]]
+        
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_actioned = lambda: model.get_releases_actioned_by_user(self.id)
-        self.get_active_actions = lambda object_id: model.get_active_actions_by_user(self.id, object_id)
+        self.get_active_actions = get_active_actions
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
@@ -383,26 +395,14 @@ class Model(GeneralModel):
                 type, creation
             )
        
-    def get_active_actions_by_user(self, user_id, object_id):
-        latest_by_type = defaultdict(lambda: "0") #A date older than all others
-        
-        #Oldest of each action type, by that user on that object
-        latest_by_type.update({
+    def get_latest_actions_by_type(self, user_id, object_id):
+        return {
             type: creation for type, creation in
             self.query("select * from"
                        " (select type, creation from actions"
                        "  where user_id=? and object_id=? order by creation asc)"
                        " group by type", user_id, object_id)
-        })
-        
-        #Pairs of actions and those that undo them
-        actions = ["list", "listen", "share"]
-        action_pairs = [(name, ActionType[name].value, ActionType["un" + name].value)
-                        for name in actions]
-        
-        #Actions done more recently than undone
-        return [name for name, action, antiaction in action_pairs
-                if latest_by_type[action] > latest_by_type[antiaction]]
+        }
         
     def get_ratings(self, object_id):
         return [
