@@ -87,6 +87,15 @@ class ActionType(Enum):
     def simple_past(self):
         return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared"][self.value-1]
 
+class RatingStats:
+    def __init__(self, ratings):
+        try:
+            self.frequency = len(ratings)
+            self.average = sum(ratings) / self.frequency
+            
+        except ZeroDivisionError:
+            self.average = None
+
 class ModelObject:
     def init_from_row(self, row, columns):
         for column, value in zip(columns, row):
@@ -151,7 +160,7 @@ class Release(ModelObject):
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
         self.get_palette = lambda: model.get_palette(self.id)
-        self.get_rating_stats = lambda: model.get_rating_stats(self.id)
+        self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
         
 class User(ModelObject):
     def __init__(self, model, row):
@@ -312,7 +321,6 @@ class Model(GeneralModel):
     #Actions
     
     Action = namedtuple("Action", ["id", "user", "object", "type", "creation"])
-    RatingStats = namedtuple("RatingStats", ["average", "frequency"])
         
     def add_action(self, user_id, object_id, type):
         return self.insert("insert into actions (user_id, object_id, type, creation)"
@@ -394,8 +402,8 @@ class Model(GeneralModel):
         return [name for name, action, antiaction in action_pairs
                 if latest_by_type[action] > latest_by_type[antiaction]]
         
-    def get_rating_stats(self, object_id):
-        ratings = [
+    def get_ratings(self, object_id):
+        return [
             rating for type, rating in
             self.query("select type, rating from"
                        " (select id, user_id, type from actions"
@@ -404,14 +412,6 @@ class Model(GeneralModel):
                        object_id, ActionType.rate.value, ActionType.unrate.value)
             if type == ActionType.rate.value
         ]
-        
-        try:
-            frequency = len(ratings)
-            average = sum(ratings) / frequency
-            return self.RatingStats(average=average, frequency=frequency)
-            
-        except ZeroDivisionError:
-            return self.RatingStats(average=None, frequency=0)
         
     def get_user_ratings(self, user_id):
         rows = \
