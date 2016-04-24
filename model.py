@@ -167,7 +167,7 @@ class User(ModelObject):
         self.timezone = model.get_user_timezone(self.id)
         
         def get_active_actions(object_id):
-            latest_by_type = defaultdict(lambda: "0") #A date older than all others
+            latest_by_type = defaultdict(lambda: 0) #A date older than all others (1970)
             latest_by_type.update(model.get_latest_actions_by_type(self.id, object_id))
             
             #Pairs of actions and those that undo them
@@ -190,7 +190,7 @@ class Action(ModelObject):
     def __init__(self, id, type, creation, user_id, user_name,
                  object_id, object_title, object_slug, artists):
         self.id = id
-        self.type = type
+        self.type = ActionType(type)
         self.creation = arrow.get(creation)
         self.user = dict(id=user_id, name=user_name)
         self.object = dict(id=object_id, title=object_title, artists=artists,
