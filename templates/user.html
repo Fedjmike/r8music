@@ -68,7 +68,7 @@ var userDatasets = {{ json_dumps(user_datasets) | safe }};
         {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
     </div></section>
 {% endfor %}
-    <section><div>
+    <section class="page content"><div>
         <header><h1>Listened but unrated</h1></header>
         {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
     </div></section>
