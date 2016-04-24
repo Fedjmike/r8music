@@ -740,7 +740,7 @@ ol.nav {
 
 section {
     padding-top: 0.25em !important;
-	margin-bottom: 3em !important;
+	margin-bottom: 2.5em !important;
     border-radius: 0.1em;
 }
 
@@ -774,13 +774,13 @@ section {
         padding: 0 1.5em 1em;
 	}
 
-	ol.main.nav,
-    .album-main {
-        width: 25em;
+	ol.main.nav {
+        margin-left: -1.5em;
     }
-    
-    ol:not(.main).nav {
-        margin-bottom: 1.5em;
+        
+    ol.nav.right {
+        margin-bottom: 1em;
+        margin-right: -1.5em;
     }
     
     .album {
@@ -790,6 +790,7 @@ section {
     }
     
     .album-main {
+    	width: 25em;
         flex-shrink: 0;
     }
     
