@@ -206,15 +206,11 @@ ol.main.nav {
     overflow: hidden;
 }
 
-.main.nav > li > * {
+.main.nav > li > a {
     margin-left: 0.65rem;
     margin-right: 0.65rem;
-}
-
-.main.nav > li > a {
     color: white;
     opacity: 0.6;
-    text-shadow: 1px 1px 3px rgba(0,0,0, 1);
     transition: opacity 0.1s;
 }
 
@@ -699,7 +695,11 @@ form.small .search {
 
 /*Glows and shadows*/
 
-.main.nav,
+.main.nav {
+    box-shadow: 0 0 3em 0.5em rgba(0,0,0, 0.1);
+    text-shadow: 1px 1px 3px rgba(0,0,0, 0.5);
+}
+
 .rating, #average-rating,
 input[type=submit] {
     box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
@@ -776,6 +776,7 @@ section {
 
 	ol.main.nav {
         margin-left: -1.5em;
+        padding: 0 0.25em;
     }
         
     ol.nav.right {
