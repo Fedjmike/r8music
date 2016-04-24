@@ -31,6 +31,12 @@ class GeneralModel:
         
     def close(self):
         self.db.close()
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     def query(self, query, *args):
         return self.db.execute(query, args).fetchall()
@@ -692,9 +698,8 @@ class Model(GeneralModel):
         
 if __name__ == "__main__":
     import sys
-    from contextlib import closing
     
-    with closing(Model()) as model:
+    with Model() as model:
         program, command, *sys.argv = sys.argv
         
         if command == "remove":
