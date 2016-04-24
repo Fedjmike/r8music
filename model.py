@@ -117,7 +117,7 @@ class Artist(ModelObject):
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
         self.init_from_row(row, ["id", "title", "slug", "date", "release_type", "full_art_url", "thumb_art_url"])
-        self.url = url_for_release(self.slug, primary_artist_slug)
+        self.url = url_for_release(primary_artist_slug, self.slug)
         
         def get_artists():
             artists = model.get_release_artists(self.id)
