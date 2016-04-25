@@ -82,6 +82,14 @@
     </div>
 </section>
 
+<section class="page content">
+    <header><h2>External links</h2></header>
+    <p></p>
+    {% for site, link in release.get_external_links() %}
+        <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a><br/>
+    {% endfor %}
+</section>
+
 {% for artist in release.get_artists() %}
 <section class="page content">
 	<header>

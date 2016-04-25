@@ -154,10 +154,26 @@ class Release(ModelObject):
                 _next = other_releases[index+1] if index != len(other_releases)-1 else None
                 yield artist, previous, _next
             
+        def get_external_links():
+            sites = [
+                ("Wikipedia", lambda title: "//en.wikipedia.org/wiki/" + title),
+                ("AZLyrics", lambda x: x),
+                ("MusicBrainz", lambda mbid: "//musicbrainz.org/release/" + mbid),
+                ("Allmusic", lambda x: x),
+                ("UltimateGuitar", lambda x: x)
+            ]
+            
+            for site, build_url in sites:
+                link = model.get_link(self.id, site.lower())
+                
+                if link:
+                    yield site, build_url(link)
+            
         self.get_artists = get_artists
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
         self.get_palette = lambda: model.get_palette(self.id)
+        self.get_external_links = get_external_links
         self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
         
 class User(ModelObject):
