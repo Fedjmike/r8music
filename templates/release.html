@@ -82,12 +82,21 @@
     </div>
 </section>
 
-<section class="page content">
-    <header><h2>External links</h2></header>
-    <p></p>
-    {% for site, link in release.get_external_links() %}
-        <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a><br/>
-    {% endfor %}
+<section class="page content columns">
+    <section>
+        <header><h2>External links</h2></header>
+        <p></p>
+        {% for site, link in release.get_external_links() %}
+            <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a><br/>
+        {% endfor %}
+    </section>
+    <section>
+        <header><h2>Contribute</h2></header>
+        Report a mistake<br/>
+        <a href={{ release.url + "/edit" }}>Edit the release palette</a><br/>
+        Add an external link<br/>
+        Add cover art<br/>
+    </section>
 </section>
 
 {% for artist in release.get_artists() %}

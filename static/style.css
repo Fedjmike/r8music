@@ -780,6 +780,12 @@ section {
 
 section > section {
     margin-bottom: 1.5em !important;
+    margin-bottom: 0 !important;
+}
+
+.columns {
+    display: flex;
+    padding: 0 0 1em !important;
 }
 
 .columns > * {
@@ -790,6 +796,16 @@ section > section {
 @media only screen and (max-width: 500px) {
     .page {
         padding: 0 0.75em 1em;
+    }
+    
+    .columns {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .columns > * {
+        margin: 0 0.75em;
+        min-width: 12em;
     }
     
     .tracks time {
@@ -824,6 +840,12 @@ section > section {
     ol.nav.right {
         margin-bottom: 1em;
         margin-right: -1.5em;
+    }
+    
+    .columns > * {
+        margin: 0 1.5em;
+        flex-basis: 0;
+        flex-grow: 1;
     }
     
     .album {
