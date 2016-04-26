@@ -168,7 +168,7 @@ form input[type="submit"] {
 
 /*Custom lists*/
 
-ol.inline, ol.nav, ol.rating, ol.releases, ol.user-actions {
+ol.inline, ol.nav, ol.rating, ol.releases, .color-palette ol, ol.user-actions {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -410,6 +410,39 @@ ol:not(.small).rating {
     -webkit-filter: brightness(107%);
     -ff-filter: brightness(110%);
     filter: brightness(110%);
+}
+
+/*Colour palettes*/
+
+.color-palette {
+    width: 22em;
+}
+
+.color-palette ol {
+    margin-bottom: 0.5em;
+}
+
+.color-palette ol li {
+    display: inline-block;
+    width: 6em;
+    margin: 0.5em;
+}
+
+.color-palette .title {
+    text-align: center;
+}
+
+.color-swatch {
+    display: inline-block;
+    width: 5em;
+    height: 5em;
+    margin: 0.5em;
+    border-radius: 2.5em;
+}
+
+.color-palette input[type=text] {
+    display: block;
+    width: 100%;
 }
 
 /*Actions and action lists*/
@@ -742,6 +775,10 @@ section {
     padding-top: 0.25em !important;
 	margin-bottom: 2.5em !important;
     border-radius: 0.1em;
+}
+
+section > section {
+    margin-bottom: 1.5em !important;
 }
 
 .columns > * {

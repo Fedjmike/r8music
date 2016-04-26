@@ -315,7 +315,9 @@ class Model(GeneralModel):
     #Object attachments
     
     def add_palette_from_image(self, id, image_url=None):
-        palette = get_palette(image_url) if image_url else [None, None, None]
+        self.set_palette(id, get_palette(image_url) if image_url else [None, None, None])
+        
+    def set_palette(self, id, palette):
         self.insert("replace into palettes (id, color1, color2, color3)"
                     " values (?, ?, ?, ?)", id, *palette)
         

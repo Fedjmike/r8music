@@ -114,13 +114,12 @@ def from_ajax():
     return request.method == "POST"
 
 @decorator_with_args
-def handle_not_found(f, what=None):
-    """Not to be used with pages to which a form POSTs"""
+def handle_not_found(f, what=None, form=False):
     try:
         return f()
     
     except NotFound:
-        return      (jsonify(error=1), 404) if from_ajax() \
+        return      (jsonify(error=1), 404) if from_ajax() and not form \
                else page_not_found(what=what)
     
 # Views
@@ -208,6 +207,23 @@ def release_post(release_id):
     else:
         model().add_action(request.user.id, release_id, action)
         return jsonify(error=0)
+    
+@app.route("/<artist_slug>/<release_slug>/edit", methods=["GET", "POST"])
+@handle_not_found(what="release", form=True)
+@needs_auth
+def edit_release(artist_slug, release_slug):
+    release = model().get_release(artist_slug, release_slug)
+        
+    if request.method == "POST":
+        try:
+            colors = [request.values["color-%d" % n] for n in [1, 2, 3]]
+            model().set_palette(release.id, colors)
+            
+        except KeyError:
+            #todo
+            return "Invalid palette", 400
+        
+    return render_template("edit_release.html", release=release)
 
 #Routing is done later because /<slug>/ would override other routes
 @handle_not_found()

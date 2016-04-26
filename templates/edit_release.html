@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% from "release_list.html" import release_list, rating_widget %}
+
+{% block title %} Editing {{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
+
+{% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
+
+{% block content %}
+<section class="album page content">
+    <section>
+        <header>
+            <h1>
+                Editing <a href={{ release.url }}>{{ release.title }}</a>
+            </h1>
+        </header>
+        
+        {% set release_slug = release.slug %}
+        {% set artist_slug = release.get_artists()[0].slug %}
+        <form action={{ release.url + "/edit" }} method="post" class="color-palette clearfix">
+            <p class="tight">Colour scheme:</p>
+            <ol>
+            {% for title, color in [("Links", accent_color_1), ("Interface", accent_color_2), ("(Unused)", accent_color_3)]%}
+                <li>
+                    <div class="title">{{ title }}</div>
+                    <div class="color-swatch" style="background-color: {{ color }};"></div>
+                    <input type="text" name="color-{{ loop.index }}" value="{{ color }}"/>
+                </li>
+            {% endfor %}
+            </ol>
+            <input type="submit" value="Save">
+        </form>
+    </section>
+    <section>
+        {% if release.thumb_art_url %}
+        <div class="album-cover">
+            <a href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a><br/>
+        </div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}
