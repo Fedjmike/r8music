@@ -138,17 +138,13 @@ def set_user(user):
     #Can't store the user obj directly as methods can't be seralized
     session["user"] = {"id": user.id, "name": user.name}
 
-@basic_decorator
-def with_user(view):
-    """A decorator for pages that (can) use the logged in User, but
-       do not *require* authentication."""
+@app.before_request
+def with_user():
     request.user = get_user()
-    return view()
 
 @basic_decorator
 def needs_auth(view):
-    """A decorator for pages that require authentication"""
-    request.user = get_user()
+    """Display an error if not authenticated"""
     
     if not request.user:
         #todo
@@ -173,7 +169,6 @@ def handle_not_found(f, what=None):
     
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @handle_not_found(what="release")
-@with_user
 def release_page(artist_slug, release_slug):
     release = model().get_release(artist_slug, release_slug)
 
@@ -214,7 +209,6 @@ def release_post(release_id):
 
 #Routing is done later because /<slug>/ would override other routes
 @handle_not_found()
-@with_user
 def artist_page(slug):
     artist = model().get_artist(slug)
     return render_template("artist.html", artist=artist, user=request.user)
@@ -248,13 +242,11 @@ def add_artist_search_results(query=None):
     return render_template("add_artist_search_results.html", artists=artists, query=query)
 
 @app.route("/")
-@with_user
 def homepage():
     return render_template("activity_feed.html")
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
 @handle_not_found(what="user")
-@with_user
 def user_page(slug):
     that_user = model().get_user(slug)
     
