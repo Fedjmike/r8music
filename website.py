@@ -83,6 +83,48 @@ def after_request(response):
 def page_not_found(e=None, what=None):
     return render_template("404.html", what=what), 404
 
+def get_user():
+    try:
+        return model().get_user(session["user"]["id"])
+    
+    except (KeyError, TypeError):
+        return None
+
+def set_user(user):
+    #Can't store the user obj directly as methods can't be seralized
+    session["user"] = {"id": user.id, "name": user.name}
+
+@app.before_request
+def with_user():
+    request.user = get_user()
+
+@basic_decorator
+def needs_auth(view):
+    """Display an error if not authenticated"""
+    
+    if not request.user:
+        #todo
+        #todo send JSON for some pages (e.g. rating, with UI info)
+        return "Not authenticated", 403
+    
+    else:
+        return view()
+
+def from_ajax():
+    return request.method == "POST"
+
+@decorator_with_args
+def handle_not_found(f, what=None):
+    """Not to be used with pages to which a form POSTs"""
+    try:
+        return f()
+    
+    except NotFound:
+        return      (jsonify(error=1), 404) if from_ajax() \
+               else page_not_found(what=what)
+    
+# Views
+
 @app.route("/artists")
 def artists_index():
     artists = model().query("select * from artists")
@@ -127,46 +169,6 @@ def search_results(query=None):
     return render_template("search_results.html",
             search={"query": query, "args": args, "results": results})
 
-def get_user():
-    try:
-        return model().get_user(session["user"]["id"])
-    
-    except (KeyError, TypeError):
-        return None
-
-def set_user(user):
-    #Can't store the user obj directly as methods can't be seralized
-    session["user"] = {"id": user.id, "name": user.name}
-
-@app.before_request
-def with_user():
-    request.user = get_user()
-
-@basic_decorator
-def needs_auth(view):
-    """Display an error if not authenticated"""
-    
-    if not request.user:
-        #todo
-        #todo send JSON for some pages (e.g. rating, with UI info)
-        return "Not authenticated", 403
-    
-    else:
-        return view()
-
-def from_ajax():
-    return request.method == "POST"
-
-@decorator_with_args
-def handle_not_found(f, what=None):
-    """Not to be used with pages to which a form POSTs"""
-    try:
-        return f()
-    
-    except NotFound:
-        return      (jsonify(error=1), 404) if from_ajax() \
-               else page_not_found(what=what)
-    
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @handle_not_found(what="release")
 def release_page(artist_slug, release_slug):
