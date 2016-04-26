@@ -91,6 +91,10 @@ class ActionType(Enum):
     def simple_past(self):
         return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared"][self.value-1]
 
+class UserType(Enum):
+    user = 1
+    admin = 2
+
 class RatingStats:
     def __init__(self, ratings):
         try:
@@ -178,7 +182,8 @@ class Release(ModelObject):
         
 class User(ModelObject):
     def __init__(self, model, row):
-        self.init_from_row(row, ["id", "name", "email", "creation"])
+        self.init_from_row(row, ["id", "name", "email", "type", "creation"])
+        self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
         
@@ -485,7 +490,7 @@ class Model(GeneralModel):
     def get_user(self, user):
         """Get user by id or by slug"""
         
-        query =   "select id, name, email, creation from users where %s=?" \
+        query =   "select id, name, email, type, creation from users where %s=?" \
                 % ("name" if isinstance(user, str) else "id")
         return User(self, self.query_unique(query, user))
         
@@ -499,12 +504,13 @@ class Model(GeneralModel):
             raise AlreadyExists()
             
         creation = arrow.utcnow().timestamp
-        user_id = self.insert("insert into users (name, pw_hash, email, fullname, creation) values (?, ?, ?, ?, ?)",
-                              name, generate_password_hash(password), email, fullname, creation)
+        user_id = self.insert("insert into users (name, pw_hash, email, fullname, type, creation)"
+                              " values (?, ?, ?, ?, ?, ?)", name, generate_password_hash(password),
+                              email, fullname, UserType.user, creation)
         
         self.set_user_timezone(user_id, timezone)
         
-        return User(self, [user_id, name, email, creation])
+        return User(self, (user_id, name, email, creation))
     
     def set_user_pw(self, user, password):
         """user can be a slug or an id"""
@@ -518,13 +524,16 @@ class Model(GeneralModel):
            For added security, it doesn't even leave this function."""
            
         column =  "name" if isinstance(user, str) else "id"
-        db_hash, *row = self.query_unique("select pw_hash, id, name, email, creation from users"
+        db_hash, *row = self.query_unique("select pw_hash, id, name, email, type, creation from users"
                                           " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
         return matches, User(self, row)
         
     def set_user_email(self, user_id, email):
         self.execute("update users set email=? where id=?", email, user_id)
+        
+    def set_user_type(self, user_id, type):
+        self.execute("update users set type=? where id=?", UserType[type].value, user_id)
         
     def set_user_timezone(self, user_id, timezone=None):
         self.execute("replace into user_timezones (user_id, timezone)"

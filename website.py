@@ -5,7 +5,7 @@ from flask import Flask, render_template, g, request, session, redirect, jsonify
 from contextlib import closing
 from bs4 import BeautifulSoup
 
-from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType
+from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
 from tools import basic_decorator, decorator_with_args, search_artists
@@ -105,10 +105,19 @@ def needs_auth(view):
     if not request.user:
         #todo
         #todo send JSON for some pages (e.g. rating, with UI info)
-        return "Not authenticated", 403
+        return "Not authenticated", 401
     
     else:
         return view()
+
+@decorator_with_args
+@needs_auth
+def needs_priv(view, allowed=["admin"]):
+    if request.user.type.name not in allowed:
+        #todo
+        return "Not authorised", 403
+        
+    return view()
 
 def from_ajax():
     return request.method == "POST"
@@ -211,7 +220,7 @@ def release_post(release_id):
     
 @app.route("/<artist_slug>/<release_slug>/edit", methods=["GET", "POST"])
 @handle_not_found(what="release", form=True)
-@needs_auth
+@needs_priv()
 def edit_release(artist_slug, release_slug):
     release = model().get_release(artist_slug, release_slug)
         
