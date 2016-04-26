@@ -519,7 +519,7 @@ class Model(GeneralModel):
            
         column =  "name" if isinstance(user, str) else "id"
         db_hash, *row = self.query_unique("select pw_hash, id, name, email, creation from users"
-                                             " where %s=?" % column, user)
+                                          " where %s=?" % column, user)
         matches = check_password_hash(db_hash, given_password)
         return matches, User(self, row)
         

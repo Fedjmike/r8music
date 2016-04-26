@@ -154,8 +154,8 @@ def search():
         #Redirect to a GET with the query in the path
         return redirect(url_for("search_results", query=query, **args))
 
-@app.route("/search/<query>", methods=["GET"])
-@app.route("/search/", methods=["GET"])
+@app.route("/search/<query>")
+@app.route("/search/")
 def search_results(query=None):
     if not query:
         return redirect(url_for("search"))
@@ -180,6 +180,7 @@ def release_page(artist_slug, release_slug):
         return release_post(release.id)
 
 @app.route("/release/<int:release_id>", methods=["POST"])
+@handle_not_found(what="release")
 @needs_auth
 def release_post(release_id):
     def rating_stats():
@@ -231,7 +232,7 @@ def artist_page(slug):
     artist = model().get_artist(slug)
     return render_template("artist.html", artist=artist, user=request.user)
 
-@app.route("/artists/add", methods=["GET", "POST"])
+@app.route("/add-artist", methods=["GET", "POST"])
 @needs_auth
 def add_artist():
     if request.method == "GET":
@@ -242,7 +243,7 @@ def add_artist():
             #todo ajax progress
             artist_id = MBID(request.form["artist-id"])
             app_pool.apply_async(import_artist, (artist_id,))
-            return redirect_back()
+            return redirect(url_for("artists_index"))
             
         else:
             query = encode_query_str(request.form["artist-name"])
