@@ -764,7 +764,8 @@ input[type=submit] {
 /*Layout*/
 
 .page {
-    padding: 0 0.75em 1em;
+    box-sizing: border-box;
+    min-width: 20em;
 }
 
 ol.nav {
@@ -786,7 +787,11 @@ section > section {
 }
 
 /*Mobile*/
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 500px) {
+    .page {
+        padding: 0 0.75em 1em;
+    }
+    
     .tracks time {
         margin-right: 0.3em;
     }
@@ -804,10 +809,10 @@ section > section {
 }
 
 /*Full page*/
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 500px) {
     .page {
 		margin: 0 auto;
-		max-width: 50em;
+		max-width: 53em;
         padding: 0 1.5em 1em;
 	}
 
@@ -829,7 +834,7 @@ section > section {
     
     .album-main {
     	width: 25em;
-        flex-shrink: 0;
+        flex-shrink: 0.4;
     }
     
     .track-title {
@@ -856,7 +861,7 @@ html {
     }
 }
 
-@media (min-width: 850px) {
+@media (min-width: 875px) {
     html {
         font-size: 12pt;
     }
