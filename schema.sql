@@ -105,6 +105,7 @@ create table users (
     pw_hash text not null,
     email text,
     fullname text,
+    type integer not null, -- model.UserType enum
     creation integer not null -- Unix timestamp
 );
 
