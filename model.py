@@ -207,6 +207,7 @@ class User(ModelObject):
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         self.get_activity_feed = lambda: model.get_activity_feed(self.id)
+        self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
     def __init__(self, id, type, creation, user_id, user_name,
@@ -390,17 +391,17 @@ class Model(GeneralModel):
                        " where user_id=? order by creation desc", user_id)
         ]
         
-    def get_activity_feed(self, user_id, limit=10, offset=0):
+    def _get_activity(self, user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
                           " r.id, r.title, r.slug, artists.name, artists.slug from"
-                          " followerships join actions a using (user_id)"
-                          " join users u on user_id = u.id"
+                          " actions a join users u on user_id = u.id"
+                          + (" join followerships using (user_id)" if friends else "") +
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id"
-                          " where follower=? order by a.creation desc"
-                          " limit ? offset ?", user_id, limit, offset)
+                          " where " + ("follower" if friends else "user_id") + "=?"
+                          " order by a.creation desc limit ? offset ?", user_id, limit, offset)
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
         
@@ -413,6 +414,12 @@ class Model(GeneralModel):
             
             if not ActionType(action_type(row)).name.startswith("un"):
                 yield Action(*row, artists=artists)
+        
+    def get_activity_by_user(self, user_id, limit=20, offset=0):
+        return self._get_activity(user_id, limit, offset)
+        
+    def get_activity_feed(self, user_id, limit=20, offset=0):
+        return self._get_activity(user_id, limit, offset, friends=True)
         
     def get_latest_actions_by_type(self, user_id, object_id):
         return {

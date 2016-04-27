@@ -274,7 +274,7 @@ def homepage():
     return render_template("activity_feed.html")
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
-@app.route("/user/<slug>/<any(rated, 'listened-unrated'):tab>")
+@app.route("/user/<slug>/<any(rated, 'listened-unrated', activity):tab>")
 @handle_not_found(what="user")
 def user_page(slug, tab="rated"):
     that_user = model().get_user(slug)

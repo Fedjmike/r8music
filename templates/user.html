@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% from "macros.html" import full_and_friendly_datetime, event_datetime %}
+{% from "activity_feed.html" import action_list %}
 {% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
@@ -9,7 +10,7 @@
 {% block content %}
 
 <ol class="page tabs">
-    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated")] %}
+    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity")] %}
         {% if tab == name %}
             <li class="active">{{ description }}</li>
         {% else %}
@@ -92,6 +93,12 @@
             {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
         </div></section>
     </div>
+    
+{% elif tab == "activity" %}
+    <section class="page content">
+        <header><h1>Recent activity</h1></header>
+        {{ action_list(that_user.get_activity(), same_user=True) }}
+    </section>
 {% endif %}
 
 {% endblock %}
