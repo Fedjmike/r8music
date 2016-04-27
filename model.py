@@ -268,8 +268,11 @@ class Model(GeneralModel):
         return release_id
         
     def add_author(self, release_id, artist_id):
-        self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
-                    release_id, artist_id)
+        try:
+            self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
+                        release_id, artist_id)
+        except sqlite3.IntegrityError: # In case contributing artists are repeated
+            pass
     
     def get_releases_by_artist(self, artist):
         """artist is the Artist object"""
