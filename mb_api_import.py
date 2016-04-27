@@ -158,6 +158,7 @@ def import_artist(artist):
     processed_artist_mbids[artist_mbid] = artist_id
 
     for release in releases:
+        print("Adding release: ", release['title'])
         release_id = model.add_release(
             release['title'],
             release['date'],
