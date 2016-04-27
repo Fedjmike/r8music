@@ -9,16 +9,6 @@
 
 {% block content %}
 
-<ol class="page tabs">
-    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity")] %}
-        {% if tab == name %}
-            <li class="active">{{ description }}</li>
-        {% else %}
-            <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
-        {% endif %}
-    {% endfor %}
-</ol>
-
 <section class="clearfix page content">
     {% if tab == "rated" %}
     <div class="chart">
@@ -57,6 +47,16 @@
     {% endif %}
 </section>
 
+<ol class="page tabs">
+    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity")] %}
+        {% if tab == name %}
+            <li class="active">{{ description }}</li>
+        {% else %}
+            <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
+        {% endif %}
+    {% endfor %}
+</ol>
+
 {% if tab == "rated" %}
     {% set ratings = that_user.get_releases_rated() %}
     {% set by_rating = group_by_rating(ratings) %}
@@ -87,12 +87,10 @@
     
 {% elif tab == "listened-unrated" %}
     {% set listened = that_user.get_releases_listened_unrated() %}
-    <div class="grids-list">
-        <section class="page content"><div>
-            <header><h1>Listened to but unrated</h1></header>
-            {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
-        </div></section>
-    </div>
+    <section class="page content"><div>
+        <header><h1>Listened to but unrated</h1></header>
+        {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
+    </div></section>
     
 {% elif tab == "activity" %}
     <section class="page content">

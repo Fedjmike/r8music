@@ -382,15 +382,6 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
         
-    #todo auth
-    def get_actions_by_user(self, user_id):
-        #generator, limit
-        return [
-            self._make_action(user_id, *row) for row in
-            self.query("select id, object_id, type, creation from actions"
-                       " where user_id=? order by creation desc", user_id)
-        ]
-        
     def _get_activity(self, user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
