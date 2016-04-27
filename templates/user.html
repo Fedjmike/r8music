@@ -8,7 +8,20 @@
 
 {% block content %}
 
+<div class="page">
+    <ol class="tabs">
+        {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated")] %}
+            {% if tab == name %}
+                <li>{{ description }}</li>
+            {% else %}
+                <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</div>
+
 <section class="clearfix page content">
+    {% if tab == "rated" %}
     <div class="chart">
         <header></header>
         <canvas id="user-chart" width="400" height="200"></canvas>
@@ -17,6 +30,7 @@
             <label><input type="radio" name="chart-select" value="year-counts">Years</label>
         </form>
     </div>
+    {% endif %}
 
     <header><h1>{{ that_user.name }}</h1></header>
 
@@ -44,35 +58,42 @@
     {% endif %}
 </section>
 
-{% set ratings, listened = that_user.get_releases_actioned() %}
-{% set by_rating = group_by_rating(ratings) %}
-{% set user_datasets = get_user_datasets(ratings) %}
+{% if tab == "rated" %}
+    {% set ratings = that_user.get_releases_rated() %}
+    {% set by_rating = group_by_rating(ratings) %}
+    {% set user_datasets = get_user_datasets(ratings) %}
 
-{% set rating_description = that_user.get_rating_descriptions() %}
+    {% set rating_description = that_user.get_rating_descriptions() %}
 
-<script>
-var userDatasets = {{ json_dumps(user_datasets) | safe }};
-</script>
+    <script>
+    var userDatasets = {{ json_dumps(user_datasets) | safe }};
+    </script>
 
-{% set editable = 'editable' if that_user.id == user.id else '' %}
+    {% set editable = 'editable' if that_user.id == user.id else '' %}
 
-<div class="grids-list">
-{% for n in range(8, 0, -1) %}
-    <section class="page content"><div>
-        <header><h1>{{ n }}
-            {% if rating_description[n] %} &ndash;
-            &ldquo;<span class="{{ editable }} rating-description single-line"
-                         data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
-             {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
-            {% endif %}
-        </h1></header>
-        {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
-    </div></section>
-{% endfor %}
-    <section class="page content"><div>
-        <header><h1>Listened but unrated</h1></header>
-        {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
-    </div></section>
-</div>
+    <div class="grids-list">
+    {% for n in range(8, 0, -1) %}
+        <section class="page content"><div>
+            <header><h1>{{ n }}
+                {% if rating_description[n] %} &ndash;
+                &ldquo;<span class="{{ editable }} rating-description single-line"
+                             data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
+                 {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
+                {% endif %}
+            </h1></header>
+            {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
+        </div></section>
+    {% endfor %}
+    </div>
+    
+{% elif tab == "listened-unrated" %}
+    {% set listened = that_user.get_releases_listened_unrated() %}
+    <div class="grids-list">
+        <section class="page content"><div>
+            <header><h1>Listened to but unrated</h1></header>
+            {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
+        </div></section>
+    </div>
+{% endif %}
 
 {% endblock %}

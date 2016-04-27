@@ -168,7 +168,7 @@ form input[type="submit"] {
 
 /*Custom lists*/
 
-ol.inline, ol.nav, ol.rating, ol.releases, .color-palette ol, ol.user-actions {
+ol.inline, ol.nav, ol.rating, ol.releases, .color-palette ol, ol.user-actions, ol.tabs {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -460,6 +460,17 @@ ol.action > li {
     margin-right: 0.15em;
     font-size: 1rem;
     vertical-align: middle;
+}
+
+/*Tabs*/
+
+ol.tabs > li {
+    display: inline-block;
+}
+
+.tabs li {
+    margin-right: 1em;
+    font-weight: bold;
 }
 
 /*Author "lists"*/

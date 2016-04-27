@@ -82,8 +82,8 @@ def get_user_datasets(ratings):
 
 from flask import url_for
 
-def url_for_user(user):
-    return url_for("user_page", slug=user.name)
+def url_for_user(user, **kwargs):
+    return url_for("user_page", slug=user.name, **kwargs)
     
 def url_for_release(artist, release):
     try:
