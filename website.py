@@ -5,7 +5,7 @@ from flask import Flask, render_template, g, request, session, redirect, jsonify
 from contextlib import closing
 from bs4 import BeautifulSoup
 
-from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType
+from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
 from tools import basic_decorator, decorator_with_args, search_artists
@@ -193,7 +193,7 @@ def release_page(artist_slug, release_slug):
 @needs_auth
 def release_post(release_id):
     def rating_stats():
-        rating_stats = model().get_rating_stats(release_id)
+        rating_stats = RatingStats(model().get_ratings(release_id))
         return jsonify(error=0,
                        ratingAverage=rating_stats.average,
                        ratingFrequency=rating_stats.frequency)
@@ -375,11 +375,11 @@ def confirm_password(view, user, password):
             return view(user)
 
         else:
-            return "Incorrect password for '%s'" % user.name
+            return "Incorrect password for '%s'" % user
             
     except NotFound:
         #error
-        return "User '%s' not found" % user.name
+        return "User '%s' not found" % user
 
 @app.route("/set-password", methods=["GET", "POST"])
 @needs_auth

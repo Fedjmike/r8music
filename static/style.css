@@ -541,7 +541,7 @@ ol.tracks {
 }
 
 .album-cover img {
-    max-width: 100%;
+    width: 100%;
 }
 
 .album-cover .next-albums {

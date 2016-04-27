@@ -273,11 +273,8 @@ class Model(GeneralModel):
         return release_id
         
     def add_author(self, release_id, artist_id):
-        try:
-            self.insert("insert into authorships (release_id, artist_id) values (?, ?)",
-                        release_id, artist_id)
-        except sqlite3.IntegrityError: # In case contributing artists are repeated
-            pass
+        self.insert("replace into authorships (release_id, artist_id) values (?, ?)",
+                    release_id, artist_id)
     
     def get_releases_by_artist(self, artist):
         """artist is the Artist object"""
@@ -404,7 +401,7 @@ class Model(GeneralModel):
                           " where follower=? order by a.creation desc"
                           " limit ? offset ?", user_id, limit, offset)
         
-        object_id, artist_name, artist_slug = (itemgetter(n) for n in [5, 8, 9])
+        action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
@@ -412,7 +409,9 @@ class Model(GeneralModel):
                        for row in uniq(rows, key=artist_slug)]
             
             row = list(rows[0])[:8] #Excluding artist columns
-            yield Action(*row, artists=artists)
+            
+            if not ActionType(action_type(row)).name.startswith("un"):
+                yield Action(*row, artists=artists)
         
     def get_latest_actions_by_type(self, user_id, object_id):
         return {
@@ -513,7 +512,7 @@ class Model(GeneralModel):
         
         self.set_user_timezone(user_id, timezone)
         
-        return User(self, (user_id, name, email, creation))
+        return User(self, (user_id, name, email, UserType.user, creation))
     
     def set_user_pw(self, user, password):
         """user can be a slug or an id"""
