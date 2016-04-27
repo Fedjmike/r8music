@@ -70,6 +70,12 @@ ol, ul {
 	padding-left: 2em;
 }
 
+ol {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
 .right {
     float: right;
 }
@@ -167,12 +173,6 @@ form input[type="submit"] {
 }
 
 /*Custom lists*/
-
-ol.inline, ol.nav, ol.rating, ol.releases, .color-palette ol, ol.user-actions, ol.tabs {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
 
 ol.inline {
     margin: 0.5em 0;
@@ -464,13 +464,18 @@ ol.action > li {
 
 /*Tabs*/
 
-ol.tabs > li {
-    display: inline-block;
+ol.tabs {
+    text-align: right;
+    padding-bottom: 0.75em;
 }
 
-.tabs li {
+ol.tabs > li {
+    display: inline-block;
     margin-right: 1em;
-    font-weight: bold;
+}
+
+.tabs > .active {
+    font-weight: 400;
 }
 
 /*Author "lists"*/

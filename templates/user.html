@@ -8,17 +8,15 @@
 
 {% block content %}
 
-<div class="page">
-    <ol class="tabs">
-        {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated")] %}
-            {% if tab == name %}
-                <li>{{ description }}</li>
-            {% else %}
-                <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ol>
-</div>
+<ol class="page tabs">
+    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated")] %}
+        {% if tab == name %}
+            <li class="active">{{ description }}</li>
+        {% else %}
+            <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
+        {% endif %}
+    {% endfor %}
+</ol>
 
 <section class="clearfix page content">
     {% if tab == "rated" %}
