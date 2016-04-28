@@ -49,7 +49,10 @@
         border-color: {{ accent_color_1 }};
     }
     
-    .search > input:focus ~ input[type=submit],
+    .search > input:focus ~ input[type=submit] {
+        color: {{ accent_color_1 }};
+    }
+    
     .search > input[type=submit]:active {
         background-color: {{ accent_color_1 }};
     }
