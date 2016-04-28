@@ -172,12 +172,28 @@ form input[type="submit"] {
     display:inline;
 }
 
+/*Messages*/
+
 form .error {
     display: inline-block;
     margin-left: 0.4em;
     margin-top: 0.4em;
     color: red;
     font-size: 0.9em;
+}
+
+.success-message {
+    background: #f2ffe3;
+    line-height: 2.5em;
+}
+
+.success-message .material-icons {
+    color: green;
+    font-size: 2em;
+    vertical-align: middle;
+    position: relative;
+    top: -0.075em;
+    padding-right: 0.1em;
 }
 
 /*Custom lists*/
@@ -797,7 +813,8 @@ ol.nav {
 }
 
 section {
-    padding-top: 0.25em !important;
+    padding-top: 0.25em;
+    padding-bottom: 1em;
 	margin-bottom: 2.5em !important;
     border-radius: 0.1em;
 }
@@ -819,7 +836,8 @@ section > section {
 /*Mobile*/
 @media only screen and (max-width: 500px) {
     .page {
-        padding: 0 0.75em 1em;
+        padding-left: 0.75em;
+        padding-right: 0.75em;
     }
     
     .columns {
@@ -853,7 +871,8 @@ section > section {
     .page {
 		margin: 0 auto;
 		max-width: 53em;
-        padding: 0 1.5em 1em;
+        padding-left: 1.5em;
+        padding-right: 1.5em;
 	}
 
 	ol.main.nav {

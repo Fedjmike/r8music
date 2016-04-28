@@ -104,6 +104,11 @@
         {% endif %}
         </ol>
 	</div>
+    
+    {% for message in get_flashed_messages(category_filter=["success"]) %}
+        <div class="page content success-message"><i class="material-icons">done</i>{{ message }}</div>
+    {% endfor %}
+    
     {% block content %}{% endblock %}
     
 <script type="text/javascript">

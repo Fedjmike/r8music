@@ -383,6 +383,7 @@ def register():
             #Automatically log them in
             set_user(user)
             
+            flash("Welcome to r8music", "success")
             return redirect_back()
         
         return register()
@@ -424,6 +425,7 @@ def set_password():
         @confirm_password(request.user.id, password, error)
         def set_password(user):
             model().set_user_pw(user.id, new_password)
+            flash("Password changed", "success")
             return redirect_back()
             
         return set_password()
@@ -444,6 +446,7 @@ def user_settings():
         if timezone:
             model().set_user_timezone(request.user.id, timezone)
         
+        flash("Settings saved", "success")
         return redirect(url_for("user_settings"))
         
 @app.route("/rating-descriptions", methods=["GET", "POST"])
@@ -484,6 +487,7 @@ def login():
         @confirm_password(name, password, error)
         def login(user):
             set_user(user)
+            flash("Logged in", "success")
             return redirect_back()
             
         return login()
