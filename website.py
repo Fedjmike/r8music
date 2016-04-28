@@ -388,7 +388,7 @@ def register():
         return register()
 
 @decorator_with_args
-def confirm_password(view, user, password):
+def confirm_password(view, user, password, error_view):
     """Runs a view, if the credentials given are correct, otherwise
     displays an error. `user` may be an id or name. Passes the
     corresponding user object into the given view."""
@@ -399,11 +399,12 @@ def confirm_password(view, user, password):
             return view(user)
 
         else:
-            return "Incorrect password for '%s'" % user
+            flash("Incorrect password for '%s'" % user, "password-error")
+            return error_view()
             
     except NotFound:
-        #error
-        return "User '%s' not found" % user
+        flash("User '%s' not found" % user, "username-error")
+        return error_view()
 
 @app.route("/set-password", methods=["GET", "POST"])
 @needs_auth
@@ -420,7 +421,7 @@ def set_password():
             return render_template("form.html", form="set_pw")
         
         @sanitize_new_password(new_password, verify_new_password, error)
-        @confirm_password(request.user.id, password)
+        @confirm_password(request.user.id, password, error)
         def set_password(user):
             model().set_user_pw(user.id, new_password)
             return redirect_back()
@@ -476,8 +477,11 @@ def login():
     else:
         name = request.form["username"]
         password = request.form["password"]
+        
+        def error():
+            return render_template("form.html", form="login")
 
-        @confirm_password(name, password)
+        @confirm_password(name, password, error)
         def login(user):
             set_user(user)
             return redirect_back()
