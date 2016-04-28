@@ -408,9 +408,8 @@ def set_password():
         return render_template("form.html", form="set_pw")
         
     else:
-        password = request.form["password"]
-        new_password = request.form["new-password"]
-        verify_new_password = request.form["verify-new-password"]
+        password, new_password, verify_new_password = dict_values(request.values,
+            ["password", "new-password", "verify-new-password"]
         
         def error():
             return render_template("form.html", form="set_pw")
@@ -430,8 +429,7 @@ def user_settings():
         return render_template("settings.html", user=request.user)
     
     else:
-        email, timezone = (request.form[key] if key in request.form else None
-                           for key in ["email", "timezone"])
+        email, timezone = dict_values(request.values, ["email", "timezone"])
         
         #Allow the user to set email to an empty string
         if email is not None:
