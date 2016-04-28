@@ -40,8 +40,8 @@
     <form action={{ url_for("register") }} method="post" class="clearfix">
         <dl>
             {{ form_field("Create a username", "username", "text", form_prefill)}}
-            {{ form_field("Create a password", "password", "password")}}
-            {{ form_field("Confirm the password", "verify-password", "password")}}
+            {{ form_field("Create a password", "new-password", "password")}}
+            {{ form_field("Confirm the password", "verify-new-password", "password")}}
             {{ form_field("Email (optional)", "email", "text", form_prefill)}}
             {{ recaptcha() }}
             

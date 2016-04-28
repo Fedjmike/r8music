@@ -330,11 +330,11 @@ def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
 @decorator_with_args
 def sanitize_new_password(view, new_password, again, error_view):
     if new_password != again:
-        flash("The passwords didn't match", "verify-password-error")
+        flash("The passwords didn't match", "verify-new-password-error")
         return error_view()
         
     elif len(new_password) < 6:
-        flash("Your password must be 6 characters or longer", "password-error")
+        flash("Your password must be 6 characters or longer", "new-password-error")
         return error_view()
         
     return view()
@@ -366,7 +366,7 @@ def register():
         
     else:
         name, password, verify_password, email, recaptcha_response = dict_values(request.values,
-            ["username", "password", "verify-password", "email", "g-recaptcha-response"])
+            ["username", "new-password", "verify-new-password", "email", "g-recaptcha-response"])
         
         def error():
             return render_template("form.html", form="register",
@@ -399,7 +399,7 @@ def confirm_password(view, user, password, error_view):
             return view(user)
 
         else:
-            flash("Incorrect password for '%s'" % user, "password-error")
+            flash("Incorrect password for '%s'" % user.name, "password-error")
             return error_view()
             
     except NotFound:
@@ -415,7 +415,7 @@ def set_password():
         
     else:
         password, new_password, verify_new_password = dict_values(request.values,
-            ["password", "new-password", "verify-new-password"]
+            ["password", "new-password", "verify-new-password"])
         
         def error():
             return render_template("form.html", form="set_pw")
