@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
-from tools import basic_decorator, decorator_with_args, search_artists
+from tools import dict_values, basic_decorator, decorator_with_args, search_artists
 
 g_recaptcha_secret = "todo config"
 
@@ -311,9 +311,13 @@ def failed_recaptcha(recaptcha_response, remote_addr):
         }
     ).json()
 
-    #Incorrect use of the API, not captcha failure
     if "error-codes" in response:
-        raise Exception(response["error-codes"])
+        for error in response["error-codes"]:
+            if error == "missing-input-response":
+                pass
+            
+            else:
+                raise Exception(response["error-codes"])
     
     return not response["success"]
 
@@ -333,11 +337,8 @@ def register():
         return render_template("form.html", form="register")
         
     else:
-        name = request.form["username"]
-        password = request.form["password"]
-        verify_password = request.form["verify-password"]
-        email = request.form["email"]
-        recaptcha_response = request.form["g-recaptcha-response"]
+        name, password, verify_password, email, recaptcha_response = dict_values(request.values,
+            ["username", "password", "verify-password", "email", "g-recaptcha-response"])
         
         if failed_recaptcha(recaptcha_response, request.remote_addr):
             return "Sorry, you appear to be a robot"

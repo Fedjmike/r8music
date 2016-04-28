@@ -14,6 +14,10 @@ def uniq(iter, key=lambda x: x):
             seen.add(item_key)
             yield item
 
+def dict_values(dict, keys):
+    return [dict[key] if key in dict else None
+            for key in keys]
+
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):
         raise ValueError()
