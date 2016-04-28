@@ -332,6 +332,10 @@ def sanitize_new_password(view, new_password, again, error_view):
         flash("The passwords didn't match", "verify-password-error")
         return error_view()
         
+    elif len(new_password) < 6:
+        flash("Your password must be 6 characters or longer", "password-error")
+        return error_view()
+        
     return view()
     
 @decorator_with_args
