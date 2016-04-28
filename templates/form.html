@@ -13,16 +13,16 @@
     {% endif %}
 {% endblock %}
 
+{% set dont_display_login_register = form in ["login", "register"] %}
+{% set dont_display_search = form == "search" %}
+
 {% block content %}
 <section class="page content">
     {% if form == "login" %}
-        {% set dont_display_login_register = True %}
             <header><h1>Log in</h1></header>
             {{ login_form(True) }}
 
     {% elif form == "register" %}
-        {% set dont_display_login_register = True %}
-
         <header><h1>User registration</h1></header>
         {{ register_form(True) }}
 
@@ -31,8 +31,6 @@
             {{ set_pw_form(request.user, True) }}
 
     {% elif form == "search" %}
-        {% set dont_display_search = True %}
-
             <header><h1>Search</h1></header>
             {% from "forms.html" import  %}
             {{ search_form(search) }}
