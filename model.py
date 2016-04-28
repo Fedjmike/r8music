@@ -496,13 +496,16 @@ class Model(GeneralModel):
                 % ("name" if isinstance(user, str) else "id")
         return User(self, self.query_unique(query, user))
         
+    def user_exists(self, name):
+        return self.query("select id from users where name=?", name)
+        
     def register_user(self, name, password, email=None, fullname=None, timezone=None):
         """Try to add a new user to the database.
            Perhaps counterintuitively, for security hashing the password is
            delayed until this function. Better that you accidentally hash
            twice than hash zero times and store the password as plaintext."""
     
-        if self.query("select id from users where name=?", name):
+        if self.user_exists(name):
             raise AlreadyExists()
             
         creation = arrow.utcnow().timestamp

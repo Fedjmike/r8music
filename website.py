@@ -340,16 +340,19 @@ def register():
         name, password, verify_password, email, recaptcha_response = dict_values(request.values,
             ["username", "password", "verify-password", "email", "g-recaptcha-response"])
         
-        if failed_recaptcha(recaptcha_response, request.remote_addr):
-            return "Sorry, you appear to be a robot"
-        
         @sanitize_new_password(password, verify_password)
         def register(email=email):
             #todo more restrictions, slugging
-            if len(name) < 4:
-                return "Your username must be 4 characters or longer"
-                
             try:
+                if len(name) < 4:
+                    return "Your username must be 4 characters or longer"
+                    
+                elif model().user_exists(name):
+                    raise AlreadyExists()
+                    
+                if failed_recaptcha(recaptcha_response, request.remote_addr):
+                    return "Sorry, you appear to be a robot"
+                
                 if email == "":
                     email = None
                     
