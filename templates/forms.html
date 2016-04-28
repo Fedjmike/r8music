@@ -1,3 +1,18 @@
+{% macro flash_area(name) -%}
+    {% for message in get_flashed_messages(category_filter=[name + "-message", name + "-error"]) %}
+        <span class="error">{{ message }}</span>
+    {% endfor %}
+{%- endmacro %}
+
+{% macro form_field(description, name, type, form_prefill=None) -%}
+    <dt>{{ description }}</dt>
+    <dd>
+        <input type={{ type }} name={{ name }}
+               value="{{ form_prefill[name] if form_prefill and name in form_prefill else ''}}" />
+        {{ flash_area(name) }}
+    </dd>
+{%- endmacro %}
+
 {% macro login_form(standalone=False) -%}
     <form action={{ url_for("login") }} method="post" class="clearfix">
         <dl>
@@ -12,17 +27,23 @@
     </form>
 {%- endmacro %}
 
-{% macro register_form(standalone=False) -%}
+{% macro recaptcha() -%}
+    <!-- "I'm not a robot" reCAPTCHA -->
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <dd>
+        <div class="g-recaptcha" data-sitekey="6LeJzxgTAAAAAO9KpMEH9DsZKG9ax0C3DAIYSpgA"></div>
+        {{ flash_area("recaptcha") }}
+    </dd>
+{%- endmacro %}
+
+{% macro register_form(form_prefill, standalone=False) -%}
     <form action={{ url_for("register") }} method="post" class="clearfix">
         <dl>
-            <dt>Create a username</dt> <dd><input type="text" name="username" /></dd>
-            <dt>Create a password</dt> <dd><input type="password" name="password" /></dd>
-            <dt>Confirm the password</dt> <dd><input type="password" name="verify-password" /></dd>
-            <dt>Email (optional)</dt> <dd><input type="text" name="email" /></dd>
-            
-            <!-- "I'm not a robot" reCAPTCHA -->
-            <script src='https://www.google.com/recaptcha/api.js'></script>
-            <dd><div class="g-recaptcha" data-sitekey="6LeJzxgTAAAAAO9KpMEH9DsZKG9ax0C3DAIYSpgA"></div></dd>
+            {{ form_field("Create a username", "username", "text", form_prefill)}}
+            {{ form_field("Create a password", "password", "password")}}
+            {{ form_field("Confirm the password", "verify-password", "password")}}
+            {{ form_field("Email (optional)", "email", "text", form_prefill)}}
+            {{ recaptcha() }}
             
             <dd><input type="submit" value="Register" /></dd>
             
@@ -36,9 +57,9 @@
 {% macro set_pw_form(user, standalone=False) -%}
     <form action={{ url_for("set_password") }} method="post" class="clearfix">
         <dl>
-            <dt>Current password</dt> <dd><input type="password" name="password" /></dd>
-            <dt>New password</dt> <dd><input type="password" name="new-password" /></dd>
-            <dt>Confirm new password</dt> <dd><input type="password" name="verify-new-password" /></dd>
+            {{ form_field("Current password", "password", "password")}}
+            {{ form_field("New password", "new-password", "password")}}
+            {{ form_field("Confirm new password", "verify-new-password", "password")}}
             
             <dd><input type="submit" value="Change" /></dd>
             

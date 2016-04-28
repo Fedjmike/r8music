@@ -1,14 +1,14 @@
 import os, time, requests, multiprocessing.pool, sqlite3
 from urllib.parse import urlparse, urljoin
 
-from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for
+from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for, flash
 from contextlib import closing
 from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
-from tools import dict_values, basic_decorator, decorator_with_args, search_artists
+from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_artists
 
 g_recaptcha_secret = "todo config"
 
@@ -301,7 +301,8 @@ def user_page(slug, tab="rated"):
     else:
         return render_template("user.html", that_user=that_user, tab=tab, user=request.user)
 
-def failed_recaptcha(recaptcha_response, remote_addr):
+@decorator_with_args
+def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
     response = requests.post(
         "https://www.google.com/recaptcha/api/siteverify",
         data={
@@ -312,21 +313,43 @@ def failed_recaptcha(recaptcha_response, remote_addr):
     ).json()
 
     if "error-codes" in response:
-        for error in response["error-codes"]:
-            if error == "missing-input-response":
-                pass
-            
-            else:
-                raise Exception(response["error-codes"])
+        if response["error-codes"] == ["missing-input-response"]:
+            pass #User error
+        
+        else:
+            raise Exception(response["error-codes"])
     
-    return not response["success"]
+    if not response["success"]:
+        flash("Sorry, you appear to be a robot. Try again?", "recaptcha-error")
+        return error_view()
+        
+    else:
+        return view()
 
 @decorator_with_args
-def sanitize_new_password(view, new_password, again):
+def sanitize_new_password(view, new_password, again, error_view):
     if new_password != again:
-        return "LOL you typed your password wrong"
+        flash("The passwords didn't match", "verify-password-error")
+        return error_view()
         
     return view()
+    
+@decorator_with_args
+def sanitize_new_username(view, name, error_view):
+    try:
+        if len(name) < 4:
+            flash("Your username must be 4 characters or longer", "username-error")
+            return error_view()
+            
+        elif model().user_exists(name):
+            raise AlreadyExists()
+            
+        #Catch an AlreadyExists if the view raises one (although it shouldn't)
+        return view()
+            
+    except AlreadyExists:
+        flash("'%s' is already taken" % name, "username-error")
+        return error_view()
     
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -340,31 +363,22 @@ def register():
         name, password, verify_password, email, recaptcha_response = dict_values(request.values,
             ["username", "password", "verify-password", "email", "g-recaptcha-response"])
         
-        @sanitize_new_password(password, verify_password)
+        def error():
+            return render_template("form.html", form="register",
+                form_prefill=dict_subset(request.values, ["username", "email"]))
+        
+        #todo more restrictions, slugging
+        @sanitize_new_password(password, verify_password, error)
+        @sanitize_new_username(name, error)
+        @confirm_recaptcha(recaptcha_response, request.remote_addr, error)
         def register(email=email):
-            #todo more restrictions, slugging
-            try:
-                if len(name) < 4:
-                    return "Your username must be 4 characters or longer"
-                    
-                elif model().user_exists(name):
-                    raise AlreadyExists()
-                    
-                if failed_recaptcha(recaptcha_response, request.remote_addr):
-                    return "Sorry, you appear to be a robot"
-                
-                if email == "":
+            if email == "":
                     email = None
-                    
-                user = model().register_user(name, password, email)
-                #Automatically log them in
-                set_user(user)
-                
-                return redirect_back()
-                
-            except AlreadyExists:
-                #error
-                return "Username %s already taken" % name
+            user = model().register_user(name, password, email)
+            #Automatically log them in
+            set_user(user)
+            
+            return redirect_back()
         
         return register()
 
@@ -398,7 +412,10 @@ def set_password():
         new_password = request.form["new-password"]
         verify_new_password = request.form["verify-new-password"]
         
-        @sanitize_new_password(new_password, verify_new_password)
+        def error():
+            return render_template("form.html", form="set_pw")
+        
+        @sanitize_new_password(new_password, verify_new_password, error)
         @confirm_password(request.user.id, password)
         def set_password(user):
             model().set_user_pw(user.id, new_password)
