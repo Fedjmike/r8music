@@ -152,7 +152,7 @@ def only_valid_search_args(args, filter_out=False):
 @app.route("/search", methods=["GET", "POST"])
 def search():
     if request.method == "GET":
-        return render_template("search.html", search={"args": default_search_args})
+        return render_template("form.html", form="search", search={"args": default_search_args})
         
     else:
         query = encode_query_str(request.form["query"])
@@ -330,7 +330,7 @@ def register():
 
     if request.method == "GET":
         #todo https
-        return render_template("register.html")
+        return render_template("form.html", form="register")
         
     else:
         name = request.form["username"]
@@ -387,7 +387,7 @@ def confirm_password(view, user, password):
 def set_password():
     if request.method == "GET":
         #todo https
-        return render_template("set_password.html")
+        return render_template("form.html", form="set_pw")
         
     else:
         password = request.form["password"]
@@ -447,7 +447,7 @@ def login():
 
     if request.method == "GET":
         #todo https
-        return render_template("login.html")
+        return render_template("form.html", form="login")
         
     else:
         name = request.form["username"]

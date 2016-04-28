@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% from "forms.html" import login_form, register_form, set_pw_form, search_form %}
+
+{% block title %}
+    {% if form == "login" %}
+        Log in {{ super() }}
+    {% elif form == "register" %}
+        User registration {{ super() }}
+    {% elif form == "set_pw" %}
+        Change your password {{ super() }}
+    {% elif form == "search" %}
+        Search {{ super() }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="page content">
+    {% if form == "login" %}
+        {% set dont_display_login_register = True %}
+            <header><h1>Log in</h1></header>
+            {{ login_form(True) }}
+
+    {% elif form == "register" %}
+        {% set dont_display_login_register = True %}
+
+        <header><h1>User registration</h1></header>
+        {{ register_form(True) }}
+
+    {% elif form == "set_pw" %}
+            <header><h1>Change your password</h1></header>
+            {{ set_pw_form(request.user, True) }}
+
+    {% elif form == "search" %}
+        {% set dont_display_search = True %}
+
+            <header><h1>Search</h1></header>
+            {% from "forms.html" import  %}
+            {{ search_form(search) }}
+    {% endif %}
+</section>
+{% endblock %}
