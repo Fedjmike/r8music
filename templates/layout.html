@@ -78,7 +78,7 @@
             <li><a href={{ url_for("users_index") }}>users</a></li>
         </ol>
         <ol class="nav right">
-        {%if not dont_display_search %}
+        {% if not dont_display_search %}
             {% from "forms.html" import small_search_form %}
             <li>{{ small_search_form() }}</li>
         {% endif %}

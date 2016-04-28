@@ -376,9 +376,7 @@ def register():
         @sanitize_new_password(password, verify_password, error)
         @sanitize_new_username(name, error)
         @confirm_recaptcha(recaptcha_response, request.remote_addr, error)
-        def register(email=email):
-            if email == "":
-                    email = None
+        def register(email=email if email else None):
             user = model().register_user(name, password, email)
             #Automatically log them in
             set_user(user)

@@ -18,6 +18,9 @@ def dict_values(dict, keys):
     return [dict[key] if key in dict else None
             for key in keys]
 
+def dict_subset(dict, keys):
+    return {key: dict[key] for key in keys if key in dict}
+
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):
         raise ValueError()
