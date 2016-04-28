@@ -511,7 +511,7 @@ class Model(GeneralModel):
         creation = arrow.utcnow().timestamp
         user_id = self.insert("insert into users (name, pw_hash, email, fullname, type, creation)"
                               " values (?, ?, ?, ?, ?, ?)", name, generate_password_hash(password),
-                              email, fullname, UserType.user, creation)
+                              email, fullname, UserType.user.value, creation)
         
         self.set_user_timezone(user_id, timezone)
         
