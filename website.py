@@ -317,7 +317,8 @@ def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
             pass #User error
         
         else:
-            raise Exception(response["error-codes"])
+            flash("Recaptcha error: " + str(response["error-codes"]), "recaptcha-error")
+            return error()
     
     if not response["success"]:
         flash("Sorry, you appear to be a robot. Try again?", "recaptcha-error")
