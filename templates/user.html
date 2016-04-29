@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import full_and_friendly_datetime, event_datetime %}
+{% from "macros.html" import full_and_friendly_datetime, event_datetime, page_tabs %}
 {% from "activity_feed.html" import action_list %}
 {% from "release_list.html" import release_list, release_grid %}
 
@@ -47,15 +47,7 @@
     {% endif %}
 </section>
 
-<ol class="page tabs">
-    {% for name, description in [("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity")] %}
-        {% if tab == name %}
-            <li class="active">{{ description }}</li>
-        {% else %}
-            <li><a href={{ url_for_user(that_user, tab=name) }}>{{ description }}</a></li>
-        {% endif %}
-    {% endfor %}
-</ol>
+{{ page_tabs([("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity"), ("reviews", "Reviews")], url_for_user(that_user), current_tab=tab) }}
 
 {% if tab == "rated" %}
     {% set ratings = that_user.get_releases_rated() %}
