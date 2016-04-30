@@ -272,7 +272,7 @@ def add_artist_search_results(query=None):
 
 @app.route("/")
 def homepage():
-    return render_template("activity_feed.html")
+    return render_template("homepage.html")
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
 @app.route("/user/<slug>/<any(rated, 'listened-unrated', activity):tab>")

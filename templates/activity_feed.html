@@ -1,4 +1,3 @@
-{% extends "layout.html" %}
 {% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
 {% macro explain_action(action, same_user=False) -%}
@@ -25,14 +24,3 @@
     {% endfor %}
     </ol>
 {%- endmacro %}
-
-{% block title %}r8music{% endblock %}
-
-{% block content %}
-    {% if request.user %}
-        <section class="page content">
-            <header><h1>Recent activity</h1></header>
-            {{ action_list(request.user.get_activity_feed()) }}
-        </section>
-    {% endif %}
-{% endblock %}

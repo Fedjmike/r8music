@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% from "activity_feed.html" import action_list %}
+
+{% block title %}r8music{% endblock %}
+
+{% block content %}
+    {% if request.user %}
+        <section class="page content">
+            <header><h1>Recent activity</h1></header>
+            {{ action_list(request.user.get_activity_feed()) }}
+            <p><a class="load-more" href=# data-endpoint={{ url_for("activity_feed") }}>Load more</a></p>
+        </section>
+    {% endif %}
+{% endblock %}
