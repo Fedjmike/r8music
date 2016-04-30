@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, page_tabs %}
+{% from "macros.html" import artist_link, page_tabs, clickable_action_list %}
 {% from "release_list.html" import release_list, rating_widget %}
 
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
@@ -76,24 +76,17 @@
                 <li class="total clearfix"><time>{{ runtime }}</time></li>
             {% endif %}
             </ol>
-		
-            <ol class="action inline unselectable">
-                {% set active_actions = user.get_active_actions(release.id) if user else [] %}
-                <li><a class="clickable {{ 'selected' if 'list' in active_actions else '' }}"
-                       name="list" href=# data-release-id={{ release.id }}>
-                    <i class="material-icons">playlist_add</i>Will listen to
-                </a></li>
-                <li><a class="clickable {{ 'selected' if 'listen' in active_actions else '' }}"
-                       name="listen" href=# data-release-id={{ release.id }}>
-                    <i class="material-icons">headset</i>Listened to
-                </a></li>
-                <li><a class="clickable {{ 'selected' if 'share' in active_actions else '' }}"
-                       name="share" href=# data-release-id={{ release.id }}>
-                    <i class="material-icons">share</i>Share
-                </a></li>
-            </ol>
-	        
+            
             {% set ratings = user.get_ratings() if user else {} %}
+            {% set active_actions = user.get_active_actions(release.id) if user else [] %}
+            
+            {% set actions = [("list", "playlist_add", "Will listen to")] %}
+            {% set _ = actions.append(("listen", "headset", "Listened to")) if release.id not in ratings %}
+            {% set _ = actions.append(("share", "share", "Share")) if release.id in ratings %}
+            
+            {{ clickable_action_list(actions, active_actions,
+                                     data=[("data-release-id", release.id)]) }}
+            
             {{ rating_widget(release, ratings[release.id] if release.id in ratings, None) }}
         </div>
         <div class="album-cover clearfix">

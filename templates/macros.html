@@ -34,6 +34,18 @@
 </ol>
 {%- endmacro %}
 
+{% macro clickable_action_list(actions, active, data) -%}
+<ol class="action inline unselectable">
+    {% for name, icon, description in actions %}
+        <li><a class="clickable {{ 'selected' if name in active else '' }}"
+               name={{ name }} href=#
+               {% for key, value in data %} {{ key }}="{{ value }}" {% endfor %}>
+            <i class="material-icons">{{ icon }}</i>{{ description }}
+        </a></li>
+    {% endfor %}
+</ol>
+{%- endmacro %}
+
 {% macro load_more(content, endpoint, offset) -%}
 <span class="load-more-area">
     <span class="load-more-target">{{ content }}</span>
