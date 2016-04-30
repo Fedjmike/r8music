@@ -101,13 +101,22 @@ ol {
 
 /*Input elements*/
 
+textarea, input {
+    box-sizing: border-box;
+}
+
+textarea,
 input[type=text],
 input[type=password] {
-    height: 1.8em;
     padding: 0.3em;
     border: 2px solid rgba(0,0,0, 0.15);
     border-radius: 0.4em;
     outline: none;
+}
+
+input[type=text],
+input[type=password] {
+    height: 1.8em;
 }
 
 input[type=submit] {
@@ -510,6 +519,19 @@ ol.tabs > li {
 
 .author:not(:last-of-type):after {
     content: ' & ';
+}
+
+/*Reviews*/
+
+form.review {
+    max-width: 30em;
+}
+
+form.review textarea {
+    display: block;
+    width: 100%;
+    resize: vertical;
+    margin-bottom: 1em;
 }
 
 /*Albums*/

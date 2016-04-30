@@ -178,12 +178,13 @@ def search_results(query=None):
             search={"query": query, "args": args, "results": results})
 
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
+@app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
 @handle_not_found(what="release")
-def release_page(artist_slug, release_slug):
+def release_page(artist_slug, release_slug, tab=None):
     release = model().get_release(artist_slug, release_slug)
 
     if request.method == "GET":
-        return render_template("release.html", release=release, user=request.user)
+        return render_template("release.html", release=release, tab=tab, user=request.user)
         
     else:
         return release_post(release.id)

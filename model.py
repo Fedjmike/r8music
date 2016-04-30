@@ -178,7 +178,10 @@ class Release(ModelObject):
         self.get_next_releaseses = get_next_releaseses
         self.get_palette = lambda: model.get_palette(self.id)
         self.get_external_links = get_external_links
+        
         self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
+        self.get_reviews = lambda: model.get_reviews(self.id)
+        self.get_review_no = lambda: model.get_review_no(self.id)
         
 class User(ModelObject):
     def __init__(self, model, row):
@@ -486,6 +489,14 @@ class Model(GeneralModel):
         
         rated_ids = [release.id for release, rating in self.get_releases_rated_by_user(user_id)]
         return filter(lambda release: release.id not in rated_ids, listened)
+        
+    #Reviews
+    
+    def get_reviews(self, object_id):
+        return []
+        
+    def get_review_no(self, object_id):
+        return 0
         
     #Users
     
