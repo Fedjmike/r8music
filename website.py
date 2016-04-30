@@ -273,6 +273,17 @@ def add_artist_search_results(query=None):
 @app.route("/")
 def homepage():
     return render_template("homepage.html")
+    
+@app.route("/activity-feed")
+@needs_auth
+def activity_feed():
+    try:
+        offset, actions = request.user.get_activity_feed(offset=int(request.values["offset"]))
+        html = render_template("activity_list.html", actions=actions)
+        return jsonify(error=0, html=html, offset=offset)
+        
+    except (KeyError, ValueError):
+        return jsonify(error=1)
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
 @app.route("/user/<slug>/<any(rated, 'listened-unrated', activity):tab>")

@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% from "macros.html" import full_and_friendly_datetime, event_datetime, page_tabs %}
-{% from "activity_feed.html" import action_list %}
+{% from "activity_list.html" import activity_list %}
 {% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
@@ -87,7 +87,8 @@
 {% elif tab == "activity" %}
     <section class="page content">
         <header><h1>Recent activity</h1></header>
-        {{ action_list(that_user.get_activity(), same_user=True) }}
+        {% set offset, actions = that_user.get_activity() %}
+        {{ activity_list(actions, same_user=True) }}
     </section>
 {% endif %}
 

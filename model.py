@@ -209,7 +209,7 @@ class User(ModelObject):
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
-        self.get_activity_feed = lambda: model.get_activity_feed(self.id)
+        self.get_activity_feed = lambda offset=0: model.get_activity_feed(self.id, offset=offset)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
@@ -399,6 +399,8 @@ class Model(GeneralModel):
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
         
+        yield offset + len(rows)
+        
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
@@ -410,10 +412,12 @@ class Model(GeneralModel):
                 yield Action(*row, artists=artists)
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
-        return self._get_activity(user_id, limit, offset)
+        offset, *actions = self._get_activity(user_id, limit, offset)
+        return offset, actions
         
     def get_activity_feed(self, user_id, limit=20, offset=0):
-        return self._get_activity(user_id, limit, offset, friends=True)
+        offset, *actions = self._get_activity(user_id, limit, offset, friends=True)
+        return offset, actions
         
     def get_latest_actions_by_type(self, user_id, object_id):
         return {

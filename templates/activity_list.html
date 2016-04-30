@@ -14,7 +14,7 @@
     {{ object_link(action.object) }}
 {%- endmacro %}
 
-{% macro action_list(actions, same_user=False) -%}
+{% macro activity_list(actions, same_user=False) -%}
     <ol class="user-actions">
     {% for action in actions %}
         <li>
@@ -24,3 +24,9 @@
     {% endfor %}
     </ol>
 {%- endmacro %}
+
+{% block content %}
+    {% if request.user %}
+        {{ activity_list(actions) }}
+    {% endif %}
+{% endblock %}

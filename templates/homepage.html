@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
-{% from "activity_feed.html" import action_list %}
+{% from "macros.html" import load_more %}
+{% from "activity_list.html" import activity_list %}
 
 {% block title %}r8music{% endblock %}
 
@@ -7,8 +8,9 @@
     {% if request.user %}
         <section class="page content">
             <header><h1>Recent activity</h1></header>
-            {{ action_list(request.user.get_activity_feed()) }}
-            <p><a class="load-more" href=# data-endpoint={{ url_for("activity_feed") }}>Load more</a></p>
+            
+            {% set offset, actions = request.user.get_activity_feed() %}
+            {{ load_more(activity_list(actions), url_for("activity_feed"), offset) }}
         </section>
     {% endif %}
 {% endblock %}

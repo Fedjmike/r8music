@@ -33,3 +33,12 @@
     {% endfor %}
 </ol>
 {%- endmacro %}
+
+{% macro load_more(content, endpoint, offset) -%}
+<span class="load-more-area">
+    <span class="load-more-target">{{ content }}</span>
+    <p><a class="load-more" href=#
+          data-endpoint={{ endpoint }}
+          data-offset={{ offset }}>Load more</a></p>
+</span>
+{%- endmacro %}
