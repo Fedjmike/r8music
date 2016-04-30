@@ -73,7 +73,7 @@
                         <a href={{ previous.url }} class="previous">&larr; {{ previous.title }} [{{ previous.date[:4] }}]</a>
                     {% endif %}
                     {% if next %}
-                        <a href={{ next.url }} class="next">{{ next.title }} [{{ next.date[:4] }}] &rarr;</a>
+                        <a href={{ next.url }} class="next">{{ next.title }} [{{ next.date[:4] }}]&nbsp;&rarr;</a>
                     {% endif %}
                     <br/>
                 {% endif %}
@@ -93,7 +93,9 @@
     <section>
         <header><h2>Contribute</h2></header>
         Report a mistake<br/>
-        <a href={{ release.url + "/edit" }}>Edit the release palette</a><br/>
+        {% if user and user.type.name == "admin" %}
+            <a href={{ release.url + "/edit" }}>Edit the release palette</a><br/>
+        {% endif %}
         Add an external link<br/>
         Add cover art<br/>
     </section>
