@@ -286,9 +286,9 @@ def activity_feed():
         return jsonify(error=1)
 
 @app.route("/user/<slug>", methods=["GET", "POST"])
-@app.route("/user/<slug>/<any(rated, 'listened-unrated', 'will-listen', activity):tab>")
+@app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity):tab>")
 @handle_not_found(what="user")
-def user_page(slug, tab="rated"):
+def user_page(slug, tab=None):
     that_user = model().get_user(slug)
     
     if request.values:
