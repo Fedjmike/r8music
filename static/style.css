@@ -105,7 +105,7 @@ textarea, input {
     box-sizing: border-box;
 }
 
-textarea,
+textarea, .textarea-expl,
 input[type=text],
 input[type=password] {
     padding: 0.3em;
@@ -139,6 +139,32 @@ input[type=submit]:active {
 
 input[type=radio] {
     margin-left: 0.75em;
+}
+
+textarea, .textarea-expl {
+    font-family: Signika;
+    font-weight: 300;
+    font-size: 0.9rem;
+    background: white;
+}
+
+textarea.with-expl {
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.textarea-expl {
+    display: block;
+    padding: 0.15em 0.5em;
+    border-top: none;
+    border-top: 1px dashed rgba(0,0,0, 0.15);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+textarea:not(.with-expl), .textarea-expl {
+    margin-bottom: 1em;
 }
 
 /*Forms*/
@@ -531,7 +557,6 @@ form.review textarea {
     display: block;
     width: 100%;
     resize: vertical;
-    margin-bottom: 1em;
 }
 
 /*Albums*/
