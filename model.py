@@ -202,9 +202,18 @@ class User(ModelObject):
             return [name for name, action, antiaction in action_pairs
                     if latest_by_type[action] > latest_by_type[antiaction]]
         
+        def get_releases_listened_unrated():
+            listened = model.get_releases_actioned_by_user(self.id, "listen")
+            rated_ids = [release.id for release, rating in model.get_releases_rated_by_user(self.id)]
+            return filter(lambda release: release.id not in rated_ids, listened)
+            
+        def get_releases_listed():
+            return model.get_releases_actioned_by_user(self.id, "list")
+        
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
-        self.get_releases_listened_unrated = lambda: model.get_releases_listened_unrated_by_user(self.id)
+        self.get_releases_listened_unrated = get_releases_listened_unrated
+        self.get_releases_listed = get_releases_listed
         self.get_active_actions = get_active_actions
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         self.get_followers = lambda: model.get_followers(self.id)
@@ -477,10 +486,10 @@ class Model(GeneralModel):
                        user_id, *action_values("rate", "unrate", "rate"))
         ]
         
-    def get_releases_listened_unrated_by_user(self, user_id):
-        action_values = lambda *actions: [ActionType[action].value for action in actions]
+    def get_releases_actioned_by_user(self, user_id, action):
+        action_values = [ActionType[action].value for action in [action, "un" + action, action]]
         
-        listened = [
+        return [
             self._make_release(row) for row in
             self.query("select " + self._release_columns_rename + " from"
                        " (select action_id, object_id, type as action_type from"
@@ -488,11 +497,8 @@ class Model(GeneralModel):
                        "   where user_id=? and type in (?, ?) order by creation asc)"
                        "  group by object_id)"
                        " join releases on id = object_id where action_type=?",
-                       user_id, *action_values("listen", "unlisten", "listen"))
+                       user_id, *action_values)
         ]
-        
-        rated_ids = [release.id for release, rating in self.get_releases_rated_by_user(user_id)]
-        return filter(lambda release: release.id not in rated_ids, listened)
         
     #Reviews
     
