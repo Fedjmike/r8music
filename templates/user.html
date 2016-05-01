@@ -47,7 +47,11 @@
     {% endif %}
 </section>
 
-{{ page_tabs([("rated", "Releases rated"), ("listened-unrated", "Listened to but not rated"), ("activity", "Activity"), ("reviews", "Reviews")], url_for_user(that_user), current_tab=tab) }}
+{{ page_tabs([("rated", "Releases rated"),
+              ("listened-unrated", "Listened to but not rated"),
+              ("activity", "Activity"),
+              ("reviews", "Reviews")],
+              url_for_user(that_user), current_tab=tab) }}
 
 {% if tab == "rated" %}
     {% set ratings = that_user.get_releases_rated() %}

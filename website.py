@@ -179,7 +179,7 @@ def search_results(query=None):
 
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
-@handle_not_found(what="release")
+@handle_not_found()
 def release_page(artist_slug, release_slug, tab=None):
     release = model().get_release(artist_slug, release_slug)
 
