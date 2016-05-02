@@ -17,7 +17,8 @@ app = Flask(__name__)
 #losing your session when the server restarts
 app.secret_key = os.urandom(24)
 
-app_pool = None
+app_pool = multiprocessing.pool.ThreadPool(processes=4)
+add_template_tools(app)
 
 def model():
     if not hasattr(g, "model"):
@@ -513,13 +514,10 @@ def logout():
 def recover_password():
     pass
 
+app.add_url_rule("/<slug>", view_func=artist_page)
+
 #
 
 if __name__ == "__main__":
-    app_pool = multiprocessing.pool.ThreadPool(processes=4)
     init_db()
-    
-    add_template_tools(app)
-    
-    app.add_url_rule("/<slug>", view_func=artist_page)
     app.run(debug=True)
