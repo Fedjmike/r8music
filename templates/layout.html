@@ -50,14 +50,18 @@
         border-color: {{ accent_color_2 }};
     }
     
-    .search > input[type=text]:focus,
-    .search > input:focus ~ input[type=submit],
-    .search > input[type=submit]:active {
+    .search > input[type=text]:focus {
         border-color: {{ accent_color_1 }};
     }
     
     .search > input:focus ~ input[type=submit] {
+        border-color: {{ accent_color_1 }};
         color: {{ accent_color_1 }};
+    }
+    
+    .search > input[type=submit]:active {
+        background-color: {{ accent_color_1 }};
+        border-color: {{ accent_color_1 }}
     }
     
     .action a.selected {
