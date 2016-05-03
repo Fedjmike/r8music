@@ -108,27 +108,32 @@ def search_artists(artist_name):
     
 #
 
-import re, requests, wikipedia
+import re, urllib.parse, requests, wikipedia
 from bs4 import BeautifulSoup
 
 def _wikipedia_query(titles, **args):
     response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
         action="query",
         format="json",
-        titles=titles,
+        titles=urllib.parse.unquote(titles),
         **args
     )).json()
     
     return list(response["query"]["pages"].values())
 
 def get_wikipedia_summary(title):
-    pages = _wikipedia_query(
-        prop="extracts",
-        titles=title,
-        exintro=""
-    )
-
-    return pages[0]["extract"]
+    try:
+        pages = _wikipedia_query(
+            prop="extracts",
+            titles=title,
+            exintro=""
+        )
+        
+        return pages[0]["extract"]
+        
+    except KeyError as e:
+        print("get_wikipedia_summary error:", repr(e), pages)
+        return ""
 
 def get_wikipedia_image(title):
     url, _ = get_wikipedia_urls(title)
