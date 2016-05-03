@@ -18,7 +18,7 @@
     </header>
     
     {% if not search.results %}
-        <p>No matches! Try <a href={{ url_for("add_artist") }}>adding the artist to the database?</a></p>
+        <p>No matches! Try <a href={{ url_for("add_artist_search_results", query=search.encoded_query) }}>adding the artist to the database?</a></p>
     {% else %}
         <ol class="search-results">
         {% for result in search.results %}

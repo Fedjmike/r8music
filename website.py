@@ -170,13 +170,13 @@ def search_results(query=None):
     if not query:
         return redirect(url_for("search"))
 
-    query = decode_query_str(query)
+    encoded_query, query = query, decode_query_str(query)
     args = default_search_args.copy()
     args.update(only_valid_search_args(request.args))
     
     results = model().search(query, **args)
     return render_template("search_results.html",
-            search={"query": query, "args": args, "results": results})
+            search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
 
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
