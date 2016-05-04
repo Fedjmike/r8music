@@ -214,10 +214,13 @@ class User(ModelObject):
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
         self.get_releases_listened_unrated = get_releases_listened_unrated
         self.get_releases_listed = get_releases_listed
+        
         self.get_active_actions = get_active_actions
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
+        
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
+        
         self.get_activity_feed = lambda offset=0: model.get_activity_feed(self.id, offset=offset)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         

@@ -19,7 +19,7 @@
         {% set wp_urls = artist.get_wikipedia_urls() %}
         {% if wp_urls %}
             {% set wp_page, wp_edit = wp_urls %}
-            <p class="de-emph">[<a href="{{ wp_page }}">Read more</a> or <a href="{{ wp_edit }}">edit</a> on Wikipedia]</p>
+            <p class="de-emph">[<a href="{{ wp_page }}" target=_blank>Read more</a> or <a href="{{ wp_edit }}" target=_blank>edit</a> on Wikipedia]</p>
         {% endif %}
     </div>
     
