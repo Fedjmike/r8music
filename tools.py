@@ -1,6 +1,9 @@
 import re
 from unidecode import unidecode
 
+class WikipediaPageNotFound(Exception):
+    pass
+
 def flatten(lists):
     return [item for list in lists for item in list]
     
@@ -176,7 +179,7 @@ def guess_wikipedia_page(artist_name):
     except wikipedia.exceptions.PageError:
         pass
         
-    return None
+    raise(WikipediaPageNotFound)
     
 def get_wikipedia_urls(page_title):
     return "https://en.wikipedia.org/wiki/%s" % page_title, \

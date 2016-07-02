@@ -4,7 +4,7 @@ import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image
+from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound
 from model import Model, NotFound
 
 album_art_base_url = 'http://coverartarchive.org/release-group/'
@@ -136,18 +136,22 @@ def import_artist(artist):
         model.set_link(artist_id, link_type, target)
             
     if "wikipedia" not in links:
-        print("Guessing wikipedia link...")
-        links["wikipedia"] = title = guess_wikipedia_page(artist_name)
-        model.set_link(artist_id, "wikipedia", title)
+        try:
+            print("Guessing wikipedia link...")
+            links["wikipedia"] = title = guess_wikipedia_page(artist_name)
+            model.set_link(artist_id, "wikipedia", title)
 
-    print("Scraping wikipedia...")
-    model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
-    try:
-        image_thumb, image = get_wikipedia_image(links["wikipedia"])
-        model.set_link(artist_id, "image", image)
-        model.set_link(artist_id, "image_thumb", image_thumb)
-    except TypeError:    
-        pass
+            print("Scraping wikipedia...")
+            model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
+            try:
+                image_thumb, image = get_wikipedia_image(links["wikipedia"])
+                model.set_link(artist_id, "image", image)
+                model.set_link(artist_id, "image_thumb", image_thumb)
+            except TypeError:    
+                pass
+
+        except WikipediaPageNotFound:
+            pass
         
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
