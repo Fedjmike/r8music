@@ -136,7 +136,7 @@ def handle_not_found(f, what=None, form=False):
 
 @app.route("/artists")
 def artists_index():
-    artists = model().query("select * from artists")
+    artists = model().query("select * from artists order by slug")
     return render_template("artists_index.html", artists=artists)
 
 @app.route("/users")
