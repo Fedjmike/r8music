@@ -20,8 +20,8 @@ def friendly_datetime(then):
     now = datetime.now()
 
     #d is the day number, b is the short month name, Y is the year, X is the time
-    format =      "%d %B %Y at %X" if then.year != now.year \
-             else "%d %B at %X" if then.date() != now.date() \
+    format =      "%d %B %Y" if then.year != now.year \
+             else "%d %B" if then.date() != now.date() \
              else "today at %X"
     return then.strftime(format)
 

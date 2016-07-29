@@ -133,7 +133,7 @@ $(document).ready(function ($) {
     
     $("form#search input[type='submit']").click(function (event) {
         /*Cancel the click if the search query is empty*/
-        if ($("form#search [name='query']").val() == "")
+        if ($("form#search [name='query']").val().trim() == "")
             event.preventDefault();
     });
     

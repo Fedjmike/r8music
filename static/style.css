@@ -93,6 +93,7 @@ ol {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    cursor: default;
 }
 
 .material-icons.tiny {
@@ -565,10 +566,6 @@ form.review textarea {
 	margin-top: 2em;
 }
 
-.byline .author:after {
-    content: ', ';
-}
-
 ol.tracks {
     color: #333;
     counter-reset: item;
@@ -643,6 +640,16 @@ ol.tracks {
 
 .next-albums .next {
     float: right;
+}
+
+.album-title {
+    /*For the floated average rating */
+    display: inline-block;
+}
+
+.album-title > #average-rating-section {
+    float: right;
+    padding-left: 0.23em;
 }
 
 #average-rating {
@@ -882,6 +889,10 @@ section > section {
 
 /*Mobile*/
 @media only screen and (max-width: 500px) {
+    .nav {
+        max-width: 100%;
+    }
+    
     .page {
         padding-left: 0.75em;
         padding-right: 0.75em;

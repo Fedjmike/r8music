@@ -7,18 +7,16 @@ from multiprocessing.dummy import Pool as ThreadPool
 from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound
 from model import Model, NotFound
 
-album_art_base_url = 'http://coverartarchive.org/release-group/'
-
 def get_canonical_url(url):
     return requests.get(url).url
 
 def get_album_art_urls(release_group_id):
     print("Getting album art for release group " + release_group_id + "...")
-    r = requests.get(album_art_base_url + release_group_id + '/')
     try:
+        url = 'http://coverartarchive.org/release-group/%s/' % id
+        art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
-                (r.json()['images'][0]['image'],
-                 r.json()['images'][0]['thumbnails']['large']))
+                (art['image'], art['thumbnails']['large']))
     except ValueError:
         return None, None
 

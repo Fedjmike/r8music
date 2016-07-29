@@ -129,7 +129,7 @@ def handle_not_found(f, what=None, form=False):
         return f()
     
     except NotFound:
-        return      (jsonify(error=1), 404) if from_ajax() and not form \
+        return      (jsonify(error=1), 404) if from_ajax() and not (form or request.form) \
                else page_not_found(what=what)
     
 # Views
