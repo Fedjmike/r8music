@@ -380,6 +380,14 @@ class Model(GeneralModel):
     Action = namedtuple("Action", ["id", "user", "object", "type", "creation"])
         
     def add_action(self, user_id, object_id, type):
+        #Rating implies having listened (transitively, it also unlists)
+        if type == ActionType["rate"]:
+            self.add_action(user_id, object_id, ActionType["listen"])
+            
+        #Listening resets "to listen" status
+        if type == ActionType["listen"]:
+            self.add_action(user_id, object_id, ActionType["unlist"])
+            
         return self.insert("insert into actions (user_id, object_id, type, creation)"
                            " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
         

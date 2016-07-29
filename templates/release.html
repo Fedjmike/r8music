@@ -83,9 +83,11 @@
             {% set ratings = user.get_ratings() if user else {} %}
             {% set active_actions = user.get_active_actions(release.id) if user else [] %}
             
-            {% set actions = [("list", "playlist_add", "Will listen to")] %}
+            {# Which buttons appear / how they appear depends on their status #}
+            {% set actions = [("list", "playlist_add", "Will listen to"
+                    + (" again" if "listen" in active_actions else ""))] %}
             {% set _ = actions.append(("listen", "headset", "Listened to")) if release.id not in ratings %}
-            {% set _ = actions.append(("share", "share", "Share")) if release.id in ratings %}
+            {% set _ = actions.append(("share", "share", "Share")) if "listen" in active_actions %}
             
             {{ clickable_action_list(actions, active_actions,
                                      data=[("data-release-id", release.id)]) }}
