@@ -8,7 +8,7 @@ create table objects (
 
 drop table if exists artists;
 create table artists (
-    id integer not null,
+    id integer primary key,
     name text not null,
     slug text not null,
     incomplete text,
@@ -20,7 +20,7 @@ create index artist_slug_index on artists(slug);
 
 drop table if exists releases;
 create table releases (
-    id integer not null,
+    id integer primary key,
     title text not null,
     slug text not null,
     date text not null, -- ISO 8601 date
@@ -47,7 +47,7 @@ create index authorship_artist_index on authorships(artist_id);
 
 drop table if exists tracks;
 create table tracks (
-    id integer not null,
+    id integer primary key,
     release_id integer not null,
     title text not null,
     slug text not null,
@@ -73,7 +73,7 @@ create table palettes (
 
 drop table if exists descriptions;
 create table descriptions (
-    id integer not null,
+    id integer primary key,
     description text,
     foreign key (id) references objects(id)
 );
@@ -123,6 +123,7 @@ create table user_rating_descriptions (
     user_id integer not null,
     rating integer not null,
     description text not null,
+    primary key (user_id, rating),
     foreign key (user_id) references users(id)
 );
 
@@ -157,7 +158,7 @@ create table actions (
 
 drop table if exists ratings;
 create table ratings (
-    action_id integer not null,
+    action_id integer primary key,
     rating integer not null,
     foreign key (action_id) references actions(id)
 );
