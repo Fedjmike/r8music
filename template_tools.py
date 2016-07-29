@@ -41,12 +41,13 @@ def group_by_rating(ratings):
     
 range_of = lambda list: range(min(list), max(list))
     
-def get_release_year_counts(ratings):
-    counts = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0, 0])
+def get_release_year_counts(ratings=[], listened_unrated=[]):
+    #Split by year then rating (first element = listened unrated)
+    counts = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0, 0, 0])
     
-    for release, rating in ratings:
+    for release, rating in ratings + [(r, 0) for r in listened_unrated]:
         year = int(release.date[:4])
-        counts[year][rating-1] += 1
+        counts[year][rating] += 1
 
     #Fill in the missing years within the range
     for year in range_of(counts):
@@ -62,7 +63,7 @@ def get_release_year_counts(ratings):
     #[year], [count], [[count]]
     return years, list(map(sum, year_counts)), list(zip(*year_counts))
     
-def get_user_datasets(ratings):
+def get_user_datasets(ratings=[], listened_unrated=[]):
     """Takes [(release, rating)] and gives various interesting datasets"""
     
     if not ratings:
@@ -70,7 +71,7 @@ def get_user_datasets(ratings):
     
     releases, _ = zip(*ratings)
     by_rating = group_by_rating(ratings)
-    years, year_counts, year_counts_by_rating = get_release_year_counts(ratings)
+    years, year_counts, year_counts_by_rating = get_release_year_counts(ratings, listened_unrated)
     
     return {
         "ratingCounts": [len(releases) for releases in by_rating.values()],
