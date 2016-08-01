@@ -10,12 +10,14 @@ from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
 from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_artists
 
-g_recaptcha_secret = "todo config"
-
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
 #losing your session when the server restarts
 app.secret_key = os.urandom(24)
+try:
+    app.config.from_object('config')
+except ImportError:
+    print("Warning: Config not loaded")
 
 app_pool = multiprocessing.pool.ThreadPool(processes=4)
 add_template_tools(app)
@@ -319,7 +321,7 @@ def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
     response = requests.post(
         "https://www.google.com/recaptcha/api/siteverify",
         data={
-            "secret": g_recaptcha_secret,
+            "secret": app.config["G_RECAPTCHA_SECRET"],
             "response": recaptcha_response,
             "remoteip": remote_addr
         }
@@ -331,7 +333,7 @@ def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
         
         else:
             flash("Recaptcha error: " + str(response["error-codes"]), "recaptcha-error")
-            return error()
+            return error_view()
     
     if not response["success"]:
         flash("Sorry, you appear to be a robot. Try again?", "recaptcha-error")
