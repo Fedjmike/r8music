@@ -7,6 +7,8 @@ from multiprocessing.dummy import Pool as ThreadPool
 from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound
 from model import Model, NotFound
 
+limit = 100
+
 def get_canonical_url(url):
     return requests.get(url).url
 
@@ -49,8 +51,15 @@ def get_links(artist_mbid):
 
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
-    result = musicbrainzngs.get_artist_by_id(mbid, includes=['release-groups']) 
-    release_groups = result['artist']['release-group-list']
+    offset = 0
+    release_groups = []
+    while True:
+        result = musicbrainzngs.browse_release_groups(mbid, limit=limit, offset=offset)
+        release_groups += result['release-group-list']
+        offset += limit
+        if len(result['release-group-list']) != limit:
+            break
+        print("Getting more release groups with offset " + str(offset) +"...")
     releases = []
     for group in release_groups:
         print("Querying MB for release group " + group['id'] + "...")
