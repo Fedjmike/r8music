@@ -15,7 +15,7 @@ def get_canonical_url(url):
 def get_album_art_urls(release_group_id):
     print("Getting album art for release group " + release_group_id + "...")
     try:
-        url = 'http://coverartarchive.org/release-group/%s/' % id
+        url = 'http://coverartarchive.org/release-group/%s/' % release_group_id
         art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
                 (art['image'], art['thumbnails']['large']))
