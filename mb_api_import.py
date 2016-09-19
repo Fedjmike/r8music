@@ -12,10 +12,14 @@ limit = 100
 def get_canonical_url(url):
     return requests.get(url).url
 
-def get_album_art_urls(release_group_id):
-    print("Getting album art for release group " + release_group_id + "...")
+def get_album_art_urls(mbid, group=True):
+    if group:
+        print("Getting album art for release group " + mbid + "...")
+    else:
+        print("Getting album art for release " + mbid + "...")
     try:
-        url = 'http://coverartarchive.org/release-group/%s/' % release_group_id
+        url = 'http://coverartarchive.org/release-group/%s/' % mbid \
+            if group else 'http://coverartarchive.org/release/%s/' % mbid
         art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
                 (art['image'], art['thumbnails']['large']))
