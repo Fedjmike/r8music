@@ -34,11 +34,13 @@
         {{ n_things(followers | length, "follower") }}
     </p>
     
-    {% if user and that_user.id != user.id %}
+    {% if user %}
         {% set following_since = user.get_follow(that_user.id) %}
         <p>
         {% if following_since %}
-            You started following them {{ full_and_friendly_datetime(following_since) }}<br/>
+            {% if that_user.id != user.id %}
+                You started following them {{ full_and_friendly_datetime(following_since) }}<br/>
+            {% endif %}
             <a href={{ url_for_user(that_user) + "?action=unfollow" }}>Unfollow</a>
         {% else %}
             <a href={{ url_for_user(that_user) + "?action=follow" }}>Follow</a>
