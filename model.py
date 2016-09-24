@@ -549,7 +549,6 @@ class Model(GeneralModel):
                               email, fullname, UserType.user.value, creation)
         
         self.set_user_timezone(user_id, timezone)
-        self.follow(user_id, user_id)
         
         return User(self, (user_id, name, email, UserType.user, creation))
     
