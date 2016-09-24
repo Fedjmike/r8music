@@ -189,6 +189,7 @@ class User(ModelObject):
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
+        self.follows_self = model.get_user_follows_self(self.id)
         
         def get_active_actions(object_id):
             latest_by_type = defaultdict(lambda: 0) #A date older than all others (1970)
@@ -405,7 +406,7 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
         
-    def _get_activity(self, user_id, limit, offset, friends=False):
+    def _get_activity(self, user_id, limit, offset, friends=False, follows_self=True):
         #todo not just releases
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
                           " r.id, r.title, r.slug, artists.name, artists.slug from"
@@ -414,7 +415,8 @@ class Model(GeneralModel):
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id"
-                          " where " + ("follower" if friends else "user_id") + "=?"
+                          " where " + (("follower " + ("or user_id" if follows_self else ""))\
+                          if friends else "user_id") + "=?"
                           " order by a.creation desc limit ? offset ?", user_id, limit, offset)
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
@@ -436,7 +438,8 @@ class Model(GeneralModel):
         return offset, actions
         
     def get_activity_feed(self, user_id, limit=20, offset=0):
-        offset, *actions = self._get_activity(user_id, limit, offset, friends=True)
+        follows_self = self.get_user_follows_self(user_id)
+        offset, *actions = self._get_activity(user_id, limit, offset, friends=True, follows_self=follows_self)
         return offset, actions
         
     def get_latest_actions_by_type(self, user_id, object_id):
@@ -581,6 +584,16 @@ class Model(GeneralModel):
         return self.query_unique("select timezone from user_timezones"
                                  " where user_id=?", user_id, fallback=("Europe/London",))[0]
         
+    def set_user_follows_self(self, user_id, follows_self):
+        self.execute("replace into user_follows_self (user_id, follows_self) values (?, ?)", user_id, 1 if follows_self else 0)
+
+    def get_user_follows_self(self, user_id):
+        try:
+            return self.query_unique("select follows_self from user_follows_self where user_id=?", user_id)[0]
+        except NotFound:
+            self.set_user_follows_self(user_id, True)
+            return True
+
     def set_user_rating_description(self, user_id, rating, description):
         if description:
             self.execute("replace into user_rating_descriptions (user_id, rating, description)"

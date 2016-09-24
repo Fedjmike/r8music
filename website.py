@@ -450,7 +450,8 @@ def user_settings():
         return render_template("settings.html", user=request.user)
     
     else:
-        email, timezone = dict_values(request.values, ["email", "timezone"])
+        email, timezone, follows_self = \
+            dict_values(request.values, ["email", "timezone", "follows_self"])
         
         #Allow the user to set email to an empty string
         if email is not None:
@@ -458,6 +459,9 @@ def user_settings():
             
         if timezone:
             model().set_user_timezone(request.user.id, timezone)
+
+        model().set_user_follows_self(request.user.id, 
+            True if follows_self == "on" else False)
         
         flash("Settings saved", "success")
         return redirect(url_for("user_settings"))
