@@ -177,6 +177,11 @@ def search_results(query=None):
     args.update(only_valid_search_args(request.args))
     
     results = model().search(query, **args)
+    
+    #If there is only one result, redirect straight there
+    if len(results) == 1:
+        return redirect(results[0]["url"])
+    
     return render_template("search_results.html",
             search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
 
