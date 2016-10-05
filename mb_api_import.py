@@ -53,6 +53,33 @@ def get_links(artist_mbid):
         print("Error getting links:", e)
     return links
 
+def prepare_artist(artist_mbid, artist_id):
+    model = Model()
+
+    print("Getting links...")
+    links = get_links(artist_mbid)
+    for link_type, target in links.items():
+        model.set_link(artist_id, link_type, target)
+            
+    if "wikipedia" not in links:
+        try:
+            print("Guessing wikipedia link...")
+            links["wikipedia"] = title = guess_wikipedia_page(artist_name)
+            model.set_link(artist_id, "wikipedia", title)
+
+            print("Scraping wikipedia...")
+            model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
+            try:
+                image_thumb, image = get_wikipedia_image(links["wikipedia"])
+                model.set_link(artist_id, "image", image)
+                model.set_link(artist_id, "image_thumb", image_thumb)
+            except TypeError:    
+                pass
+
+        except WikipediaPageNotFound:
+            pass
+
+
 def get_releases(mbid, processed_release_mbids):
     print("Querying MB for release groups...")
     offset = 0
@@ -99,78 +126,8 @@ def prepare_release(release):
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
-class MBID(str):
-    pass
-    
-def import_artist(artist):
-    """artist may either be the name or MBID"""
-    
-    print("Querying MB for artist info...")
-    if isinstance(artist, MBID):
-        artist_mbid = artist
-        result = musicbrainzngs.get_artist_by_id(artist_mbid)
-        artist_name = result['artist']['name']
-    else:
-        result = musicbrainzngs.search_artists(artist=artist)
-        artist_mbid = result['artist-list'][0]['id']
-        artist_name = result['artist-list'][0]['name']
-
+def add_releases(releases, processed_artist_mbids):
     model = Model()
-
-    mb_type_id = model.get_link_type_id("musicbrainz")
-    
-    try:
-        #Imported incompletely
-        (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
-        processed_release_mbids = [
-            row['target'] for row in
-            model.query('select target from links l join authorships a on l.id = a.release_id where artist_id=? and type_id=?', artist_id, mb_type_id)
-        ]
-        
-        model.execute('update artists set incomplete = NULL where id=?', artist_id)
-
-    except NotFound:
-        try:
-            #Complete
-            (artist_id,) = model.query_unique('select id from links where type_id=? and target=?', mb_type_id, artist_mbid)
-            print("Already imported")
-            return
-
-        #Not in db
-        except NotFound:
-            artist_id = model.add_artist(artist_name, artist_mbid)
-            processed_release_mbids = []
-
-    print("Getting links...")
-    links = get_links(artist_mbid)
-    for link_type, target in links.items():
-        model.set_link(artist_id, link_type, target)
-            
-    if "wikipedia" not in links:
-        try:
-            print("Guessing wikipedia link...")
-            links["wikipedia"] = title = guess_wikipedia_page(artist_name)
-            model.set_link(artist_id, "wikipedia", title)
-
-            print("Scraping wikipedia...")
-            model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
-            try:
-                image_thumb, image = get_wikipedia_image(links["wikipedia"])
-                model.set_link(artist_id, "image", image)
-                model.set_link(artist_id, "image_thumb", image_thumb)
-            except TypeError:    
-                pass
-
-        except WikipediaPageNotFound:
-            pass
-        
-    pool = ThreadPool(8)
-    releases = get_releases(artist_mbid, processed_release_mbids)
-    pool.map(prepare_release, releases)
-
-    # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
-    processed_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
-    processed_artist_mbids[artist_mbid] = artist_id
 
     for release in releases:
         print("Adding release: ", release['title'])
@@ -215,6 +172,76 @@ def import_artist(artist):
                     side,
                     length
                 )
+
+class MBID(str):
+    pass
+
+class id_(str):
+    pass
+    
+def import_artist(artist):
+    """artist may either be the name or MBID"""
+    
+    model = Model()
+    mb_type_id = model.get_link_type_id("musicbrainz")
+
+    print("Querying MB for artist info...")
+    if isinstance(artist, id_):
+        artist_mbid, artist_name = model.query_unique("select target, name from links join artists using (id)"
+                                                      " where type_id=? and artists.id=?", mb_type_id, artist)
+
+    elif isinstance(artist, MBID):
+        artist_mbid = artist
+        result = musicbrainzngs.get_artist_by_id(artist_mbid)
+        artist_name = result['artist']['name']
+    else:
+        result = musicbrainzngs.search_artists(artist=artist)
+        artist_mbid = result['artist-list'][0]['id']
+        artist_name = result['artist-list'][0]['name']
+
+    update_links = True
+    
+    try:
+        #Imported incompletely
+        (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
+        processed_release_mbids = [
+            row['target'] for row in
+            model.query("select target from links l join authorships a"
+                        " on l.id = a.release_id where artist_id=? and type_id=?", artist_id, mb_type_id)
+        ]
+        
+        model.execute('update artists set incomplete = NULL where id=?', artist_id)
+
+    except NotFound:
+        try:
+            #Complete
+            (artist_id,) = model.query_unique('select id from links where type_id=? and target=?', mb_type_id, artist_mbid)
+            print("Already imported, updating...")
+            update_links = False
+            processed_release_mbids = [
+                row['target'] for row in
+                model.query('select target from links l join authorships a'
+                            ' on l.id = a.release_id where artist_id=? and type_id=?', artist_id, mb_type_id)
+            ]
+
+        #Not in db
+        except NotFound:
+            artist_id = model.add_artist(artist_name, artist_mbid)
+            processed_release_mbids = []
+
+    if not update_links: 
+        prepare_artist(artist_mbid, artist_id)
+        
+    pool = ThreadPool(8)
+    releases = get_releases(artist_mbid, processed_release_mbids)
+    pool.map(prepare_release, releases)
+
+    # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
+    processed_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
+    processed_artist_mbids[artist_mbid] = artist_id
+
+    add_releases(releases, processed_artist_mbids)
+
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 

@@ -39,4 +39,9 @@
         {{ release_grid(others | sort(attribute="date"), user, "small") }}
     {% endif %}
 </section>
+<section class="content page">
+    <form action={{ url_for("update_artist") }} method="post">
+        <button name="artist-id" value={{ artist.id }}>Update artist</button>
+    </form>
+</section>
 {% endblock %}

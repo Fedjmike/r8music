@@ -6,7 +6,7 @@ from contextlib import closing
 from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
-from mb_api_import import import_artist, MBID
+from mb_api_import import import_artist, MBID, id_
 from template_tools import add_template_tools
 from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_artists
 
@@ -272,6 +272,14 @@ def add_artist_search_results(query=None):
     query = decode_query_str(query)
     artists = search_artists(query)
     return render_template("add_artist_search_results.html", artists=artists, query=query)
+
+@app.route("/update-artist", methods=["POST"])
+@needs_auth
+def update_artist():
+    artist_id = id_(request.form["artist-id"])
+    app_pool.apply_async(import_artist, (artist_id,))
+    return redirect(url_for("artists_index"))
+
 
 @app.route("/")
 def homepage():
