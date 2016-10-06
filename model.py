@@ -428,12 +428,12 @@ class Model(GeneralModel):
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
                           " r.id, r.title, r.slug, artists.name, artists.slug from"
                           " actions a join users u on user_id = u.id"
-                          + (" join followerships using (user_id)" if friends else "") +
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id"
-                          " where " + (("follower " + ("or user_id" if follows_self else ""))\
-                          if friends else "user_id") + "=?"
+                          " where u.id in (select user_id from followerships where" + \
+                          ((" follower" + (" or user_id" if follows_self else ""))\
+                          if friends else " user_id") + "=?)"
                           " order by a.creation desc limit ? offset ?", user_id, limit, offset)
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
@@ -442,11 +442,11 @@ class Model(GeneralModel):
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
+
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
                        for row in uniq(rows, key=artist_slug)]
             
             row = list(rows[0])[:8] #Excluding artist columns
-            
             if not ActionType(action_type(row)).name.startswith("un"):
                 yield Action(*row, artists=artists)
         
