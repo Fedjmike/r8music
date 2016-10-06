@@ -113,10 +113,27 @@ class Artist(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "slug"])
         
+        def get_external_links():
+            sites = [
+                ("Wikipedia", lambda title: "//en.wikipedia.org/wiki/" + title),
+                ("MusicBrainz", lambda mbid: "//musicbrainz.org/artist/" + mbid),
+                ("Facebook", lambda x: x),
+                ("Bandcamp", lambda x: x),
+                ("Twitter", lambda x: x),
+                ("SoundCloud", lambda x: x)
+            ]
+            
+            for site, build_url in sites:
+                link = model.get_link(self.id, site.lower())
+                
+                if link:
+                    yield site, build_url(link)
+
         self.get_releases = lambda: model.get_releases_by_artist(self)
         self.get_image = lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
         self.get_description = lambda: model.get_description(self.id)
         self.get_wikipedia_urls = lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
+        self.get_external_links = get_external_links
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
