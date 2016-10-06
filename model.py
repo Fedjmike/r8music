@@ -438,6 +438,10 @@ class Model(GeneralModel):
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
         
+        action_priorities = {
+            1: 1, 2: 4, 3: 2, 4: 5, 5: 3, 6: 6, 7: 7, 8: 8
+        }
+
         yield offset + len(rows)
         
         for object_id, rows in groupby(rows, object_id):
@@ -446,7 +450,7 @@ class Model(GeneralModel):
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
                        for row in uniq(rows, key=artist_slug)]
             
-            row = list(rows[0])[:8] #Excluding artist columns
+            row = list(sorted(rows, key=lambda a:action_priorities[action_type(a)])[0])[:8] #Excluding artist columns
             if not ActionType(action_type(row)).name.startswith("un"):
                 yield Action(*row, artists=artists)
         
