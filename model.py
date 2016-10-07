@@ -113,27 +113,11 @@ class Artist(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "slug"])
         
-        def get_external_links():
-            sites = [
-                ("Wikipedia", lambda title: "//en.wikipedia.org/wiki/" + title),
-                ("MusicBrainz", lambda mbid: "//musicbrainz.org/artist/" + mbid),
-                ("Facebook", lambda x: x),
-                ("Bandcamp", lambda x: x),
-                ("Twitter", lambda x: x),
-                ("SoundCloud", lambda x: x)
-            ]
-            
-            for site, build_url in sites:
-                link = model.get_link(self.id, site.lower())
-                
-                if link:
-                    yield site, build_url(link)
-
         self.get_releases = lambda: model.get_releases_by_artist(self)
         self.get_image = lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
         self.get_description = lambda: model.get_description(self.id)
         self.get_wikipedia_urls = lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
-        self.get_external_links = get_external_links
+        self.get_external_links = lambda: model.get_external_links(self.id, "artist")
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
@@ -175,26 +159,11 @@ class Release(ModelObject):
                 _next = other_releases[index+1] if index != len(other_releases)-1 else None
                 yield artist, previous, _next
             
-        def get_external_links():
-            sites = [
-                ("Wikipedia", lambda title: "//en.wikipedia.org/wiki/" + title),
-                ("AZLyrics", lambda x: x),
-                ("MusicBrainz", lambda mbid: "//musicbrainz.org/release/" + mbid),
-                ("Allmusic", lambda x: x),
-                ("UltimateGuitar", lambda x: x)
-            ]
-            
-            for site, build_url in sites:
-                link = model.get_link(self.id, site.lower())
-                
-                if link:
-                    yield site, build_url(link)
-            
         self.get_artists = get_artists
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
         self.get_palette = lambda: model.get_palette(self.id)
-        self.get_external_links = get_external_links
+        self.get_external_links = lambda: model.get_external_links(self.id, "release")
         
         self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
         self.get_reviews = lambda: model.get_reviews(self.id)
@@ -392,6 +361,22 @@ class Model(GeneralModel):
             
         return self.query_unique("select target from links where id=? and type_id=?",
                                  id, link_type_id, fallback=(None,))[0]
+        
+    def get_external_links(self, id, mb_type):
+        sites = [
+            "AZLyrics", "Allmusic", "Bandcamp", "Facebook",
+            "Twitter", "SoundCloud", "UltimateGuitar",
+            #For some sites an ID or title is stored, not an URL
+            ("Wikipedia", lambda title: "//en.wikipedia.org/wiki/" + title),
+            ("MusicBrainz", lambda mbid: "//musicbrainz.org/%s/%s" % (mb_type, mbid))
+        ]
+        
+        for site in sites:
+            site, build_url = site if isinstance(site, tuple) else (site, lambda x: x)
+            link = self.get_link(id, site.lower())
+            
+            if link:
+                yield site, build_url(link)
         
     #Actions
     
