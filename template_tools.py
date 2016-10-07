@@ -54,7 +54,7 @@ def get_release_year_counts(ratings=[], listened_unrated=[]):
         if year not in counts:
             counts[year] = counts.default_factory()
     
-    #[(year, (,,,,,,,,))]
+    #[(year, (,,,,,,,,))] sorted by year
     items = sorted(counts.items(), key=lambda kv: kv[0])
     #Transpose the table into [year], [(,,,,,,,,)]
     years, year_counts = zip(*items)
@@ -64,7 +64,7 @@ def get_release_year_counts(ratings=[], listened_unrated=[]):
     return years, list(map(sum, year_counts)), list(zip(*year_counts))
     
 def get_user_datasets(ratings=[], listened_unrated=[]):
-    """Takes [(release, rating)] and gives various interesting datasets"""
+    """Takes [(release, rating)] and [release] and gives various interesting datasets"""
     
     if not ratings:
         return None

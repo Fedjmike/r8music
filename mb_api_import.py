@@ -13,16 +13,14 @@ def get_canonical_url(url):
     return requests.get(url).url
 
 def get_album_art_urls(mbid, group=True):
-    if group:
-        print("Getting album art for release group " + mbid + "...")
-    else:
-        print("Getting album art for release " + mbid + "...")
     try:
-        url = 'http://coverartarchive.org/release-group/%s/' % mbid \
-            if group else 'http://coverartarchive.org/release/%s/' % mbid
+        print("Getting album art for %s %s..." % ("release group" if group else "release", mbid))
+        url_format = "http://coverartarchive.org/%s/%s/"
+        url = url_format % ("release-group" if group else "release", id)
         art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
                 (art['image'], art['thumbnails']['large']))
+        
     except ValueError:
         return None, None
 

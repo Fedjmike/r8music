@@ -446,11 +446,11 @@ class Model(GeneralModel):
         
         for object_id, rows in groupby(rows, object_id):
             rows = list(rows) #groupby uses generators
-
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
                        for row in uniq(rows, key=artist_slug)]
             
             row = list(sorted(rows, key=lambda a:action_priorities[action_type(a)])[0])[:8] #Excluding artist columns
+            
             if not ActionType(action_type(row)).name.startswith("un"):
                 yield Action(*row, artists=artists)
         
