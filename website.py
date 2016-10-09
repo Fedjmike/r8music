@@ -287,7 +287,6 @@ def update_artist():
     app_pool.apply_async(import_artist, (artist_id,))
     return redirect(url_for("artists_index"))
 
-
 @app.route("/")
 def homepage():
     return render_template("homepage.html")
