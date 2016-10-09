@@ -280,10 +280,10 @@ def add_artist_search_results(query=None):
     artists = search_artists(query)
     return render_template("add_artist_search_results.html", artists=artists, query=query)
 
-@app.route("/update-artist", methods=["POST"])
+@app.route("/update-artist/<int:id>")
 @needs_auth
-def update_artist():
-    artist_id = id_(request.form["artist-id"])
+def update_artist(id):
+    artist_id = id_(id)
     app_pool.apply_async(import_artist, (artist_id,))
     return redirect(url_for("artists_index"))
 

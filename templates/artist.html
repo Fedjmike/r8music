@@ -44,8 +44,6 @@
     {% for site, link in artist.get_external_links() %}
         <a href={{ link }} target=_blank>{{ site }}<i class="material-icons tiny">launch</i></a><br/>
     {% endfor %}
-    <form action={{ url_for("update_artist") }} method="post">
-        <button name="artist-id" value={{ artist.id }}>Update artist</button>
-    </form>
+    <span class="right de-emph">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
 </section>
 {% endblock %}
