@@ -13,8 +13,6 @@
         <dl>
             <dt>Email address</dt> <dd><input type="text" name="email" value="{{ user.email if user.email else '' }}" /></dd>
             <dt>Timezone</dt> <dd><input type="text" name="timezone" value="{{ user.timezone }}" /></dd>
-            <dt>Following self</dt> <dd><input type="checkbox" name="follows_self" 
-            {% if user.follows_self %} checked {% endif %} /></dd>
             
             <dd><input type="submit" value="Save changes" /></dd>
         </dl>

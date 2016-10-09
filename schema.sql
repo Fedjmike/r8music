@@ -118,13 +118,6 @@ create table user_timezones (
     foreign key (user_id) references users(id)
 );
 
-drop table if exists user_follows_self;
-create table user_follows_self (
-    user_id integer primary key,
-    follows_self integer not null,
-    foreign key (user_id) references users(id)
-);
-
 drop table if exists user_rating_descriptions;
 create table user_rating_descriptions (
     user_id integer not null,
