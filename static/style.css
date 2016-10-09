@@ -418,10 +418,28 @@ ol:not(.small).rating {
     position: relative;
     height: 0;
     z-index: 99;
+}
+
+.releases.grid > li > .inset.top {
+    top: 0.3em;
+    right: 0.35em;
+    top: -0.5em;
+    right: 0.5em;
+    text-align: right;
+}
+
+.releases.grid #average-rating {
+    font-size: 0.8em;
+    margin-left: 0.5em;
+    background-color: rgba(96, 96, 96, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.releases.grid > li > .inset.bottom {
     top: 6.85em;
 }
 
-.small.releases.grid > li > .inset {
+.small.releases.grid > li > .inset.bottom {
     top: 5.6rem;
 }
 
@@ -701,11 +719,11 @@ ol.references {
     display: inline-block;
 }
     
-.grids-list li > .inset {
+.grids-list li > .inset-rating-widget {
     transition: opacity 0.08s;
 }
 
-.grids-list li:not(:hover) > .inset {
+.grids-list li:not(:hover) > .inset-rating-widget {
     opacity: 0;
 }
 

@@ -23,8 +23,14 @@
     {% set ratings = user.get_ratings() if user else {} %}
     {% for release in releases %}
         <li>
-            <div class="inset">
+            <div class="bottom inset inset-rating-widget">
                 {{ rating_widget(release, ratings[release.id] if release.id in ratings, "small") }}
+            </div>
+            <div class="top inset inset-average-rating">
+                {% set average_rating = release.get_rating_stats().average %}
+                <span id="average-rating-section" style="{{ '' if average_rating else 'display: none;' }}">
+                    <span id="average-rating">{{ "%.1f" % average_rating if average_rating else '' }}</span>
+                </span>
             </div>
             <a href={{ release.url }}>
                 <div class="cover"><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
