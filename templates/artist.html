@@ -28,7 +28,7 @@
 </section>
 <section class="content page">
     <header><h2>Albums</h2></header>
-    {{ release_grid(albums | sort(attribute="date"), user, show_average_rating=True) }}
+    {{ release_grid(albums | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
 </section>
 <section class="content page">
     {% endif %}
@@ -36,7 +36,7 @@
     {% set others = artist.get_releases() | rejectattr("release_type", "equalto", "Album") | list %}
     {% if others %}
         <header><h3>Other releases</h3></header>
-        {{ release_grid(others | sort(attribute="date"), user, "small", show_average_rating=True) }}
+        {{ release_grid(others | sort(attribute="date"), user, "small", show_date_not_artist=True, show_average_rating=True) }}
     {% endif %}
 </section>
 <section class="content page">

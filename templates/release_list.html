@@ -18,7 +18,7 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_grid(releases, user=None, class=None, artist_not_date=False, show_average_rating=False) -%}
+{% macro release_grid(releases, user=None, class=None, show_date_not_artist=False, show_average_rating=False) -%}
     <ol class="releases grid {{ class if class else '' }}">
     {% set ratings = user.get_ratings() if user else {} %}
     {% for release in releases %}
@@ -36,7 +36,7 @@
             {% endif %}
             <a href={{ release.url }}>
                 <div class="cover"><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
-                {% if not artist_not_date %}
+                {% if show_date_not_artist %}
                     <span class="title">{{ release.title }}<br/>{{ release.date[:4] }}</span>
             </a>
                 {% else %}

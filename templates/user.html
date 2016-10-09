@@ -58,14 +58,14 @@
     {% set listened = that_user.get_releases_listened_unrated() %}
     <section class="page content"><div>
         <header><h1>Listened to but unrated</h1></header>
-        {{ release_grid(sort_by_artist(listened), user, "small", artist_not_date=True) }}
+        {{ release_grid(sort_by_artist(listened), user, "small") }}
     </div></section>
     
 {% elif tab == "will-listen" %}
     {% set will_listen = that_user.get_releases_listed() %}
     <section class="page content"><div>
         <header><h1>Will listen to</h1></header>
-        {{ release_grid(sort_by_artist(will_listen), user, "small", artist_not_date=True) }}
+        {{ release_grid(sort_by_artist(will_listen), user, "small") }}
     </div></section>
     
 {% elif tab == "activity" %}
@@ -98,7 +98,7 @@
                  {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
                 {% endif %}
             </h1></header>
-            {{ release_grid(sort_by_artist(by_rating[n]), user, "small", artist_not_date=True) }}
+            {{ release_grid(sort_by_artist(by_rating[n]), user, "small") }}
         </div></section>
     {% endfor %}
     </div>
