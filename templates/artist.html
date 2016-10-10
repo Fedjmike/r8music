@@ -24,8 +24,9 @@
         
         <header class="tight"><h4>External links</h4></header>
         {% for site, link in artist.get_external_links() %}
-            {% if loop.index % 4 == 0 %}<br/>
-            {% elif loop.index != 1 %}&#183;{% endif %}
+            {% if loop.index == 1 %}
+            {% elif (loop.index-1) % 4 == 0 %}<br/>
+            {% else %}&#183;{% endif %}
             <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a> 
         {% endfor %}
         
