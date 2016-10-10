@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled
 from template_tools import url_for_release
 from chromatography import get_palette
 

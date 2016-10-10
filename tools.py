@@ -103,6 +103,32 @@ def decorator_with_args(decorator):
 
 #
 
+from cProfile import Profile
+from time import perf_counter
+
+@basic_decorator
+def execution_time(f):
+    start = perf_counter()                     
+    result = f()
+    duration = (perf_counter() - start)*1000
+    
+    if duration > 1:
+        print("%.2f" % duration, "ms spent in", f.__name__)
+        
+    return result
+
+@basic_decorator
+def profiled(f):
+    try:
+        profile = Profile()
+        result = profile.runcall(f)
+        return result
+    
+    finally:
+        profile.print_stats(sort="cumtime")
+
+#
+
 def search_artists(artist_name):
     import musicbrainzngs as mb
     mb.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
