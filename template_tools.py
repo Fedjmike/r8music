@@ -66,10 +66,7 @@ def get_release_year_counts(ratings=[], listened_unrated=[]):
 def get_user_datasets(ratings=[], listened_unrated=[]):
     """Takes [(release, rating)] and [release] and gives various interesting datasets"""
     
-    if not ratings:
-        return None
-    
-    releases, _ = zip(*ratings)
+    releases, _ = zip(*ratings) if len(ratings) != 0 else ([], [])
     by_rating = group_by_rating(ratings)
     years, year_counts, year_counts_by_rating = get_release_year_counts(ratings, listened_unrated)
     

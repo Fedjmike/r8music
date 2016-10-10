@@ -109,7 +109,7 @@ function renderYearCounts(canvas) {
     /*Pad the front of the dataset to the start of a decade*/
     var extraYears = labels[0] % 10;
     data = Array(extraYears).fill(0).concat(data);
-    labels = [labels[0] - extraYears].concat(Array(extraYears-1).fill("")).concat(labels);
+    labels = Array.from(Array(extraYears), (x, i) => labels[0] - extraYears + i).concat(labels);
     
     renderBarChart(canvas, labels, data, {
         scales: {
