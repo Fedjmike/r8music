@@ -285,7 +285,7 @@ def add_artist_search_results(query=None):
 def update_artist(id):
     artist_id = id_(id)
     app_pool.apply_async(import_artist, (artist_id,))
-    return redirect(url_for("artists_index"))
+    return redirect(url_for("artist_page", slug=model().get_artist(id).slug))
 
 @app.route("/")
 def homepage():
