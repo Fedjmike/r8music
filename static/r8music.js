@@ -63,28 +63,38 @@ function handleReleaseAction(event) {
 }
 
 if (typeof Chart !== "undefined") {
+    Chart.defaults.global.legend.display = false;
     Chart.defaults.global.animation = false;
 
     Chart.defaults.global.scaleLineColor = palette[1];
     Chart.defaults.global.scaleFontFamily = "Signika";
     Chart.defaults.global.scaleFontSize = 14;
-
-    Chart.defaults.Bar.barStrokeWidth = 1.5;
-    Chart.defaults.Bar.barValueSpacing = 1;
 }
 
-function renderBarChart(canvas, labels, data) {
+function renderChart(canvas, labels, options) {
     if ("chart" in canvas)
         canvas.chart.destroy();
     
-    canvas.chart = new Chart(canvas.getContext("2d")).Bar({
-        labels: labels,
-        datasets: [{
-            data: data,
-            strokeColor: palette[0],
-            fillColor: "rgba(0,0,0, 0)",
-            highlightFill: palette[0]
-        }]
+    canvas.chart = new Chart(canvas.getContext("2d"), options);
+}
+
+defaultBarOptions = {scales: {xAxes: [{categoryPercentage: 1, barPercentage: 0.85}]}};
+
+function renderBarChart(canvas, labels, data, options=defaultBarOptions) {
+    renderChart(canvas, labels, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: palette[0],
+                backgroundColor: "rgba(0,0,0, 0)",
+                hoverBackgroundColor: palette[0],
+                borderWidth: 1.5,
+                
+            }]
+        },
+        options: options
     });
 }
 
@@ -101,10 +111,16 @@ function renderYearCounts(canvas) {
     data = Array(extraYears).fill(0).concat(data);
     labels = [labels[0] - extraYears].concat(Array(extraYears-1).fill("")).concat(labels);
     
-    //todo: this is shit
-    labels = labels.map(year => year % 10 == 0 ? year : "");
-    
-    renderBarChart(canvas, labels, data);
+    renderBarChart(canvas, labels, data, {
+        scales: {
+            xAxes: [{
+                categoryPercentage: 1,
+                barPercentage: 0.8,
+                type: "time",
+                time: {parser: "YYYY", unit: "year", unitStepSize: 10
+            }}]
+        }
+    });
 }
 
 $(document).ready(function ($) {
