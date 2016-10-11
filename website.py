@@ -23,6 +23,7 @@ except ImportError:
 
 app_pool = multiprocessing.pool.ThreadPool(processes=4)
 add_template_tools(app)
+updating = []
 
 def model():
     if not hasattr(g, "model"):
@@ -284,7 +285,14 @@ def add_artist_search_results(query=None):
 @needs_auth
 def update_artist(id):
     artist_id = id_(id)
-    app_pool.apply_async(import_artist, (artist_id,))
+    print(updating, artist_id)
+    if artist_id in updating:
+        flash("The artist is currently being updated", "error")
+        return redirect_back()
+    updating.append(artist_id)
+    print(updating)
+    flash("The artist will be updated", "success")
+    app_pool.apply_async(import_artist, (artist_id,), callback=lambda _:updating.remove(artist_id))
     return redirect(url_for("artist_page", slug=model().get_artist(id).slug))
 
 @app.route("/")

@@ -114,6 +114,10 @@
     {% for message in get_flashed_messages(category_filter=["success"]) %}
         <div class="page content success-message"><i class="material-icons">done</i>{{ message }}</div>
     {% endfor %}
+
+    {% for message in get_flashed_messages(category_filter=["error"]) %}
+        <div class="page content error-message"><i class="material-icons">error</i>{{ message }}</div>
+    {% endfor %}
     
     {% block content %}{% endblock %}
     

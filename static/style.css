@@ -218,18 +218,32 @@ form .error {
     font-size: 0.9em;
 }
 
-.success-message {
-    background: #f2ffe3;
+.success-message, .error-message {
     line-height: 2.5em;
 }
 
-.success-message .material-icons {
-    color: green;
+.success-message {
+    background: #f2ffe3;
+}
+
+.error-message {
+    background: #ffe3e3;
+}
+
+.success-message .material-icons, .error-message .material-icons {
     font-size: 2em;
     vertical-align: middle;
     position: relative;
     top: -0.075em;
     padding-right: 0.1em;
+}
+
+.success-message .material-icons {
+    color: green;
+}
+
+.error-message .material-icons {
+    color: red;
 }
 
 /*Custom lists*/
