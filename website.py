@@ -13,7 +13,6 @@ from tools import dict_values, dict_subset, basic_decorator, decorator_with_args
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
 #losing your session when the server restarts
-app.secret_key = os.urandom(24)
 
 try:
     app.config.from_object("config")
@@ -21,6 +20,7 @@ try:
 except ImportError:
     print("Warning: Config not loaded")
 
+app.secret_key = app.config["APP_SECRET"] 
 app_pool = multiprocessing.pool.ThreadPool(processes=4)
 add_template_tools(app)
 updating = []
