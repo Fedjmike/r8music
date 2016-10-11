@@ -169,7 +169,7 @@ def search():
         #Redirect to a GET with the query in the path
         return redirect(url_for("search_results", query=query, **args))
 
-@app.route("/search/<query>")
+@app.route("/search/<path:query>")
 @app.route("/search/")
 def search_results(query=None):
     if not query:
@@ -271,7 +271,7 @@ def add_artist():
             query = encode_query_str(request.form["artist-name"])
             return redirect(url_for("add_artist_search_results", query=query))
 
-@app.route("/add-artist-search/<query>", methods=["GET"])
+@app.route("/add-artist-search/<path:query>", methods=["GET"])
 @app.route("/add-artist-search/", methods=["GET"])
 @needs_auth
 def add_artist_search_results(query=None):
