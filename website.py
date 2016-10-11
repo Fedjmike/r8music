@@ -260,6 +260,7 @@ def add_artist():
         return render_template("add_artist.html")
         
     else:
+        flash("The artist will be added soon", "success")
         if "artist-id" in request.form:
             #todo ajax progress
             artist_id = MBID(request.form["artist-id"])
