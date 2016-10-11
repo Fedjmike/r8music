@@ -135,6 +135,7 @@ class Release(ModelObject):
             tracks = model.get_release_tracks(self.id)
             track_no = len(tracks)
             total_runtime = sum(track.runtime for track in tracks if track.runtime)
+            picks = [] #todo
             
             def runtime_str(milliseconds):
                 if milliseconds:
@@ -142,7 +143,7 @@ class Release(ModelObject):
 
             tracks = [track._replace(runtime=runtime_str(track.runtime)) for track in tracks]
             sides = groupby(tracks, lambda track: track.side)
-            return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no
+            return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no, picks
             
         def get_next_releaseses():
             for artist in get_artists():
@@ -406,6 +407,9 @@ class Model(GeneralModel):
     def move_actions(self, dest_id, src_id):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
+        
+    def set_track_picked(self, user_id, track_id, picked):
+        pass #todo
         
     def _get_activity(self, user_id, limit, offset, friends=False):
         #todo not just releases

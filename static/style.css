@@ -539,15 +539,15 @@ ol:not(.small).rating {
 
 /*Actions and action lists*/
 
-ol.action > li {
+ol.action-list > li {
     margin-left: 1em;
 }
 
-.action a {
+.action-list a, a.action {
     color: #aaa;
 }
 
-.action i.material-icons {
+.action-list i.material-icons {
     margin-top: -0.2em;
     margin-right: 0.15em;
     font-size: 1rem;
@@ -650,6 +650,19 @@ ol.tracks {
 
 .tracks .total:nth-child(2n) {
     border-top: 2px solid rgba(0,0,0, 0.03);
+}
+
+.track-pick {
+    display: none;
+}
+
+.tracks li:hover .track-pick, .track-pick.selected {
+    display: initial;
+}
+
+.track-pick i {
+    vertical-align: middle;
+    padding-bottom: 0.2em;
 }
 
 .album-cover {

@@ -70,6 +70,9 @@
                 {% for track in tracks %}
                     <li>
                         <span class="track-title">{{ track.title }}</span>
+                        <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}" name="pick" href=# data-track-id={{ track.id }}>
+                            <i class="material-icons tiny">stars</i>
+                        </a>
                         {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
                     </li>
                 {% endfor %}

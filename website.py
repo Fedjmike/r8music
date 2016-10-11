@@ -188,6 +188,21 @@ def search_results(query=None):
     return render_template("search_results.html",
             search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
 
+@app.route("/track/<int:track_id>", methods=["POST"])
+@handle_not_found(what="track")
+@needs_auth
+def track_post(track_id):
+    try:
+        if request.values["action"] in ["pick", "unpick"]:
+            model().set_track_picked(request.user.id, track_id, request.values["action"] == "pick")
+            return jsonify(error=0)
+        
+        else:
+            return jsonify(error=2), 400 #HTTPStatus.BAD_REQUEST
+        
+    except KeyError:
+        return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
+
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
 @app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
 @handle_not_found()

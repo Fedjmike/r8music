@@ -35,7 +35,7 @@
 {%- endmacro %}
 
 {% macro clickable_action_list(actions, active, data) -%}
-<ol class="action inline unselectable">
+<ol class="action-list inline unselectable">
     {% for name, icon, description in actions %}
         <li><a class="clickable {{ 'selected' if name in active else '' }}"
                name={{ name }} href=#

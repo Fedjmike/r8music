@@ -42,11 +42,14 @@ function rateRelease(clicked_element, release_id, rating) {
     });
 }
 
-function handleReleaseAction(event) {
+function handleAction(event) {
     event.preventDefault();
     var clickable = this;
     var action = clickable.name;
     var undo = clickable.classList.contains("selected");
+    
+    var url =   "releaseId" in clickable.dataset ? "/release/" + clickable.dataset.releaseId
+              : "/track/" + clickable.dataset.trackId
     
     $.ajax({
         method: "POST",
@@ -153,7 +156,8 @@ $(document).ready(function ($) {
             event.preventDefault();
     });
     
-    $(".action .clickable").click(handleReleaseAction);
+    $(".action-list .clickable").click(handleAction);
+    $(".action.clickable").click(handleAction);
     
     if (typeof Chart !== "undefined") {
         $("input[type=radio][name=chart-select]").change(function () {
