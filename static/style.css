@@ -467,6 +467,7 @@ ol:not(.small).rating {
 
 .releases .title {
     display: block;
+    overflow-wrap: break-word;
 }
 
 .small.releases .title {
