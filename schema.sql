@@ -164,3 +164,14 @@ create table ratings (
 );
 
 create index rating_id_index on ratings(action_id);
+
+-- Picks
+
+drop table if exists picks;
+create table picks (
+    user_id integer not null,
+    track_id integer not null,
+    primary key (user_id, track_id),
+    foreign key (user_id) references users(id),
+    foreign key (track_id) references tracks(id)
+);
