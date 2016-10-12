@@ -663,6 +663,7 @@ ol.tracks {
 .track-pick i {
     vertical-align: middle;
     padding-bottom: 0.2em;
+    font-size: 0.9em;
 }
 
 .album-cover {
