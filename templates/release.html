@@ -72,7 +72,9 @@
                     <li>
                         <span class="track-title">
                             {{ track.title }}
-                            <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}" name="pick" href=# data-track-id={{ track.id }}>
+                            <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
+                               name="pick" href=# data-track-id={{ track.id }}
+                               title="Select as a pick">
                                 <i class="material-icons">stars</i>
                             </a>
                         </span>
