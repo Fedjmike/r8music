@@ -181,8 +181,11 @@ def search_results(query=None):
     
     results = model().search(query, **args)
     
-    #If there is only one result, redirect straight there
-    if len(results) == 1:
+    def clear_match(query, results):
+        return len(results) == 1 and edit_distance(query, results[0]["name"]) < 4
+    
+    #If there is an obvious match, redirect straight there
+    if clear_match(query, results):
         return redirect(results[0]["url"])
     
     return render_template("search_results.html",
