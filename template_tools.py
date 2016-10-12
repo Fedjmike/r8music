@@ -1,5 +1,6 @@
 from datetime import datetime
 from collections import defaultdict
+from itertools import groupby
 
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
@@ -38,6 +39,14 @@ def group_by_rating(ratings):
     """Turns [(release, rating)] into {rating: [release]}"""
     get_rated = lambda n: [release for release, rating in ratings if rating == n]
     return {n: get_rated(n) for n in range(1, 9)}
+
+def group_by_year(releases):
+    year = lambda release: release.date[:4]
+    releases = sorted(releases, key=year)
+    releases_by_year = {y: list(r) for y, r in groupby(releases, year)}
+    years = sorted(releases_by_year.keys())
+
+    return years, releases_by_year
     
 range_of = lambda list: range(min(list), max(list))
     
@@ -95,7 +104,7 @@ def url_for_release(artist, release):
 
 import json
 
-template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_rating, get_user_datasets, url_for_user]
+template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)

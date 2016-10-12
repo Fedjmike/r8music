@@ -79,6 +79,7 @@
 {% else %}
     {% set ratings = that_user.get_releases_rated() %}
     {% set listened_unrated = that_user.get_releases_listened_unrated() %}
+    {% set years, releases_by_year = group_by_year(that_user.get_releases_listened()) %}
     {% set by_rating = group_by_rating(ratings) %}
     {% set user_datasets = get_user_datasets(ratings, listened_unrated) %}
 

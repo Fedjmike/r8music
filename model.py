@@ -198,6 +198,7 @@ class User(ModelObject):
         
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
+        self.get_releases_listened = lambda: model.get_releases_actioned_by_user(self.id, "listen")
         self.get_releases_listened_unrated = get_releases_listened_unrated
         self.get_releases_listed = get_releases_listed
         
