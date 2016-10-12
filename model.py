@@ -202,6 +202,7 @@ class User(ModelObject):
         self.get_releases_listed = get_releases_listed
         
         self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
+        self.get_pick_no = lambda: model.get_user_pick_no(self.id)
         
         self.get_active_actions = get_active_actions
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
@@ -422,6 +423,9 @@ class Model(GeneralModel):
             self.query("select id from tracks join picks on track_id = id"
                        " where user_id=? and release_id=?", user_id, release_id)
             ]
+            
+    def get_user_pick_no(self, user_id):
+        return self.query_unique("select count(*) from picks where user_id=?", user_id)[0]
 
     def _get_activity(self, user_id, limit, offset, friends=False):
         #todo not just releases
