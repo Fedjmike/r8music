@@ -135,7 +135,6 @@ class Release(ModelObject):
             tracks = model.get_release_tracks(self.id)
             track_no = len(tracks)
             total_runtime = sum(track.runtime for track in tracks if track.runtime)
-            # picks = [] #todo
             
             def runtime_str(milliseconds):
                 if milliseconds:
@@ -201,6 +200,8 @@ class User(ModelObject):
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
         self.get_releases_listened_unrated = get_releases_listened_unrated
         self.get_releases_listed = get_releases_listed
+        
+        self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
         
         self.get_active_actions = get_active_actions
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)

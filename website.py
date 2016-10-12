@@ -208,11 +208,9 @@ def track_post(track_id):
 @handle_not_found()
 def release_page(artist_slug, release_slug, tab=None):
     release = model().get_release(artist_slug, release_slug)
-    picks = model().get_picks(request.user.id, release.id) if request.user else []
-
+    
     if request.method == "GET":
-        return render_template("release.html", release=release, tab=tab,
-                               user=request.user, picks=picks)
+        return render_template("release.html", release=release, tab=tab, user=request.user)
         
     else:
         return release_post(release.id)
