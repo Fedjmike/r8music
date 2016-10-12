@@ -53,7 +53,7 @@ function handleAction(event) {
     
     $.ajax({
         method: "POST",
-        url: "/release/" + clickable.dataset.releaseId,
+        url: url,
         data: {"action": undo ? "un" + action : action}
         
     }).done(function (msg) {

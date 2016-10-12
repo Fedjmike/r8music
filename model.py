@@ -135,7 +135,7 @@ class Release(ModelObject):
             tracks = model.get_release_tracks(self.id)
             track_no = len(tracks)
             total_runtime = sum(track.runtime for track in tracks if track.runtime)
-            picks = [] #todo
+            # picks = [] #todo
             
             def runtime_str(milliseconds):
                 if milliseconds:
@@ -143,7 +143,7 @@ class Release(ModelObject):
 
             tracks = [track._replace(runtime=runtime_str(track.runtime)) for track in tracks]
             sides = groupby(tracks, lambda track: track.side)
-            return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no, picks
+            return [list(tracks) for side_no, tracks in sides], runtime_str(total_runtime), track_no
             
         def get_next_releaseses():
             for artist in get_artists():
@@ -159,7 +159,7 @@ class Release(ModelObject):
                 previous = other_releases[index-1] if index != 0 else None
                 _next = other_releases[index+1] if index != len(other_releases)-1 else None
                 yield artist, previous, _next
-            
+
         self.get_artists = get_artists
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
@@ -409,8 +409,19 @@ class Model(GeneralModel):
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
         
     def set_track_picked(self, user_id, track_id, picked):
-        pass #todo
+        if picked:
+            self.execute("insert into picks values (?, ?)", user_id, track_id)
         
+        else:
+            self.execute("delete from picks where user_id=? and track_id=?", user_id, track_id)
+
+    def get_picks(self, user_id, release_id):
+        return [
+            pick for (pick,) in \
+            self.query("select id from (select id from tracks where release_id=?)"
+                       " join picks on track_id=id where user_id=?", release_id, user_id)
+            ]
+
     def _get_activity(self, user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
