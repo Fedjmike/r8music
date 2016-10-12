@@ -6,7 +6,7 @@ from contextlib import closing
 from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
-from mb_api_import import import_artist, MBID, id_
+from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
 from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_artists, profiled
 
