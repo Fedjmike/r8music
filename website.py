@@ -317,7 +317,7 @@ def update_artist(id):
     updating.append(artist_mbid)
     flash("The artist will be updated", "success")
     app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:updating.remove(artist_id))
-    return redirect(url_for("artist_page", slug=model().get_artist(id).slug))
+    return redirect_back()
 
 @app.route("/")
 def homepage():
