@@ -277,10 +277,18 @@ def add_artist():
     else:
         if "artist-id" in request.form:
             #todo ajax progress
-            artist_id = MBID(request.form["artist-id"])
-            app_pool.apply_async(import_artist, (artist_id,))
-            flash("The artist will be added soon", "success")
-            return redirect(url_for("artists_index"))
+            artist_mbid = MBID(request.form["artist-id"])
+
+            if artist_mbid not in updating:
+                updating.append(artist_mbid)
+                app_pool.apply_async(import_artist, (artist_mbid,),
+                                     callback=lambda _:updating.remove(artist_mbid))
+                flash("The artist will be added soon", "success")
+                return redirect(url_for("artists_index"))
+
+            else:
+                flash("The artist is currently being updated", "error")
+                return redirect_back()
             
         else:
             query = encode_query_str(request.form["artist-name"])
@@ -300,15 +308,15 @@ def add_artist_search_results(query=None):
 @app.route("/update-artist/<int:id>")
 @needs_auth
 def update_artist(id):
-    artist_id = id_(id)
+    artist_mbid = MBID(model().get_link(id, "musicbrainz"))
 
-    if artist_id in updating:
+    if artist_mbid in updating:
         flash("The artist is currently being updated", "error")
         return redirect_back()
 
-    updating.append(artist_id)
+    updating.append(artist_mbid)
     flash("The artist will be updated", "success")
-    app_pool.apply_async(import_artist, (artist_id,), callback=lambda _:updating.remove(artist_id))
+    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:updating.remove(artist_id))
     return redirect(url_for("artist_page", slug=model().get_artist(id).slug))
 
 @app.route("/")
