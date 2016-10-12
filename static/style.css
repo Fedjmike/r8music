@@ -231,19 +231,20 @@ form .error {
 }
 
 .success-message .material-icons, .error-message .material-icons {
-    font-size: 2em;
+    font-size: 1.65em;
     vertical-align: middle;
     position: relative;
-    top: -0.075em;
-    padding-right: 0.1em;
+    padding-right: 0.2em;
 }
 
 .success-message .material-icons {
     color: green;
+    top: -0.075em;
 }
 
 .error-message .material-icons {
     color: red;
+    top: -0.05em;
 }
 
 /*Custom lists*/
