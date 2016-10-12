@@ -316,7 +316,7 @@ def update_artist(id):
 
     updating.append(artist_mbid)
     flash("The artist will be updated", "success")
-    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:updating.remove(artist_id))
+    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:updating.remove(artist_mbid))
     return redirect_back()
 
 @app.route("/")
