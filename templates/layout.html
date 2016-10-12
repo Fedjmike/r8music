@@ -116,7 +116,7 @@
     {% endfor %}
 
     {% for message in get_flashed_messages(category_filter=["error"]) %}
-        <div class="page content error-message"><i class="material-icons">error</i>{{ message }}</div>
+        <div class="page content error-message"><i class="material-icons">error_outline</i>{{ message }}</div>
     {% endfor %}
     
     {% block content %}{% endblock %}
