@@ -4,11 +4,11 @@
     {% endfor %}
 {%- endmacro %}
 
-{% macro form_field(description, name, type, form_prefill=None) -%}
+{% macro form_field(description, name, type, form_prefill=None, prefill=None) -%}
     <dt>{{ description }}</dt>
     <dd>
         <input type={{ type }} name={{ name }}
-               value="{{ form_prefill[name] if form_prefill and name in form_prefill else ''}}" />
+               value="{{ prefill if prefill else form_prefill[name] if form_prefill and name in form_prefill else ''}}" />
         {{ flash_area(name) }}
     </dd>
 {%- endmacro %}
@@ -66,6 +66,17 @@
             {% if standalone %}
                 <input type="hidden" name="next" value="{{ request.referrer }}" />
             {% endif %}
+        </dl>
+    </form>
+{%- endmacro %}
+
+{% macro settings_form(user) -%}
+    <form action={{ url_for("user_settings") }} method="post" class="clearfix">
+        <dl>
+            {{ form_field("Email address", "email", "text", prefill=user.email if user.email else "") }}
+            {{ form_field("Timezone", "timezone", "text", prefill=user.timezone) }}
+            
+            <dd><input type="submit" value="Save changes" /></dd>
         </dl>
     </form>
 {%- endmacro %}

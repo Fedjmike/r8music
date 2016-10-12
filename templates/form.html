@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "forms.html" import login_form, register_form, set_pw_form, search_form %}
+{% from "forms.html" import login_form, register_form, set_pw_form, settings_form, search_form %}
 
 {% block title %}
     {% if form == "login" %}
@@ -30,6 +30,13 @@
         <header><h1>Change your password</h1></header>
         {{ set_pw_form(request.user, standalone=True) }}
 
+    {% elif form == "settings" %}
+        <header>
+            <h1>Settings</h1>
+            <h3>Logged in as <a href={{ url_for("user_page", slug=user.name) }}>{{ user.name }}</a></h3>
+        </header>
+        {{ settings_form(user) }}
+        
     {% elif form == "search" %}
         <header><h1>Search</h1></header>
         {% from "forms.html" import  %}

@@ -493,7 +493,7 @@ def set_password():
 @needs_auth
 def user_settings():
     if request.method == "GET":
-        return render_template("settings.html", user=request.user)
+        return render_template("form.html", form="settings", user=request.user)
     
     else:
         email, timezone = \
