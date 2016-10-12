@@ -419,8 +419,8 @@ class Model(GeneralModel):
     def get_picks(self, user_id, release_id):
         return [
             pick for (pick,) in \
-            self.query("select id from (select id from tracks where release_id=?)"
-                       " join picks on track_id=id where user_id=?", release_id, user_id)
+            self.query("select id from tracks join picks on track_id = id"
+                       " where user_id=? and release_id=?", user_id, release_id)
             ]
 
     def _get_activity(self, user_id, limit, offset, friends=False):
