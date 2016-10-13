@@ -1,5 +1,14 @@
 import re
 from unidecode import unidecode
+import arrow
+
+def sortable_date(date):
+    if len(date) == 4:
+        return date + "-12-31"
+    elif len(date) == 7:
+        return arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD')
+    else:
+        return date
 
 class WikipediaPageNotFound(Exception):
     pass

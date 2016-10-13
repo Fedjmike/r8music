@@ -2,6 +2,8 @@ from datetime import datetime
 from collections import defaultdict
 from itertools import groupby
 
+from tools import sortable_date
+
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
     inflection =      "es" if noun.endswith("o") and noun[-2] not in vowels \
@@ -42,7 +44,7 @@ def group_by_rating(ratings):
 
 def group_by_year(releases):
     year = lambda release: release.date[:4]
-    releases = sorted(releases, key=year)
+    releases = sorted(releases, key=lambda r:sortable_date(r.date))
     releases_by_year = {y: list(r) for y, r in groupby(releases, year)}
     years = sorted(releases_by_year.keys())
 

@@ -4,7 +4,7 @@ import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound
+from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound, sortable_date
 from model import Model, NotFound
 
 limit = 100
@@ -98,11 +98,8 @@ def get_releases(mbid, processed_release_mbids):
         if not release_candidates:
             continue
         
-        fulldate = lambda date: date + "-12-31" if len(date) == 4 else \
-                                arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD') if len(date) == 7 else \
-                                date
         release = min(release_candidates,
-                      key=lambda release: arrow.get(fulldate(release["date"])).timestamp)
+                      key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
 
         if release['id'] in processed_release_mbids:
             print("Release " + release['id'] + " has already been processed")
