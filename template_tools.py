@@ -50,7 +50,7 @@ def group_by_year(releases):
 
     return years, releases_by_year
     
-range_of = lambda list: range(min(list), max(list))
+range_of = lambda list: range(min(list), max(list)) if list else []
     
 def get_release_year_counts(ratings=[], listened_unrated=[]):
     #Split by year then rating (first element = listened unrated)
@@ -68,7 +68,7 @@ def get_release_year_counts(ratings=[], listened_unrated=[]):
     #[(year, (,,,,,,,,))] sorted by year
     items = sorted(counts.items(), key=lambda kv: kv[0])
     #Transpose the table into [year], [(,,,,,,,,)]
-    years, year_counts = zip(*items)
+    years, year_counts = zip(*items) if items else ([], [])
     
     #Return the year counts and year counts by rating
     #[year], [count], [[count]]
