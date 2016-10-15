@@ -435,10 +435,12 @@ class Model(GeneralModel):
                           " actions a join users u on user_id = u.id"
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
-                          " join artists on artist_id = artists.id"
-                          " where u.id in (select user_id from followerships where" + \
-                          (" follower or user_id" if friends else " user_id") + "=?)"
-                          " order by a.creation desc limit ? offset ?", user_id, limit, offset)
+                          " join artists on artist_id = artists.id" + \
+                          (" where u.id = ?" if not friends else \
+                          " where u.id in (select user_id from followerships"
+                          " where follower=? union select ? as user_id)") +\
+                          " order by a.creation desc limit ? offset ?",
+                          *[ user_id, user_id, limit, offset] if friends else [user_id, limit, offset])
         
         action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
         
