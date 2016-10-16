@@ -35,19 +35,20 @@
     var palette = ["{{ accent_color_1 }}", "{{ accent_color_2 }}"];
     </script>
     
+    <!-- from http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask -->
     <script type="text/javascript">
         $(function() {
             $("#autocomplete").autocomplete({
                 source:function(request, response) {
                     $.getJSON("{{url_for('autocomplete')}}",{
-                        q: request.term, // in flask, "q" will be the argument to look for using request.args
+                        q: request.term,
                     }, function(data) {
-                        response(data.results); // matching_results from jsonify
+                        response(data.results);
                     });
                 },
                 minLength: 2,
                 select: function(event, ui) {
-                    window.location.href = ui.item.url; // not in your question, but might help later
+                    window.location.href = ui.item.url;
                 }
             });
         })
