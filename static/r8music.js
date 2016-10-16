@@ -202,4 +202,22 @@ $(document).ready(function ($) {
             target.append(msg.html);
         });
     });
+    
+    //From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
+    $("#autocomplete").autocomplete({
+        source: function (request, response) {
+            $.getJSON("/search/" + request.term, {
+                json: 1
+            }, function (data) {
+                response(data.results.map(function (result) {
+                    result.label = result.name;
+                    return result;
+                }));
+            });
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            window.location.href = ui.item.url;
+        }
+    });
 });

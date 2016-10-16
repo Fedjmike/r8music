@@ -181,6 +181,9 @@ def search_results(query=None):
 
     results = model().search(query, **args)
     
+    if "json" in request.values and request.values["json"]:
+        return jsonify(results=results)
+
     def clear_match(query, results):
         return len(results) == 1 and edit_distance(query, results[0]["name"]) < 4
 
@@ -190,17 +193,6 @@ def search_results(query=None):
     
     return render_template("search_results.html",
             search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
-
-@app.route('/autocomplete', methods=['GET'])
-def autocomplete():
-    def rename(result):
-        result['label'] = result.pop('name')
-        return result
-
-    args = default_search_args.copy()
-    query = request.args.get('q')
-    results = [rename(result) for result in model().search(query, **args)]
-    return jsonify(results=results)
 
 @app.route("/track/<int:track_id>", methods=["POST"])
 @handle_not_found(what="track")
