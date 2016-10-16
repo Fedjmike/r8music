@@ -109,6 +109,7 @@ create table users (
     creation integer not null -- Unix timestamp
 );
 
+drop index if exists user_name_index;
 create index user_name_index on users(name);
 
 drop table if exists user_timezones;
