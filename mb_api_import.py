@@ -51,7 +51,7 @@ def get_links(artist_mbid):
         print("Error getting links:", e)
     return links
 
-def prepare_artist(artist_mbid, artist_id):
+def prepare_artist(artist_mbid, artist_id, artist_name):
     model = Model()
 
     print("Getting links...")
@@ -225,7 +225,7 @@ def import_artist(artist):
             processed_release_mbids = []
 
     if not update_links: 
-        prepare_artist(artist_mbid, artist_id)
+        prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
     releases = get_releases(artist_mbid, processed_release_mbids)
