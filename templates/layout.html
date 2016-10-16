@@ -10,11 +10,15 @@
 
 	<link rel="stylesheet" type="text/css" href="/static/style.css" />
 	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Signika:400,300" />
+
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     
     <link rel="shortcut icon" href="/static/favicon.png" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
     
     {% if chart_js %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.0/Chart.bundle.min.js"></script>
@@ -31,6 +35,24 @@
     var palette = ["{{ accent_color_1 }}", "{{ accent_color_2 }}"];
     </script>
     
+    <script type="text/javascript">
+        $(function() {
+            $("#autocomplete").autocomplete({
+                source:function(request, response) {
+                    $.getJSON("{{url_for('autocomplete')}}",{
+                        q: request.term, // in flask, "q" will be the argument to look for using request.args
+                    }, function(data) {
+                        response(data.results); // matching_results from jsonify
+                    });
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    window.location.href = ui.item.url; // not in your question, but might help later
+                }
+            });
+        })
+    </script>
+
     <script src="/static/r8music.js"></script>
     
     <style>
@@ -120,6 +142,8 @@
     {% endfor %}
     
     {% block content %}{% endblock %}
+
+
     
 <script type="text/javascript">
 var sc_project=10828447; 

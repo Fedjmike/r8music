@@ -178,18 +178,29 @@ def search_results(query=None):
     encoded_query, query = query, decode_query_str(query)
     args = default_search_args.copy()
     args.update(only_valid_search_args(request.args))
-    
+
     results = model().search(query, **args)
     
     def clear_match(query, results):
         return len(results) == 1 and edit_distance(query, results[0]["name"]) < 4
-    
+
     #If there is an obvious match, redirect straight there
     if clear_match(query, results):
         return redirect(results[0]["url"])
     
     return render_template("search_results.html",
             search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
+
+@app.route('/autocomplete', methods=['GET'])
+def autocomplete():
+    def rename(result):
+        result['label'] = result.pop('name')
+        return result
+
+    args = default_search_args.copy()
+    query = request.args.get('q')
+    results = [rename(result) for result in model().search(query, **args)]
+    return jsonify(results=results)
 
 @app.route("/track/<int:track_id>", methods=["POST"])
 @handle_not_found(what="track")

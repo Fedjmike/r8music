@@ -681,7 +681,7 @@ class Model(GeneralModel):
             for name, slug in
             self.query(("select %s from" % columns) +
                        " (select id as indexed_id from %s_indexed where name match (?) limit 20)"
-                       " join %s on %s.id = indexed_id" % (table, table, table), query)
+                       " join %s on %s.id = indexed_id" % (table, table, table), query+'*')
         ]
     
     #Misc
