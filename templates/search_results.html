@@ -25,6 +25,7 @@
             <li><a href="{{ result.url }}">{{ result.name }}</a></li>
         {% endfor %}
         </ol>
+        <p>No matches? Try <a href={{ url_for("add_artist_search_results", query=search.encoded_query) }}>adding the artist to the database!</a></p>
     {% endif %}
 </section>
 {% endblock %}
