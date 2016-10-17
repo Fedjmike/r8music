@@ -840,6 +840,69 @@ form.small .search {
     cursor: pointer;
 }
 
+.ui-autocomplete {
+	position: absolute;
+	top: 0;
+	left: 0;
+    margin-top: 10px;
+}
+
+.ui-menu {
+	list-style: none;
+	display: block;
+	outline: none;
+    padding: 0;
+}
+
+.ui-menu-item a {
+	display: block;
+    padding: 0.25em 0.5em;
+    font-size: 0.9em;
+}
+
+.ui-menu-item a:hover {
+    color: white;
+    background: #0088cc;
+    opacity: 0.8;
+    
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ui-helper-hidden {
+	display: none;
+}
+
+.ui-helper-hidden-accessible {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+
+/**/
+
+summary {
+    display: inline-block;
+}
+
+details {
+    display: inline;
+    transition: background 0.5s, border 0.5s;
+}
+
+details.window[open] {
+    position: fixed;
+    width: 20em;
+    
+    background: white;
+    border-radius: 0.2em;
+}
+
 /*Popups*/
 
 .popup {
@@ -852,20 +915,23 @@ form.small .search {
     font-size: 1rem;
 }
 
-.popup > div {
-    display: none;
+.popup > div, .ui-autocomplete {
     width: 17.5em;
-    padding: 1em;
-    margin-left: -19.5em;
-    
     background: white;
     border-radius: 0.2em;
+    overflow: hidden;
+}
+
+.popup > div {
+    display: none;
+    margin-left: -19.5em;
+    padding: 1em;
 }
 
 .small.popup > div {
     width: 10em;
-    padding: 0.25em;
     margin-left: -10.5em;
+    padding: 0.25em;
 }
 
 /*Glows and shadows*/
@@ -889,7 +955,7 @@ input[type=submit] {
     color: white;
 }
 
-.popup > div {
+.popup > div, .ui-autocomplete {
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.33);
 }
 
