@@ -423,7 +423,7 @@ class Model(GeneralModel):
             pick for (pick,) in \
             self.query("select id from tracks join picks on track_id = id"
                        " where user_id=? and release_id=?", user_id, release_id)
-            ]
+        ]
             
     def get_user_pick_no(self, user_id):
         return self.query_unique("select count(*) from picks where user_id=?", user_id)[0]
