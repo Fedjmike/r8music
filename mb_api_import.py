@@ -78,10 +78,21 @@ def prepare_artist(artist_mbid, artist_id, artist_name):
             pass
 
 
-def get_releases(mbid, processed_release_mbids):
+def get_releases(mbid, artist_id):
+    model = Model()
+    mb_type_id = model.get_link_type_id("musicbrainz")
+
+    processed_release_mbids = [
+        row['target'] for row in
+        model.query("select target from authorships a join links l"
+                    " on l.id=a.release_id where a.artist_id=?"
+                    " and l.type_id=?", artist_id, mb_type_id)
+    ]
+
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
+    
     while True:
         result = musicbrainzngs.browse_release_groups(mbid, limit=limit, offset=offset)
         release_groups += result['release-group-list']
@@ -89,26 +100,30 @@ def get_releases(mbid, processed_release_mbids):
         if len(result['release-group-list']) != limit:
             break
         print("Getting more release groups with offset " + str(offset) +"...")
+
     releases = []
+    
     for group in release_groups:
         print("Querying MB for release group " + group['id'] + "...")
         result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        # Gets the oldest release of the group. If it fails, ignore this release group
         release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
+
         if not release_candidates:
             continue
         
+        if any([release['id'] in processed_release_mbids for release in release_candidates]):
+            print("Release " + release_candidates[0]['id'] + " has already been processed")
+            continue
+
+        # Gets the oldest release of the group. If it fails, ignore this release group
         release = min(release_candidates,
                       key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
-
-        if release['id'] in processed_release_mbids:
-            print("Release " + release['id'] + " has already been processed")
-            continue
 
         release['group-id'] = group['id']
         release['type'] = group['type'] if 'type' in group else 'Unspecified'
 
         releases.append(release)
+    
     return releases
 
 def prepare_release(release):
@@ -182,8 +197,9 @@ def import_artist(artist):
 
     print("Querying MB for artist info...")
     if isinstance(artist, id_):
-        artist_mbid, artist_name = model.query_unique("select target, name from links join artists using (id)"
-                                                      " where type_id=? and artists.id=?", mb_type_id, artist)
+        artist_mbid, artist_name = \
+            model.query_unique("select target, name from links join artists using (id)"
+                               " where type_id=? and artists.id=?", mb_type_id, artist)
 
     elif isinstance(artist, MBID):
         artist_mbid = artist
@@ -199,36 +215,25 @@ def import_artist(artist):
     try:
         #Imported incompletely
         (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
-        processed_release_mbids = [
-            row['target'] for row in
-            model.query("select target from links l join authorships a"
-                        " on l.id = a.release_id where artist_id=? and type_id=?", artist_id, mb_type_id)
-        ]
-        
         model.execute('update artists set incomplete = NULL where id=?', artist_id)
 
     except NotFound:
         try:
             #Complete
-            (artist_id,) = model.query_unique('select id from links where type_id=? and target=?', mb_type_id, artist_mbid)
+            (artist_id,) = model.query_unique('select id from links where type_id=?'
+                                              ' and target=?', mb_type_id, artist_mbid)
             print("Already imported, updating...")
             update_links = False
-            processed_release_mbids = [
-                row['target'] for row in
-                model.query('select target from links l join authorships a'
-                            ' on l.id = a.release_id where artist_id=? and type_id=?', artist_id, mb_type_id)
-            ]
 
         #Not in db
         except NotFound:
             artist_id = model.add_artist(artist_name, artist_mbid)
-            processed_release_mbids = []
 
     if not update_links: 
         prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
-    releases = get_releases(artist_mbid, processed_release_mbids)
+    releases = get_releases(artist_mbid, artist_id)
     pool.map(prepare_release, releases)
 
     # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
