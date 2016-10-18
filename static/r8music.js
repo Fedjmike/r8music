@@ -220,4 +220,25 @@ $(document).ready(function ($) {
             window.location.href = ui.item.url;
         }
     });
+    $("#autocomplete-mb").autocomplete({
+        source: function (request, response) {
+            $.getJSON("/add-artist-search/" + request.term, {
+                json: 1
+            }, function (data) {
+                response(data.results.map(function (result) {
+                    result.label = result.name+", "+result.disambiguation;
+                    return result;
+                }));
+            });
+        },
+        minLength: 2,
+        select: function (event, ui) {
+                $.ajax({
+                    method: "POST",
+                    url: "/add-artist",
+                    data: {'artist-id': ui.item.id}
+                });
+                window.alert("The artist is being added")
+        }
+    });
 });

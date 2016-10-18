@@ -300,7 +300,7 @@ def add_artist():
             query = encode_query_str(request.form["artist-name"])
             return redirect(url_for("add_artist_search_results", query=query))
 
-@app.route("/add-artist-search/<path:query>", methods=["GET"])
+@app.route("/add-artist-search/<path:query>", methods=["GET", "POST"])
 @app.route("/add-artist-search/", methods=["GET"])
 @needs_auth
 def add_artist_search_results(query=None):
@@ -309,6 +309,10 @@ def add_artist_search_results(query=None):
         
     query = decode_query_str(query)
     artists = search_artists(query)
+
+    if "json" in request.values and request.values["json"]:
+        return jsonify(results=artists)
+
     return render_template("add_artist_search_results.html", artists=artists, query=query)
 
 @app.route("/update-artist/<int:id>")
