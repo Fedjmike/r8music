@@ -233,8 +233,6 @@ class Model(GeneralModel):
     #Artists
     
     def add_artist(self, name, mbid):
-        #Todo document "incomplete"
-        
         slug = generate_slug(name, self, "artists")
         
         artist_id = self.new_id(ObjectType.artist)
