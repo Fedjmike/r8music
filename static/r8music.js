@@ -220,7 +220,8 @@ $(document).ready(function ($) {
             window.location.href = ui.item.url;
         }
     });
-    $("#autocomplete-mb").autocomplete({
+    
+    var mb_autocomplete = $("#autocomplete-mb").autocomplete({
         source: function (request, response) {
             $.getJSON("/add-artist-search/" + request.term, {
                 json: 1
@@ -240,5 +241,23 @@ $(document).ready(function ($) {
                 });
                 window.alert("The artist is being added")
         }
-    });
+    }).data("ui-autocomplete");
+    
+    mb_autocomplete._renderItem = function (ul, item) {
+        var li = $("<li>")
+            .addClass("ui-menu-item")
+            .appendTo(ul);
+        
+        var a = $("<a>")
+            .append(item.name + " ")
+            .appendTo(li);
+            
+        if ("disambiguation" in item || "area" in item)
+            $("<span>")
+                .addClass("de-emph")
+                .append("disambiguation" in item ? item.disambiguation : item.area.name)
+                .appendTo(a);
+                
+        return li;
+    }
 });
