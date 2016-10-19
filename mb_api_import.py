@@ -136,7 +136,7 @@ def prepare_release(release):
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
-def add_releases(releases, processed_artist_mbids):
+def add_releases(releases):
     model = Model()
 
     for release in releases:
@@ -152,20 +152,20 @@ def add_releases(releases, processed_artist_mbids):
         
         for artist in release['artists']:
             try:
-                if artist['artist']['id'] in processed_artist_mbids:
-                    featured_artist_id = processed_artist_mbids[artist['artist']['id']]
-                else:
+                try:
+                    featured_artist_id = model.query_unique("select id from links where target=?",
+                                                            artist['artist']['id'])[0]
+
+                except NotFound:
                     # Make a dummy entry into the artists table
                     featured_artist_id = model.add_artist(
                         artist['artist']['name'],
-                        artist['artist']['id'], #mbid
-                        incomplete=True
+                        artist['artist']['id'] #mbid
                     )
-                    
-                    processed_artist_mbids[artist['artist']['id']] = featured_artist_id
 
                 model.add_author(release_id, featured_artist_id)
 
+            # & is in release['artists'] for some reason :o
             except TypeError:
                 pass
 
@@ -212,22 +212,16 @@ def import_artist(artist):
 
     update_links = True
     
+    # Been imported before
     try:
-        #Imported incompletely
-        (artist_id,) = model.query_unique('select id from artists where incomplete=?', artist_mbid)
-        model.execute('update artists set incomplete = NULL where id=?', artist_id)
+        (artist_id,) = model.query_unique('select id from links where type_id=?'
+                                          ' and target=?', mb_type_id, artist_mbid)
+        print("Already imported, updating...")
+        update_links = False
 
+    #Not in db
     except NotFound:
-        try:
-            #Complete
-            (artist_id,) = model.query_unique('select id from links where type_id=?'
-                                              ' and target=?', mb_type_id, artist_mbid)
-            print("Already imported, updating...")
-            update_links = False
-
-        #Not in db
-        except NotFound:
-            artist_id = model.add_artist(artist_name, artist_mbid)
+        artist_id = model.add_artist(artist_name, artist_mbid)
 
     if not update_links: 
         prepare_artist(artist_mbid, artist_id, artist_name)
@@ -236,11 +230,7 @@ def import_artist(artist):
     releases = get_releases(artist_mbid, artist_id)
     pool.map(prepare_release, releases)
 
-    # Dictionary of artist MBIDs to local IDs which have already been processed and can't make dummy entries in the artists table
-    processed_artist_mbids = dict(model.query('select incomplete, id from artists where incomplete is not null'))
-    processed_artist_mbids[artist_mbid] = artist_id
-
-    add_releases(releases, processed_artist_mbids)
+    add_releases(releases)
 
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
