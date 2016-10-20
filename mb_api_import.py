@@ -223,7 +223,7 @@ def import_artist(artist):
     except NotFound:
         artist_id = model.add_artist(artist_name, artist_mbid)
 
-    if not update_links: 
+    if update_links:
         prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
