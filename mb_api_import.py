@@ -59,23 +59,27 @@ def prepare_artist(artist_mbid, artist_id, artist_name):
     for link_type, target in links.items():
         model.set_link(artist_id, link_type, target)
             
-    if "wikipedia" not in links:
-        try:
+    try:
+        if "wikipedia" not in links:
             print("Guessing wikipedia link...")
             links["wikipedia"] = title = guess_wikipedia_page(artist_name)
             model.set_link(artist_id, "wikipedia", title)
 
-            print("Scraping wikipedia...")
-            model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
-            try:
-                image_thumb, image = get_wikipedia_image(links["wikipedia"])
-                model.set_link(artist_id, "image", image)
-                model.set_link(artist_id, "image_thumb", image_thumb)
-            except TypeError:    
-                pass
+    except WikipediaPageNotFound:
+        print("Couldn't guess wikipedia link")
+        return
 
-        except WikipediaPageNotFound:
-            pass
+    print("Scraping wikipedia...")
+    model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
+
+    try:
+        image_thumb, image = get_wikipedia_image(links["wikipedia"])
+        model.set_link(artist_id, "image", image)
+        model.set_link(artist_id, "image_thumb", image_thumb)
+
+    except TypeError:
+        pass
+
 
 
 def get_releases(mbid, artist_id):
