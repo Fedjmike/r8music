@@ -86,13 +86,6 @@ def get_releases(mbid, artist_id):
     model = Model()
     mb_type_id = model.get_link_type_id("musicbrainz")
 
-    processed_release_mbids = [
-        row['target'] for row in
-        model.query("select target from authorships a join links l"
-                    " on l.id=a.release_id where a.artist_id=?"
-                    " and l.type_id=?", artist_id, mb_type_id)
-    ]
-
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
@@ -115,7 +108,7 @@ def get_releases(mbid, artist_id):
         if not release_candidates:
             continue
         
-        if any([release['id'] in processed_release_mbids for release in release_candidates]):
+        if any([model.mbid_in_links(release['id']) for release in release_candidates]):
             print("Release " + release_candidates[0]['id'] + " has already been processed")
             continue
 
@@ -140,52 +133,51 @@ def prepare_release(release):
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
 
-def add_releases(releases):
+def add_release(release):
     model = Model()
 
-    for release in releases:
-        print("Adding release: ", release['title'])
-        release_id = model.add_release(
-            release['title'],
-            release['date'],
-            release['type'],
-            release['full-art-url'],
-            release['thumb-art-url'],
-            release['id'] #mbid
-        )
-        
-        for artist in release['artists']:
+    print("Adding release: ", release['title'])
+    release_id = model.add_release(
+        release['title'],
+        release['date'],
+        release['type'],
+        release['full-art-url'],
+        release['thumb-art-url'],
+        release['id'] #mbid
+    )
+    
+    for artist in release['artists']:
+        try:
             try:
-                try:
-                    featured_artist_id = model.query_unique("select id from links where target=?",
-                                                            artist['artist']['id'])[0]
+                featured_artist_id = model.query_unique("select id from links where target=?",
+                                                        artist['artist']['id'])[0]
 
-                except NotFound:
-                    # Make a dummy entry into the artists table
-                    featured_artist_id = model.add_artist(
-                        artist['artist']['name'],
-                        artist['artist']['id'] #mbid
-                    )
-
-                model.add_author(release_id, featured_artist_id)
-
-            # & is in release['artists'] for some reason :o
-            except TypeError:
-                pass
-
-        for side, tracks in enumerate(release['tracks']):
-            for track in tracks:
-                try:
-                    length = track['recording']['length']
-                except KeyError:
-                    length = None
-                model.add_track(
-                    release_id,
-                    track['recording']['title'],
-                    int(track['position']),
-                    side,
-                    length
+            except NotFound:
+                # Make a dummy entry into the artists table
+                featured_artist_id = model.add_artist(
+                    artist['artist']['name'],
+                    artist['artist']['id'] #mbid
                 )
+
+            model.add_author(release_id, featured_artist_id)
+
+        # & is in release['artists'] for some reason :o
+        except TypeError:
+            pass
+
+    for side, tracks in enumerate(release['tracks']):
+        for track in tracks:
+            try:
+                length = track['recording']['length']
+            except KeyError:
+                length = None
+            model.add_track(
+                release_id,
+                track['recording']['title'],
+                int(track['position']),
+                side,
+                length
+            )
 
 class MBID(str):
     pass
@@ -234,7 +226,8 @@ def import_artist(artist):
     releases = get_releases(artist_mbid, artist_id)
     pool.map(prepare_release, releases)
 
-    add_releases(releases)
+    for release in releases:
+        add_release(release)
 
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")

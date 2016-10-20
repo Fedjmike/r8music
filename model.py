@@ -379,6 +379,11 @@ class Model(GeneralModel):
             if link:
                 yield site, build_url(link)
         
+    def mbid_in_links(self, mbid):
+        return self.query_unique("select exists(select 1 from links"
+                                  " where target=? limit 1 )", mbid)[0]
+
+
     #Actions
     
     Action = namedtuple("Action", ["id", "user", "object", "type", "creation"])
