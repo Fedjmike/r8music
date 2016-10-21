@@ -195,8 +195,17 @@ class MBID(str):
 class id_(str):
     pass
 
-def import_release(group_id):
-    release_type = musicbrainzngs.get_release_group_by_id(group_id)['release-group']['type']
+def import_release(release):
+    #TODO: Update specific release by id
+    if isinstance(release, MBID):
+        group_id = release
+        release_type = musicbrainzngs.get_release_group_by_id(group_id)['release-group']['type']
+
+    else:
+        result = musicbrainzngs.search_release_groups(releasegroup=release)
+        group_id = result['release-group-list'][0]['id']
+        release_type = result['release-group-list'][0]['type']
+        
     release = get_release(group_id, release_type)
     prepare_release(release)
     add_release(release)
