@@ -119,8 +119,6 @@ def get_releases(mbid):
             break
         print("Getting more release groups with offset " + str(offset) +"...")
 
-
-
     releases = []
 
     for group in release_groups:
@@ -204,8 +202,8 @@ def import_release(group_id):
     add_release(release)
 
 def import_artist(artist):
-    """artist may either be the name or MBID"""
-    
+    """artist may the name, mbid or local id"""
+
     model = Model()
     mb_type_id = model.get_link_type_id("musicbrainz")
 
@@ -246,7 +244,6 @@ def import_artist(artist):
 
     for release in releases:
         add_release(release)
-
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
