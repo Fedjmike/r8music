@@ -196,7 +196,13 @@ class MBID(str):
 
 class id_(str):
     pass
-    
+
+def import_release(group_id):
+    release_type = musicbrainzngs.get_release_group_by_id(group_id)['release-group']['type']
+    release = get_release(group_id, release_type)
+    prepare_release(release)
+    add_release(release)
+
 def import_artist(artist):
     """artist may either be the name or MBID"""
     
