@@ -106,7 +106,7 @@ def get_release(group_mbid, release_type):
 
     return release
 
-def get_releases(mbid, artist_id):
+def get_releases(mbid):
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
@@ -235,7 +235,7 @@ def import_artist(artist):
         prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
-    releases = get_releases(artist_mbid, artist_id)
+    releases = get_releases(artist_mbid)
     pool.map(prepare_release, releases)
 
     for release in releases:
