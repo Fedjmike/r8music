@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, MBID
 from template_tools import add_template_tools
-from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_artists, edit_distance, profiled
+from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled
 
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
@@ -308,7 +308,7 @@ def add_artist_search_results(query=None):
         return redirect(url_for("add_artist"))
         
     query = decode_query_str(query)
-    artists = search_artists(query)
+    artists = search_mb(query, search='artists')
 
     if "json" in request.values and request.values["json"]:
         return jsonify(results=artists)
