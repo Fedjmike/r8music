@@ -9,6 +9,9 @@ from model import Model, NotFound
 
 limit = 100
 
+class ReleaseImportError(Exception):
+    pass
+
 def get_canonical_url(url):
     return requests.get(url).url
 
@@ -80,12 +83,30 @@ def prepare_artist(artist_mbid, artist_id, artist_name):
     except TypeError:
         pass
 
+def get_release(group_mbid, release_type):
+    model = Model()
 
+    print("Querying MB for release group " + group_mbid + "...")
+    result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['releases'])
+    release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
+
+    if not release_candidates:
+        raise ReleaseImportError
+    
+    if any([model.mbid_in_links(release['id']) for release in release_candidates]):
+        print("Release " + release_candidates[0]['id'] + " has already been processed")
+        raise ReleaseImportError
+
+    # Gets the oldest release of the group. If it fails, ignore this release group
+    release = min(release_candidates,
+                  key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
+
+    release['group-id'] = group_mbid
+    release['type'] = release_type
+
+    return release
 
 def get_releases(mbid, artist_id):
-    model = Model()
-    mb_type_id = model.get_link_type_id("musicbrainz")
-
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
@@ -98,34 +119,25 @@ def get_releases(mbid, artist_id):
             break
         print("Getting more release groups with offset " + str(offset) +"...")
 
+
+
     releases = []
-    
+
     for group in release_groups:
-        print("Querying MB for release group " + group['id'] + "...")
-        result = musicbrainzngs.get_release_group_by_id(group['id'], includes=['releases'])
-        release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
-
-        if not release_candidates:
-            continue
-        
-        if any([model.mbid_in_links(release['id']) for release in release_candidates]):
-            print("Release " + release_candidates[0]['id'] + " has already been processed")
-            continue
-
-        # Gets the oldest release of the group. If it fails, ignore this release group
-        release = min(release_candidates,
-                      key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
-
-        release['group-id'] = group['id']
-        release['type'] = group['type'] if 'type' in group else 'Unspecified'
-
-        releases.append(release)
+        try:
+            releases.append(get_release(group['id'], group['type']\
+                if 'type' in group else 'Unspecified'))
+        except ReleaseImportError:
+            pass
     
     return releases
 
 def prepare_release(release):
-    release['full-art-url'], release['thumb-art-url'] \
-        = get_album_art_urls(release['group-id'])
+    try:
+        release['full-art-url'], release['thumb-art-url'] \
+            = get_album_art_urls(release['group-id'])
+    except TypeError:
+        return
 
     print("Getting deets for release " + release['id'] + "...")
     result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
