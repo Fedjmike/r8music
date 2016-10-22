@@ -214,6 +214,7 @@ $(document).ready(function ($) {
     
     //From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
     $("#autocomplete").autocomplete({
+        minLength: 2,
         source: function (request, response) {
             $.getJSON("/search/" + request.term, {
                 json: 1
@@ -222,13 +223,13 @@ $(document).ready(function ($) {
                 response(data.results);
             });
         },
-        minLength: 2,
         select: function (event, ui) {
             window.location.href = ui.item.url;
         }
     });
     
     var mb_autocomplete = $("#autocomplete-mb").autocomplete({
+        minLength: 2,
         source: function (request, response) {
             $.getJSON("/add-artist-search/" + request.term, {
                 json: 1
@@ -237,7 +238,6 @@ $(document).ready(function ($) {
                 response(data.results);
             });
         },
-        minLength: 2,
         select: function (event, ui) {
                 $.ajax({
                     method: "POST",

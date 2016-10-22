@@ -13,6 +13,7 @@ class ReleaseImportError(Exception):
     pass
 
 def get_canonical_url(url):
+    """Skips through redirects to get the "actual" URL"""
     return requests.get(url).url
 
 def get_album_art_urls(mbid, group=True):
@@ -50,9 +51,11 @@ def get_links(artist_mbid):
         for item in result['artist']['url-relation-list']:
             _type, target = split_link(item['type'], item['target'])
             links[_type] = target
+        return links
+        
     except KeyError as e:
         print("Error getting links:", e)
-    return links
+        return {}
 
 def prepare_artist(artist_mbid, artist_id, artist_name):
     model = Model()
@@ -88,12 +91,12 @@ def get_release(group_mbid, release_type):
 
     print("Querying MB for release group " + group_mbid + "...")
     result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['releases'])
-    release_candidates = [x for x in result['release-group']['release-list'] if 'date' in x]
+    release_candidates = [r for r in result['release-group']['release-list'] if 'date' in r]
 
     if not release_candidates:
         raise ReleaseImportError
     
-    if any([model.mbid_in_links(release['id']) for release in release_candidates]):
+    if any(model.mbid_in_links(release['id']) for release in release_candidates):
         print("Release " + release_candidates[0]['id'] + " has already been processed")
         raise ReleaseImportError
 
