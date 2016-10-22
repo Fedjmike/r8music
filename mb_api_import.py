@@ -76,7 +76,7 @@ def prepare_artist(artist_mbid, artist_id, artist_name):
         return
 
     print("Scraping wikipedia...")
-    model.add_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
+    model.set_description(artist_id, get_wikipedia_summary(links["wikipedia"]))
 
     try:
         image_thumb, image = get_wikipedia_image(links["wikipedia"])

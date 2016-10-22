@@ -335,8 +335,8 @@ class Model(GeneralModel):
         return self.query_unique("select color1, color2, color3 from palettes"
                                  " where id=?", id, fallback=(None, None, None))
         
-    def add_description(self, artist_id, description):
-        self.insert("insert into descriptions (id, description)"
+    def set_description(self, artist_id, description):
+        self.insert("replace into descriptions (id, description)"
                     " values (?, ?)", artist_id, description)
         
     def get_description(self, id):
