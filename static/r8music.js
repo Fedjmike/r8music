@@ -248,21 +248,23 @@ $(document).ready(function ($) {
         }
     }).data("ui-autocomplete");
     
-    mb_autocomplete._renderItem = function (ul, item) {
-        var li = $("<li>")
-            .addClass("ui-menu-item")
-            .appendTo(ul);
-        
-        var a = $("<a>")
-            .append(item.name + " ")
-            .appendTo(li);
+    if (mb_autocomplete) {
+        mb_autocomplete._renderItem = function (ul, item) {
+            var li = $("<li>")
+                .addClass("ui-menu-item")
+                .appendTo(ul);
             
-        if ("disambiguation" in item || "area" in item)
-            $("<span>")
-                .addClass("de-emph")
-                .append("disambiguation" in item ? item.disambiguation : item.area.name)
-                .appendTo(a);
+            var a = $("<a>")
+                .append(item.name + " ")
+                .appendTo(li);
                 
-        return li;
+            if ("disambiguation" in item || "area" in item)
+                $("<span>")
+                    .addClass("de-emph")
+                    .append("disambiguation" in item ? item.disambiguation : item.area.name)
+                    .appendTo(a);
+                    
+            return li;
+        }
     }
 });
