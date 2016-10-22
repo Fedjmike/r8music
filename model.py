@@ -675,13 +675,13 @@ class Model(GeneralModel):
         endpoint = chop_suffix(type, "s") + "_page"
         
         columns = {
-            "artists": "name, slug",
-            "users": "name, name as slug"
+            "artists": "id, name, slug",
+            "users": "id, name, name as slug"
         }[type]
         
         return [
-            {"type": type, "name": name, "url": url_for(endpoint, slug=slug)}
-            for name, slug in
+            {"id": id, "type": type, "name": name, "url": url_for(endpoint, slug=slug)}
+            for id, name, slug in
             self.query(("select %s from" % columns) +
                        " (select id as indexed_id from %s_indexed where name match (?) limit 20)"
                        " join %s on %s.id = indexed_id" % (table, table, table), query+'*')
