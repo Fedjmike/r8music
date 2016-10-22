@@ -203,16 +203,23 @@ $(document).ready(function ($) {
         });
     });
     
+    //The jQuery autocomplete API relies on each result having a "label" field.
+    //Even if _renderItem is overriden not to use it, it is still used when selecting
+    //an item with the keyboard.
+    function assignLabels(results, f) {
+        results.map(function (result) {
+            result.label = f(result);
+        });
+    }
+    
     //From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
     $("#autocomplete").autocomplete({
         source: function (request, response) {
             $.getJSON("/search/" + request.term, {
                 json: 1
             }, function (data) {
-                response(data.results.map(function (result) {
-                    result.label = result.name;
-                    return result;
-                }));
+                assignLabels(data.results, result => result.name);
+                response(data.results);
             });
         },
         minLength: 2,
@@ -226,10 +233,8 @@ $(document).ready(function ($) {
             $.getJSON("/add-artist-search/" + request.term, {
                 json: 1
             }, function (data) {
-                response(data.results.map(function (result) {
-                    result.label = result.name+", "+result.disambiguation;
-                    return result;
-                }));
+                assignLabels(data.results, result => result.name);
+                response(data.results);
             });
         },
         minLength: 2,
