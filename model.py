@@ -445,7 +445,7 @@ class Model(GeneralModel):
                           " order by a.creation desc limit ? offset ?",
                           *[ user_id, user_id, limit, offset] if friends else [user_id, limit, offset])
         
-        action_type, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 5, 8, 9])
+        action_type, user_id_getter, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 3, 5, 8, 9])
         
         action_priorities = {ActionType[k].value: v for k, v in {
             "rate": 1, "listen": 2, "list": 3,
@@ -455,16 +455,17 @@ class Model(GeneralModel):
         
         yield offset + len(rows)
         
-        for object_id, rows in groupby(rows, object_id):
-            rows = list(rows) #groupby uses generators
-            artists = [dict(name=artist_name(row), slug=artist_slug(row))
-                       for row in uniq(rows, key=artist_slug)]
-            
-            highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-            row = list(highest_priority_action)[:8] #Excluding artist columns
-            
-            if not ActionType(action_type(row)).name.startswith("un"):
-                yield Action(*row, artists=artists)
+        for _, rows in groupby(rows, object_id):
+            for _, rows in groupby(rows, user_id_getter):
+                rows = list(rows) #groupby uses generators
+                artists = [dict(name=artist_name(row), slug=artist_slug(row))
+                           for row in uniq(rows, key=artist_slug)]
+                
+                highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
+                row = list(highest_priority_action)[:8] #Excluding artist columns
+                
+                if not ActionType(action_type(row)).name.startswith("un"):
+                    yield Action(*row, artists=artists)
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
         offset, *actions = self._get_activity(user_id, limit, offset)
