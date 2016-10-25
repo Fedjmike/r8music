@@ -164,7 +164,7 @@ create table active_actions (
 
 create view active_actions_view as
     select user_id, object_id, type, creation
-    from actions join active_actions on id = action_id
+    from actions join active_actions on id = action_id;
 
 -- indexes?
 
