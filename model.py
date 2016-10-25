@@ -448,9 +448,9 @@ class Model(GeneralModel):
 
     def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
-        rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
+        rows = self.query("select a.action_id, a.type, a.creation, u.id, u.name,"
                           " r.id, r.title, r.slug, artists.name, artists.slug from"
-                          " actions a join users u on user_id = u.id"
+                          " active_actions_view a join users u on user_id = u.id"
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id" + \
@@ -467,17 +467,15 @@ class Model(GeneralModel):
         
         yield offset + len(rows)
         
-        for _, rows in groupby(rows, object_id):
-            for _, rows in groupby(rows, user_id_getter):
-                rows = list(rows) #groupby uses generators
-                artists = [dict(name=artist_name(row), slug=artist_slug(row))
-                           for row in uniq(rows, key=artist_slug)]
-                
-                highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-                row = list(highest_priority_action)[:8] #Excluding artist columns
-                
-                if not ActionType(action_type(row)).name.startswith("un"):
-                    yield Action(*row, artists=artists)
+        for _, rows in groupby(rows, key=lambda row: (object_id(row), user_id(row))):
+            rows = list(rows) #groupby uses generators
+            artists = [dict(name=artist_name(row), slug=artist_slug(row))
+                       for row in uniq(rows, key=artist_slug)]
+            
+            highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
+            row = list(highest_priority_action)[:8] #Excluding artist columns
+            
+            yield Action(*row, artists=artists)
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
         offset, *actions = self._get_activity(user_id, limit, offset)
