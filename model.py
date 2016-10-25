@@ -496,27 +496,19 @@ class Model(GeneralModel):
         
     def get_ratings(self, object_id):
         return [
-            rating for type, rating in
-            self.query("select type, rating from"
-                       " (select id, user_id, type from actions"
-                       "  where object_id=? and type in (?, ?) order by creation asc)"
-                       " left join ratings on id = action_id group by user_id",
-                       object_id, ActionType.rate.value, ActionType.unrate.value)
-            if type == ActionType.rate.value
+            (self.get_user(user), rating) for user, rating in
+            self.query("select user_id, rating from active_actions_view"
+                       " join ratings using (action_id)"
+                       " where object_id=?", object_id)
         ]
-        
+    
     def get_ratings_by_user(self, user_id):
-        rows = \
-            self.query("select object_id, type, rating from"
-                       " (select id, object_id, type from actions"
-                       "  where user_id=? and type in (?, ?) order by creation asc)"
-                       " left join ratings on id = action_id group by object_id",
-                       user_id, ActionType.rate.value, ActionType.unrate.value)
-        
         return {
             object_id: rating
-            for object_id, type, rating in rows
-            if type == ActionType.rate.value
+            for object_id, rating in
+            self.query("select object_id, rating from active_actions_view"
+                       " join ratings using (action_id)"
+                       " where user_id=?", user_id)
         }
         
     def _make_release(self, row):
