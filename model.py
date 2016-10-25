@@ -439,7 +439,9 @@ class Model(GeneralModel):
         ]
             
     def get_user_pick_no(self, user_id):
-        return self.query_unique("select count(*) from picks where user_id=?", user_id)[0]
+        return self.query_unique("select count(*) from active_actions_view"
+                                 " where user_id=? and type=?",
+                                 user_id, ActionType['pick'].value)[0]
 
     def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
