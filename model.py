@@ -446,7 +446,7 @@ class Model(GeneralModel):
     def get_user_pick_no(self, user_id):
         return self.query_unique("select count(*) from picks where user_id=?", user_id)[0]
 
-    def _get_activity(self, user_id, limit, offset, friends=False):
+    def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
                           " r.id, r.title, r.slug, artists.name, artists.slug from"
@@ -455,18 +455,15 @@ class Model(GeneralModel):
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id" + \
                           (" where u.id = ?" if not friends else \
-                          " where u.id in (select user_id from followerships"
-                          " where follower=? union select ? as user_id)") +\
+                           " where u.id in (select user_id from followerships"
+                           " where follower=? union select ? as user_id)") + \
                           " order by a.creation desc limit ? offset ?",
-                          *[ user_id, user_id, limit, offset] if friends else [user_id, limit, offset])
+                          *[primary_user_id, primary_user_id, limit, offset] if friends else [primary_user_id, limit, offset])
         
-        action_type, user_id_getter, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 3, 5, 8, 9])
+        action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 3, 5, 8, 9])
         
-        action_priorities = {ActionType[k].value: v for k, v in {
-            "rate": 1, "listen": 2, "list": 3,
-            "unrate": 4, "unlisten": 5, "unlist": 6,
-            "share": 7, "unshare": 8
-        }.items()}
+        action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
+        action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
         
         yield offset + len(rows)
         
