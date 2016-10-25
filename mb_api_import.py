@@ -110,7 +110,7 @@ def get_release(group_mbid, release_type):
 
     return release
 
-def get_releases(mbid):
+def get_release_groups(mbid):
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
@@ -123,16 +123,14 @@ def get_releases(mbid):
             break
         print("Getting more release groups with offset " + str(offset) +"...")
 
-    releases = []
+    return release_groups
 
-    for group in release_groups:
-        try:
-            releases.append(get_release(group['id'], group['type']\
-                if 'type' in group else 'Unspecified'))
-        except ReleaseImportError:
-            pass
-    
-    return releases
+def get_release_from_group(group):
+    try:
+        return get_release(group['id'], group['type']\
+            if 'type' in group else 'Unspecified')
+    except ReleaseImportError:
+        return
 
 def prepare_release(release):
     try:
@@ -252,9 +250,11 @@ def import_artist(artist):
         prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
-    releases = get_releases(artist_mbid)
+    release_groups = get_release_groups(artist_mbid)
+    releases = pool.map(get_release_from_group, release_groups)
+    releases = list(filter(lambda r: r is not None, releases))
     pool.map(prepare_release, releases)
-
+    
     for release in releases:
         add_release(release)
 
