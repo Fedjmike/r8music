@@ -156,6 +156,20 @@ create table actions (
     foreign key (object_id) references objects(id)
 );
 
+drop table if exists active_actions;
+create table active_actions (
+    action_id integer unique,
+    foreign key (action_id) references actions(id)
+);
+
+create view active_actions_view as
+    select user_id, object_id, type, creation
+    from actions join active_actions on id = action_id
+
+-- indexes?
+
+-- Ratings
+
 drop table if exists ratings;
 create table ratings (
     action_id integer primary key,
@@ -164,14 +178,3 @@ create table ratings (
 );
 
 create index rating_id_index on ratings(action_id);
-
--- Picks
-
-drop table if exists picks;
-create table picks (
-    user_id integer not null,
-    track_id integer not null,
-    primary key (user_id, track_id),
-    foreign key (user_id) references users(id),
-    foreign key (track_id) references tracks(id)
-);
