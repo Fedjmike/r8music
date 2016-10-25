@@ -200,7 +200,7 @@ def search_results(query=None):
 def track_post(track_id):
     try:
         if request.values["action"] in ["pick", "unpick"]:
-            model().set_track_picked(request.user.id, track_id, request.values["action"] == "pick")
+            model().add_action(request.user.id, track_id, ActionType[request.values["action"]])
             return jsonify(error=0)
         
         else:

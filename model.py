@@ -86,6 +86,8 @@ class ActionType(Enum):
     unlist = 6
     share = 7
     unshare = 8
+    pick = 9
+    unpick = 10
     
     @property
     def simple_past(self):
@@ -428,18 +430,11 @@ class Model(GeneralModel):
     def move_actions(self, dest_id, src_id):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
-        
-    def set_track_picked(self, user_id, track_id, picked):
-        if picked:
-            self.execute("insert into picks values (?, ?)", user_id, track_id)
-        
-        else:
-            self.execute("delete from picks where user_id=? and track_id=?", user_id, track_id)
 
     def get_picks(self, user_id, release_id):
         return [
             pick for (pick,) in \
-            self.query("select id from tracks join picks on track_id = id"
+            self.query("select id from tracks join active_actions_view on id = object_id"
                        " where user_id=? and release_id=?", user_id, release_id)
         ]
             
