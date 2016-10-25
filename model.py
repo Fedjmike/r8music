@@ -397,8 +397,23 @@ class Model(GeneralModel):
         if type == ActionType["listen"]:
             self.add_action(user_id, object_id, ActionType["unlist"])
             
-        return self.insert("insert into actions (user_id, object_id, type, creation)"
-                           " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
+        action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
+                                " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
+
+        try:
+            (previous_active_action,) = \
+                self.query_unique("select action_id from active_actions_view"
+                                  " where user_id=? and object_id=? and type=?", user_id, object_id,
+                                  type.value if not type.name.startswith('un') else ActionType[type.name[2:]].value)
+            self.execute("delete from active_actions where action_id=?", previous_active_action)
+
+        except NotFound:
+            pass
+
+        if not type.name.startswith('un'):
+            self.execute("insert into active_actions values (?)", action_id)
+
+        return action_id
         
     def _make_action(self, user, action_id, object, type_id, creation):
         return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
