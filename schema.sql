@@ -162,6 +162,7 @@ create table active_actions (
     foreign key (action_id) references actions(id)
 );
 
+drop view if exists active_actions_view;
 create view active_actions_view as
     select user_id, object_id, type, creation
     from actions join active_actions on id = action_id;
