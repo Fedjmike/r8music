@@ -522,17 +522,12 @@ class Model(GeneralModel):
         return Release(self, row, primary_artist_id, primary_artist_slug)
         
     def get_releases_rated_by_user(self, user_id):
-        action_values = lambda *actions: [ActionType[action].value for action in actions]
-    
         return [
             (self._make_release(row), rating) for rating, *row in
-            self.query("select rating, " + self._release_columns_rename + " from"
-                       " (select action_id, object_id, type as action_type from"
-                       "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and type in (?, ?) order by creation asc)"
-                       "  group by object_id) natural join ratings"
-                       " join releases on id = object_id where action_type=?",
-                       user_id, *action_values("rate", "unrate", "rate"))
+            self.query("select rating, " + self._release_columns_rename +
+                       " from active_actions_view a join releases on id = object_id"
+                       " join ratings using (action_id)"
+                       " where user_id=? and a.type=?", user_id, ActionType.rate.value)
         ]
         
     def get_releases_actioned_by_user(self, user_id, action):
