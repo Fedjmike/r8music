@@ -496,17 +496,14 @@ class Model(GeneralModel):
         return [
             rating for (rating,) in
             self.query("select rating from active_actions_view"
-                       " join ratings using (action_id)"
-                       " where object_id=?", object_id)
+                       " join ratings using (action_id) where object_id=?", object_id)
         ]
     
     def get_ratings_by_user(self, user_id):
         return {
-            object_id: rating
-            for object_id, rating in
+            object_id: rating for object_id, rating in
             self.query("select object_id, rating from active_actions_view"
-                       " join ratings using (action_id)"
-                       " where user_id=?", user_id)
+                       " join ratings using (action_id) where user_id=?", user_id)
         }
         
     def _make_release(self, row):
