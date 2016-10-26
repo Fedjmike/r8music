@@ -416,8 +416,7 @@ class Model(GeneralModel):
 
         if not type.name.startswith('un'):
             self.execute("insert into active_actions values (?)", action_id)
-
-        return action_id
+            return action_id
         
     def _make_action(self, user, action_id, object, type_id, creation):
         return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
