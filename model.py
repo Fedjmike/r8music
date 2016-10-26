@@ -100,7 +100,6 @@ class UserType(Enum):
 class RatingStats:
     def __init__(self, ratings):
         try:
-            print(ratings)
             self.frequency = len(ratings)
             self.average = sum(ratings) / self.frequency
             
