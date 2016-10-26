@@ -100,6 +100,7 @@ class UserType(Enum):
 class RatingStats:
     def __init__(self, ratings):
         try:
+            print(ratings)
             self.frequency = len(ratings)
             self.average = sum(ratings) / self.frequency
             
@@ -495,8 +496,8 @@ class Model(GeneralModel):
         
     def get_ratings(self, object_id):
         return [
-            (self.get_user(user), rating) for user, rating in
-            self.query("select user_id, rating from active_actions_view"
+            rating for (rating,) in
+            self.query("select rating from active_actions_view"
                        " join ratings using (action_id)"
                        " where object_id=?", object_id)
         ]
