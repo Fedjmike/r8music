@@ -178,18 +178,6 @@ class User(ModelObject):
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
         
-        def get_active_actions(object_id):
-            latest_by_type = defaultdict(lambda: 0) #A date older than all others (1970)
-            latest_by_type.update(model.get_latest_actions_by_type(self.id, object_id))
-            
-            #Pairs of actions and those that undo them
-            action_pairs = [(name, ActionType[name].value, ActionType["un" + name].value)
-                            for name in ["list", "listen", "share"]]
-            
-            #Actions done more recently than undone
-            return [name for name, action, antiaction in action_pairs
-                    if latest_by_type[action] > latest_by_type[antiaction]]
-        
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
             rated_ids = [release.id for release, rating in model.get_releases_rated_by_user(self.id)]
@@ -207,7 +195,7 @@ class User(ModelObject):
         self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
         self.get_pick_no = lambda: model.get_user_pick_no(self.id)
         
-        self.get_active_actions = get_active_actions
+        self.get_active_actions = lambda object_id: model.get_active_actions(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         
         self.get_followers = lambda: model.get_followers(self.id)
@@ -483,14 +471,12 @@ class Model(GeneralModel):
         offset, *actions = self._get_activity(user_id, limit, offset, friends=True)
         return offset, actions
         
-    def get_latest_actions_by_type(self, user_id, object_id):
-        return {
-            type: creation for type, creation in
-            self.query("select * from"
-                       " (select type, creation from actions"
-                       "  where user_id=? and object_id=? order by creation asc)"
-                       " group by type", user_id, object_id)
-        }
+    def get_active_actions(self, user_id, object_id):
+        return [
+            ActionType(type).name for (type,) in
+            self.query("select type from active_actions_view"
+                       " where user_id=? and object_id=?", user_id, object_id)
+        ]
         
     def get_ratings(self, object_id):
         return [
