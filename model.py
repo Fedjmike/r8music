@@ -399,8 +399,10 @@ class Model(GeneralModel):
         if type == ActionType["listen"]:
             self.add_action(user_id, object_id, ActionType["unlist"])
             
-        action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
-                                " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
+        if not type.name.startswith('un'):
+            action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
+                                    " values (?, ?, ?, ?)",
+                                    user_id, object_id, type.value, arrow.utcnow().timestamp)
 
         try:
             (previous_active_action,) = \
