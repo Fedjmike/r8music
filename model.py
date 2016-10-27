@@ -512,17 +512,11 @@ class Model(GeneralModel):
         ]
         
     def get_releases_actioned_by_user(self, user_id, action):
-        action_values = [ActionType[action].value for action in [action, "un" + action, action]]
-        
         return [
             self._make_release(row) for row in
-            self.query("select " + self._release_columns_rename + " from"
-                       " (select action_id, object_id, type as action_type from"
-                       "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and type in (?, ?) order by creation asc)"
-                       "  group by object_id)"
-                       " join releases on id = object_id where action_type=?",
-                       user_id, *action_values)
+            self.query("select " + self._release_columns_rename +
+                       " from active_actions_view a join releases on id = object_id"
+                       " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
         
     #Reviews
