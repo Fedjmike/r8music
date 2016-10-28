@@ -3,7 +3,7 @@ from collections import defaultdict, namedtuple
 from itertools import groupby
 import arrow
 
-from tools import sortable_date, fuzzy_groupby
+from tools import sortable_date, fuzzy_groupby, group_by_key
 
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
@@ -36,16 +36,23 @@ def relative_datetime(then):
 
 ActionGroup = namedtuple("ActionGroup", ["user", "types", "actions"])
 
-def group_actions(actions):
+def action_groups(actions):
     threshold = 60*60
 
-    for user, actions_by_user in groupby(actions, key=lambda action: action.user):
-        for _, close_actions in fuzzy_groupby(actions_by_user,
-                                              key=lambda action: action.creation.timestamp,
-                                              threshold=threshold):
-            close_actions = list(close_actions)
-            types = set(action.type for action in close_actions)
-            yield ActionGroup(user, types, close_actions)
+    def group_actions(actions):
+        actions = group_by_key(actions, key=lambda action: action.user['id'])
+
+        for user, actions_by_user in groupby(actions, key=lambda action: action.user):
+            for _, close_actions in fuzzy_groupby(actions_by_user,
+                                                  key=lambda action: action.creation.timestamp,
+                                                  threshold=threshold):
+                close_actions = list(close_actions)
+                types = set(action.type for action in close_actions)
+                yield ActionGroup(user, types, close_actions)
+
+    action_groups = group_actions(actions)
+
+    return sorted(action_groups, key=lambda ag: -ag.actions[0].creation.timestamp)
 
 #Rating datasets
 
@@ -122,7 +129,7 @@ def url_for_release(artist, release):
 
 import json
 
-template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), group_actions, sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
+template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), action_groups, sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)

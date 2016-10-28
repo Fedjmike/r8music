@@ -1,5 +1,7 @@
 #Iterables
 
+from itertools import chain
+
 def flatten(lists):
     return [item for list in lists for item in list]
     
@@ -46,6 +48,19 @@ class fuzzy_groupby(object):
         while self.target and self.close_enough(current, self.target):
             yield self.target
             self.target = next(self.it, None)
+
+def group_by_key(items, key):
+    """Takes an unordered list, returns list with elements with identical keys grouped together"""
+    d = dict()
+
+    for item in items:
+        try:
+            d[key(item)].append(item)
+
+        except KeyError:
+            d[key(item)] = [item]
+
+    return chain(*[d[k] for k in d])
 
 #Strings
 

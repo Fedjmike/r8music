@@ -35,7 +35,7 @@
 {%- endmacro %}
 
 {% macro activity_list(actions, same_user=False) -%}
-    {% set action_groups = group_actions(actions) %}
+    {% set action_groups = action_groups(actions) %}
     <ol class="activity-list">
     {% for action_group in action_groups %}
         <li>
