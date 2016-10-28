@@ -1,17 +1,27 @@
 {% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
+{% macro explain_action(action) -%}
+    {% for artist in action.object.artists %}
+        <span class="author">{{ artist_link(artist) }}</span>
+    {% endfor %}
+    &ndash;
+    {{ object_link(action.object) }}
+{%- endmacro %}
+
 {% macro explain_action_group(action_group, same_user=False) -%}
     {% set n_actions = action_group.actions | length %}
-    {{ user_link(action_group.user) }} did {{ n_actions}} things:<br>
+    {{ user_link(action_group.user) }}
+    {% for type in action_group.types %}
+        <span class='comma-separated'>{{type.simple_past}}</span>
+    {% endfor %}
+    {% if not n_actions == 1 %}
+    {{ n_actions}} releases
+    {% endif %}
+    {{ event_datetime(action_group.creation) }}
     <ol class="user-actions">
     {% for action in action_group.actions %}
         <li>
-        {% for artist in action.object.artists %}
-            <span class="author">{{ artist_link(artist) }}</span>
-        {% endfor %}
-        &ndash;
-        {{ object_link(action.object) }}
-        {{ event_datetime(action.creation) }}
+            {{ explain_action(action)}}
         </li>
     {% endfor %}
     </ol>
