@@ -34,7 +34,7 @@ def relative_datetime(then):
 
 #Actions
 
-ActionGroup = namedtuple("ActionGroup", ["user", "types", "creation", "actions"])
+ActionGroup = namedtuple("ActionGroup", ["user", "types", "actions"])
 
 def group_actions(actions):
     threshold = 60*60
@@ -50,7 +50,6 @@ def group_actions(actions):
             yield ActionGroup(
                 actions[0].user,
                 types,
-                actions[0].creation,
                 actions
             )
 
