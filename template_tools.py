@@ -1,8 +1,9 @@
 from datetime import datetime
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from itertools import groupby
+import arrow
 
-from tools import sortable_date
+from tools import sortable_date, fuzzy_groupby
 
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
@@ -30,7 +31,31 @@ def friendly_datetime(then):
 
 def relative_datetime(then):
     return then.humanize()
-    
+
+#Actions
+
+ActionGroup = namedtuple("ActionGroup", ["user", "types", "creation", "actions"])
+
+def group_actions(actions):
+    threshold = 60*60
+
+    for _, by_user in groupby(actions, key=lambda action: action.user):
+        for _, actions in fuzzy_groupby(by_user,
+                                             key=lambda action:action.creation.timestamp,
+                                             threshold=threshold):
+
+            actions = list(actions)
+            types = set([action.type for action in actions])
+
+            yield ActionGroup(
+                actions[0].user,
+                types,
+                actions[0].creation,
+                actions
+            )
+
+            # yield actions
+
 #Rating datasets
 
 def sort_by_artist(releases):
@@ -106,7 +131,7 @@ def url_for_release(artist, release):
 
 import json
 
-template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
+template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), group_actions, sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)

@@ -19,7 +19,7 @@ class fuzzy_groupby(object):
             while(abs(self.key(self.target) - self.key(self.current)) <= self.threshold):
                 self.target = next(self.it)
 
-        except TypeError:
+        except (TypeError, AttributeError):
             self.target = next(self.it)
 
         self.current = self.target
