@@ -2,6 +2,37 @@ import re
 from unidecode import unidecode
 import arrow
 
+class fuzzy_groupby(object):
+    def __init__(self, iterable, key=None, threshold=0):
+        self.it = iter(iterable)
+        self.threshold = threshold
+        self.target = self.current = object()   
+        if key is None:
+            key = lambda x: x
+        self.key = key
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try: # Fails during first iteration
+            while(abs(self.key(self.target) - self.key(self.current)) <= self.threshold):
+                self.target = next(self.it)
+
+        except TypeError:
+            self.target = next(self.it)
+
+        self.current = self.target
+        return (self.key(self.target), self._grouper(self.target))
+
+    def _grouper(self, current):
+        while(abs(self.key(current) - self.key(self.target)) <= self.threshold):
+            yield self.target
+            try:
+                self.target = next(self.it)
+            except StopIteration:
+                return
+
 def sortable_date(date):
     if len(date) == 4:
         return date + "-12-31"
