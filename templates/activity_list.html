@@ -27,7 +27,7 @@
         {{ n_things(n_actions, "release") }}:
     {% endif %}
     
-    <ol class="user-actions">
+    <ol class="activity-group">
     {% for action in action_group.actions %}
         <li>{{ explain_action(action, same_user=True)}}</li>
     {% endfor %}

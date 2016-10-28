@@ -584,12 +584,16 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-list > li {
-    margin-bottom: 1em;
+.activity-list .author {
+    display: inline;
 }
 
 .comma-separated:not(:last-of-type):after {
     content: ', ';
+}
+
+.activity-group {
+    margin-bottom: 1em;
 }
 
 /*Reviews*/
@@ -794,12 +798,6 @@ ol.references {
 
 .chart input[type=radio] {
     margin-right: 0.2em;
-}
-
-/*Activity feed*/
-
-.user-actions .author {
-    display: inline;
 }
 
 /*Search*/
