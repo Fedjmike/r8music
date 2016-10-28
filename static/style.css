@@ -582,7 +582,11 @@ ol.tabs > li {
     content: ' & ';
 }
 
-/*Activity summary*/
+/*Activity lists*/
+
+.activity-list > li {
+    margin-bottom: 1em;
+}
 
 .comma-separated:not(:last-of-type):after {
     content: ', ';

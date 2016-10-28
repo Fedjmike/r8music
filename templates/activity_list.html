@@ -1,6 +1,13 @@
 {% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
-{% macro explain_action(action) -%}
+{% macro explain_action(action, same_user=False) -%}
+    {% if same_user %}
+        {{ action.type.simple_past.capitalize() }}
+    {% else %}
+        {{ user_link(action.user) }}
+        {{ action.type.simple_past }}
+    {% endif %}
+    
     {% for artist in action.object.artists %}
         <span class="author">{{ artist_link(artist) }}</span>
     {% endfor %}
@@ -11,28 +18,32 @@
 
 {% macro explain_action_group(action_group, same_user=False) -%}
     {% set n_actions = action_group.actions | length %}
-    {{ user_link(action_group.user) }}
-    {% for type in action_group.types %}
-        <span class='comma-separated'>{{type.simple_past}}</span>
-    {% endfor %}
-    {% if not n_actions == 1 %}
-    {{ n_actions}} releases
+    
+    {% if not same_user %}
+        {{ user_link(action_group.user) }}
+        {% for type in action_group.types %}
+            <span class="comma-separated">{{ type.simple_past }}</span>
+        {% endfor %}
+        {{ n_things(n_actions, "release") }}:
     {% endif %}
+    
     <ol class="user-actions">
     {% for action in action_group.actions %}
-        <li>
-            {{ explain_action(action)}}
-        </li>
+        <li>{{ explain_action(action, same_user=True)}}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
 
 {% macro activity_list(actions, same_user=False) -%}
     {% set action_groups = group_actions(actions) %}
-    <ol>
+    <ol class="activity-list">
     {% for action_group in action_groups %}
         <li>
-            {{ explain_action_group(action_group, same_user) }}
+            {% if action_group.actions | length == 1 %}
+                {{ explain_action(action_group.actions[0], same_user) }}
+            {% else %}
+                {{ explain_action_group(action_group, same_user) }}
+            {% endif %}
         </li>
     {% endfor %}
     </ol>
