@@ -39,19 +39,13 @@ ActionGroup = namedtuple("ActionGroup", ["user", "types", "actions"])
 def group_actions(actions):
     threshold = 60*60
 
-    for _, by_user in groupby(actions, key=lambda action: action.user):
-        for _, actions in fuzzy_groupby(by_user,
-                                             key=lambda action:action.creation.timestamp,
-                                             threshold=threshold):
-
-            actions = list(actions)
-            types = set([action.type for action in actions])
-
-            yield ActionGroup(
-                actions[0].user,
-                types,
-                actions
-            )
+    for user, actions_by_user in groupby(actions, key=lambda action: action.user):
+        for _, close_actions in fuzzy_groupby(actions_by_user,
+                                              key=lambda action: action.creation.timestamp,
+                                              threshold=threshold):
+            close_actions = list(close_actions)
+            types = set(action.type for action in close_actions)
+            yield ActionGroup(user, types, close_actions)
 
 #Rating datasets
 
