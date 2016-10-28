@@ -1,6 +1,24 @@
-import re
-from unidecode import unidecode
-import arrow
+#Iterables
+
+def flatten(lists):
+    return [item for list in lists for item in list]
+    
+def uniq(iter, key=lambda x: x):
+    seen = set()
+    
+    for item in iter:
+        item_key = key(item)
+        
+        if item_key not in seen:
+            seen.add(item_key)
+            yield item
+
+def dict_values(dict, keys):
+    return [dict[key] if key in dict else None
+            for key in keys]
+
+def dict_subset(dict, keys):
+    return {key: dict[key] for key in keys if key in dict}
 
 class fuzzy_groupby(object):
     def __init__(self, iterable, key=None, threshold=0):
@@ -33,36 +51,10 @@ class fuzzy_groupby(object):
             except StopIteration:
                 return
 
-def sortable_date(date):
-    if len(date) == 4:
-        return date + "-12-31"
-    elif len(date) == 7:
-        return arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD')
-    else:
-        return date
+#Strings
 
-class WikipediaPageNotFound(Exception):
-    pass
-
-def flatten(lists):
-    return [item for list in lists for item in list]
-    
-def uniq(iter, key=lambda x: x):
-    seen = set()
-    
-    for item in iter:
-        item_key = key(item)
-        
-        if item_key not in seen:
-            seen.add(item_key)
-            yield item
-
-def dict_values(dict, keys):
-    return [dict[key] if key in dict else None
-            for key in keys]
-
-def dict_subset(dict, keys):
-    return {key: dict[key] for key in keys if key in dict}
+import re
+from unidecode import unidecode
 
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):
@@ -100,6 +92,24 @@ def slugify(text, delim=u'-'):
     for word in _punct_re.split(text.lower()):
         result.extend(unidecode(word).split())
     return delim.join(result).lower()
+
+#Date/time
+
+import arrow
+
+def sortable_date(date):
+    """Accepts dates of the form YYYY, YYYY-MM or YYYY-MM-DD and extends them to a full date."""
+    
+    #Year only
+    if len(date) == 4:
+        return date + "-12-31"
+        
+    #Year and  month
+    elif len(date) == 7:
+        return arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD')
+        
+    else:
+        return date
 
 #Yo dawg I heard you like decorating so I made some decorators to 
 #decorate your decorators into decorators
@@ -163,7 +173,7 @@ def decorator_with_args(decorator):
         
     return decorated_decorator
 
-#
+#Profiling
 
 from cProfile import Profile
 from time import perf_counter
@@ -189,7 +199,7 @@ def profiled(f):
     finally:
         profile.print_stats(sort="cumtime")
 
-#
+#Wikipedia
 
 def search_mb(query, search='artists'):
     import musicbrainzngs as mb
@@ -207,6 +217,9 @@ def search_mb(query, search='artists'):
 
 import re, urllib.parse, requests, wikipedia
 from bs4 import BeautifulSoup
+
+class WikipediaPageNotFound(Exception):
+    pass
 
 def _wikipedia_query(titles, **args):
     response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
