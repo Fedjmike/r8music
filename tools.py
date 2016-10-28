@@ -21,20 +21,19 @@ def dict_subset(dict, keys):
     return {key: dict[key] for key in keys if key in dict}
 
 class fuzzy_groupby(object):
-    def __init__(self, iterable, key=None, threshold=0):
-        self.it = iter(iterable)
-        self.threshold = threshold
-        self.target = self.current = object()   
-        if key is None:
-            key = lambda x: x
+    def __init__(self, iterable, key=lambda x: x, threshold=0):
         self.key = key
+        self.close_enough = lambda x, y: abs(key(x) - key(y)) <= threshold
+        
+        self.it = iter(iterable)
+        self.target = self.current = object()
 
     def __iter__(self):
         return self
 
     def __next__(self):
         try: # Fails during first iteration
-            while(abs(self.key(self.target) - self.key(self.current)) <= self.threshold):
+            while self.close_enough(self.current, self.target):
                 self.target = next(self.it)
 
         except (TypeError, AttributeError):
@@ -44,12 +43,9 @@ class fuzzy_groupby(object):
         return (self.key(self.target), self._grouper(self.target))
 
     def _grouper(self, current):
-        while(abs(self.key(current) - self.key(self.target)) <= self.threshold):
+        while self.target and self.close_enough(current, self.target):
             yield self.target
-            try:
-                self.target = next(self.it)
-            except StopIteration:
-                return
+            self.target = next(self.it, None)
 
 #Strings
 
