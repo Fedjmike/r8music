@@ -54,8 +54,6 @@ def group_actions(actions):
                 actions
             )
 
-            # yield actions
-
 #Rating datasets
 
 def sort_by_artist(releases):
