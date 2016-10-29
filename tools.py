@@ -302,3 +302,13 @@ def guess_wikipedia_page(artist_name):
 def get_wikipedia_urls(page_title):
     return "https://en.wikipedia.org/wiki/%s" % page_title, \
            "https://en.wikipedia.org/w/index.php?title=%s&action=edit" % page_title
+
+# Avatars
+
+from hashlib import sha256
+
+def avatar_url(email, size=48):
+    _hash = sha256(email.encode('utf-8').strip().lower()).hexdigest()
+    base_url = "http://cdn.libravatar.org/avatar/"
+    params = "?default=identicon&size=" + str(size)
+    return base_url + _hash + params

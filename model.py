@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, avatar_url
 from template_tools import url_for_release
 from chromatography import get_palette
 
@@ -177,6 +177,7 @@ class User(ModelObject):
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
+        self.avatar = avatar_url(self.email if self.email else self.name)
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
