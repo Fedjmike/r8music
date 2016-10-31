@@ -177,7 +177,7 @@ class User(ModelObject):
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
-        self.avatar = avatar_url(self.email if self.email else self.name)
+        self.avatar_url = avatar_url(self.email if self.email else self.name)
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
