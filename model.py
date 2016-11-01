@@ -209,13 +209,13 @@ class User(ModelObject):
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
-    def __init__(self, id, type, creation, object_id, object_title, object_slug,
+    def __init__(self, id, type, creation, object_id, object_title, object_slug, object_thumb,
                  user, artists):
         self.id = id
         self.type = ActionType(type)
         self.creation = arrow.get(creation)
         self.user = user
-        self.object = dict(id=object_id, title=object_title, artists=artists,
+        self.object = dict(id=object_id, title=object_title, thumb_art_url=object_thumb, artists=artists,
                            url=url_for_release(artists[0]["slug"], object_slug))
 
 class Model(GeneralModel):
