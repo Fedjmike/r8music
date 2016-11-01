@@ -439,7 +439,7 @@ class Model(GeneralModel):
     def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.action_id, a.type, a.creation,"
-                          " r.id, r.title, r.slug, user_id, artists.name, artists.slug from"
+                          " r.id, r.title, r.slug, r.thumb_art_url, user_id, artists.name, artists.slug from"
                           " active_actions_view a join users u on user_id = u.id"
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
@@ -450,7 +450,7 @@ class Model(GeneralModel):
                           " order by a.creation desc limit ? offset ?",
                           *[primary_user_id, primary_user_id, limit, offset] if friends else [primary_user_id, limit, offset])
         
-        action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 6, 3, 7, 8])
+        action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 7, 3, 8, 9])
         
         action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
         action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
@@ -464,7 +464,7 @@ class Model(GeneralModel):
                        for row in uniq(rows, key=artist_slug)]
             
             highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-            row = list(highest_priority_action)[:6] #Excluding user and artist columns
+            row = list(highest_priority_action)[:7] #Excluding user and artist columns
             
             yield Action(*row, user=user, artists=artists)
         

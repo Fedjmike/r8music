@@ -584,16 +584,43 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-list .author {
+.activity-list * {
+    vertical-align: middle;
+}
+
+.activity-group {
+    margin-bottom: 1.5em;
+}
+
+.activity-group > li {
+    margin: 0.75em;
+}
+
+.activity-group:not(.same-user) > li {
+    margin-left: 1.5em;
+}
+
+.activity-thumb {
+    width: 2.5em;
+    height: 2.5em;
+    margin-right: 0.4em;
+}
+
+.activity-details {
+    display: inline-block;
+}
+
+.activity-item .author {
     display: inline;
+}
+
+.activity-item time {
+    font-size: 0.85em;
+    line-height: 0;
 }
 
 .comma-separated:not(:last-of-type):after {
     content: ', ';
-}
-
-.activity-group {
-    margin-bottom: 1em;
 }
 
 /*Reviews*/
@@ -971,7 +998,8 @@ input[type=submit] {
 }
 
 .artist-image,
-.album-cover img {
+.album-cover img,
+.activity-thumb {
     /*Glowed border*/
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }

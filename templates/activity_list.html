@@ -1,35 +1,37 @@
 {% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
-{% macro explain_action(action, same_user=False) -%}
-    {% if same_user %}
-        {{ action.type.simple_past.capitalize() }}
-    {% else %}
-        {{ user_link(action.user) }}
-        {{ action.type.simple_past }}
-    {% endif %}
-    
-    {% for artist in action.object.artists %}
-        <span class="author">{{ artist_link(artist) }}</span>
-    {% endfor %}
-    &ndash;
-    {{ object_link(action.object) }}
-    {{ event_datetime(action.creation) }}
+{% macro explain_action(action) -%}
+    <div class="activity-item">
+        <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
+        <div class="activity-details">
+            <div>
+                {% for artist in action.object.artists %}
+                    <span class="author">{{ artist_link(artist) }}</span>
+                {% endfor %}
+                &ndash;
+                {{ object_link(action.object) }}
+            </div>
+            {{ event_datetime(action.creation) }}
+        </div>
+    </div>
 {%- endmacro %}
 
 {% macro explain_action_group(action_group, same_user=False) -%}
     {% set n_actions = action_group.actions | length %}
     
     {% if not same_user %}
+        <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
         {{ user_link(action_group.user) }}
-        {% for type in action_group.types %}
-            <span class="comma-separated">{{ type.simple_past }}</span>
-        {% endfor %}
-        {{ n_things(n_actions, "release") }}:
     {% endif %}
     
-    <ol class="activity-group">
+    {% for type in action_group.types %}
+        <span class="comma-separated">{{ type.simple_past.capitalize() if loop.index == 1 else type.simple_past }}</span>
+    {% endfor %}
+    {{ n_things(n_actions, "release") }}:
+    
+    <ol class="activity-group {{ 'same-user' if same_user else '' }}">
     {% for action in action_group.actions %}
-        <li>{{ explain_action(action, same_user=True)}}</li>
+        <li>{{ explain_action(action)}}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
@@ -38,13 +40,7 @@
     {% set action_groups = action_groups(actions) %}
     <ol class="activity-list">
     {% for action_group in action_groups %}
-        <li>
-            {% if action_group.actions | length == 1 %}
-                {{ explain_action(action_group.actions[0], same_user) }}
-            {% else %}
-                {{ explain_action_group(action_group, same_user) }}
-            {% endif %}
-        </li>
+        <li>{{ explain_action_group(action_group, same_user) }}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
