@@ -464,7 +464,7 @@ class Model(GeneralModel):
                        for row in uniq(rows, key=artist_slug)]
             
             highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-            row = list(highest_priority_action)[:7] #Excluding user and artist columns
+            row = list(highest_priority_action)[:6] #Excluding user and artist columns
             
             yield Action(*row, user=user, artists=artists)
         
