@@ -40,7 +40,7 @@ def action_groups(actions):
     threshold = 60*60
 
     def group_actions(actions):
-        actions = group_by_key(actions, key=lambda action: action.user['id'])
+        actions = group_by_key(actions, key=lambda action: action.user.id)
 
         for user, actions_by_user in groupby(actions, key=lambda action: action.user):
             for _, close_actions in fuzzy_groupby(actions_by_user,
