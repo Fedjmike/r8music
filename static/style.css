@@ -588,8 +588,13 @@ ol.tabs > li {
     vertical-align: middle;
 }
 
+.activity-list a {
+    font-weight: 400;
+}
+
 .activity-group {
-    margin-bottom: 1.5em;
+    margin-bottom: 1em;
+    border-left: medium solid #62b5e0;
 }
 
 .activity-group > li {
@@ -600,9 +605,15 @@ ol.tabs > li {
     margin-left: 1.5em;
 }
 
-.activity-thumb {
+.avatar-thumb {
     width: 2.5em;
     height: 2.5em;
+    margin-right: 0.4em;    
+}
+
+.activity-thumb {
+    width: 3.5em;
+    height: 3.5em;
     margin-right: 0.4em;
 }
 

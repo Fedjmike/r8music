@@ -20,12 +20,12 @@
     {% set n_actions = action_group.actions | length %}
     
     {% if not same_user %}
-        <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
+        <img class="avatar-thumb" src={{ action_group.user.avatar_url }} />
         {{ user_link(action_group.user) }}
     {% endif %}
     
     {% for type in action_group.types %}
-        <span class="comma-separated">{{ type.simple_past.capitalize() if loop.index == 1 else type.simple_past }}</span>
+        <span class="comma-separated">{{ type.simple_past }}</span>
     {% endfor %}
     {{ n_things(n_actions, "release") }}:
     
