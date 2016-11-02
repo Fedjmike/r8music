@@ -305,10 +305,17 @@ def get_wikipedia_urls(page_title):
 
 # Avatars
 
-from hashlib import sha256
+from os import path
+from PIL import Image
+from config import UPLOAD_DIR
 
-def avatar_url(email, size=48):
-    _hash = sha256(email.encode('utf-8').strip().lower()).hexdigest()
-    base_url = "http://cdn.libravatar.org/avatar/"
-    params = "?default=identicon&size=" + str(size)
-    return base_url + _hash + params
+def save_thumbnail(image, path):
+    im = Image.open(image).convert('RGB')
+    w, h = im.size[0], im.size[1]
+    im = im.crop(((w-h)//2, 0, h + (w-h)//2, h) if w > h else (0, (h-w)//2, w, w + (h-w)//2))
+    im = im.resize((200, 200), Image.LANCZOS)
+    im.save(path)
+
+def get_avatar_url(avatar_id):
+    filename = str(avatar_id) + '.jpg'
+    return path.join(UPLOAD_DIR, filename)

@@ -71,6 +71,13 @@
 {%- endmacro %}
 
 {% macro settings_form(user) -%}
+    <form action="/set-avatar" method="post" enctype="multipart/form-data" class="clearfix">
+        <dl>
+            <dt>Upload an avatar:</dt>
+            <dd><input type='file' name='image'></dd>
+            <dd><input type='submit' value='Upload'></dd>
+        </dl>
+    </form>
     <form action={{ url_for("user_settings") }} method="post" class="clearfix">
         <dl>
             {{ form_field("Email address", "email", "text", prefill=user.email if user.email else "") }}
