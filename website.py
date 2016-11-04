@@ -6,7 +6,7 @@ from contextlib import closing
 from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
-from mb_api_import import import_artist, MBID
+from mb_api_import import import_artist, import_release, MBID
 from template_tools import add_template_tools
 from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled
 
@@ -281,24 +281,28 @@ def add_artist():
         return render_template("add_artist.html")
         
     else:
-        if "artist-id" in request.form:
+        if "artist-id" in request.form or "release-id" in request.form:
             #todo ajax progress
-            artist_mbid = MBID(request.form["artist-id"])
+            mbid = MBID(request.form["artist-id" if "artist-id" in request.form else "release-id"])
 
-            if artist_mbid not in updating:
-                updating.append(artist_mbid)
-                app_pool.apply_async(import_artist, (artist_mbid,),
-                                     callback=lambda _:updating.remove(artist_mbid))
+            if mbid not in updating:
+                updating.append(mbid)
+                app_pool.apply_async(import_artist if "artist-id" in request.form else import_release,
+                                     (mbid,),
+                                     callback=lambda _:updating.remove(mbid))
                 flash("The artist will be added soon", "success")
                 return redirect(url_for("artists_index"))
 
             else:
                 flash("The artist is currently being updated", "error")
                 return redirect_back()
-            
+
         else:
-            query = encode_query_str(request.form["artist-name"])
-            return redirect(url_for("add_artist_search_results", query=query))
+            query = encode_query_str(request.form["artist-name" if "artist-name" in request.form \
+                                                  else "release-name"])
+            query_type = "artist" if "artist-name" in request.form else "release"
+
+            return redirect(url_for("add_artist_search_results", query=query, query_type=query_type))
 
 @app.route("/add-artist-search/<path:query>", methods=["GET", "POST"])
 @app.route("/add-artist-search/", methods=["GET"])
@@ -308,12 +312,13 @@ def add_artist_search_results(query=None):
         return redirect(url_for("add_artist"))
         
     query = decode_query_str(query)
-    artists = search_mb(query, search='artists')
+    query_type = request.values['query_type']
+    results = search_mb(query, query_type=query_type)
 
     if "json" in request.values and request.values["json"]:
-        return jsonify(results=artists)
+        return jsonify(results=results)
 
-    return render_template("add_artist_search_results.html", artists=artists, query=query)
+    return render_template("add_artist_search_results.html", results=results, query=query, query_type=query_type)
 
 @app.route("/update-artist/<int:id>")
 @needs_auth

@@ -10,21 +10,29 @@
         <input type="text" name="artist-name" placeholder="Artist name" value="{{ query }}" id="autocomplete-mb" class="form-control input-lg">
     </form>
 
-    {% if artists %}
+    {% if results %}
         <p>Choose the artist to import.</p>
 
         <form action={{ url_for("add_artist") }} method="post" class="clearfix">
-            {% for artist in artists %}
-                <label>
-                    <input type="radio" name="artist-id" value={{ artist.id }}>
-                    {{ artist.name }}
-                    <span class="de-emph">
-                        {{      ' (%s)' % artist.disambiguation if artist.disambiguation
-                           else ' (%s)' % artist.area.name if artist.area
-                           else '' }}
-                    </span>
-                </label>
-                <a href="https://musicbrainz.org/artist/{{ artist.id }}" target=_blank><i class="material-icons tiny" title="View this artist on MusicBrainz">launch</i></a>
+            {% for result in results %}
+                {% if query_type == 'artist' %}
+                    <label>
+                        <input type="radio" name="artist-id" value={{ result.id }}>
+                        {{ result.name }}
+                        <span class="de-emph">
+                            {{      ' (%s)' % result.disambiguation if result.disambiguation
+                               else ' (%s)' % result.area.name if result.area
+                               else '' }}
+                        </span>
+                    </label>
+                    <a href="https://musicbrainz.org/artist/{{ result.id }}" target=_blank><i class="material-icons tiny" title="View this artist on MusicBrainz">launch</i></a>
+                {% else %}
+                    <label>
+                        <input type="radio" name="release-id" value={{ result.id }}>
+                        {{ result['artist-credit-phrase'] }} &ndash; {{ result['release-list'][0]['title'] }}
+                    </label>
+                    <a href="https://musicbrainz.org/release-group/{{ result.id }}" target=_blank><i class="material-icons tiny" title="View this release on MusicBrainz">launch</i></a>
+                {% endif %}
                 </br>
             {% endfor %}
             

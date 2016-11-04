@@ -160,16 +160,16 @@ def profiled(f):
 
 #
 
-def search_mb(query, search='artists'):
+def search_mb(query, query_type='artist'):
     import musicbrainzngs as mb
     mb.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
-    if search == 'artists':
+    if query_type == 'artist':
         result = mb.search_artists(artist=query)
         return result["artist-list"]
 
     else:
-        result = mb.search_artists(releasegroup=query)
+        result = mb.search_release_groups(releasegroup=query)
         return result['release-group-list']
     
 #
