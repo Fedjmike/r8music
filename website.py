@@ -312,7 +312,12 @@ def add_artist_search_results(query=None):
         return redirect(url_for("add_artist"))
         
     query = decode_query_str(query)
-    query_type = request.values['query_type']
+    try:
+        query_type = request.values['query_type']
+    
+    except KeyError:
+        query_type = 'artist'
+
     results = search_mb(query, query_type=query_type)
 
     if "json" in request.values and request.values["json"]:
