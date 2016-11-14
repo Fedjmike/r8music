@@ -588,33 +588,27 @@ ol.tabs > li {
     vertical-align: middle;
 }
 
-.activity-list a {
-    font-weight: 400;
-}
-
 .activity-group {
-    margin-bottom: 1em;
-    border-left: medium solid #62b5e0;
+    margin-bottom: 1.5em;
+    border-left: 2px solid;
 }
 
 .activity-group > li {
     margin: 0.75em;
 }
 
-.activity-group:not(.same-user) > li {
-    margin-left: 1.5em;
+.activity-group:not(.same-user) {
+    margin-left: 0.75em;
 }
 
-.avatar-thumb {
-    width: 2.5em;
-    height: 2.5em;
-    margin-right: 0.4em;    
+.activity-group:not(.same-user) > li {
+    margin-left: 1em;
 }
 
 .activity-thumb {
-    width: 3.5em;
-    height: 3.5em;
-    margin-right: 0.4em;
+    width: 2.5em;
+    height: 2.5em;
+    margin-right: 0.4em;    
 }
 
 .activity-details {
