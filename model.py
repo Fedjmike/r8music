@@ -209,14 +209,12 @@ class User(ModelObject):
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
-    def __init__(self, id, type, creation, object_id, object_title, object_slug, object_thumb,
-                 user, artists):
+    def __init__(self, model, id, type, creation, user_id, object_id, object_type):
         self.id = id
         self.type = ActionType(type)
         self.creation = arrow.get(creation)
-        self.user = user
-        self.object = dict(id=object_id, title=object_title, thumb_art_url=object_thumb, artists=artists,
-                           url=url_for_release(artists[0]["slug"], object_slug))
+        self.object = model.get_object(object_id, object_type)
+        self.user = model.get_user(user_id)
 
 class Model(GeneralModel):
     #General music objects
@@ -397,8 +395,6 @@ class Model(GeneralModel):
 
     #Actions
     
-    Action = namedtuple("Action", ["id", "user", "object", "type", "creation"])
-        
     def add_action(self, user_id, object_id, type):
         #Rating implies having listened (transitively, it also unlists)
         if type == ActionType["rate"]:
@@ -427,8 +423,9 @@ class Model(GeneralModel):
             self.execute("insert into active_actions values (?)", action_id)
             return action_id
         
-    def _make_action(self, user, action_id, object, type_id, creation):
-        return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
+    def _make_action(self, action_id, type_id, creation, user_id, object_id, object_type):
+        return Action(self, action_id, ActionType(type_id), arrow.get(creation),
+                      user_id, object_id, ObjectType(object_type))
     
     def set_rating(self, user_id, object_id, rating=None):
         action_id = self.add_action(user_id, object_id, ActionType["rate" if rating else "unrate"])
@@ -443,23 +440,23 @@ class Model(GeneralModel):
 
     def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
-        rows = self.query("select a.action_id, a.type, a.creation,"
-                          " r.id, r.title, r.slug, r.thumb_art_url, user_id, artists.name, artists.slug from"
-                          " active_actions_view a join users u on user_id = u.id"
-                          " join releases r on object_id = r.id"
-                          " join authorships on object_id = release_id"
-                          " join artists on artist_id = artists.id" + \
-                          (" where u.id = ?" if not friends else \
-                           " where u.id in (select user_id from followerships"
-                           " where follower=? union select ? as user_id)") + \
+        rows = self.query("select action_id, a.type, a.creation, user_id, object_id, o.type"
+                          " from active_actions_view a join objects o on object_id = o.id"
+                          #Only releases supported
+                          " where o.type=? and " + \
+                          (" user_id = ?" if not friends else \
+                           " user_id in (select user_id from followerships"
+                           "  where follower=? union select ? as user_id)") + \
                           " order by a.creation desc limit ? offset ?",
-                          *[primary_user_id, primary_user_id, limit, offset] if friends else [primary_user_id, limit, offset])
+                          ObjectType.release.value,
+                          *[primary_user_id, limit, offset] if not friends else
+                           [primary_user_id, primary_user_id, limit, offset])
         
         #The First result is the next offset to be used
         yield offset + len(rows)
         
         #Getters for certain columns
-        action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 7, 3, 8, 9])
+        action_type, user_id, object_id = (itemgetter(n) for n in [1, 3, 4])
         
         action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
         action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
@@ -468,14 +465,11 @@ class Model(GeneralModel):
         
         for _, rows in groupby(rows, key=object_and_user):
             rows = list(rows) #groupby uses generators
-            user = self.get_user(user_id(rows[0]))
-            artists = [dict(name=artist_name(row), slug=artist_slug(row))
-                       for row in uniq(rows, key=artist_slug)]
             
             highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
             row = list(highest_priority_action)[:7] #Excluding user and artist columns
             
-            yield Action(*row, user=user, artists=artists)
+            yield self._make_action(*row)
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
         offset, *actions = self._get_activity(user_id, limit, offset)

@@ -5,7 +5,7 @@
         <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
         <div class="activity-details">
             <div>
-                {% for artist in action.object.artists %}
+                {% for artist in action.object.get_artists() %}
                     <span class="author">{{ artist_link(artist) }}</span>
                 {% endfor %}
                 &ndash;
