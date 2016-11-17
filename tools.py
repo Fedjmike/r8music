@@ -1,17 +1,6 @@
-import re
-from unidecode import unidecode
-import arrow
+#Iterables
 
-def sortable_date(date):
-    if len(date) == 4:
-        return date + "-12-31"
-    elif len(date) == 7:
-        return arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD')
-    else:
-        return date
-
-class WikipediaPageNotFound(Exception):
-    pass
+from itertools import chain
 
 def flatten(lists):
     return [item for list in lists for item in list]
@@ -32,6 +21,51 @@ def dict_values(dict, keys):
 
 def dict_subset(dict, keys):
     return {key: dict[key] for key in keys if key in dict}
+
+class fuzzy_groupby(object):
+    def __init__(self, iterable, key=lambda x: x, threshold=0):
+        self.key = key
+        self.close_enough = lambda x, y: abs(key(x) - key(y)) <= threshold
+        
+        self.it = iter(iterable)
+        self.target = self.current = object()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try: # Fails during first iteration
+            while self.close_enough(self.current, self.target):
+                self.target = next(self.it)
+
+        except (TypeError, AttributeError):
+            self.target = next(self.it)
+
+        self.current = self.target
+        return (self.key(self.target), self._grouper(self.target))
+
+    def _grouper(self, current):
+        while self.target and self.close_enough(current, self.target):
+            yield self.target
+            self.target = next(self.it, None)
+
+def group_by_key(items, key):
+    """Takes an unordered list, returns list with elements with identical keys grouped together"""
+    d = dict()
+
+    for item in items:
+        try:
+            d[key(item)].append(item)
+
+        except KeyError:
+            d[key(item)] = [item]
+
+    return chain(*[d[k] for k in d])
+
+#Strings
+
+import re
+from unidecode import unidecode
 
 def chop_suffix(str, suffix):
     if not str.endswith(suffix):
@@ -69,6 +103,24 @@ def slugify(text, delim=u'-'):
     for word in _punct_re.split(text.lower()):
         result.extend(unidecode(word).split())
     return delim.join(result).lower()
+
+#Date/time
+
+import arrow
+
+def sortable_date(date):
+    """Accepts dates of the form YYYY, YYYY-MM or YYYY-MM-DD and extends them to a full date."""
+    
+    #Year only
+    if len(date) == 4:
+        return date + "-12-31"
+        
+    #Year and  month
+    elif len(date) == 7:
+        return arrow.get(date + '-01').replace(months=+1, days=-1).format('YYYY-MM-DD')
+        
+    else:
+        return date
 
 #Yo dawg I heard you like decorating so I made some decorators to 
 #decorate your decorators into decorators
@@ -132,7 +184,7 @@ def decorator_with_args(decorator):
         
     return decorated_decorator
 
-#
+#Profiling
 
 from cProfile import Profile
 from time import perf_counter
@@ -158,7 +210,7 @@ def profiled(f):
     finally:
         profile.print_stats(sort="cumtime")
 
-#
+#Wikipedia
 
 def search_mb(query, query_type='artist'):
     import musicbrainzngs as mb
@@ -176,6 +228,9 @@ def search_mb(query, query_type='artist'):
 
 import re, urllib.parse, requests, wikipedia
 from bs4 import BeautifulSoup
+
+class WikipediaPageNotFound(Exception):
+    pass
 
 def _wikipedia_query(titles, **args):
     response = requests.get("http://en.wikipedia.org/w/api.php", params=dict(
@@ -247,3 +302,20 @@ def guess_wikipedia_page(artist_name):
 def get_wikipedia_urls(page_title):
     return "https://en.wikipedia.org/wiki/%s" % page_title, \
            "https://en.wikipedia.org/w/index.php?title=%s&action=edit" % page_title
+
+# Avatars
+
+from os import path
+from PIL import Image
+from config import UPLOAD_DIR
+
+def save_thumbnail(image, path):
+    im = Image.open(image).convert('RGB')
+    w, h = im.size[0], im.size[1]
+    im = im.crop(((w-h)//2, 0, h + (w-h)//2, h) if w > h else (0, (h-w)//2, w, w + (h-w)//2))
+    im = im.resize((200, 200), Image.LANCZOS)
+    im.save(path)
+
+def get_avatar_url(avatar_id):
+    filename = str(avatar_id) + '.jpg'
+    return path.join(UPLOAD_DIR, filename)

@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, get_avatar_url
 from template_tools import url_for_release
 from chromatography import get_palette
 
@@ -86,6 +86,8 @@ class ActionType(Enum):
     unlist = 6
     share = 7
     unshare = 8
+    pick = 9
+    unpick = 10
     
     @property
     def simple_past(self):
@@ -108,6 +110,9 @@ class ModelObject:
     def init_from_row(self, row, columns):
         for column, value in zip(columns, row):
             setattr(self, column, value)
+    
+    def __eq__(self, other):
+        return self.id == other.id
         
 class Artist(ModelObject):
     def __init__(self, model, row):
@@ -175,18 +180,7 @@ class User(ModelObject):
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
-        
-        def get_active_actions(object_id):
-            latest_by_type = defaultdict(lambda: 0) #A date older than all others (1970)
-            latest_by_type.update(model.get_latest_actions_by_type(self.id, object_id))
-            
-            #Pairs of actions and those that undo them
-            action_pairs = [(name, ActionType[name].value, ActionType["un" + name].value)
-                            for name in ["list", "listen", "share"]]
-            
-            #Actions done more recently than undone
-            return [name for name, action, antiaction in action_pairs
-                    if latest_by_type[action] > latest_by_type[antiaction]]
+        self.avatar_url = get_avatar_url(model.get_avatar_id(self.id))
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
@@ -205,7 +199,7 @@ class User(ModelObject):
         self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
         self.get_pick_no = lambda: model.get_user_pick_no(self.id)
         
-        self.get_active_actions = get_active_actions
+        self.get_active_actions = lambda object_id: model.get_active_actions(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         
         self.get_followers = lambda: model.get_followers(self.id)
@@ -215,13 +209,13 @@ class User(ModelObject):
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
-    def __init__(self, id, type, creation, user_id, user_name,
-                 object_id, object_title, object_slug, artists):
+    def __init__(self, id, type, creation, object_id, object_title, object_slug, object_thumb,
+                 user, artists):
         self.id = id
         self.type = ActionType(type)
         self.creation = arrow.get(creation)
-        self.user = dict(id=user_id, name=user_name)
-        self.object = dict(id=object_id, title=object_title, artists=artists,
+        self.user = user
+        self.object = dict(id=object_id, title=object_title, thumb_art_url=object_thumb, artists=artists,
                            url=url_for_release(artists[0]["slug"], object_slug))
 
 class Model(GeneralModel):
@@ -397,8 +391,24 @@ class Model(GeneralModel):
         if type == ActionType["listen"]:
             self.add_action(user_id, object_id, ActionType["unlist"])
             
-        return self.insert("insert into actions (user_id, object_id, type, creation)"
-                           " values (?, ?, ?, ?)", user_id, object_id, type.value, arrow.utcnow().timestamp)
+        if not type.name.startswith('un'):
+            action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
+                                    " values (?, ?, ?, ?)",
+                                    user_id, object_id, type.value, arrow.utcnow().timestamp)
+
+        try:
+            (previous_active_action,) = \
+                self.query_unique("select action_id from active_actions_view"
+                                  " where user_id=? and object_id=? and type=?", user_id, object_id,
+                                  type.value if not type.name.startswith('un') else ActionType[type.name[2:]].value)
+            self.execute("delete from active_actions where action_id=?", previous_active_action)
+
+        except NotFound:
+            pass
+
+        if not type.name.startswith('un'):
+            self.execute("insert into active_actions values (?)", action_id)
+            return action_id
         
     def _make_action(self, user, action_id, object, type_id, creation):
         return self.Action(action_id, user, object, ActionType(type_id), arrow.get(creation))
@@ -413,59 +423,42 @@ class Model(GeneralModel):
     def move_actions(self, dest_id, src_id):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
-        
-    def set_track_picked(self, user_id, track_id, picked):
-        if picked:
-            self.execute("insert into picks values (?, ?)", user_id, track_id)
-        
-        else:
-            self.execute("delete from picks where user_id=? and track_id=?", user_id, track_id)
 
-    def get_picks(self, user_id, release_id):
-        return [
-            pick for (pick,) in \
-            self.query("select id from tracks join picks on track_id = id"
-                       " where user_id=? and release_id=?", user_id, release_id)
-        ]
-            
-    def get_user_pick_no(self, user_id):
-        return self.query_unique("select count(*) from picks where user_id=?", user_id)[0]
-
-    def _get_activity(self, user_id, limit, offset, friends=False):
+    def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
-        rows = self.query("select a.id, a.type, a.creation, u.id, u.name,"
-                          " r.id, r.title, r.slug, artists.name, artists.slug from"
-                          " actions a join users u on user_id = u.id"
+        rows = self.query("select a.action_id, a.type, a.creation,"
+                          " r.id, r.title, r.slug, r.thumb_art_url, user_id, artists.name, artists.slug from"
+                          " active_actions_view a join users u on user_id = u.id"
                           " join releases r on object_id = r.id"
                           " join authorships on object_id = release_id"
                           " join artists on artist_id = artists.id" + \
                           (" where u.id = ?" if not friends else \
-                          " where u.id in (select user_id from followerships"
-                          " where follower=? union select ? as user_id)") +\
+                           " where u.id in (select user_id from followerships"
+                           " where follower=? union select ? as user_id)") + \
                           " order by a.creation desc limit ? offset ?",
-                          *[ user_id, user_id, limit, offset] if friends else [user_id, limit, offset])
+                          *[primary_user_id, primary_user_id, limit, offset] if friends else [primary_user_id, limit, offset])
         
-        action_type, user_id_getter, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 3, 5, 8, 9])
-        
-        action_priorities = {ActionType[k].value: v for k, v in {
-            "rate": 1, "listen": 2, "list": 3,
-            "unrate": 4, "unlisten": 5, "unlist": 6,
-            "share": 7, "unshare": 8
-        }.items()}
-        
+        #The First result is the next offset to be used
         yield offset + len(rows)
         
-        for _, rows in groupby(rows, object_id):
-            for _, rows in groupby(rows, user_id_getter):
-                rows = list(rows) #groupby uses generators
-                artists = [dict(name=artist_name(row), slug=artist_slug(row))
-                           for row in uniq(rows, key=artist_slug)]
-                
-                highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-                row = list(highest_priority_action)[:8] #Excluding artist columns
-                
-                if not ActionType(action_type(row)).name.startswith("un"):
-                    yield Action(*row, artists=artists)
+        #Getters for certain columns
+        action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 7, 3, 8, 9])
+        
+        action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
+        action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
+        
+        object_and_user = lambda row: (object_id(row), user_id(row))
+        
+        for _, rows in groupby(rows, key=object_and_user):
+            rows = list(rows) #groupby uses generators
+            user = self.get_user(user_id(rows[0]))
+            artists = [dict(name=artist_name(row), slug=artist_slug(row))
+                       for row in uniq(rows, key=artist_slug)]
+            
+            highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
+            row = list(highest_priority_action)[:7] #Excluding user and artist columns
+            
+            yield Action(*row, user=user, artists=artists)
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
         offset, *actions = self._get_activity(user_id, limit, offset)
@@ -475,38 +468,25 @@ class Model(GeneralModel):
         offset, *actions = self._get_activity(user_id, limit, offset, friends=True)
         return offset, actions
         
-    def get_latest_actions_by_type(self, user_id, object_id):
-        return {
-            type: creation for type, creation in
-            self.query("select * from"
-                       " (select type, creation from actions"
-                       "  where user_id=? and object_id=? order by creation asc)"
-                       " group by type", user_id, object_id)
-        }
+    def get_active_actions(self, user_id, object_id):
+        return [
+            ActionType(type).name for (type,) in
+            self.query("select type from active_actions_view"
+                       " where user_id=? and object_id=?", user_id, object_id)
+        ]
         
     def get_ratings(self, object_id):
         return [
-            rating for type, rating in
-            self.query("select type, rating from"
-                       " (select id, user_id, type from actions"
-                       "  where object_id=? and type in (?, ?) order by creation asc)"
-                       " left join ratings on id = action_id group by user_id",
-                       object_id, ActionType.rate.value, ActionType.unrate.value)
-            if type == ActionType.rate.value
+            rating for (rating,) in
+            self.query("select rating from active_actions_view"
+                       " join ratings using (action_id) where object_id=?", object_id)
         ]
-        
+    
     def get_ratings_by_user(self, user_id):
-        rows = \
-            self.query("select object_id, type, rating from"
-                       " (select id, object_id, type from actions"
-                       "  where user_id=? and type in (?, ?) order by creation asc)"
-                       " left join ratings on id = action_id group by object_id",
-                       user_id, ActionType.rate.value, ActionType.unrate.value)
-        
         return {
-            object_id: rating
-            for object_id, type, rating in rows
-            if type == ActionType.rate.value
+            object_id: rating for object_id, rating in
+            self.query("select object_id, rating from active_actions_view"
+                       " join ratings using (action_id) where user_id=?", user_id)
         }
         
     def _make_release(self, row):
@@ -520,33 +500,34 @@ class Model(GeneralModel):
         return Release(self, row, primary_artist_id, primary_artist_slug)
         
     def get_releases_rated_by_user(self, user_id):
-        action_values = lambda *actions: [ActionType[action].value for action in actions]
-    
         return [
             (self._make_release(row), rating) for rating, *row in
-            self.query("select rating, " + self._release_columns_rename + " from"
-                       " (select action_id, object_id, type as action_type from"
-                       "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and type in (?, ?) order by creation asc)"
-                       "  group by object_id) natural join ratings"
-                       " join releases on id = object_id where action_type=?",
-                       user_id, *action_values("rate", "unrate", "rate"))
+            self.query("select rating, " + self._release_columns_rename +
+                       " from active_actions_view a join releases on id = object_id"
+                       " join ratings using (action_id)"
+                       " where user_id=? and a.type=?", user_id, ActionType.rate.value)
         ]
         
     def get_releases_actioned_by_user(self, user_id, action):
-        action_values = [ActionType[action].value for action in [action, "un" + action, action]]
-        
         return [
             self._make_release(row) for row in
-            self.query("select " + self._release_columns_rename + " from"
-                       " (select action_id, object_id, type as action_type from"
-                       "  (select id as action_id, object_id, type from actions"
-                       "   where user_id=? and type in (?, ?) order by creation asc)"
-                       "  group by object_id)"
-                       " join releases on id = object_id where action_type=?",
-                       user_id, *action_values)
+            self.query("select " + self._release_columns_rename +
+                       " from active_actions_view a join releases on id = object_id"
+                       " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
-        
+
+    def get_picks(self, user_id, release_id):
+        return [
+            pick for (pick,) in \
+            self.query("select id from tracks join active_actions_view on id = object_id"
+                       " where user_id=? and release_id=?", user_id, release_id)
+        ]
+            
+    def get_user_pick_no(self, user_id):
+        return self.query_unique("select count(*) from active_actions_view"
+                                 " where user_id=? and type=?",
+                                 user_id, ActionType['pick'].value)[0]
+
     #Reviews
     
     def get_reviews(self, object_id):
@@ -633,7 +614,21 @@ class Model(GeneralModel):
                        " where user_id=?", user_id)
         })
         return descriptions
-        
+
+    def set_avatar(self, user_id):
+        image_id = self.insert("insert into images (id) values (null)")
+        self.execute("insert or replace into avatars (user_id, image_id) values (?, ?)",
+                    user_id, image_id)
+        return image_id
+
+    def get_avatar_id(self, user_id):
+        try:
+            return self.query_unique("select image_id from avatars where user_id=?", user_id)[0]
+
+        except NotFound:
+            return 'fallback'
+
+
     def follow(self, follower_id, user_id):
         creation = arrow.utcnow().timestamp
         self.execute("insert into followerships (follower, user_id, creation)"

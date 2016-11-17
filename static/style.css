@@ -582,6 +582,52 @@ ol.tabs > li {
     content: ' & ';
 }
 
+/*Activity lists*/
+
+.activity-list * {
+    vertical-align: middle;
+}
+
+.activity-group {
+    margin-bottom: 1.5em;
+    border-left: 2px solid;
+}
+
+.activity-group > li {
+    margin: 0.75em;
+}
+
+.activity-group:not(.same-user) {
+    margin-left: 0.75em;
+}
+
+.activity-group:not(.same-user) > li {
+    margin-left: 1em;
+}
+
+.activity-thumb {
+    width: 2.5em;
+    height: 2.5em;
+    margin-right: 0.4em;    
+}
+
+.activity-details {
+    display: inline-block;
+}
+
+.activity-item .author {
+    display: inline;
+}
+
+.activity-item time {
+    font-size: 0.85em;
+    line-height: 0;
+}
+
+.comma-separated:not(:last-of-type):after {
+    content: ', ';
+}
+
 /*Reviews*/
 
 form.review {
@@ -786,12 +832,6 @@ ol.references {
     margin-right: 0.2em;
 }
 
-/*Activity feed*/
-
-.user-actions .author {
-    display: inline;
-}
-
 /*Search*/
 
 .search {
@@ -963,7 +1003,8 @@ input[type=submit] {
 }
 
 .artist-image,
-.album-cover img {
+.album-cover img,
+.activity-thumb {
     /*Glowed border*/
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }
