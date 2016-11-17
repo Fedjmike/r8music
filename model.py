@@ -219,11 +219,23 @@ class Action(ModelObject):
                            url=url_for_release(artists[0]["slug"], object_slug))
 
 class Model(GeneralModel):
-    #IDs
+    #General music objects
     
     def new_id(self, type):
         return self.insert("insert into objects (type) values (?)", type.value)
         
+    def get_object(self, id, type):
+        try:
+            getter = {
+                ObjectType.artist: self.get_artist,
+                ObjectType.release: self.get_release
+            }
+            
+            return getter[type](id)
+        
+        except KeyError:
+            raise ValueError("Can't get that type of object")
+            
     #Artists
     
     def add_artist(self, name, mbid):
@@ -285,7 +297,12 @@ class Model(GeneralModel):
                        " join releases on releases.id = release_id", artist.id)
         ]
         
-    def get_release(self, artist_slug, release_slug):
+    def get_release(self, release_id):
+        row = self.query_unique("select " + self._release_columns_rename +
+                                " from releases where id=?", release_id)
+        return self._make_release(row)
+        
+    def get_release_by_slug(self, artist_slug, release_slug):
         #Select the artist and release rows with the right slugs
         # (first, to make the join small)
         #Join them using authorships

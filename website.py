@@ -214,7 +214,7 @@ def track_post(track_id):
 @app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
 @handle_not_found()
 def release_page(artist_slug, release_slug, tab=None):
-    release = model().get_release(artist_slug, release_slug)
+    release = model().get_release_by_slug(artist_slug, release_slug)
     
     if request.method == "GET":
         return render_template("release.html", release=release, tab=tab, user=request.user)
@@ -256,7 +256,7 @@ def release_post(release_id):
 @handle_not_found(what="release", form=True)
 @needs_priv()
 def edit_release(artist_slug, release_slug):
-    release = model().get_release(artist_slug, release_slug)
+    release = model().get_release_by_slug(artist_slug, release_slug)
         
     if request.method == "POST":
         try:
