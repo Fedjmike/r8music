@@ -438,14 +438,18 @@ class Model(GeneralModel):
                           " order by a.creation desc limit ? offset ?",
                           *[primary_user_id, primary_user_id, limit, offset] if friends else [primary_user_id, limit, offset])
         
+        #The First result is the next offset to be used
+        yield offset + len(rows)
+        
+        #Getters for certain columns
         action_type, user_id, object_id, artist_name, artist_slug = (itemgetter(n) for n in [1, 7, 3, 8, 9])
         
         action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
         action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
         
-        yield offset + len(rows)
+        object_and_user = lambda row: (object_id(row), user_id(row))
         
-        for _, rows in groupby(rows, key=lambda row: (object_id(row), user_id(row))):
+        for _, rows in groupby(rows, key=object_and_user):
             rows = list(rows) #groupby uses generators
             user = self.get_user(user_id(rows[0]))
             artists = [dict(name=artist_name(row), slug=artist_slug(row))
