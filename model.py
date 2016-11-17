@@ -91,7 +91,7 @@ class ActionType(Enum):
     
     @property
     def simple_past(self):
-        return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared"][self.value-1]
+        return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared", "picked", "unpicked"][self.value-1]
 
 class UserType(Enum):
     user = 1
