@@ -424,18 +424,6 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
 
-    def get_picks(self, user_id, release_id):
-        return [
-            pick for (pick,) in \
-            self.query("select id from tracks join active_actions_view on id = object_id"
-                       " where user_id=? and release_id=?", user_id, release_id)
-        ]
-            
-    def get_user_pick_no(self, user_id):
-        return self.query_unique("select count(*) from active_actions_view"
-                                 " where user_id=? and type=?",
-                                 user_id, ActionType['pick'].value)[0]
-
     def _get_activity(self, primary_user_id, limit, offset, friends=False):
         #todo not just releases
         rows = self.query("select a.action_id, a.type, a.creation,"
@@ -523,7 +511,19 @@ class Model(GeneralModel):
                        " from active_actions_view a join releases on id = object_id"
                        " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
-        
+
+    def get_picks(self, user_id, release_id):
+        return [
+            pick for (pick,) in \
+            self.query("select id from tracks join active_actions_view on id = object_id"
+                       " where user_id=? and release_id=?", user_id, release_id)
+        ]
+            
+    def get_user_pick_no(self, user_id):
+        return self.query_unique("select count(*) from active_actions_view"
+                                 " where user_id=? and type=?",
+                                 user_id, ActionType['pick'].value)[0]
+
     #Reviews
     
     def get_reviews(self, object_id):
