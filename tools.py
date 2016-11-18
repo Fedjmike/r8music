@@ -311,7 +311,7 @@ from urllib.error import HTTPError
 from imghdr import what
 
 valid_domains = ["i.imgur.com", "my.mixtape.moe"]
-max_size = "322322" # 322 KB in bytes
+max_size = 322322 # 322 KB in bytes
 allowed_types = ["jpeg", "png", "gif"]
 
 class AvatarException(Exception):
@@ -337,9 +337,9 @@ def validate_avatar(avatar_url):
     except HTTPError:
         raise ImageError("Couldn't download the image for validation")
 
-    filesize = r.info().get("Content-Length")
+    filesize = int(r.info().get("Content-Length"))
     if filesize > max_size:
-        raise TooBig("File size " + filesize//1000 + " kB exceeds max size " \
+        raise TooBig("File size " + str(filesize//1000) + " kB exceeds max size " \
                      + str(max_size//1000) + " kB")
 
     _type = what('', h=r.read())
