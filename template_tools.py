@@ -37,20 +37,34 @@ def relative_datetime(then):
 ActionGroup = namedtuple("ActionGroup", ["user", "types", "actions"])
 
 def action_groups(actions):
-    threshold = 60*60
-
-    def group_actions(actions):
+    from model import ActionType
+    
+    threshold = 60*60 #1h in seconds
+    
+    def group_by_object_and_omit(actions):
+        for _, actions in groupby(actions, key=lambda action: action.object.id):
+            actions = list(actions)
+            
+            for action in actions:
+                #If they rated around the same time as listing or listening, don't show those
+                if     action.type in [ActionType.list, ActionType.listen] \
+                   and any(action.type == ActionType.rate for action in actions):
+                    continue
+                    
+                yield action
+    
+    def group_by_user_and_time(actions):
         actions = group_by_key(actions, key=lambda action: action.user.id)
 
         for user, actions_by_user in groupby(actions, key=lambda action: action.user):
             for _, close_actions in fuzzy_groupby(actions_by_user,
                                                   key=lambda action: action.creation.timestamp,
                                                   threshold=threshold):
-                close_actions = list(close_actions)
+                close_actions = list(group_by_object_and_omit(close_actions))
                 types = set(action.type for action in close_actions)
                 yield ActionGroup(user, types, close_actions)
 
-    action_groups = group_actions(actions)
+    action_groups = group_by_user_and_time(actions)
 
     return sorted(action_groups, key=lambda ag: -ag.actions[0].creation.timestamp)
 

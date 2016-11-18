@@ -452,32 +452,18 @@ class Model(GeneralModel):
                           *[primary_user_id, limit, offset] if not friends else
                            [primary_user_id, primary_user_id, limit, offset])
         
-        #The First result is the next offset to be used
-        yield offset + len(rows)
+        next_offset = offset + len(rows)
         
-        #Getters for certain columns
-        action_type, user_id, object_id = (itemgetter(n) for n in [1, 3, 4])
-        
-        action_priorities = {"rate": 1, "listen": 2, "list": 3, "share": 4}
-        action_priorities = {ActionType[k].value: v for k, v in action_priorities.items()}
-        
-        object_and_user = lambda row: (object_id(row), user_id(row))
-        
-        for _, rows in groupby(rows, key=object_and_user):
-            rows = list(rows) #groupby uses generators
-            
-            highest_priority_action = sorted(rows, key=lambda r: action_priorities[action_type(r)])[0]
-            row = list(highest_priority_action)[:7] #Excluding user and artist columns
-            
-            yield self._make_action(*row)
+        return next_offset, [
+            self._make_action(action_id, type, creation, user_id, object_id, object_type)
+            for action_id, type, creation, user_id, object_id, object_type in rows
+        ]
         
     def get_activity_by_user(self, user_id, limit=20, offset=0):
-        offset, *actions = self._get_activity(user_id, limit, offset)
-        return offset, actions
+        return self._get_activity(user_id, limit, offset)
         
     def get_activity_feed(self, user_id, limit=20, offset=0):
-        offset, *actions = self._get_activity(user_id, limit, offset, friends=True)
-        return offset, actions
+        return self._get_activity(user_id, limit, offset, friends=True)
         
     def get_active_actions(self, user_id, object_id):
         return [
