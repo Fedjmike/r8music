@@ -423,10 +423,6 @@ class Model(GeneralModel):
             self.execute("insert into active_actions values (?)", action_id)
             return action_id
         
-    def _make_action(self, action_id, type_id, creation, user_id, object_id, object_type):
-        return Action(self, action_id, ActionType(type_id), arrow.get(creation),
-                      user_id, object_id, ObjectType(object_type))
-    
     def set_rating(self, user_id, object_id, rating=None):
         action_id = self.add_action(user_id, object_id, ActionType["rate" if rating else "unrate"])
         
@@ -438,32 +434,38 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
 
-    def _get_activity(self, primary_user_id, limit, offset, friends=False):
+    def _get_activity(self, offset, rows):
         #todo not just releases
-        rows = self.query("select action_id, a.type, a.creation, user_id, object_id, o.type"
-                          " from active_actions_view a join objects o on object_id = o.id"
-                          #Only releases supported
-                          " where o.type=? and " + \
-                          (" user_id = ?" if not friends else \
-                           " user_id in (select user_id from followerships"
-                           "  where follower=? union select ? as user_id)") + \
-                          " order by a.creation desc limit ? offset ?",
-                          ObjectType.release.value,
-                          *[primary_user_id, limit, offset] if not friends else
-                           [primary_user_id, primary_user_id, limit, offset])
-        
         next_offset = offset + len(rows)
         
         return next_offset, [
-            self._make_action(action_id, type, creation, user_id, object_id, object_type)
-            for action_id, type, creation, user_id, object_id, object_type in rows
+            Action(self, action_id, ActionType(type_id), arrow.get(creation),
+                   user_id, object_id, ObjectType(object_type))
+            for action_id, type_id, creation, user_id, object_id, object_type in rows
         ]
         
+    activity_columns_and_from = \
+        "action_id, a.type, a.creation, user_id, object_id, o.type" \
+        " from active_actions_view a join objects o on object_id = o.id"
+        
     def get_activity_by_user(self, user_id, limit=20, offset=0):
-        return self._get_activity(user_id, limit, offset)
+        rows = self.query("select " + self.activity_columns_and_from +
+                          #Only releases supported
+                          " where o.type=? and user_id = ?"
+                          " order by a.creation desc limit ? offset ?",
+                          ObjectType.release.value, user_id, limit, offset)
+        
+        return self._get_activity(offset, rows)
         
     def get_activity_feed(self, user_id, limit=20, offset=0):
-        return self._get_activity(user_id, limit, offset, friends=True)
+        rows = self.query("select " + self.activity_columns_and_from +
+                          " where o.type=? " #Only releases supported
+                          " and user_id in (select user_id from followerships"
+                          "  where follower=? union select ? as user_id)"
+                          " order by a.creation desc limit ? offset ?",
+                          ObjectType.release.value, user_id, user_id, limit, offset)
+        
+        return self._get_activity(offset, rows)
         
     def get_active_actions(self, user_id, object_id):
         return [
