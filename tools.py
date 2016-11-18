@@ -305,17 +305,45 @@ def get_wikipedia_urls(page_title):
 
 # Avatars
 
-from os import path
-from PIL import Image
-from config import UPLOAD_DIR
+from urllib.parse import urlparse
+from urllib.request import urlopen
+from urllib.error import HTTPError
+from collections import namedtuple
+from imghdr import what
 
-def save_thumbnail(image, path):
-    im = Image.open(image).convert('RGB')
-    w, h = im.size[0], im.size[1]
-    im = im.crop(((w-h)//2, 0, h + (w-h)//2, h) if w > h else (0, (h-w)//2, w, w + (h-w)//2))
-    im = im.resize((200, 200), Image.LANCZOS)
-    im.save(path)
+valid_domains = ["i.imgur.com", "my.mixtape.moe"]
+max_size = "420420"
+allowed_types = ["jpeg", "png", "gif"]
 
-def get_avatar_url(avatar_id):
-    filename = str(avatar_id) + '.jpg'
-    return path.join(UPLOAD_DIR, filename)
+class DomainNotWhitelisted(Exception):
+    pass
+
+class TooBig(Exception):
+    pass
+
+class ImageError(Exception):
+    pass
+
+utup = namedtuple("AvatarExceptions", ["TooBig",
+                                        "DomainNotWhitelisted",
+                                        "ImageError"])
+
+AvatarExceptions = utup(TooBig, DomainNotWhitelisted, ImageError)
+
+def validate_avatar(avatar_url):
+    if urlparse(avatar_url).netloc not in valid_domains:
+        raise DomainNotWhitelisted
+
+    try:
+        r = urlopen(avatar_url)
+
+    except HTTPError:
+        raise ImageError
+
+    if r.info().get("Content-Length") > max_size:
+        raise TooBig
+
+    _type = what('', h=r.read())
+
+    if _type not in allowed_types:
+        raise ImageError

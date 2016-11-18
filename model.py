@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, get_avatar_url
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled
 from template_tools import url_for_release
 from chromatography import get_palette
 
@@ -181,7 +181,7 @@ class User(ModelObject):
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
-        self.avatar_url = get_avatar_url(model.get_avatar_id(self.id))
+        self.avatar_url = model.get_user_avatar(self.id)
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
@@ -622,18 +622,16 @@ class Model(GeneralModel):
         })
         return descriptions
 
-    def set_avatar(self, user_id):
-        image_id = self.insert("insert into images (id) values (null)")
-        self.execute("insert or replace into avatars (user_id, image_id) values (?, ?)",
-                    user_id, image_id)
-        return image_id
+    def set_user_avatar(self, user_id, avatar_url):
+        self.execute("insert or replace into avatars (user_id, avatar_url) values (?, ?)",
+                    user_id, avatar_url)
 
-    def get_avatar_id(self, user_id):
+    def get_user_avatar(self, user_id):
         try:
-            return self.query_unique("select image_id from avatars where user_id=?", user_id)[0]
+            return self.query_unique("select avatar_url from avatars where user_id=?", user_id)[0]
 
         except NotFound:
-            return 'fallback'
+            return 'http://i.imgur.com/7lZwLKc.jpg'
 
 
     def follow(self, follower_id, user_id):

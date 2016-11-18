@@ -143,18 +143,12 @@ create table followerships (
 
 create index followership_index on followerships(follower, user_id, creation);
 
-drop table if exists images;
-create table images (
-    id integer primary key
-);
-
 drop table if exists avatars;
 create table avatars (
     user_id integer not null,
-    image_id integer not null,
+    avatar_url text not null,
     primary key (user_id),
-    foreign key (user_id) references users(id),
-    foreign key (image_id) references images(id)
+    foreign key (user_id) references users(id)
 );
 
 -- Actions

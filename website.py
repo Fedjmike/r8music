@@ -1,7 +1,7 @@
 import os, time, requests, multiprocessing.pool, sqlite3
 from urllib.parse import urlparse, urljoin
 
-from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for, flash, send_from_directory
+from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for, flash
 from werkzeug import secure_filename
 from contextlib import closing
 from bs4 import BeautifulSoup
@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, import_release, MBID
 from template_tools import add_template_tools
-from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled, save_thumbnail
+from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled, validate_avatar, AvatarExceptions
 
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
@@ -383,24 +383,6 @@ def user_page(slug, tab=None):
     else:
         return render_template("user.html", that_user=that_user, tab=tab, user=request.user)
 
-@app.route("/set-avatar", methods=["POST"])
-@needs_auth
-def set_avatar():
-    if request.method == 'POST':
-        image = request.files['image']
-        # validate image
-        image_id = model().set_avatar(request.user.id)
-        filename = str(image_id) + '.jpg'
-        save_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-        save_thumbnail(image, save_path)
-        flash("You image has been updated", "success")
-        return redirect_back()
-
-# To be used in lieu of a server for images
-@app.route('/images/<filename>')
-def return_pic(filename):
-    return send_from_directory(app.config['UPLOAD_DIR'], secure_filename(filename))
-
 @decorator_with_args
 def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
     response = requests.post(
@@ -535,8 +517,8 @@ def user_settings():
         return render_template("form.html", form="settings", user=request.user)
     
     else:
-        email, timezone = \
-            dict_values(request.values, ["email", "timezone"])
+        email, timezone, avatar_url = \
+            dict_values(request.values, ["email", "timezone", "avatar_url"])
         
         #Allow the user to set email to an empty string
         if email is not None:
@@ -544,7 +526,21 @@ def user_settings():
             
         if timezone:
             model().set_user_timezone(request.user.id, timezone)
-        
+
+        if avatar_url:
+            try:
+                validate_avatar(avatar_url)
+                model().set_user_avatar(request.user.id, avatar_url)
+
+            except AvatarExceptions.TooBig:
+                flash("Linked image is too big", "error")
+
+            except AvatarExceptions.DomainNotWhitelisted:
+                flash("You must use a whitelisted domain", "error")
+
+            except AvatarExceptions.ImageError:
+                flash("URL does not point to a valid image", "error")
+
         flash("Settings saved", "success")
         return redirect(url_for("user_settings"))
         
