@@ -170,6 +170,7 @@ class Release(ModelObject):
         self.get_palette = lambda: model.get_palette(self.id)
         self.get_external_links = lambda: model.get_external_links(self.id, "release")
         
+        self.get_activity = lambda: model.get_activity_on_object(self.id)
         self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
         self.get_reviews = lambda: model.get_reviews(self.id)
         self.get_review_no = lambda: model.get_review_no(self.id)
