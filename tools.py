@@ -332,18 +332,18 @@ AvatarExceptions = utup(TooBig, DomainNotWhitelisted, ImageError)
 
 def validate_avatar(avatar_url):
     if urlparse(avatar_url).netloc not in valid_domains:
-        raise DomainNotWhitelisted
+        raise DomainNotWhitelisted(avatar_url + ": Not a whitelisted domain")
 
     try:
         r = urlopen(avatar_url)
 
     except HTTPError:
-        raise ImageError
+        raise ImageError("Couldn't download the image for validation")
 
     if r.info().get("Content-Length") > max_size:
-        raise TooBig
+        raise TooBig("File size exceeds max size "+ str(max_size) + " bytes")
 
     _type = what('', h=r.read())
 
     if _type not in allowed_types:
-        raise ImageError
+        raise ImageError("File must be a valid jpg, png or gif")

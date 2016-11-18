@@ -532,14 +532,10 @@ def user_settings():
                 validate_avatar(avatar_url)
                 model().set_user_avatar(request.user.id, avatar_url)
 
-            except AvatarExceptions.TooBig:
-                flash("Linked image is too big", "error")
-
-            except AvatarExceptions.DomainNotWhitelisted:
-                flash("You must use a whitelisted domain", "error")
-
-            except AvatarExceptions.ImageError:
-                flash("URL does not point to a valid image", "error")
+            except (AvatarExceptions.TooBig,
+                    AvatarExceptions.DomainNotWhitelisted,
+                    AvatarExceptions.ImageError) as e:
+                flash(str(e), "error")
 
         flash("Settings saved", "success")
         return redirect(url_for("user_settings"))
