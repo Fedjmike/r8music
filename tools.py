@@ -308,27 +308,23 @@ def get_wikipedia_urls(page_title):
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from collections import namedtuple
 from imghdr import what
 
 valid_domains = ["i.imgur.com", "my.mixtape.moe"]
-max_size = "420420"
+max_size = "322322" # 322 KB in bytes
 allowed_types = ["jpeg", "png", "gif"]
 
-class DomainNotWhitelisted(Exception):
+class AvatarException(Exception):
     pass
 
-class TooBig(Exception):
+class DomainNotWhitelisted(AvatarException):
     pass
 
-class ImageError(Exception):
+class TooBig(AvatarException):
     pass
 
-utup = namedtuple("AvatarExceptions", ["TooBig",
-                                        "DomainNotWhitelisted",
-                                        "ImageError"])
-
-AvatarExceptions = utup(TooBig, DomainNotWhitelisted, ImageError)
+class ImageError(AvatarException):
+    pass
 
 def validate_avatar(avatar_url):
     if urlparse(avatar_url).netloc not in valid_domains:

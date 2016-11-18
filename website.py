@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
 from mb_api_import import import_artist, import_release, MBID
 from template_tools import add_template_tools
-from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled, validate_avatar, AvatarExceptions
+from tools import dict_values, dict_subset, basic_decorator, decorator_with_args, search_mb, edit_distance, profiled, validate_avatar, AvatarException
 
 app = Flask(__name__)
 #Used to encrypt cookies and session data. Change this to a constant to avoid
@@ -532,9 +532,7 @@ def user_settings():
                 validate_avatar(avatar_url)
                 model().set_user_avatar(request.user.id, avatar_url)
 
-            except (AvatarExceptions.TooBig,
-                    AvatarExceptions.DomainNotWhitelisted,
-                    AvatarExceptions.ImageError) as e:
+            except AvatarException as e:
                 flash(str(e), "error")
 
         flash("Settings saved", "success")
