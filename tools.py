@@ -328,7 +328,8 @@ class ImageError(AvatarException):
 
 def validate_avatar(avatar_url):
     if urlparse(avatar_url).netloc not in valid_domains:
-        raise DomainNotWhitelisted(avatar_url + ": Not a whitelisted domain")
+        raise DomainNotWhitelisted("Error: " + avatar_url + " is not a whitelisted domain." +\
+                                   " Allowed domains: " + ", ".join(valid_domains))
 
     try:
         r = urlopen(avatar_url)
@@ -336,8 +337,10 @@ def validate_avatar(avatar_url):
     except HTTPError:
         raise ImageError("Couldn't download the image for validation")
 
-    if r.info().get("Content-Length") > max_size:
-        raise TooBig("File size exceeds max size "+ str(max_size) + " bytes")
+    filesize = r.info().get("Content-Length")
+    if filesize > max_size:
+        raise TooBig("File size " + filesize//1000 + " kB exceeds max size " \
+                     + str(max_size//1000) + " kB")
 
     _type = what('', h=r.read())
 
