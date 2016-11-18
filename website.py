@@ -211,7 +211,7 @@ def track_post(track_id):
         return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
 
 @app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
-@app.route("/<artist_slug>/<release_slug>/<any(reviews):tab>")
+@app.route("/<artist_slug>/<release_slug>/<any(reviews, activity):tab>")
 @handle_not_found()
 def release_page(artist_slug, release_slug, tab=None):
     release = model().get_release_by_slug(artist_slug, release_slug)

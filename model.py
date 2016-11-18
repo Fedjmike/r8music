@@ -467,6 +467,13 @@ class Model(GeneralModel):
         
         return self._get_activity(offset, rows)
         
+    def get_activity_on_object(self, object_id, limit=20, offset=0):
+        rows = self.query("select " + self.activity_columns_and_from +
+                          " where object_id=? order by a.creation desc limit ? offset ?",
+                          object_id, limit, offset)
+        
+        return self._get_activity(offset, rows)
+        
     def get_active_actions(self, user_id, object_id):
         return [
             ActionType(type).name for (type,) in
