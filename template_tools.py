@@ -41,18 +41,23 @@ def action_groups(actions):
     
     threshold = 60*60 #1h in seconds
     
-    def group_by_object_and_omit(actions):
-        for _, actions in groupby(actions, key=lambda action: action.object.id):
-            actions = list(actions)
-            
-            for action in actions:
-                #If they rated around the same time as listing or listening, don't show those
-                if     action.type in [ActionType.list, ActionType.listen] \
-                   and any(action.type == ActionType.rate for action in actions):
-                    continue
-                    
-                yield action
+    overriding_actions = defaultdict(lambda: [])
+    overriding_actions.update({
+        ActionType.listen: [ActionType.rate],
+        ActionType.list: [ActionType.rate, ActionType.listen]
+    })
     
+    def group_by_object_and_omit(actions):
+        for _, actions_on_object in groupby(actions, key=lambda action: action.object.id):
+            actions_on_object = list(actions_on_object)
+            
+            def not_overridden(action):
+                #Omit this action if an overriding action is present in this group
+                return not any(other_action.type in overriding_actions[action.type]
+                               for other_action in actions_on_object)
+                
+            yield from filter(not_overridden, actions_on_object)
+            
     def group_by_user_and_time(actions):
         actions = group_by_key(actions, key=lambda action: action.user.id)
 
