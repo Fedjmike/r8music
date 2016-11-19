@@ -117,12 +117,14 @@ class ModelObject:
 class Artist(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "slug"])
+        self.url = url_for("artist_page", slug=self.slug) 
         
         self.get_releases = lambda: model.get_releases_by_artist(self)
         self.get_image = lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
         self.get_description = lambda: model.get_description(self.id)
         self.get_wikipedia_urls = lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
         self.get_external_links = lambda: model.get_external_links(self.id, "artist")
+        self.get_activity_on_releases = lambda: model.get_activity_on_releases_by_artist(self.id)
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
@@ -472,6 +474,14 @@ class Model(GeneralModel):
         rows = self.query("select " + self.activity_columns_and_from +
                           " where object_id=? order by a.creation desc limit ? offset ?",
                           object_id, limit, offset)
+        
+        return self._get_activity(offset, rows)
+        
+    def get_activity_on_releases_by_artist(self, artist_id, limit=20, offset=0):
+        rows = self.query("select " + self.activity_columns_and_from +
+                          " join authorships on object_id=release_id"
+                          " where artist_id=? order by a.creation desc limit ? offset ?",
+                          artist_id, limit, offset)
         
         return self._get_activity(offset, rows)
         

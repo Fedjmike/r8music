@@ -210,7 +210,7 @@ def track_post(track_id):
     except KeyError:
         return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
 
-@app.route("/<artist_slug>/<release_slug>", methods=["GET", "POST"])
+#The route /<artist>/<release> is added later because it would override other routes
 @app.route("/<artist_slug>/<release_slug>/<any(reviews, activity):tab>")
 @handle_not_found()
 def release_page(artist_slug, release_slug, tab=None):
@@ -269,11 +269,12 @@ def edit_release(artist_slug, release_slug):
         
     return render_template("edit_release.html", release=release)
 
-#Routing is done later because /<slug>/ would override other routes
+#The route /<slug> is added later because it would override other routes
+@app.route("/<slug>/<any(activity):tab>")
 @handle_not_found()
-def artist_page(slug):
+def artist_page(slug, tab=None):
     artist = model().get_artist(slug)
-    return render_template("artist.html", artist=artist, user=request.user)
+    return render_template("artist.html", artist=artist, user=request.user, tab=tab)
 
 @app.route("/add-artist", methods=["GET", "POST"])
 @needs_auth
@@ -593,6 +594,7 @@ def recover_password():
     pass
 
 app.add_url_rule("/<slug>", view_func=artist_page)
+app.add_url_rule("/<artist_slug>/<release_slug>", view_func=release_page)
 
 #
 
