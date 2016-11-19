@@ -15,6 +15,9 @@ def uniq(iter, key=lambda x: x):
             seen.add(item_key)
             yield item
 
+def transpose(table, rows):
+    return zip(*table) if len(table) != 0 else [[]]*rows
+
 def dict_values(dict, keys):
     return [dict[key] if key in dict else None
             for key in keys]

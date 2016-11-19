@@ -3,7 +3,7 @@ from collections import defaultdict, namedtuple
 from itertools import groupby
 import arrow
 
-from tools import sortable_date, fuzzy_groupby, group_by_key
+from tools import transpose, sortable_date, fuzzy_groupby, group_by_key
 
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
@@ -110,16 +110,16 @@ def get_release_year_counts(ratings=[], listened_unrated=[]):
     #[(year, (,,,,,,,,))] sorted by year
     items = sorted(counts.items(), key=lambda kv: kv[0])
     #Transpose the table into [year], [(,,,,,,,,)]
-    years, year_counts = zip(*items) if items else ([], [])
+    years, year_counts = transpose(items, rows=2)
     
     #Return the year counts and year counts by rating
     #[year], [count], [[count]]
-    return years, list(map(sum, year_counts)), list(zip(*year_counts))
+    return years, list(map(sum, year_counts)), list(transpose(year_counts, rows=9))
     
 def get_user_datasets(ratings=[], listened_unrated=[]):
     """Takes [(release, rating)] and [release] and gives various interesting datasets"""
     
-    releases, _ = zip(*ratings) if len(ratings) != 0 else ([], [])
+    releases, _ = transpose(ratings, rows=2)
     by_rating = group_by_rating(ratings)
     years, year_counts, year_counts_by_rating = get_release_year_counts(ratings, listened_unrated)
     
