@@ -640,11 +640,7 @@ form.review textarea {
     resize: vertical;
 }
 
-/*Albums*/
-
-.album-cover {
-	margin-top: 2em;
-}
+/*Tracklists*/
 
 ol.tracks {
     color: #333;
@@ -714,7 +710,71 @@ ol.tracks {
     font-size: 0.9em;
 }
 
+/*Expandable tracklists*/
+
+.tracks-expand-container {
+    /*The way this works is a little convoluted.
+      There are two copies of the tracklist. The secondary tracklist is outside
+      the <details>. This one shows the contracted form, and gets hidden when
+      the <details> is open.
+      This is necessary because there is no way to select which parts of the
+      contents of a <details> are hidden. Only the <summary> is shown, and we
+      don't want the tracklist to be part of the button which expands it.*/
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+details.tracks-expand {
+    display: block;
+    /*Room at the bottom for the button*/
+    position: relative;
+    padding-bottom: 1.1em;
+}
+
+.tracks-expand > summary {
+    display: block;
+    width: 100%;
+    position: absolute;
+    bottom: 0em;
+    
+    cursor: pointer;
+    outline: none;
+}
+
+.tracks-expand > summary::-webkit-details-marker {
+    display: none;
+}
+
+.tracks-expand[open] > summary > .expand-more,
+.tracks-expand:not([open]) > summary > .expand-less {
+    display: none;
+}
+
+.tracks-expand > summary > * {
+    /*Expand/contract bar*/
+    display: block;
+    text-align: center;
+    line-height: 1.1em;
+    background-color: rgba(0,0,0, 0.05);
+    opacity: 1;
+}
+
+.tracks-expand + .tracks
+  > li:nth-child(13) ~ li {
+    /*In the secondary track list, hide all after the 13th element
+      (important: is odd, therefore not shaded)*/
+    display: none;
+}
+
+.tracks-expand[open] ~ .tracks {
+    /*When open, hide the secondary track list*/
+    display: none;
+}
+
+/*Albums*/
+
 .album-cover {
+	margin-top: 2em;
     margin-left: 1.5em;
 }
 

@@ -7,6 +7,29 @@
 
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
+{% macro tracklist(sides) -%}
+    <ol class="tracks">
+    {% for tracks in sides %}
+        {% for track in tracks %}
+            <li>
+                <span class="track-title">
+                    {{ track.title }}
+                    <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
+                       name="pick" href=# data-track-id={{ track.id }}
+                       title="Select as a pick">
+                        <i class="material-icons">stars</i>
+                    </a>
+                </span>
+                {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
+            </li>
+        {% endfor %}
+    {% endfor %}
+    {% if runtime and track_no != 1 %}
+        <li class="total clearfix"><time>{{ runtime }}</time></li>
+    {% endif %}
+    </ol>
+{%- endmacro %}
+
 {% block content %}
 
 {{ page_tabs([(None, release.title),
@@ -73,28 +96,24 @@
                 </h2>
             </header>
             
-            <ol class="tracks">
             {% set sides, runtime, track_no = release.get_tracks() %}
             {% set picks = user.get_picks(release.id) if user else [] %}
-            {% for tracks in sides %}
-                {% for track in tracks %}
-                    <li>
-                        <span class="track-title">
-                            {{ track.title }}
-                            <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
-                               name="pick" href=# data-track-id={{ track.id }}
-                               title="Select as a pick">
-                                <i class="material-icons">stars</i>
-                            </a>
-                        </span>
-                        {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
-                    </li>
-                {% endfor %}
-            {% endfor %}
-            {% if runtime and track_no != 1 %}
-                <li class="total clearfix"><time>{{ runtime }}</time></li>
+            
+            {% if track_no > 17 %}
+                {# See "expandable tracklists" in the CSS #}
+                <div class="tracks-expand-container">
+                    <details class="tracks-expand">
+                        {{ tracklist(sides) }}
+                        <summary>
+                            <i class="material-icons tiny expand-more">expand_more</i>
+                            <i class="material-icons tiny expand-less">expand_less</i>
+                        </summary>
+                    </details>
+                    {{ tracklist(sides) }}
+                </div>
+            {% else %}
+                {{ tracklist(sides) }}
             {% endif %}
-            </ol>
             
             {% set ratings = user.get_ratings() if user else {} %}
             {% set active_actions = user.get_active_actions(release.id) if user else [] %}
