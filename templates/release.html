@@ -7,7 +7,7 @@
 
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
-{% macro tracklist(sides) -%}
+{% macro tracklist(sides, runtime, track_no) -%}
     <ol class="tracks">
     {% for tracks in sides %}
         {% for track in tracks %}
@@ -112,7 +112,7 @@
                     {{ tracklist(sides) }}
                 </div>
             {% else %}
-                {{ tracklist(sides) }}
+                {{ tracklist(sides, runtime, track_no) }}
             {% endif %}
             
             {% set ratings = user.get_ratings() if user else {} %}
