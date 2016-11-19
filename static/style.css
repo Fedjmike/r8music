@@ -760,7 +760,7 @@ details.tracks-expand {
 }
 
 .tracks-expand + .tracks
-  > li:nth-child(13) ~ li {
+  > li:nth-child(13) ~ li:not(.total) {
     /*In the secondary track list, hide all after the 13th element
       (important: is odd, therefore not shaded)*/
     display: none;
@@ -769,6 +769,18 @@ details.tracks-expand {
 .tracks-expand[open] ~ .tracks {
     /*When open, hide the secondary track list*/
     display: none;
+}
+
+.tracks-expand + .tracks > li.total,
+.tracks-expand > .tracks > li.total {
+    border-top: 0;
+    /*Make room for the expand/contract bar above, and move this down*/
+    margin-top: 1.1em;
+    margin-bottom: -2.4em;
+}
+
+.tracks-expand {
+    margin-bottom: 0.8em;
 }
 
 /*Albums*/

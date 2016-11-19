@@ -103,13 +103,13 @@
                 {# See "expandable tracklists" in the CSS #}
                 <div class="tracks-expand-container">
                     <details class="tracks-expand">
-                        {{ tracklist(sides) }}
+                        {{ tracklist(sides, runtime, track_no) }}
                         <summary>
                             <i class="material-icons tiny expand-more">expand_more</i>
                             <i class="material-icons tiny expand-less">expand_less</i>
                         </summary>
                     </details>
-                    {{ tracklist(sides) }}
+                    {{ tracklist(sides, runtime, track_no) }}
                 </div>
             {% else %}
                 {{ tracklist(sides, runtime, track_no) }}
