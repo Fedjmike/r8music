@@ -7,7 +7,7 @@
 
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
-{% macro tracklist(sides, runtime, track_no) -%}
+{% macro tracklist(sides, runtime, track_no, picks) -%}
     <ol class="tracks">
     {% for tracks in sides %}
         {% for track in tracks %}
@@ -103,16 +103,16 @@
                 {# See "expandable tracklists" in the CSS #}
                 <div class="tracks-expand-container">
                     <details class="tracks-expand">
-                        {{ tracklist(sides, runtime, track_no) }}
+                        {{ tracklist(sides, runtime, track_no, picks) }}
                         <summary>
                             <i class="material-icons tiny expand-more">expand_more</i>
                             <i class="material-icons tiny expand-less">expand_less</i>
                         </summary>
                     </details>
-                    {{ tracklist(sides, runtime, track_no) }}
+                    {{ tracklist(sides, runtime, track_no, picks) }}
                 </div>
             {% else %}
-                {{ tracklist(sides, runtime, track_no) }}
+                {{ tracklist(sides, runtime, track_no, picks) }}
             {% endif %}
             
             {% set ratings = user.get_ratings() if user else {} %}
