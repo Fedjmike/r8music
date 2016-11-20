@@ -2,7 +2,9 @@
 
 {% macro explain_action(action) -%}
     <div class="activity-item">
-        <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
+        <a href={{ action.object.url }}>
+            <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
+        </a>
         <div class="activity-details">
             <div>
                 {% for artist in action.object.get_artists() %}
@@ -20,7 +22,9 @@
     {% set n_actions = action_group.actions | length %}
     
     {% if not same_user %}
-        <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
+        <a href={{ url_for("user_page", slug=action_group.user.name) }}>
+            <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
+        </a>
         {{ user_link(action_group.user) }}
     {% endif %}
     
