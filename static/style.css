@@ -608,7 +608,8 @@ ol.tabs > li {
 .activity-thumb {
     width: 2.5em;
     height: 2.5em;
-    margin-right: 0.4em;    
+    margin-right: 0.4em;
+    object-fit: cover;
 }
 
 .activity-details {
@@ -848,6 +849,17 @@ ol.references {
 }
 
 /*Users*/
+/*
+.avatar {
+  width: 5em;
+  height: 5em;
+}*/
+
+.avatar {
+    width: 8em;
+    height: 8em;
+    object-fit: cover;
+}
 
 .grids-list {
     text-align: center;

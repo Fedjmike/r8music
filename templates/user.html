@@ -27,8 +27,8 @@
         {% set rated_no = that_user.get_ratings() | length %}
         {% set pick_no = that_user.get_pick_no() %}
         {% set followers = that_user.get_followers() %}
-        
-        <img src='{{ that_user.avatar_url }}'><br/>
+
+        <img src='{{ that_user.avatar_url }}' class='avatar'><br/>
 
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
         Rated {{ n_things(rated_no, "release") }} and selected {{ n_things(pick_no, "pick") }}<br/>
