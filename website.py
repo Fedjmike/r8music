@@ -362,7 +362,7 @@ def activity_feed():
 def user_page(slug, tab=None):
     that_user = model().get_user(slug)
     
-    if request.values:
+    if request.method == "POST":
         try:
             action = {
                 "follow": model().follow,
@@ -373,11 +373,8 @@ def user_page(slug, tab=None):
         
         except (KeyError, sqlite3.Error):
             return jsonify(error=1), 400
-    
-    if from_ajax():
-        return jsonify(error=0)
         
-    elif request.values:
+    if request.values:
         #Redirect so that the user doesn't stay on the action URL / form submission
         return redirect(url_for("user_page", slug=slug))
         

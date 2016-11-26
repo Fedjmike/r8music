@@ -40,12 +40,16 @@
     {% if user and that_user.id != user.id %}
         {% set following_since = user.get_follow(that_user.id) %}
         <p>
+        <form method="post" action={{ url_for_user(that_user) }}>
         {% if following_since %}
             You started following them {{ full_and_friendly_datetime(following_since) }}<br/>
-            <a href={{ url_for_user(that_user) + "?action=unfollow" }}>Unfollow</a>
+            <input type="hidden" name="action" value = "unfollow">
+            <input type="submit" value="Unfollow">
         {% else %}
-            <a href={{ url_for_user(that_user) + "?action=follow" }}>Follow</a>
+            <input type="hidden" name=action value="follow">
+            <input type="submit" value="Follow">
         {% endif %}
+        </form>
         </p>
     {% endif %}
 </section>
