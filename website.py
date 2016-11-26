@@ -373,13 +373,11 @@ def user_page(slug, tab=None):
         
         except (KeyError, sqlite3.Error):
             return jsonify(error=1), 400
-        
-    if request.values:
-        #Redirect so that the user doesn't stay on the action URL / form submission
+
         return redirect(url_for("user_page", slug=slug))
-        
-    else:
-        return render_template("user.html", that_user=that_user, tab=tab, user=request.user)
+
+    group_by = request.values["group_by"] if request.values else "rating"
+    return render_template("user.html", that_user=that_user, tab=tab, group_by=group_by, user=request.user)
 
 @decorator_with_args
 def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):

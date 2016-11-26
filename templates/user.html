@@ -98,18 +98,27 @@
     {% set editable = 'editable' if that_user.id == user.id else '' %}
 
     <div class="grids-list">
-    {% for n in range(8, 0, -1) %}
-        <section class="page content"><div>
-            <header><h1>{{ n }}
-                {% if rating_description[n] %} &ndash;
-                &ldquo;<span class="{{ editable }} rating-description single-line"
-                             data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
-                 {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
-                {% endif %}
-            </h1></header>
-            {{ release_grid(sort_by_artist(by_rating[n]), user, "small") }}
-        </div></section>
-    {% endfor %}
+    {% if group_by == "rating" %}
+        {% for n in range(8, 0, -1) %}
+            <section class="page content"><div>
+                <header><h1>{{ n }}
+                    {% if rating_description[n] %} &ndash;
+                    &ldquo;<span class="{{ editable }} rating-description single-line"
+                                 data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
+                     {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
+                    {% endif %}
+                </h1></header>
+                {{ release_grid(sort_by_artist(by_rating[n]), user, "small") }}
+            </div></section>
+        {% endfor %}
+    {% elif group_by == "year" %}
+        {% for year in years %}
+            <section class="page content"><div>
+                <header><h1>{{ year }}</h1></header>
+                {{ release_grid(releases_by_year[year]) }}
+            </div></section>
+        {% endfor %}
+    {% endif %}
     </div>
 {% endif %}
 
