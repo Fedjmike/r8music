@@ -218,6 +218,17 @@ class Action(ModelObject):
         self.creation = arrow.get(creation)
         self.object = model.get_object(object_id, object_type)
         self.user = model.get_user(user_id)
+    
+    def describe(self):
+        return self.type.simple_past
+    
+class RatingAction(Action):
+    def __init__(self, rating, *args):
+        super().__init__(*args)
+        self.rating = rating
+        
+    def describe(self):
+        return "%s %d" % (self.type.simple_past, self.rating)
 
 class Model(GeneralModel):
     #General music objects
@@ -441,11 +452,20 @@ class Model(GeneralModel):
         #todo not just releases
         next_offset = offset + len(rows)
         
-        return next_offset, [
-            Action(self, action_id, ActionType(type_id), arrow.get(creation),
-                   user_id, object_id, ObjectType(object_type))
-            for action_id, type_id, creation, user_id, object_id, object_type in rows
-        ]
+        def make_action(action_id, type_id, creation, user_id, object_id, object_type):
+            args = self, action_id, ActionType(type_id), arrow.get(creation), \
+                   user_id, object_id, ObjectType(object_type)
+            
+            if type_id == ActionType.rate.value:
+                rating = self.query_unique("select rating from ratings"
+                                           " where action_id=?", action_id)[0]
+                return RatingAction(rating, *args)
+                
+            else:
+                return Action(*args)
+            
+        
+        return next_offset, [make_action(*row) for row in rows]
         
     activity_columns_and_from = \
         "action_id, a.type, a.creation, user_id, object_id, o.type" \

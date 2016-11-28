@@ -2,7 +2,7 @@
 
 {% macro explain_action(action) -%}
     <div class="activity-item">
-        <a href={{ action.object.url }}>
+        <a class="thumb-container" href={{ action.object.url }}>
             <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
         </a>
         <div class="activity-details">
@@ -13,7 +13,9 @@
                 &ndash;
                 {{ object_link(action.object) }}
             </div>
-            {{ event_datetime(action.creation) }}
+            <div class="activity-secondary-details">
+                {{ action.describe() }} &middot; {{ event_datetime(action.creation) }}
+            </div>
         </div>
     </div>
 {%- endmacro %}
@@ -22,16 +24,13 @@
     {% set n_actions = action_group.actions | length %}
     
     {% if not same_user %}
-        <a href={{ url_for("user_page", slug=action_group.user.name) }}>
+    <div class="user-box">
+        <a class="thumb-container" href={{ url_for("user_page", slug=action_group.user.name) }}>
             <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
         </a>
         {{ user_link(action_group.user) }}
+    <div class="user-box">
     {% endif %}
-    
-    {% for type in action_group.types %}
-        <span class="comma-separated">{{ type.simple_past }}</span>
-    {% endfor %}
-    {{ n_things(n_actions, "release") }}:
     
     <ol class="activity-group {{ 'same-user' if same_user else '' }}">
     {% for action in action_group.actions %}

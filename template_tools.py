@@ -34,7 +34,7 @@ def relative_datetime(then):
 
 #Actions
 
-ActionGroup = namedtuple("ActionGroup", ["user", "types", "actions"])
+ActionGroup = namedtuple("ActionGroup", ["user", "actions"])
 
 def action_groups(actions):
     from model import ActionType
@@ -66,8 +66,7 @@ def action_groups(actions):
                                                   key=lambda action: action.creation.timestamp,
                                                   threshold=threshold):
                 close_actions = list(group_by_object_and_omit(close_actions))
-                types = set(action.type for action in close_actions)
-                yield ActionGroup(user, types, close_actions)
+                yield ActionGroup(user, close_actions)
 
     action_groups = group_by_user_and_time(actions)
 

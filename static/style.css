@@ -584,10 +584,6 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-list * {
-    vertical-align: middle;
-}
-
 .activity-group {
     margin-bottom: 1.5em;
     border-left: 2px solid;
@@ -605,6 +601,16 @@ ol.tabs > li {
     margin-left: 1em;
 }
 
+.activity-item > *,
+.user-box > * {
+    vertical-align: middle;
+}
+
+.thumb-container {
+    display: inline-block;
+    line-height: 0;
+}
+
 .activity-thumb {
     width: 2.5em;
     height: 2.5em;
@@ -620,8 +626,8 @@ ol.tabs > li {
     display: inline;
 }
 
-.activity-item time {
-    font-size: 0.85em;
+.activity-secondary-details {
+    font-size: 0.9em;
     line-height: 0;
 }
 
