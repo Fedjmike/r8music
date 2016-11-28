@@ -217,7 +217,13 @@ def release_page(artist_slug, release_slug, tab=None):
     release = model().get_release_by_slug(artist_slug, release_slug)
     
     if request.method == "GET":
-        return render_template("release.html", release=release, tab=tab, user=request.user)
+        try:
+            referrer = model().get_user(request.values["referrer"])
+
+        except (NameError, KeyError):
+            referrer = None
+
+        return render_template("release.html", release=release, tab=tab, user=request.user, referrer=referrer)
         
     else:
         return release_post(release.id)

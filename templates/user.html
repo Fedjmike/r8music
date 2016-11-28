@@ -108,7 +108,7 @@
                      {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
                     {% endif %}
                 </h1></header>
-                {{ release_grid(sort_by_artist(by_rating[n]), user, "small") }}
+                {{ release_grid(sort_by_artist(by_rating[n]), user, "small", that_user=that_user if not that_user.id == user.id else None) }}
             </div></section>
         {% endfor %}
     {% elif group_by == "year" %}

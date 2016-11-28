@@ -98,6 +98,7 @@
             
             {% set sides, runtime, track_no = release.get_tracks() %}
             {% set picks = user.get_picks(release.id) if user else [] %}
+            {% set referrer_picks = referrer.get_picks(release.id) if referrer else [] %}
             
             {% if track_no > 17 %}
                 {# See "expandable tracklists" in the CSS #}
