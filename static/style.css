@@ -218,31 +218,31 @@ form .error {
     font-size: 0.9em;
 }
 
-.success-message, .error-message {
+.message {
     line-height: 2.5em;
 }
 
-.success-message {
+.success.message {
     background: #f2ffe3;
 }
 
-.error-message {
+.error.message {
     background: #ffe3e3;
 }
 
-.success-message .material-icons, .error-message .material-icons {
+.message .material-icons {
     font-size: 1.65em;
     vertical-align: middle;
     position: relative;
     padding-right: 0.2em;
 }
 
-.success-message .material-icons {
+.success.message .material-icons {
     color: green;
     top: -0.075em;
 }
 
-.error-message .material-icons {
+.error.message .material-icons {
     color: red;
     top: -0.05em;
 }
