@@ -303,6 +303,9 @@ def guess_wikipedia_page(artist_name):
     raise(WikipediaPageNotFound)
     
 def get_wikipedia_urls(page_title):
+    if page_title is None:
+        return None
+        
     return "https://en.wikipedia.org/wiki/%s" % page_title, \
            "https://en.wikipedia.org/w/index.php?title=%s&action=edit" % page_title
 
