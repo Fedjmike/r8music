@@ -701,8 +701,18 @@ ol.tracks {
     display: none;
 }
 
-.tracks li:hover .track-pick, .track-pick.selected {
+.tracks li:hover .track-pick,
+.track-pick.selected,
+.track-pick.comparison-selected {
     display: initial;
+}
+
+.track-pick.comparison-selected {
+    color: #333;
+}
+
+.tracks li:hover .track-pick.selected {
+    opacity: 0.6;
 }
 
 .track-pick i {

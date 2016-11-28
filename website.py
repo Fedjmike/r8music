@@ -218,12 +218,12 @@ def release_page(artist_slug, release_slug, tab=None):
     
     if request.method == "GET":
         try:
-            referrer = model().get_user(request.values["referrer"])
+            user_to_compare = model().get_user(request.values["compare"])
 
         except (NameError, KeyError):
-            referrer = None
+            user_to_compare = None
 
-        return render_template("release.html", release=release, tab=tab, user=request.user, referrer=referrer)
+        return render_template("release.html", release=release, tab=tab, user=request.user, user_to_compare=user_to_compare)
         
     else:
         return release_post(release.id)

@@ -7,13 +7,16 @@
 
 {% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
 
-{% macro tracklist(sides, runtime, track_no, picks) -%}
+{% macro tracklist(sides, runtime, track_no, picks, user_to_compare, comparison_picks) -%}
     <ol class="tracks">
     {% for tracks in sides %}
         {% for track in tracks %}
             <li>
                 <span class="track-title">
                     {{ track.title }}
+                    {% if track.id in comparison_picks %}
+                        <span class="track-pick comparison-selected" title="{{ user_to_compare.name }}'s pick"><i class="material-icons">stars</i></span>
+                    {% endif %}
                     <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
                        name="pick" href=# data-track-id={{ track.id }}
                        title="Select as a pick">
@@ -98,7 +101,7 @@
             
             {% set sides, runtime, track_no = release.get_tracks() %}
             {% set picks = user.get_picks(release.id) if user else [] %}
-            {% set referrer_picks = referrer.get_picks(release.id) if referrer else [] %}
+            {% set comparison_picks = user_to_compare.get_picks(release.id) if user_to_compare else [] %}
             
             {% if track_no > 17 %}
                 {# See "expandable tracklists" in the CSS #}
@@ -110,10 +113,12 @@
                             <i class="material-icons tiny expand-less">expand_less</i>
                         </summary>
                     </details>
-                    {{ tracklist(sides, runtime, track_no, picks) }}
+                    {{ tracklist(sides, runtime, track_no, picks,
+                                 user_to_compare, comparison_picks) }}
                 </div>
             {% else %}
-                {{ tracklist(sides, runtime, track_no, picks) }}
+                {{ tracklist(sides, runtime, track_no, picks,
+                             user_to_compare, comparison_picks) }}
             {% endif %}
             
             {% set ratings = user.get_ratings() if user else {} %}

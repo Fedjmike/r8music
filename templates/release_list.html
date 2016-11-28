@@ -34,7 +34,7 @@
                 </span>
             </div>
             {% endif %}
-            <a href={{ release.url }}{% if that_user %}?referrer={{ that_user.name }}{% endif %}>
+            <a href={{ release.url }}{% if that_user %}?compare={{ that_user.name }}{% endif %}>
                 <div class="cover"><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://www.howwe.biz/no-cover.png' }}" /></div>
                 {% if show_date_not_artist %}
                     <span class="title">{{ release.title }}<br/>{{ release.date[:4] }}</span>
