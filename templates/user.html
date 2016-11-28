@@ -115,7 +115,7 @@
         {% for year in years %}
             <section class="page content"><div>
                 <header><h1>{{ year }}</h1></header>
-                {{ release_grid(releases_by_year[year]) }}
+                {{ release_grid(releases_by_year[year], user, "small", that_user=that_user if not that_user.id == user.id else None) }}
             </div></section>
         {% endfor %}
     {% endif %}
