@@ -247,6 +247,10 @@ form .error {
     top: -0.05em;
 }
 
+.message ~ .tabs {
+    margin-top: 1em;
+}
+
 /*Custom lists*/
 
 ol.inline {
