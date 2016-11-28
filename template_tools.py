@@ -86,9 +86,9 @@ def group_by_rating(ratings):
 
 def group_by_year(releases):
     year = lambda release: release.date[:4]
-    releases = sorted(releases, key=lambda r:sortable_date(r.date))
+    releases = sorted(releases, key=lambda r: sortable_date(r.date))
     releases_by_year = {y: list(r) for y, r in groupby(releases, year)}
-    years = sorted(releases_by_year.keys())
+    years = sorted(releases_by_year.keys(), reverse=True)
 
     return years, releases_by_year
     
