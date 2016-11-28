@@ -356,28 +356,30 @@ def activity_feed():
     except (KeyError, ValueError):
         return jsonify(error=1)
 
-@app.route("/user/<slug>", methods=["GET", "POST"])
+@app.route("/user/<slug>", methods=["GET"])
 @app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity):tab>")
 @handle_not_found(what="user")
 def user_page(slug, tab=None):
     that_user = model().get_user(slug)
-    
-    if request.method == "POST":
-        try:
-            action = {
-                "follow": model().follow,
-                "unfollow": model().unfollow
-            }[request.values["action"]]
-            
-            action(request.user.id, that_user.id)
-        
-        except (KeyError, sqlite3.Error):
-            return jsonify(error=1), 400
-
-        return redirect(url_for("user_page", slug=slug))
-
     group_by = request.values["group_by"] if request.values else "rating"
     return render_template("user.html", that_user=that_user, tab=tab, group_by=group_by, user=request.user)
+
+@app.route("/user/<slug>", methods=["POST"])
+def user_post(slug):
+    that_user = model().get_user(slug)
+
+    try:
+        action = {
+            "follow": model().follow,
+            "unfollow": model().unfollow
+        }[request.values["action"]]
+        
+        action(request.user.id, that_user.id)
+    
+    except (KeyError, sqlite3.Error):
+        return jsonify(error=1), 400
+
+    return redirect(url_for("user_page", slug=slug))
 
 @decorator_with_args
 def confirm_recaptcha(view, recaptcha_response, remote_addr, error_view):
