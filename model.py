@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score
 from template_tools import url_for_release
 from chromatography import get_palette
 
@@ -176,6 +176,7 @@ class Release(ModelObject):
         self.get_rating_stats = lambda: RatingStats(model.get_ratings(self.id))
         self.get_reviews = lambda: model.get_reviews(self.id)
         self.get_review_no = lambda: model.get_review_no(self.id)
+        self.get_recommendations = lambda: model.get_recommendations(self.id)
         
 class User(ModelObject):
     def __init__(self, model, row):
@@ -405,7 +406,22 @@ class Model(GeneralModel):
     def mbid_in_links(self, mbid):
         return self.query_unique("select exists(select 1 from links"
                                   " where target=? limit 1 )", mbid)[0]
+    def get_recommendations(self, release_id):
+        rows = self.query(
+            "select object_id, sum(case"
+            " when type=1 then (select rating from ratings where action_id=a.action_id)"
+            " when type=3 then 3 end),"
+            " sum(case"
+            " when type=1 then 8"
+            " when type=3 then 8 end)"
+            " from active_actions_view a join"
+            " (select user_id from active_actions_view where object_id=? and "
+            " (type=1 or type=3) group by user_id) using (user_id) where a.type=1 or a.type=3"
+            " group by object_id", release_id)
 
+        return [
+            row[0] for row in sorted(rows, key=lambda row:binomial_score(row[1], row[2]), reverse=True)
+        ]
 
     #Actions
     

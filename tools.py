@@ -352,3 +352,35 @@ def validate_avatar(avatar_url):
 
     if _type not in allowed_types:
         raise ImageError("File must be a valid jpg, png or gif")
+
+# Rankings
+
+from math import sqrt, log
+
+# From http://www.johndcook.com/blog/python_phi_inverse/
+def rational_approximation(t):
+    # Abramowitz and Stegun formula 26.2.23.
+    # The absolute value of the error should be less than 4.5 e-4.
+    c = [2.515517, 0.802853, 0.010328]
+    d = [1.432788, 0.189269, 0.001308]
+    numerator = (c[2]*t + c[1])*t + c[0]
+    denominator = ((d[2]*t + d[1])*t + d[0])*t + 1.0
+    return t - numerator / denominator
+
+
+def normal_CDF_inverse(p):
+    assert p > 0.0 and p < 1
+    # See article above for explanation of this section.
+    if p < 0.5:
+        # F^-1(p) = - G^-1(p)
+        return -rational_approximation( sqrt(-2.0*log(p)) )
+    else:
+        # F^-1(p) = G^-1(1-p)
+        return rational_approximation( sqrt(-2.0*log(1.0-p)) )
+
+Z = normal_CDF_inverse(1 - (1 - 0.95) / 2)
+
+def binomial_score(likes, totes):
+    r = likes/totes
+
+    return (r + Z**2/(2*totes) - Z*sqrt((r*(1-r) + Z**2/(4*totes))/totes))/(1 + Z**2/totes)
