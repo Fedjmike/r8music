@@ -588,13 +588,13 @@ ol.tabs > li {
 
 /*Activity lists*/
 
+.activity-item {
+    margin: 0.75em 0.75em 0.75em 0;
+}
+
 .activity-group {
     margin-bottom: 1.5em;
     border-left: 2px solid;
-}
-
-.activity-group > li {
-    margin: 0.75em;
 }
 
 .activity-group:not(.same-user) {
@@ -605,13 +605,9 @@ ol.tabs > li {
     margin-left: 1em;
 }
 
-.activity-item > *,
-.user-box > * {
-    vertical-align: middle;
-}
-
-.thumb-container {
+.thumb-box > * {
     display: inline-block;
+    vertical-align: middle;
     line-height: 0;
 }
 
@@ -622,17 +618,12 @@ ol.tabs > li {
     object-fit: cover;
 }
 
-.activity-details {
-    display: inline-block;
-}
-
 .activity-item .author {
     display: inline;
 }
 
 .activity-secondary-details {
     font-size: 0.9em;
-    line-height: 0;
 }
 
 .comma-separated:not(:last-of-type):after {

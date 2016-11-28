@@ -1,8 +1,20 @@
 {% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
 
+{% macro user_thumb(user) -%}
+    <a href={{ url_for("user_page", slug=user.name) }}>
+        <img class="activity-thumb" src={{ user.avatar_url }} />
+    </a>
+{%- endmacro %}
+
+{% macro action_secondary_details(action) -%}
+    <div class="activity-secondary-details">
+        {{ action.describe() }} &middot; {{ event_datetime(action.creation) }}
+    </div>
+{%- endmacro %}
+
 {% macro explain_action(action) -%}
-    <div class="activity-item">
-        <a class="thumb-container" href={{ action.object.url }}>
+    <div class="activity-item thumb-box">
+        <a href={{ action.object.url }}>
             <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
         </a>
         <div class="activity-details">
@@ -13,9 +25,7 @@
                 &ndash;
                 {{ object_link(action.object) }}
             </div>
-            <div class="activity-secondary-details">
-                {{ action.describe() }} &middot; {{ event_datetime(action.creation) }}
-            </div>
+            {{ action_secondary_details(action) }}
         </div>
     </div>
 {%- endmacro %}
@@ -24,17 +34,32 @@
     {% set n_actions = action_group.actions | length %}
     
     {% if not same_user %}
-    <div class="user-box">
-        <a class="thumb-container" href={{ url_for("user_page", slug=action_group.user.name) }}>
-            <img class="activity-thumb" src={{ action_group.user.avatar_url }} />
-        </a>
+    <div class="thumb-box">
+        {{ user_thumb(action_group.user) }}
         {{ user_link(action_group.user) }}
-    <div class="user-box">
+    </div>
     {% endif %}
     
     <ol class="activity-group {{ 'same-user' if same_user else '' }}">
     {% for action in action_group.actions %}
         <li>{{ explain_action(action)}}</li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{% macro release_activity_list(actions) -%}
+    {% set action_groups = action_groups(actions) %}
+    <ol class="activity-list">
+    {% for action_group in action_groups %}
+        {% for action in action_group.actions %}
+            <li class="activity-item thumb-box">
+                {{ user_thumb(action.user) }}
+                <div>
+                    {{ user_link(action.user) }}
+                    {{ action_secondary_details(action) }}
+                </div>
+            </li>
+        {% endfor %}
     {% endfor %}
     </ol>
 {%- endmacro %}

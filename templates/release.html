@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "macros.html" import artist_link, user_link, page_tabs, clickable_action_list %}
 {% from "release_list.html" import release_list, rating_widget %}
-{% from "activity_list.html" import activity_list %}
+{% from "activity_list.html" import release_activity_list %}
 
 {% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
 
@@ -78,7 +78,7 @@
     <section class="page content">
         <header><h1>Activity</h1></header>
         {% set offset, actions = release.get_activity() %}
-        {{ activity_list(actions) }}
+        {{ release_activity_list(actions) }}
     </section>
     
 {% else %}
