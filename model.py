@@ -414,10 +414,6 @@ class Model(GeneralModel):
         if type == ActionType["rate"]:
             self.add_action(user_id, object_id, ActionType["listen"])
             
-        #Listening resets "to listen" status
-        if type == ActionType["listen"]:
-            self.add_action(user_id, object_id, ActionType["unlist"])
-            
         if not type.name.startswith('un'):
             action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
                                     " values (?, ?, ?, ?)",
