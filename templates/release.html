@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, page_tabs, clickable_action_list %}
+{% from "macros.html" import artist_link, user_link, page_tabs, clickable_action_list %}
 {% from "release_list.html" import release_list, rating_widget %}
 {% from "activity_list.html" import activity_list %}
 
@@ -85,6 +85,9 @@
     <section class="album page content">
         <div class="album-main">
             <header>
+                {% if user_to_compare %}
+                    <h3 style="font-style: italic; margin-bottom: 0.2em;">Comparing with {{ user_link(user_to_compare) }}</h3>
+                {% endif %}
                 <h1 class="album-title">
                     {% set average_rating = release.get_rating_stats().average %}
                     {# Comes before but floated right, so that it doesn't get selected #}
