@@ -206,7 +206,7 @@ from time import perf_counter
 
 @basic_decorator
 def execution_time(f):
-    start = perf_counter()                     
+    start = perf_counter()
     result = f()
     duration = (perf_counter() - start)*1000
     
@@ -312,7 +312,7 @@ def guess_wikipedia_page(artist_name):
     except wikipedia.exceptions.PageError:
         pass
         
-    raise(WikipediaPageNotFound)
+    raise WikipediaPageNotFound()
     
 def get_wikipedia_urls(page_title):
     if page_title is None:

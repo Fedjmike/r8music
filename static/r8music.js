@@ -217,7 +217,7 @@ $(document).ready(function ($) {
         minLength: 2,
         source: function (request, response) {
             $.getJSON("/search/" + request.term, {
-                json: 1
+                return_json: 1
             }, function (data) {
                 assignLabels(data.results, result => result.name);
                 response(data.results);
@@ -232,7 +232,7 @@ $(document).ready(function ($) {
         minLength: 2,
         source: function (request, response) {
             $.getJSON("/add-artist-search/" + request.term, {
-                json: 1
+                return_json: 1
             }, function (data) {
                 assignLabels(data.results, result => result.name);
                 response(data.results);

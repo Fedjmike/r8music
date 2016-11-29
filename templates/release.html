@@ -84,7 +84,7 @@
 
 {% elif tab == "recommendations" %}
     <section class="page content">
-        <header><h1>Recommenations</h1></header>
+        <header><h1>Recommendations</h1></header>
         {% set recommendations = release.get_recommendations() %}
         {{ release_grid(recommendations, class="small") }}
     </section>

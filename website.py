@@ -12,8 +12,6 @@ from template_tools import add_template_tools
 from tools import *
 
 app = Flask(__name__)
-#Used to encrypt cookies and session data. Change this to a constant to avoid
-#losing your session when the server restarts
 
 try:
     app.config.from_object("config")
@@ -21,10 +19,12 @@ try:
 except ImportError:
     print("Warning: Config not loaded")
 
-app.secret_key = app.config["APP_SECRET"] 
+#Used to encrypt cookies and session data. Change this to a constant to avoid
+#losing your session when the server restarts
+app.secret_key = app.config["APP_SECRET"]
 app_pool = multiprocessing.pool.ThreadPool(processes=4)
 add_template_tools(app)
-updating = []
+mbids_currently_updating = []
 
 def model():
     if not hasattr(g, "model"):
@@ -35,17 +35,11 @@ def model():
 app.teardown_appcontext(lambda exception: model().close())
 
 def init_db():
-    return
-
     with closing(connect_db()) as db:
         with app.open_resource("schema.sql", mode="r") as f:
             db.cursor().executescript(f.read())
             
         db.commit()
-        
-    Model().register_user("sam", "1", "sam.nipps@gmail")
-    
-    import_artist("DJ Okawari")
 
 def is_safe_url(target):
     ref_url = urlparse(request.host_url)
@@ -181,8 +175,11 @@ def users_index():
 default_search_args = {"type": "artists"}
 search_args = default_search_args.keys()
 
-def only_valid_search_args(args, filter_out=False):
+def only_valid_search_args(args):
     return {k: v for k, v in args.items() if k in search_args}
+
+def only_non_default_search_args(args):
+    return {k: v for k, v in args.items() if v != default_search_args[k]}
 
 @app.route("/search", methods=["GET", "POST"])
 @with_request_values(keys=["query"])
@@ -192,17 +189,16 @@ def search(query=""):
         
     else:
         query = encode_query_str(query)
-        args = only_valid_search_args(request.form)
-        #Only args different from the default
-        args = {k: v for k, v in args.items() if v != default_search_args[k]}
+        args = only_valid_search_args(request.values)
+        args = only_non_default_search_args(args)
         
         #Redirect to a GET with the query in the path
         return redirect(url_for("search_results", query=query, **args))
 
 @app.route("/search/<path:query>")
 @app.route("/search/")
-@with_request_values(keys=["json"])
-def search_results(query=None, json=False):
+@with_request_values(keys=["return_json"])
+def search_results(query=None, return_json=False):
     if not query:
         return redirect(url_for("search"))
 
@@ -212,7 +208,7 @@ def search_results(query=None, json=False):
 
     results = model().search(query, **args)
     
-    if json:
+    if return_json:
         return jsonify(results=results)
 
     def clear_match(query, results):
@@ -313,11 +309,11 @@ def add_artist():
             #todo ajax progress
             mbid = MBID(request.form["artist-id" if "artist-id" in request.form else "release-id"])
 
-            if mbid not in updating:
-                updating.append(mbid)
+            if mbid not in mbids_currently_updating:
+                mbids_currently_updating.append(mbid)
                 app_pool.apply_async(import_artist if "artist-id" in request.form else import_release,
                                      (mbid,),
-                                     callback=lambda _:updating.remove(mbid))
+                                     callback=lambda _: mbids_currently_updating.remove(mbid))
                 flash("The artist will be added soon", "success")
                 return redirect(url_for("artists_index"))
 
@@ -335,15 +331,15 @@ def add_artist():
 @app.route("/add-artist-search/<path:query>", methods=["GET", "POST"])
 @app.route("/add-artist-search/", methods=["GET"])
 @needs_auth
-@with_request_values(keys=["query_type", "json"])
-def add_artist_search_results(query=None, query_type="artist", json=False):
+@with_request_values(keys=["query_type", "return_json"])
+def add_artist_search_results(query=None, query_type="artist", return_json=False):
     if not query:
         return redirect(url_for("add_artist"))
         
     query = decode_query_str(query)
     results = search_mb(query, query_type=query_type)
 
-    if json:
+    if return_json:
         return jsonify(results=results)
 
     return render_template("add_artist_search_results.html", results=results, query=query, query_type=query_type)
@@ -353,13 +349,13 @@ def add_artist_search_results(query=None, query_type="artist", json=False):
 def update_artist(id):
     artist_mbid = MBID(model().get_link(id, "musicbrainz"))
 
-    if artist_mbid in updating:
+    if artist_mbid in mbids_currently_updating:
         flash("The artist is currently being updated", "error")
         return redirect_back()
 
-    updating.append(artist_mbid)
+    mbids_currently_updating.append(artist_mbid)
     flash("The artist will be updated", "success")
-    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:updating.remove(artist_mbid))
+    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:mbids_currently_updating.remove(artist_mbid))
     return redirect_back()
 
 @app.route("/")
@@ -617,5 +613,4 @@ app.add_url_rule("/<artist_slug>/<release_slug>", view_func=release_page)
 #
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)

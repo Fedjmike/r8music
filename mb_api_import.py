@@ -48,9 +48,11 @@ def get_links(artist_mbid):
         #todo optimize get_artists calls
         result = musicbrainzngs.get_artist_by_id(artist_mbid, includes=['url-rels'])
         links = {}
+        
         for item in result['artist']['url-relation-list']:
             _type, target = split_link(item['type'], item['target'])
             links[_type] = target
+        
         return links
         
     except KeyError as e:
@@ -235,7 +237,7 @@ def import_artist(artist):
 
     update_links = True
     
-    # Been imported before
+    #Been imported before
     try:
         (artist_id,) = model.query_unique('select id from links where type_id=?'
                                           ' and target=?', mb_type_id, artist_mbid)
