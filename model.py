@@ -419,7 +419,7 @@ class Model(GeneralModel):
             " from active_actions_view a join"
             " (select user_id from active_actions_view where object_id=? and "
             " (type=1 or type=3) group by user_id) using (user_id)"
-            " where a.type=1 or a.type=3 group by object_id", release_id)
+            " where (a.type=1 or a.type=3) and a.object_id !=? group by object_id", release_id, release_id)
 
         def votes(row):
             (_, cumulative_rating, n_ratings, n_listens) = row
