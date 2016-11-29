@@ -410,19 +410,16 @@ class Model(GeneralModel):
 
     def get_recommendations(self, release_id, limit=12):
         rows = self.query(
-            "select object_id, sum(case"
-            " when type=1 then sigmoid((select rating from ratings where action_id=a.action_id))"
-            " else 0 end),"
-            " sum(case"
-            " when type=1 then 1"
-            " else 0 end),"
-            " sum(case"
-            " when type=3 then 1"
-            " else 0 end)"
+            "select object_id,"
+                  " sum(case when type=1 then "
+                      " sigmoid((select rating from ratings where"
+                      " action_id=a.action_id)) else 0 end),"
+                  " sum(case when type=1 then 1 else 0 end),"
+                  " sum(case when type=3 then 1 else 0 end)"
             " from active_actions_view a join"
             " (select user_id from active_actions_view where object_id=? and "
-            " (type=1 or type=3) group by user_id) using (user_id) where a.type=1 or a.type=3"
-            " group by object_id", release_id)
+            " (type=1 or type=3) group by user_id) using (user_id)"
+            " where a.type=1 or a.type=3 group by object_id", release_id)
 
         def votes(row):
             (_, cumulative_rating, n_ratings, n_listens) = row
