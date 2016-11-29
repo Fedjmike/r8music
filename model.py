@@ -9,7 +9,7 @@ from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score
+from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score, sigmoid
 from template_tools import url_for_release
 from chromatography import get_palette
 
@@ -26,6 +26,7 @@ class GeneralModel:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
         self.db.row_factory = sqlite3.Row
+        self.db.create_function("sigmoid", 1, sigmoid)
         
     def close(self):
         self.db.close()
@@ -406,21 +407,30 @@ class Model(GeneralModel):
     def mbid_in_links(self, mbid):
         return self.query_unique("select exists(select 1 from links"
                                   " where target=? limit 1 )", mbid)[0]
+
     def get_recommendations(self, release_id, limit=12):
         rows = self.query(
             "select object_id, sum(case"
-            " when type=1 then (select rating from ratings where action_id=a.action_id)"
-            " when type=3 then 3 end),"
+            " when type=1 then sigmoid((select rating from ratings where action_id=a.action_id))"
+            " else 0 end),"
             " sum(case"
-            " when type=1 then 8"
-            " when type=3 then 8 end)"
+            " when type=1 then 1"
+            " else 0 end),"
+            " sum(case"
+            " when type=3 then 1"
+            " else 0 end)"
             " from active_actions_view a join"
             " (select user_id from active_actions_view where object_id=? and "
             " (type=1 or type=3) group by user_id) using (user_id) where a.type=1 or a.type=3"
             " group by object_id", release_id)
 
+        def votes(row):
+            (_, cumulative_rating, n_ratings, n_listens) = row
+            # Simulated number of upvotes/total votes
+            return cumulative_rating +0.5*n_listens, n_ratings+n_listens
+
         return [
-            self.get_release(row[0]) for row in sorted(rows, key=lambda row:binomial_score(row[1], row[2]), reverse=True)
+            self.get_release(row[0]) for row in sorted(rows, key=lambda row:binomial_score(*votes(row)), reverse=True)
         ][:limit]
 
     #Actions
