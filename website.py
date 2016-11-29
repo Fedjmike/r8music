@@ -137,7 +137,35 @@ def handle_not_found(f, what=None, form=False):
     except NotFound:
         return      (jsonify(error=1), 404) if from_ajax() and not (form or request.form) \
                else page_not_found(what=what)
+
+def request_by_json_missing_value():
+    return jsonify(error=100, message="Missing request field"), 400
+
+@decorator_with_args
+def with_request_values(view, keys, error_view=request_by_json_missing_value):
+    """Looks up keys in request.values and passes them to the given view as
+    keyword arguments. If one is missing, no value is passed to that argument.
+    If that argument had no default value, the exception is caught and an error view is run.
     
+    A key is passed to the keyword argument of the same name. If another name
+    is needed (for example, because the key isn't a valid Python identifier)
+    then that key can be given as a tuple of (key, arg_name)."""
+    
+    def values():
+        for key in keys:
+            key, arg_name = \
+                key if isinstance(key, tuple) else (key, key)
+            
+            if key in request.values:
+                yield arg_name, request.values[key]
+
+    try:
+        return view(**dict(values()))
+        
+    #A non-optional arg wasn't present in request.values
+    except TypeError:
+        return error_view()
+
 # Views
 
 @app.route("/artists")
@@ -157,12 +185,13 @@ def only_valid_search_args(args, filter_out=False):
     return {k: v for k, v in args.items() if k in search_args}
 
 @app.route("/search", methods=["GET", "POST"])
-def search():
+@with_request_values(keys=["query"])
+def search(query=""):
     if request.method == "GET":
         return render_template("form.html", form="search", search={"args": default_search_args})
         
     else:
-        query = encode_query_str(request.form["query"])
+        query = encode_query_str(query)
         args = only_valid_search_args(request.form)
         #Only args different from the default
         args = {k: v for k, v in args.items() if v != default_search_args[k]}
@@ -172,7 +201,8 @@ def search():
 
 @app.route("/search/<path:query>")
 @app.route("/search/")
-def search_results(query=None):
+@with_request_values(keys=["json"])
+def search_results(query=None, json=False):
     if not query:
         return redirect(url_for("search"))
 
@@ -182,7 +212,7 @@ def search_results(query=None):
 
     results = model().search(query, **args)
     
-    if "json" in request.values and request.values["json"]:
+    if json:
         return jsonify(results=results)
 
     def clear_match(query, results):
@@ -198,31 +228,24 @@ def search_results(query=None):
 @app.route("/track/<int:track_id>", methods=["POST"])
 @handle_not_found(what="track")
 @needs_auth
-def track_post(track_id):
-    try:
-        if request.values["action"] in ["pick", "unpick"]:
-            model().add_action(request.user.id, track_id, ActionType[request.values["action"]])
-            return jsonify(error=0)
-        
-        else:
-            return jsonify(error=2), 400 #HTTPStatus.BAD_REQUEST
-        
-    except KeyError:
+@with_request_values(keys=["action"])
+def track_post(track_id, action):
+    if action in ["pick", "unpick"]:
+        model().add_action(request.user.id, track_id, ActionType[action])
+        return jsonify(error=0)
+    
+    else:
         return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
 
 #The route /<artist>/<release> is added later because it would override other routes
 @app.route("/<artist_slug>/<release_slug>/<any(reviews, activity, recommendations):tab>")
 @handle_not_found()
-def release_page(artist_slug, release_slug, tab=None):
+@with_request_values(keys=["compare"])
+def release_page(artist_slug, release_slug, tab=None, compare=None):
     release = model().get_release_by_slug(artist_slug, release_slug)
+    user_to_compare = model().get_user(compare) if compare else None
     
     if request.method == "GET":
-        try:
-            user_to_compare = model().get_user(request.values["compare"])
-
-        except (NameError, KeyError):
-            user_to_compare = None
-
         return render_template("release.html", release=release, tab=tab, user=request.user, user_to_compare=user_to_compare)
         
     else:
@@ -231,18 +254,15 @@ def release_page(artist_slug, release_slug, tab=None):
 @app.route("/release/<int:release_id>", methods=["POST"])
 @handle_not_found(what="release")
 @needs_auth
-def release_post(release_id):
+@with_request_values(keys=["action"])
+def release_post(release_id, action):
     def rating_stats():
         rating_stats = RatingStats(model().get_ratings(release_id))
         return jsonify(error=0,
                        ratingAverage=rating_stats.average,
                        ratingFrequency=rating_stats.frequency)
 
-    try:
-        action = ActionType[request.values["action"]]
-        
-    except KeyError:
-        return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
+    action = ActionType[action]
     
     if action in [ActionType.rate, ActionType.unrate]:
         try:
@@ -315,20 +335,15 @@ def add_artist():
 @app.route("/add-artist-search/<path:query>", methods=["GET", "POST"])
 @app.route("/add-artist-search/", methods=["GET"])
 @needs_auth
-def add_artist_search_results(query=None):
+@with_request_values(keys=["query_type", "json"])
+def add_artist_search_results(query=None, query_type="artist", json=False):
     if not query:
         return redirect(url_for("add_artist"))
         
     query = decode_query_str(query)
-    try:
-        query_type = request.values['query_type']
-    
-    except KeyError:
-        query_type = 'artist'
-
     results = search_mb(query, query_type=query_type)
 
-    if "json" in request.values and request.values["json"]:
+    if json:
         return jsonify(results=results)
 
     return render_template("add_artist_search_results.html", results=results, query=query, query_type=query_type)
