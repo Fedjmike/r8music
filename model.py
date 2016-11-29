@@ -406,7 +406,7 @@ class Model(GeneralModel):
     def mbid_in_links(self, mbid):
         return self.query_unique("select exists(select 1 from links"
                                   " where target=? limit 1 )", mbid)[0]
-    def get_recommendations(self, release_id):
+    def get_recommendations(self, release_id, limit=12):
         rows = self.query(
             "select object_id, sum(case"
             " when type=1 then (select rating from ratings where action_id=a.action_id)"
@@ -420,8 +420,8 @@ class Model(GeneralModel):
             " group by object_id", release_id)
 
         return [
-            row[0] for row in sorted(rows, key=lambda row:binomial_score(row[1], row[2]), reverse=True)
-        ]
+            self.get_release(row[0]) for row in sorted(rows, key=lambda row:binomial_score(row[1], row[2]), reverse=True)
+        ][:limit]
 
     #Actions
     
