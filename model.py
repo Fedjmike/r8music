@@ -424,7 +424,12 @@ class Model(GeneralModel):
         def votes(row):
             (_, cumulative_rating, n_ratings, n_listens) = row
             # Simulated number of upvotes/total votes
-            return cumulative_rating +0.5*n_listens, n_ratings+n_listens
+            n_listens_unrated = n_listens - n_ratings
+            
+            upvotes = cumulative_rating + 0.4*n_listens_unrated
+            total_votes = n_ratings + 0.5*n_listens_unrated
+
+            return upvotes, total_votes
 
         return [
             self.get_release(row[0]) for row in sorted(rows, key=lambda row:binomial_score(*votes(row)), reverse=True)
