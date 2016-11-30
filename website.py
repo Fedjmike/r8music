@@ -128,8 +128,11 @@ def handle_not_found(f, what=None, form=False):
         return f()
     
     except NotFound:
-        return      (jsonify(error=1), 404) if from_ajax() and not (form or request.form) \
-               else page_not_found(what=what)
+        if from_ajax() and not (form or request.form):
+            return jsonify(error=1, message="%s not found" % what), 404
+        
+        else:
+            return page_not_found(what=what)
 
 def request_by_json_missing_value():
     return jsonify(error=100, message="Missing request field"), 400
@@ -230,7 +233,7 @@ def track_post(track_id, action):
         return jsonify(error=0)
     
     else:
-        return jsonify(error=1), 400 #HTTPStatus.BAD_REQUEST
+        return jsonify(error=1, message="Invalid action on track: '%s'" % action), 400 #HTTPStatus.BAD_REQUEST
 
 #The route /<artist>/<release> is added later because it would override other routes
 @app.route("/<artist_slug>/<release_slug>/<any(reviews, activity, recommendations):tab>")
@@ -267,7 +270,7 @@ def release_post(release_id, action):
             
         #No rating field sent
         except KeyError:
-            return jsonify(error=1), 400
+            return jsonify(error=1, message="Action 'rate' requires a 'rating' field"), 400
     
     else:
         model().add_action(request.user.id, release_id, action)
@@ -581,7 +584,7 @@ def rating_descriptions():
         return jsonify(error=0, description=description)
     
     except KeyError:
-        return jsonify(error=1), 400
+        return jsonify(error=1, message="Missing request field"), 400
         
 @app.route("/login", methods=["GET", "POST"])
 def login():
