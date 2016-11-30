@@ -398,6 +398,6 @@ def binomial_score(likes, totes):
     return (r + Z**2/(2*totes) - Z*sqrt((r*(1-r) + Z**2/(4*totes))/totes))/(1 + Z**2/totes)
 
 def sigmoid(x):
-    return 1/(1+exp(-(x-3)))
+    return 1/(1+exp(-0.7*(x-2)))
 
 sigmoid_map = {i: sigmoid(i) for i in range(1, 8)}
