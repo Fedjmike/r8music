@@ -8,6 +8,7 @@ from collections import namedtuple, defaultdict
 from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
+from unidecode import unidecode
 
 from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score, sigmoid
 from template_tools import url_for_release
@@ -26,6 +27,7 @@ class GeneralModel:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
         self.db.row_factory = sqlite3.Row
+        self.db.create_function("unidecode", 1, unidecode)
         self.db.create_function("sigmoid", 1, sigmoid)
         
     def close(self):
@@ -425,7 +427,7 @@ class Model(GeneralModel):
             (_, cumulative_rating, n_ratings, n_listens) = row
             # Simulated number of upvotes/total votes
             n_listens_unrated = n_listens - n_ratings
-            
+
             upvotes = cumulative_rating + 0.4*n_listens_unrated
             total_votes = n_ratings + 0.5*n_listens_unrated
 
@@ -723,7 +725,7 @@ class Model(GeneralModel):
         def build_index():
             self.execute("drop table if exists %s_indexed" % table)
             self.execute("create virtual table %s_indexed using fts4 (tokenize=unicode61, id integer, name text)" % table)
-            self.execute("insert into %s_indexed (id, name) select id, name from %s" % (table, table))
+            self.execute("insert into %s_indexed (id, name) select id, unidecode(name) from %s" % (table, table))
          
         build_index()
         
