@@ -24,7 +24,6 @@ except ImportError:
 app.secret_key = app.config["APP_SECRET"]
 app_pool = multiprocessing.pool.ThreadPool(processes=4)
 add_template_tools(app)
-mbids_currently_updating = []
 
 def model():
     if not hasattr(g, "model"):
@@ -298,6 +297,21 @@ def artist_page(slug, tab=None):
     artist = model().get_artist(slug)
     return render_template("artist.html", artist=artist, user=request.user, tab=tab)
 
+class AlreadyImporting(Exception): pass
+mbids_currently_importing = []
+
+def async_import(mbid, artist=True):
+    def do_import():
+        import_artist(mbid) if artist else import_release(mbid)
+        mbids_currently_importing.remove(mbid)
+
+    if mbid not in mbids_currently_importing:
+        mbids_currently_importing.append(mbid)
+        app_pool.apply_async(do_import, ())
+        
+    else:
+        raise AlreadyImporting()
+
 @app.route("/add-artist", methods=["GET", "POST"])
 @needs_auth
 def add_artist():
@@ -306,19 +320,16 @@ def add_artist():
         
     else:
         if "artist-id" in request.form or "release-id" in request.form:
-            #todo ajax progress
-            mbid = MBID(request.form["artist-id" if "artist-id" in request.form else "release-id"])
+            is_artist = "artist-id" in request.form
+            mbid = MBID(request.form["artist-id" if is_artist else "release-id"])
 
-            if mbid not in mbids_currently_updating:
-                mbids_currently_updating.append(mbid)
-                app_pool.apply_async(import_artist if "artist-id" in request.form else import_release,
-                                     (mbid,),
-                                     callback=lambda _: mbids_currently_updating.remove(mbid))
+            try:
+                async_import(mbid, is_artist)
                 flash("The artist will be added soon", "success")
                 return redirect(url_for("artists_index"))
 
-            else:
-                flash("The artist is currently being updated", "error")
+            except AlreadyImporting:
+                flash("The artist is currently being added", "error")
                 return redirect_back()
 
         else:
@@ -347,17 +358,16 @@ def add_artist_search_results(query=None, query_type="artist", return_json=False
 @app.route("/update-artist/<int:id>")
 @needs_auth
 def update_artist(id):
-    artist_mbid = MBID(model().get_link(id, "musicbrainz"))
+    try:
+        mbid = MBID(model().get_link(id, "musicbrainz"))
+        async_import(mbid)
+        flash("The artist will be updated soon", "success")
 
-    if artist_mbid in mbids_currently_updating:
+    except AlreadyImporting:
         flash("The artist is currently being updated", "error")
-        return redirect_back()
-
-    mbids_currently_updating.append(artist_mbid)
-    flash("The artist will be updated", "success")
-    app_pool.apply_async(import_artist, (artist_mbid,), callback=lambda _:mbids_currently_updating.remove(artist_mbid))
+    
     return redirect_back()
-
+    
 @app.route("/")
 def homepage():
     return render_template("homepage.html")
