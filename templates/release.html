@@ -37,7 +37,7 @@
 
 {{ page_tabs([(None, release.title),
               ("activity", "Activity"),
-              ("reviews", "Reviews (%d)" % release.get_review_no()),
+              ("reviews", ("Reviews", release.get_review_no())),
               ("recommendations", "Recommendations")],
              release.url, current_tab=tab) }}
 

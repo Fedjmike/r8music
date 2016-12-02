@@ -5,6 +5,9 @@ import arrow
 
 from tools import transpose, sortable_date, fuzzy_groupby, group_by_key
 
+def if_not_None(x, fallback=""):
+    return x if x is not None else fallback
+
 def pluralize(noun):
     vowels = ["a", "e", "i", "o", "u"]
     inflection =      "es" if noun.endswith("o") and noun[-2] not in vowels \
@@ -147,7 +150,14 @@ def url_for_release(artist, release):
 
 import json
 
-template_tools = [n_things, full_datetime, friendly_datetime, relative_datetime, ("json_dumps", json.dumps), action_groups, sort_by_artist, group_by_year, group_by_rating, get_user_datasets, url_for_user]
+template_tools = [
+    if_not_None, n_things,
+    full_datetime, friendly_datetime, relative_datetime,
+    action_groups, sort_by_artist, group_by_year, group_by_rating,
+    get_user_datasets,
+    url_for_user,
+    isinstance, tuple, ("json_dumps", json.dumps)
+]
 
 def add_template_tools(app):
     functions = dict((f.__name__, f) if hasattr(f, "__call__") else f for f in template_tools)

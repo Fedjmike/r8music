@@ -204,7 +204,11 @@ class User(ModelObject):
         self.get_releases_listed = get_releases_listed
         
         self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
-        self.get_pick_no = lambda: model.get_user_pick_no(self.id)
+        
+        self.get_rated_no = lambda: model.get_active_action_no(self.id, "rate")
+        self.get_pick_no = lambda: model.get_active_action_no(self.id, "pick")
+        self.get_will_listen_no = lambda: model.get_active_action_no(self.id, "list")
+        self.get_listened_unrated_no = lambda: model.get_listened_unrated_no(self.id)
         
         self.get_active_actions = lambda object_id: model.get_active_actions(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
@@ -538,6 +542,16 @@ class Model(GeneralModel):
                        " where user_id=? and object_id=?", user_id, object_id)
         ]
         
+    def get_active_action_no(self, user_id, action):
+        return self.query_unique("select count(*) from active_actions_view"
+                                 " where user_id=? and type=?",
+                                 user_id, ActionType[action].value)[0]
+    
+    def get_listened_unrated_no(self, user_id):
+        #Works because rated necessarily implies listened
+        return   self.get_active_action_no(user_id, "listen") \
+               - self.get_active_action_no(user_id, "rate")
+        
     def get_ratings(self, object_id):
         return [
             rating for (rating,) in
@@ -585,12 +599,7 @@ class Model(GeneralModel):
             self.query("select id from tracks join active_actions_view on id = object_id"
                        " where user_id=? and release_id=?", user_id, release_id)
         ]
-            
-    def get_user_pick_no(self, user_id):
-        return self.query_unique("select count(*) from active_actions_view"
-                                 " where user_id=? and type=?",
-                                 user_id, ActionType['pick'].value)[0]
-
+    
     #Reviews
     
     def get_reviews(self, object_id):

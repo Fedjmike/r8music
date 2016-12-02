@@ -46,6 +46,10 @@ p {
     color: #aaa;
 }
 
+.slightly-small {
+    font-size: 0.9em;
+}
+
 h1 {
 	font-size: 2em;
 }

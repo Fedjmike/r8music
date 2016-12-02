@@ -1,3 +1,7 @@
+{% macro slightly_small_and_de_emph(x) -%}
+    <span class="de-emph slightly-small">{{ x | safe }}</span>
+{%- endmacro %}
+
 {% macro full_and_friendly_datetime(datetime) -%}
     {% set timezone = request.user.timezone if request.user else "UTC" %}
     {% set datetime = datetime.to(timezone) %}
@@ -25,10 +29,19 @@
 {% macro page_tabs(tabs, base_url, current_tab) -%}
 <ol class="page tabs">
     {% for name, description in tabs %}
+        {% set description, secondary_description = 
+            description if isinstance(description, tuple) else (description, None) %}
+        
         {% if current_tab == name %}
-            <li class="active">{{ description }}</li>
+            <li class="active">
+                {{ description }}
+                {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
+            </li>
         {% else %}
-            <li><a href={{ base_url + ("/" + name if name else "") }}>{{ description }}</a></li>
+            <li>
+                <a href={{ base_url + ("/" + name if name else "") }}>{{ description }}</a>
+                {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
+            </li>
         {% endif %}
     {% endfor %}
 </ol>

@@ -24,14 +24,11 @@
     <header><h1>{{ that_user.name }}</h1></header>
 
     <p>
-        {% set rated_no = that_user.get_ratings() | length %}
-        {% set pick_no = that_user.get_pick_no() %}
         {% set followers = that_user.get_followers() %}
 
         <img class="avatar" src={{ that_user.avatar_url }}><br/>
 
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
-        Rated {{ n_things(rated_no, "release") }} and selected {{ n_things(pick_no, "pick") }}<br/>
 
         {% set followers = that_user.get_followers() %}
         {{ n_things(followers | length, "follower") }}
@@ -54,9 +51,13 @@
     {% endif %}
 </section>
 
-{{ page_tabs([(None, "Releases rated"),
-              ("listened-unrated", "Listened to but not rated"),
-              ("will-listen", "Will listen to"),
+{% set rated_no = that_user.get_rated_no() %}
+{% set listened_unrated_no = that_user.get_listened_unrated_no() %}
+{% set will_listen_no = that_user.get_will_listen_no() %}
+
+{{ page_tabs([(None, ("Releases rated", rated_no)),
+              ("listened-unrated", ("Listened to but not rated", listened_unrated_no)),
+              ("will-listen", ("Will listen to", will_listen_no)),
               ("activity", "Activity"),
               ("reviews", "Reviews")],
               url_for_user(that_user), current_tab=tab) }}
