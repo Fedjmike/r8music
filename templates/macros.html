@@ -62,7 +62,7 @@
 {% macro load_more(content, endpoint, last_action) -%}
 <span class="load-more-area">
     <span class="load-more-target">{{ content }}</span>
-    <p><a class="load-more" href=#
+    <p><a class="load-more" href=# id="trigger"
           data-endpoint={{ endpoint }}
           data-last_action={{ last_action }}>Load more</a></p>
 </span>

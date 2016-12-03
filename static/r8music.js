@@ -126,7 +126,42 @@ function renderYearCounts(canvas) {
     });
 }
 
+function elementInScroll(elem)
+{
+    var docViewTop = $(window).scrollTop();
+    var docViewBottom = docViewTop + $(window).height();
+
+    var elemTop = $(elem).offset().top;
+    var elemBottom = elemTop + $(elem).height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+};
+
+var stahp = false;
+var autoload = function() {
+    if (!stahp) {
+        if (elementInScroll("#trigger")) {
+            var trigger = document.getElementById("trigger");
+            stahp = true;
+
+            $.get(trigger.dataset.endpoint, {offset: trigger.dataset.offset}, function (msg) {
+                if (msg.error)
+                        return; //todo
+                
+                trigger.dataset.offset = msg.offset;
+                
+                var target = $(trigger).closest(".load-more-area").find(".load-more-target");
+                target.append(msg.html);
+                stahp = false;
+            });
+        };
+    };
+};
+
 $(document).ready(function ($) {
+
+    $(window).on('scroll',  _.debounce(autoload, 200));
+
     $("a#login").click(function (event) {
         event.preventDefault();
         $(".popup-content:not(#login-popup)").toggle(false);
