@@ -192,11 +192,11 @@ $(document).ready(function ($) {
         
         var dataset = event.target.dataset;
         
-        $.get(dataset.endpoint, {offset: dataset.offset}, function (msg) {
+        $.get(dataset.endpoint, {last_action: dataset.last_action}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            dataset.offset = msg.offset;
+            dataset.last_action= msg.last_action;
             
             var target = $(event.target).closest(".load-more-area").find(".load-more-target");
             target.append(msg.html);

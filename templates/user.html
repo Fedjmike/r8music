@@ -79,7 +79,7 @@
 {% elif tab == "activity" %}
     <section class="page content">
         <header><h1>Recent activity</h1></header>
-        {% set offset, actions = that_user.get_activity() %}
+        {% set last_action, actions = that_user.get_activity() %}
         {{ activity_list(actions, same_user=True) }}
     </section>
     

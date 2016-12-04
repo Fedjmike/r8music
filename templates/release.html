@@ -78,7 +78,7 @@
 {% elif tab == "activity" %}
     <section class="page content">
         <header><h1>Activity</h1></header>
-        {% set offset, actions = release.get_activity() %}
+        {% set last_action, actions = release.get_activity() %}
         {{ release_activity_list(actions) }}
     </section>
 

@@ -14,7 +14,7 @@
 {% if tab == "activity" %}
     <section class="content page">
         <header><h1>{{ artist_link(artist) }} &mdash; Activity</h1></header>
-        {% set offset, actions = artist.get_activity_on_releases() %}
+        {% set last_action, actions = artist.get_activity_on_releases() %}
         {{ activity_list(actions) }}
     </section>
 

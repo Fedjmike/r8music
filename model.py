@@ -217,7 +217,7 @@ class User(ModelObject):
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         
-        self.get_activity_feed = lambda offset=0: model.get_activity_feed(self.id, offset=offset)
+        self.get_activity_feed = lambda last_action=None: model.get_activity_feed(self.id, last_action=last_action)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
@@ -483,9 +483,8 @@ class Model(GeneralModel):
         """Moves all actions from one object to another"""
         self.execute("update actions set object_id=? where object_id=?", dest_id, src_id)
 
-    def _get_activity(self, offset, rows):
+    def _get_activity(self, rows):
         #todo not just releases
-        next_offset = offset + len(rows)
         
         def make_action(action_id, type_id, creation, user_id, object_id, object_type):
             args = self, action_id, ActionType(type_id), arrow.get(creation), \
@@ -498,47 +497,62 @@ class Model(GeneralModel):
                 
             else:
                 return Action(*args)
-            
+        try:
+            last_action = rows[-1][0]
+
+        except IndexError:
+            last_action = None # todo: handle properly... this shit don't make no sense
         
-        return next_offset, [make_action(*row) for row in rows]
+        return last_action, [make_action(*row) for row in rows]
         
     activity_columns_and_from = \
         "action_id, a.type, a.creation, user_id, object_id, o.type" \
         " from active_actions_view a join objects o on object_id = o.id"
-        
-    def get_activity_by_user(self, user_id, limit=20, offset=0):
+
+    and_after_last_action = lambda _, last_action: \
+        " and a.creation < (select creation from actions where id=?)" \
+        if last_action else " and ? isnull" # 'tis a hack :O (predicate that always returns true)
+
+    def get_activity_by_user(self, user_id, limit=20, last_action=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           #Only releases supported
-                          " where o.type=? and user_id = ?"
-                          " order by a.creation desc limit ? offset ?",
-                          ObjectType.release.value, user_id, limit, offset)
+                          " where o.type=? and user_id = ?" +
+                          self.and_after_last_action(last_action) +
+                          " order by a.creation desc limit ?",
+                          ObjectType.release.value, user_id, last_action, limit)
         
-        return self._get_activity(offset, rows)
+        return self._get_activity(rows)
         
-    def get_activity_feed(self, user_id, limit=20, offset=0):
+    def get_activity_feed(self, user_id, limit=20, last_action=None):
         rows = self.query("select " + self.activity_columns_and_from +
-                          " where o.type=? " #Only releases supported
+                          " where o.type=?" + # Only releases supported
+                          self.and_after_last_action(last_action) +
                           " and user_id in (select user_id from followerships"
                           "  where follower=? union select ? as user_id)"
-                          " order by a.creation desc limit ? offset ?",
-                          ObjectType.release.value, user_id, user_id, limit, offset)
+                          # + " and a.creation > 1" if last_action else "" +
+                          " order by a.creation desc limit ?",
+                          ObjectType.release.value, last_action, user_id, user_id, limit)
+
+        return self._get_activity(rows)
         
-        return self._get_activity(offset, rows)
-        
-    def get_activity_on_object(self, object_id, limit=20, offset=0):
+    def get_activity_on_object(self, object_id, limit=20, last_action=None):
         rows = self.query("select " + self.activity_columns_and_from +
-                          " where object_id=? order by a.creation desc limit ? offset ?",
-                          object_id, limit, offset)
+                          " where object_id=?" +
+                          self.and_after_last_action(last_action) +
+                          " order by a.creation desc limit ?",
+                          object_id, last_action, limit)
         
-        return self._get_activity(offset, rows)
+        return self._get_activity(rows)
         
-    def get_activity_on_releases_by_artist(self, artist_id, limit=20, offset=0):
+    def get_activity_on_releases_by_artist(self, artist_id, limit=20, last_action=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           " join authorships on object_id=release_id"
-                          " where artist_id=? order by a.creation desc limit ? offset ?",
-                          artist_id, limit, offset)
+                          " where artist_id=?" +
+                          self.and_after_last_action(last_action) +
+                          " order by a.creation desc limit ?",
+                          artist_id, last_action, limit)
         
-        return self._get_activity(offset, rows)
+        return self._get_activity(rows)
         
     def get_active_actions(self, user_id, object_id):
         return [
