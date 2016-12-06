@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, user_link, page_tabs, clickable_action_list %}
+{% from "macros.html" import artist_link, user_link, page_tabs, clickable_action_list, artist_details %}
 {% from "release_list.html" import release_list, release_grid, rating_widget %}
 {% from "activity_list.html" import release_activity_list %}
 
@@ -198,8 +198,7 @@
 	
 	{{ release_list(artist.get_releases() | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id) | sort(attribute="date")) }} 
     
-    {% set description = artist.get_description() %}
-	<p>{{ description | safe if description else "" }}</p>
+    {{ artist_details(artist) }}
 </section>
 {% endfor %}
 {% endblock %}

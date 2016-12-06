@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, page_tabs %}
+{% from "macros.html" import artist_link, page_tabs, artist_details %}
 {% from "release_list.html" import release_list, release_grid %}
 {% from "activity_list.html" import activity_list %}
 
@@ -27,25 +27,7 @@
             {% endif %}
             
             <header><h1>{{ artist.name }}</h1></header>
-            
-            {% set description = artist.get_description() %}
-            <p>{{ description | safe if description else "" }}</p>
-            
-            {% set wp_urls = artist.get_wikipedia_urls() %}
-            {% if wp_urls %}
-                {% set wp_page, wp_edit = wp_urls %}
-                <p class="de-emph">[<a href="{{ wp_page }}" target=_blank>Read more</a> or <a href="{{ wp_edit }}" target=_blank>edit</a> on Wikipedia]</p>
-            {% endif %}
-        
-            <header class="tight"><h4>External links</h4></header>
-            {% for site, link in artist.get_external_links() %}
-                {% if loop.index == 1 %}
-                {% elif (loop.index-1) % 4 == 0 %}<br/>
-                {% else %}&#183;{% endif %}
-                <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a> 
-            {% endfor %}
-            
-            <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
+            {{ artist_details(artist) }}
         </div>
     </section>
     {% set albums = artist.get_releases() | selectattr("release_type", "equalto", "Album") | list %}
