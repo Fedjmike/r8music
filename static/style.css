@@ -673,6 +673,7 @@ ol.tracks {
 
 .track-title {
     display: inline-block;
+    word-break: break-all;
 }
 
 .tracks time {
