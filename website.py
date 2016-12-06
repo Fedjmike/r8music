@@ -166,7 +166,7 @@ def with_request_values(view, keys, error_view=request_by_json_missing_value):
 
 @app.route("/artists")
 def artists_index():
-    artists = model().query("select * from artists")
+    artists = model().query("select * from artists order by id desc")
     return render_template("artists_index.html", artists=artists)
 
 @app.route("/users")
