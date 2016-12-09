@@ -217,7 +217,8 @@ class User(ModelObject):
         self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         
-        self.get_activity_feed = lambda last_action=None: model.get_activity_feed(self.id, last_action=last_action)
+        self.get_activity_feed = lambda last_action_id=None: \
+            model.get_activity_feed(self.id, last_action_id=last_action_id)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
 class Action(ModelObject):
@@ -498,58 +499,58 @@ class Model(GeneralModel):
             else:
                 return Action(*args)
         try:
-            last_action = rows[-1][0]
+            last_action_id = rows[-1][0]
 
         except IndexError:
-            last_action = None # todo: handle properly... this shit don't make no sense
+            last_action_id = None # todo: handle properly... this shit don't make no sense
         
-        return last_action, [make_action(*row) for row in rows]
+        return last_action_id, [make_action(*row) for row in rows]
         
     activity_columns_and_from = \
         "action_id, a.type, a.creation, user_id, object_id, o.type" \
         " from active_actions_view a join objects o on object_id = o.id"
 
-    and_after_last_action = lambda _, last_action: \
+    and_after_last_action = lambda _, last_action_id: \
         " and a.creation < (select creation from actions where id=?)" \
-        if last_action else " and ? isnull" # 'tis a hack :O (predicate that always returns true)
+        if last_action_id else " and ? isnull" # 'tis a hack :O (predicate that always returns true)
 
-    def get_activity_by_user(self, user_id, limit=20, last_action=None):
+    def get_activity_by_user(self, user_id, limit=20, last_action_id=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           #Only releases supported
                           " where o.type=? and user_id = ?" +
-                          self.and_after_last_action(last_action) +
+                          self.and_after_last_action(last_action_id) +
                           " order by a.creation desc limit ?",
-                          ObjectType.release.value, user_id, last_action, limit)
+                          ObjectType.release.value, user_id, last_action_id, limit)
         
         return self._get_activity(rows)
         
-    def get_activity_feed(self, user_id, limit=20, last_action=None):
+    def get_activity_feed(self, user_id, limit=20, last_action_id=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           " where o.type=?" + # Only releases supported
-                          self.and_after_last_action(last_action) +
+                          self.and_after_last_action(last_action_id) +
                           " and user_id in (select user_id from followerships"
                           "  where follower=? union select ? as user_id)"
                           " order by a.creation desc limit ?",
-                          ObjectType.release.value, last_action, user_id, user_id, limit)
+                          ObjectType.release.value, last_action_id, user_id, user_id, limit)
 
         return self._get_activity(rows)
         
-    def get_activity_on_object(self, object_id, limit=20, last_action=None):
+    def get_activity_on_object(self, object_id, limit=20, last_action_id=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           " where object_id=?" +
-                          self.and_after_last_action(last_action) +
+                          self.and_after_last_action(last_action_id) +
                           " order by a.creation desc limit ?",
-                          object_id, last_action, limit)
+                          object_id, last_action_id, limit)
         
         return self._get_activity(rows)
         
-    def get_activity_on_releases_by_artist(self, artist_id, limit=20, last_action=None):
+    def get_activity_on_releases_by_artist(self, artist_id, limit=20, last_action_id=None):
         rows = self.query("select " + self.activity_columns_and_from +
                           " join authorships on object_id=release_id"
                           " where artist_id=?" +
-                          self.and_after_last_action(last_action) +
+                          self.and_after_last_action(last_action_id) +
                           " order by a.creation desc limit ?",
-                          artist_id, last_action, limit)
+                          artist_id, last_action_id, limit)
         
         return self._get_activity(rows)
         
@@ -694,11 +695,10 @@ class Model(GeneralModel):
     def get_user_listen_implies_unlist(self, user_id):
         try:
             return int(self.query_unique("select listen_implies_unlist from"
-                                     " user_listen_implies_unlists where user_id=?", user_id)[0])
+                                         " user_listen_implies_unlists where user_id=?", user_id)[0])
 
         except NotFound:
             return True
-
         
     def set_user_rating_description(self, user_id, rating, description):
         if description:
