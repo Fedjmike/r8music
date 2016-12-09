@@ -529,7 +529,6 @@ class Model(GeneralModel):
                           self.and_after_last_action(last_action) +
                           " and user_id in (select user_id from followerships"
                           "  where follower=? union select ? as user_id)"
-                          # + " and a.creation > 1" if last_action else "" +
                           " order by a.creation desc limit ?",
                           ObjectType.release.value, last_action, user_id, user_id, limit)
 
