@@ -144,11 +144,11 @@ var autoload = function() {
             var trigger = document.getElementById("trigger");
             stahp = true;
 
-            $.get(trigger.dataset.endpoint, {offset: trigger.dataset.offset}, function (msg) {
+            $.get(trigger.dataset.endpoint, {last_action: trigger.dataset.last_action}, function (msg) {
                 if (msg.error)
                         return; //todo
                 
-                trigger.dataset.offset = msg.offset;
+                trigger.dataset.last_action = msg.last_action;
                 
                 var target = $(trigger).closest(".load-more-area").find(".load-more-target");
                 target.append(msg.html);
