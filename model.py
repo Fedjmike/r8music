@@ -188,6 +188,7 @@ class User(ModelObject):
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
         self.avatar_url = model.get_user_avatar(self.id)
+        self.listen_implies_unlist = model.get_user_listen_implies_unlist(self.id)
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
@@ -447,7 +448,11 @@ class Model(GeneralModel):
         #Rating implies having listened (transitively, it also unlists)
         if type == ActionType["rate"]:
             self.add_action(user_id, object_id, ActionType["listen"])
-            
+
+        if type == ActionType["listen"]:
+            if self.get_user_listen_implies_unlist(user_id):
+                self.add_action(user_id, object_id, ActionType["unlist"])
+
         if not type.name.startswith('un'):
             action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
                                     " values (?, ?, ?, ?)",
@@ -668,6 +673,19 @@ class Model(GeneralModel):
     def get_user_timezone(self, user_id):
         return self.query_unique("select timezone from user_timezones"
                                  " where user_id=?", user_id, fallback=("Europe/London",))[0]
+
+    def set_user_listen_implies_unlist(self, user_id, listen_implies_unlist):
+        self.execute("replace into user_listen_implies_unlists"
+                     " values (?, ?)", user_id, listen_implies_unlist)
+
+    def get_user_listen_implies_unlist(self, user_id):
+        try:
+            return int(self.query_unique("select listen_implies_unlist from"
+                                     " user_listen_implies_unlists where user_id=?", user_id)[0])
+
+        except NotFound:
+            return True
+
         
     def set_user_rating_description(self, user_id, rating, description):
         if description:

@@ -545,9 +545,9 @@ def user_settings():
         return render_template("form.html", form="settings", user=request.user)
     
     else:
-        email, timezone, avatar_url = \
-            dict_values(request.values, ["email", "timezone", "avatar_url"])
-        
+        email, timezone, avatar_url, listen_implies_unlist = \
+            dict_values(request.values, ["email", "timezone", "avatar_url", "listen_implies_unlist"])
+
         #Allow the user to set email to an empty string
         if email is not None:
             model().set_user_email(request.user.id, email)
@@ -562,6 +562,8 @@ def user_settings():
 
             except AvatarException as e:
                 flash(str(e), "error")
+
+        model().set_user_listen_implies_unlist(request.user.id, listen_implies_unlist=="on")
 
         flash("Settings saved", "success")
         return redirect(url_for("user_settings"))

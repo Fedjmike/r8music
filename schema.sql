@@ -118,6 +118,12 @@ create table user_timezones (
     foreign key (user_id) references users(id)
 );
 
+drop table if exists user_listen_implies_unlists;
+create table user_listen_implies_unlists (
+    user_id integer primary key,
+    listen_implies_unlist integer not null
+);
+
 drop table if exists user_rating_descriptions;
 create table user_rating_descriptions (
     user_id integer not null,

@@ -77,6 +77,8 @@
             {{ form_field("Timezone", "timezone", "text", prefill=user.timezone) }}
             {{ form_field("Avatar URL", "avatar_url", "text", prefill=user.avatar_url) }}
             <p>Image must be within size constraints and on an approved host</p>
+            <dt>Listening to a release unlists it</dt>
+            <dd><input type="checkbox" name="listen_implies_unlist" {% if user.listen_implies_unlist %}checked{% endif %}></dd>
             
             <dd><input type="submit" value="Save changes" /></dd>
         </dl>
