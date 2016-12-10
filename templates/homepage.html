@@ -9,8 +9,8 @@
         <section class="page content">
             <header><h1>Recent activity</h1></header>
             
-            {% set last_action, actions = request.user.get_activity_feed() %}
-            {{ load_more(activity_list(actions), url_for("activity_feed"), last_action) }}
+            {% set last_action_id, actions = request.user.get_activity_feed() %}
+            {{ load_more(activity_list(actions), url_for("activity_feed"), last_action_id) }}
         </section>
     {% endif %}
 {% endblock %}

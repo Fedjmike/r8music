@@ -126,40 +126,36 @@ function renderYearCounts(canvas) {
     });
 }
 
-function elementInScroll(elem)
-{
+function elementInScroll(elem) {
     var docViewTop = $(window).scrollTop();
     var docViewBottom = docViewTop + $(window).height();
 
     var elemTop = $(elem).offset().top;
     var elemBottom = elemTop + $(elem).height();
 
-    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+    return elemBottom <= docViewBottom && elemTop >= docViewTop;
 };
 
 var stahp = false;
 var autoload = function() {
-    if (!stahp) {
-        if (elementInScroll("#trigger")) {
-            var trigger = document.getElementById("trigger");
-            stahp = true;
+    if (!stahp && elementInScroll("#autoload-trigger")) {
+        var autoloadTrigger = document.getElementById("autoload-trigger");
+        stahp = true;
 
-            $.get(trigger.dataset.endpoint, {last_action: trigger.dataset.last_action}, function (msg) {
-                if (msg.error)
-                        return; //todo
-                
-                trigger.dataset.last_action = msg.last_action;
-                
-                var target = $(trigger).closest(".load-more-area").find(".load-more-target");
-                target.append(msg.html);
-                stahp = false;
-            });
-        };
+        $.get(autoloadTrigger.dataset.endpoint, {last_action_id: autoloadTrigger.dataset.last_action_id}, function (msg) {
+            if (msg.error)
+                    return; //todo
+            
+            autoloadTrigger.dataset.last_action_id = msg.last_action_id;
+            
+            var target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
+            target.append(msg.html);
+            stahp = false;
+        });
     };
 };
 
 $(document).ready(function ($) {
-
     $(window).on('scroll',  _.debounce(autoload, 200));
 
     $("a#login").click(function (event) {
@@ -227,11 +223,11 @@ $(document).ready(function ($) {
         
         var dataset = event.target.dataset;
         
-        $.get(dataset.endpoint, {last_action: dataset.last_action}, function (msg) {
+        $.get(dataset.endpoint, {last_action_id: dataset.last_action_id}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            dataset.last_action= msg.last_action;
+            dataset.last_action_id= msg.last_action_id;
             
             var target = $(event.target).closest(".load-more-area").find(".load-more-target");
             target.append(msg.html);

@@ -379,9 +379,10 @@ def homepage():
 @needs_auth
 def activity_feed():
     try:
-        last_action, actions = request.user.get_activity_feed(last_action=int(request.values["last_action"]))
+        last_action_id, actions = \
+            request.user.get_activity_feed(last_action_id=int(request.values["last_action_id"]))
         html = render_template("activity_list.html", actions=actions)
-        return jsonify(error=0, html=html, last_action=last_action)
+        return jsonify(error=0, html=html, last_action_id=last_action_id)
         
     except (KeyError, ValueError):
         return jsonify(error=1)
