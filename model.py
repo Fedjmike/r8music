@@ -188,7 +188,6 @@ class User(ModelObject):
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
         self.avatar_url = model.get_user_avatar(self.id)
-        self.listen_implies_unlist = model.get_user_listen_implies_unlist(self.id)
         
         def get_releases_listened_unrated():
             listened = model.get_releases_actioned_by_user(self.id, "listen")
@@ -220,6 +219,8 @@ class User(ModelObject):
         self.get_activity_feed = lambda last_action_id=None: \
             model.get_activity_feed(self.id, last_action_id=last_action_id)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
+        
+        self.get_listen_implies_unlist = lambda: model.get_user_listen_implies_unlist(self.id)
         
 class Action(ModelObject):
     def __init__(self, model, id, type, creation, user_id, object_id, object_type):
