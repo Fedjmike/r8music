@@ -1,13 +1,7 @@
-{% from "macros.html" import event_datetime, artist_link, object_link, user_link %}
-
-{% macro user_thumb(user) -%}
-    <a href={{ url_for("user_page", slug=user.name) }}>
-        <img class="activity-thumb" src={{ user.avatar_url }} />
-    </a>
-{%- endmacro %}
+{% from "macros.html" import event_datetime, artist_link, object_link, user_link, user_thumb %}
 
 {% macro action_secondary_details(action) -%}
-    <div class="activity-secondary-details">
+    <div class="secondary-details">
         {{ action.describe() }} &middot; {{ event_datetime(action.creation) }}
     </div>
 {%- endmacro %}
@@ -15,7 +9,7 @@
 {% macro explain_action(action) -%}
     <div class="activity-item thumb-box">
         <a href={{ action.object.url }}>
-            <img class="activity-thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
+            <img class="thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
         </a>
         <div class="activity-details">
             <div>

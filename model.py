@@ -184,6 +184,7 @@ class Release(ModelObject):
 class User(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "email", "type", "creation"])
+        self.model = model
         self.type = UserType(self.type)
         self.creation = arrow.get(self.creation)
         self.timezone = model.get_user_timezone(self.id)
@@ -213,7 +214,6 @@ class User(ModelObject):
         self.get_active_actions = lambda object_id: model.get_active_actions(self.id, object_id)
         self.get_rating_descriptions = lambda: model.get_user_rating_descriptions(self.id)
         
-        self.get_followers = lambda: model.get_followers(self.id)
         self.get_follow = lambda user_id: model.get_following_since(self.id, user_id)
         
         self.get_activity_feed = lambda last_action_id=None: \
@@ -221,6 +221,27 @@ class User(ModelObject):
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
         self.get_listen_implies_unlist = lambda: model.get_user_listen_implies_unlist(self.id)
+        
+    def get_friendships(self):
+        def make_friendship(friend_id):
+            friend = self.model.get_user(friend_id)
+            #Show since it became mutual
+            since = max(l[friend.id] for l in [follows, followed_by]
+                        if friend.id in l)
+            
+            return dict(id=friend.id, name=friend.name,
+                        avatar_url=friend.avatar_url,
+                        since=since,
+                        #"Is/does user_id X them?"
+                        follows=friend.id in follows,
+                        followed_by=friend.id in followed_by)
+        
+        follows, followed_by = self.model.get_followings(self.id)
+        #IDs of users in either
+        friends = set(list(follows) + list(followed_by))
+        
+        return [make_friendship(friend_id) for friend_id in friends
+                if friend_id != self.id]
         
 class Action(ModelObject):
     def __init__(self, model, id, type, creation, user_id, object_id, object_type):
@@ -740,12 +761,21 @@ class Model(GeneralModel):
         self.execute("delete from followerships where follower=? and user_id=?",
                      follower_id, user_id)
         
-    def get_followers(self, user_id):
-        return [
-            dict(name=name, since=arrow.get(creation)) for name, creation in
-            self.query("select u.name, f.creation from users u join followerships f on u.id = follower"
-                       " where user_id=?", user_id)
-        ]
+    def get_followings(self, user_id):
+        rows = self.query("select follower, user_id, creation from followerships"
+                          " where user_id=? or follower=?", user_id, user_id)
+        
+        follows = {
+            follower: arrow.get(creation) for follower, followed_by, creation in rows
+            if followed_by == user_id
+        }
+        
+        followed_by = {
+            followed_by: arrow.get(creation) for follower, followed_by, creation in rows
+            if follower == user_id
+        }
+        
+        return follows, followed_by
         
     def get_following_since(self, follower_id, user_id):
         rows = self.query("select creation from followerships"

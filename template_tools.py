@@ -75,6 +75,16 @@ def action_groups(actions):
 
     return sorted(action_groups, key=lambda ag: -ag.actions[0].creation.timestamp)
 
+#Friends
+
+def sort_friendships(friendships):
+    def key(f):
+        return      0 if f["follows"] and f["followed_by"] \
+               else 1 if f["follows"] or f["followed_by"] \
+               else 2
+    
+    return sorted(friendships, key=key)
+    
 #Rating datasets
 
 def sort_by_artist(releases):
@@ -153,7 +163,8 @@ import json
 template_tools = [
     if_not_None, n_things,
     full_datetime, friendly_datetime, relative_datetime,
-    action_groups, sort_by_artist, group_by_year, group_by_rating,
+    action_groups, sort_friendships,
+    sort_by_artist, group_by_year, group_by_rating,
     get_user_datasets,
     url_for_user,
     isinstance, tuple, ("json_dumps", json.dumps)

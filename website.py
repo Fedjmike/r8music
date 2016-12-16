@@ -393,7 +393,7 @@ def activity_feed():
         return jsonify(error=1)
 
 @app.route("/user/<slug>", methods=["GET"])
-@app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity):tab>")
+@app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity, friends):tab>")
 @handle_not_found(what="user")
 def user_page(slug, tab=None):
     that_user = model().get_user(slug)

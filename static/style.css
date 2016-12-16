@@ -592,10 +592,6 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-item {
-    margin: 0.75em 0.75em 0.75em 0;
-}
-
 .activity-group {
     margin-bottom: 1.5em;
     border-left: 2px solid;
@@ -609,25 +605,32 @@ ol.tabs > li {
     margin-left: 1em;
 }
 
+/*Thumb boxes*/
+
+.thumb-box {
+    margin: 0.75em 0.75em 0.75em 0;
+    white-space: nowrap;
+}
+
 .thumb-box > * {
     display: inline-block;
     vertical-align: middle;
     line-height: 0;
 }
 
-.activity-thumb {
+.thumb {
     width: 2.5em;
     height: 2.5em;
     margin-right: 0.4em;
     object-fit: cover;
 }
 
-.activity-item .author {
-    display: inline;
+.secondary-details {
+    font-size: 0.9em;
 }
 
-.activity-secondary-details {
-    font-size: 0.9em;
+.activity-item .author {
+    display: inline;
 }
 
 .comma-separated:not(:last-of-type):after {
@@ -1098,7 +1101,7 @@ input[type=submit] {
 
 .artist-image,
 .album-cover img,
-.activity-thumb {
+.thumb {
     /*Glowed border*/
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
 }
@@ -1137,6 +1140,16 @@ section > section {
 
 .columns > * {
     display: inline-block;
+}
+
+.collage {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.collage.four > * {
+    width: 23%;
 }
 
 /*Mobile*/

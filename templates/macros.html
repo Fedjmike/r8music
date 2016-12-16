@@ -26,6 +26,12 @@
     <a href={{ url_for("user_page", slug=user.name) }}>{{ user.name }}</a>
 {%- endmacro %}
 
+{% macro user_thumb(user) -%}
+    <a href={{ url_for("user_page", slug=user.name) }}>
+        <img class="thumb" src={{ user.avatar_url }} />
+    </a>
+{%- endmacro %}
+
 {% macro page_tabs(tabs, base_url, current_tab) -%}
 <ol class="page tabs">
     {% for name, description in tabs %}
