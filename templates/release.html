@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, user_link, page_tabs, clickable_action_list, artist_details %}
+{% from "macros.html" import artist_link, object_link, user_link, page_tabs, subpage_header, clickable_action_list, artist_details %}
 {% from "release_list.html" import release_list, release_grid, rating_widget %}
 {% from "activity_list.html" import release_activity_list %}
 
@@ -43,11 +43,11 @@
 
 {% if tab == "reviews" %}
     <section class="page content">
-        <header><h1>Reviews</h1></header>
+        {{ subpage_header("Reviews", object_link(release)) }}
         
         {% macro my_review() -%}
         <section>
-            <header><h2>Write a review</h2></header>
+            <header><h3>Write a review</h3></header>
             
             <form action=# method="post" class="review clearfix">
                 <textarea name="review" class="with-expl" rows=10 cols=50></textarea>
@@ -77,14 +77,14 @@
     
 {% elif tab == "activity" %}
     <section class="page content">
-        <header><h1>Activity</h1></header>
+        {{ subpage_header("Activity", object_link(release)) }}
         {% set last_action, actions = release.get_activity() %}
         {{ release_activity_list(actions) }}
     </section>
 
 {% elif tab == "recommendations" %}
     <section class="page content">
-        <header><h1>Recommendations</h1></header>
+        {{ subpage_header("Recommendations", object_link(release)) }}
         {% set recommendations = release.get_recommendations() %}
         {{ release_grid(recommendations, class="small") }}
     </section>

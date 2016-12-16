@@ -53,6 +53,10 @@
 </ol>
 {%- endmacro %}
 
+{% macro subpage_header(subpage_title, main_link) -%}
+    <header><h2>{{ subpage_title }} &ndash; {{ main_link }}</h2></header>
+{%- endmacro %}
+
 {% macro clickable_action_list(actions, active, data) -%}
 <ol class="action-list inline unselectable">
     {% for name, icon, description in actions %}
