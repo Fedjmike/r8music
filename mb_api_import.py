@@ -23,7 +23,7 @@ def get_album_art_urls(mbid, group=True):
         url = url_format % ("release-group" if group else "release", mbid)
         art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
-                (art['image'], art['thumbnails']['large']))
+                (art['image'], art['thumbnails']['small']))
         
     except ValueError:
         return None, None
