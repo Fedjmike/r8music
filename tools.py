@@ -61,6 +61,7 @@ class fuzzy_groupby(object):
     def _grouper(self, current):
         while self.target and self.close_enough(current, self.target):
             yield self.target
+            current = self.target
             self.target = next(self.it, None)
 
 def group_by_key(items, key):
