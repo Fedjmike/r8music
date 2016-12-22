@@ -508,12 +508,6 @@ ol:not(.small).rating {
     transition: /*-webkit-filter 0.1s,*/ -ff-filter 0.1s, filter 0.1s;
 }
 
-.releases a:hover img {
-    -webkit-filter: brightness(107%);
-    -ff-filter: brightness(110%);
-    filter: brightness(110%);
-}
-
 /*Colour palettes*/
 
 .color-palette {
@@ -1108,6 +1102,13 @@ input[type=submit] {
 
 .releases.grid > li .cover {
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.15);
+}
+
+.releases a:hover img,
+.thumb:hover {
+    -webkit-filter: brightness(107%);
+    -ff-filter: brightness(110%);
+    filter: brightness(110%);
 }
 
 /*Layout*/
