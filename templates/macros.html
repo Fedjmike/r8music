@@ -26,9 +26,13 @@
     <a href={{ url_for("user_page", slug=user.name) }}>{{ user.name }}</a>
 {%- endmacro %}
 
-{% macro user_thumb(user) -%}
+{% macro avatar(user, thumb=True) -%}
     <a href={{ url_for("user_page", slug=user.name) }}>
-        <img class="thumb" src={{ user.avatar_url }} />
+        {% if user.avatar_url.endswith('webm') %}
+            <video class={{ "thumb" if thumb else "avatar" }} src={{ user.avatar_url }} autoplay loop></video>
+        {% else %}
+            <img class={{ "thumb" if thumb else "avatar" }} src={{ user.avatar_url }} />
+        {% endif %}
     </a>
 {%- endmacro %}
 
