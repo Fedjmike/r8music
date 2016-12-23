@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs, avatar %}
+{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs %}
 {% from "activity_list.html" import activity_list %}
 {% from "friend_list.html" import friend_list %}
 {% from "release_list.html" import release_list, release_grid %}
@@ -25,7 +25,7 @@
     <header><h1>{{ that_user.name }}</h1></header>
 
     <p>
-        {{ avatar(that_user, thumb=False) }}
+        <img class="avatar" src={{ that_user.avatar_url }}><br/>
 
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
     </p>

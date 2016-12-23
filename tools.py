@@ -328,9 +328,9 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
 
-valid_domains = ["i.imgur.com", "my.mixtape.moe", "zippy.gfycat.com"]
-max_size = 420420 # 322 KB in bytes
-allowed_types = ["jpg", "jpeg", "png", "gif", "webm"]
+valid_domains = ["i.imgur.com", "my.mixtape.moe"]
+max_size = 420420 # Roll up the weed and ignite the fire
+allowed_exts = ["jpg", "jpeg", "png"]
 
 class AvatarException(Exception):
     pass
@@ -360,8 +360,8 @@ def validate_avatar(avatar_url):
         raise TooBig("File size " + str(filesize//1000) + " kB exceeds max size " \
                      + str(max_size//1000) + " kB")
 
-    if urlparse(avatar_url).path.split("/")[-1].split(".")[-1] not in allowed_types:
-        raise ImageError("File must be a valid jpg, png or gif")
+    if urlparse(avatar_url).path.split("/")[-1].split(".")[-1] not in allowed_exts:
+        raise ImageError("File must be a valid jpg or png")
 
 # Rankings
 
