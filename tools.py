@@ -61,6 +61,7 @@ class fuzzy_groupby(object):
     def _grouper(self, current):
         while self.target and self.close_enough(current, self.target):
             yield self.target
+            current = self.target
             self.target = next(self.it, None)
 
 def group_by_key(items, key):
@@ -326,11 +327,10 @@ def get_wikipedia_urls(page_title):
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from imghdr import what
 
 valid_domains = ["i.imgur.com", "my.mixtape.moe"]
-max_size = 322322 # 322 KB in bytes
-allowed_types = ["jpeg", "png", "gif"]
+max_size = 420420 # Roll up the weed and ignite the fire
+allowed_exts = ["jpg", "jpeg", "png"]
 
 class AvatarException(Exception):
     pass
@@ -360,10 +360,8 @@ def validate_avatar(avatar_url):
         raise TooBig("File size " + str(filesize//1000) + " kB exceeds max size " \
                      + str(max_size//1000) + " kB")
 
-    _type = what('', h=r.read())
-
-    if _type not in allowed_types:
-        raise ImageError("File must be a valid jpg, png or gif")
+    if urlparse(avatar_url).path.split("/")[-1].split(".")[-1] not in allowed_exts:
+        raise ImageError("File must be a valid jpg or png")
 
 # Rankings
 

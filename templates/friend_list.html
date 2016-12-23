@@ -1,0 +1,20 @@
+{% from "macros.html" import event_datetime, user_link, avatar_thumb %}
+
+{% macro friend_list(friends, class="") -%}
+    <ol class="{{ class }}">
+    {% for friend in friends %}
+        <li class="thumb-box">
+            {{ avatar_thumb(friend) }}
+            <div>
+                <div>
+                    {% if not friend.follows or not friend.followed_by %}
+                        <span class="de-emph">{{ "followed by" if friend.follows else "follows" }}</span>
+                    {% endif %}
+                    {{ user_link(friend) }}
+                </div>
+                <span class="secondary-details de-emph">{{ event_datetime(friend.since) }}</span>
+            </div>
+        </li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}

@@ -23,7 +23,7 @@ def get_album_art_urls(mbid, group=True):
         url = url_format % ("release-group" if group else "release", mbid)
         art = requests.get(url).json()['images'][0]
         return (get_canonical_url(url) for url in
-                (art['image'], art['thumbnails']['large']))
+                (art['image'], art['thumbnails']['small']))
         
     except ValueError:
         return None, None
@@ -128,18 +128,12 @@ def get_release_groups(mbid):
     return release_groups
 
 def get_release_from_group(group):
-    try:
-        return get_release(group['id'], group['type']\
-            if 'type' in group else 'Unspecified')
-    except ReleaseImportError:
-        return
+    return get_release(group['id'], group['type']\
+        if 'type' in group else 'Unspecified')
 
 def prepare_release(release):
-    try:
-        release['full-art-url'], release['thumb-art-url'] \
-            = get_album_art_urls(release['group-id'])
-    except TypeError:
-        return
+    release['full-art-url'], release['thumb-art-url'] \
+        = get_album_art_urls(release['group-id'])
 
     print("Getting deets for release " + release['id'] + "...")
     result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
@@ -210,7 +204,23 @@ def import_release(release):
         group_id = result['release-group-list'][0]['id']
         release_type = result['release-group-list'][0]['type']
         
-    release = get_release(group_id, release_type)
+    try:
+        release = get_release(group_id, release_type)
+
+    except ReleaseImportError:
+        return
+
+    prepare_release(release)
+    add_release(release)
+
+
+def import_release_group(release_group):
+    try:
+        release = get_release_from_group(release_group)
+
+    except ReleaseImportError:
+        return
+
     prepare_release(release)
     add_release(release)
 
@@ -253,12 +263,7 @@ def import_artist(artist):
         
     pool = ThreadPool(8)
     release_groups = get_release_groups(artist_mbid)
-    releases = pool.map(get_release_from_group, release_groups)
-    releases = list(filter(lambda r: r is not None, releases))
-    pool.map(prepare_release, releases)
-    
-    for release in releases:
-        add_release(release)
+    pool.map(import_release_group, release_groups)
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 

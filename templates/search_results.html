@@ -1,4 +1,5 @@
 ﻿{% extends "layout.html" %}
+{% from "add_artist_search_results.html" import add_artist_form %}
 
 {% block title %}'{{ search.query }}' &ndash; Search results {{ super() }}{% endblock %}
 
@@ -27,5 +28,6 @@
         </ol>
         <p>No matches? Try <a href={{ url_for("add_artist_search_results", query=search.encoded_query) }}>adding the artist to the database!</a></p>
     {% endif %}
+    {{ add_artist_form(search.import_candidates) }}
 </section>
 {% endblock %}

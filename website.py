@@ -219,9 +219,14 @@ def search_results(query=None, return_json=False):
     #If there is an obvious match, redirect straight there
     if clear_match(query, results):
         return redirect(results[0]["url"])
-    
+
+    mb_results = search_mb(query)
+    mbids_imported = [model().get_link(result["id"], "musicbrainz") for result in results]
+    import_candidates = filter(lambda r: r['id'] not in mbids_imported, mb_results)
+
     return render_template("search_results.html",
-            search={"query": query, "encoded_query": encoded_query, "args": args, "results": results})
+            search={"query": query, "encoded_query": encoded_query, "args": args,
+                    "results": results, "import_candidates": import_candidates})
 
 @app.route("/track/<int:track_id>", methods=["POST"])
 @handle_not_found(what="track")
@@ -388,7 +393,7 @@ def activity_feed():
         return jsonify(error=1)
 
 @app.route("/user/<slug>", methods=["GET"])
-@app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity):tab>")
+@app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity, friends):tab>")
 @handle_not_found(what="user")
 def user_page(slug, tab=None):
     that_user = model().get_user(slug)

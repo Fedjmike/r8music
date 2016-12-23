@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
-{% from "macros.html" import full_and_friendly_datetime, event_datetime, page_tabs %}
+{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs %}
 {% from "activity_list.html" import activity_list %}
+{% from "friend_list.html" import friend_list %}
 {% from "release_list.html" import release_list, release_grid %}
 
 {% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
@@ -24,14 +25,9 @@
     <header><h1>{{ that_user.name }}</h1></header>
 
     <p>
-        {% set followers = that_user.get_followers() %}
-
         <img class="avatar" src={{ that_user.avatar_url }}><br/>
 
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
-
-        {% set followers = that_user.get_followers() %}
-        {{ n_things(followers | length, "follower") }}
     </p>
     
     {% if user and that_user.id != user.id %}
@@ -59,7 +55,8 @@
               ("listened-unrated", ("Listened to but not rated", listened_unrated_no)),
               ("will-listen", ("Will listen to", will_listen_no)),
               ("activity", "Activity"),
-              ("reviews", "Reviews")],
+              ("reviews", "Reviews"),
+              ("friends", "Friends")],
               url_for_user(that_user), current_tab=tab) }}
 
 {% if tab == "listened-unrated" %}
@@ -81,6 +78,13 @@
         <header><h1>Recent activity</h1></header>
         {% set last_action, actions = that_user.get_activity() %}
         {{ activity_list(actions, same_user=True) }}
+    </section>
+    
+{% elif tab == "friends" %}
+    <section class="page content">
+        {% set friends = that_user.get_friendships() | list %}
+        <header><h2>{{ user_link(that_user) }}'s Friends {{ slightly_small_and_de_emph(friends | length) }}</h2></header>
+        {{ friend_list(sort_friendships(friends), class="collage four") }}
     </section>
     
 {% else %}
