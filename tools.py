@@ -327,11 +327,10 @@ def get_wikipedia_urls(page_title):
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from imghdr import what
 
-valid_domains = ["i.imgur.com", "my.mixtape.moe"]
-max_size = 322322 # 322 KB in bytes
-allowed_types = ["jpeg", "png", "gif"]
+valid_domains = ["i.imgur.com", "my.mixtape.moe", "zippy.gfycat.com"]
+max_size = 420420 # 322 KB in bytes
+allowed_types = ["jpg", "jpeg", "png", "gif", "webm"]
 
 class AvatarException(Exception):
     pass
@@ -361,9 +360,7 @@ def validate_avatar(avatar_url):
         raise TooBig("File size " + str(filesize//1000) + " kB exceeds max size " \
                      + str(max_size//1000) + " kB")
 
-    _type = what('', h=r.read())
-
-    if _type not in allowed_types:
+    if urlparse(avatar_url).path.split("/")[-1].split(".")[-1] not in allowed_types:
         raise ImageError("File must be a valid jpg, png or gif")
 
 # Rankings
