@@ -47,7 +47,7 @@
     {% for action_group in action_groups %}
         {% for action in action_group.actions %}
             <li class="activity-item thumb-box">
-                {{ user_thumb(action.user) }}
+                {{ avatar(action.user) }}
                 <div>
                     {{ user_link(action.user) }}
                     {{ action_secondary_details(action) }}
