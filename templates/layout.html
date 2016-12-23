@@ -15,9 +15,11 @@
     <link rel="shortcut icon" href="/static/favicon.png" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.2/lodash.min.js"></script> <!-- todo: conditionally load this (and the associated code in r8music.js) -->
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
-    
+
+    {% if lodash %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.2/lodash.min.js"></script>
+    {% endif %}
     {% if chart_js %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.0/Chart.bundle.min.js"></script>
     {% endif %}

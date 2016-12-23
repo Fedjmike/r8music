@@ -156,7 +156,9 @@ var autoload = function() {
 };
 
 $(document).ready(function ($) {
-    $(window).on('scroll',  _.debounce(autoload, 200));
+    if (document.getElementById("autoload-trigger")) {
+        $(window).on('scroll',  _.debounce(autoload, 200));
+    };
 
     $("a#login").click(function (event) {
         event.preventDefault();
