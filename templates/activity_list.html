@@ -12,6 +12,7 @@
             <img class="thumb" src={{ action.object.thumb_art_url or "http://www.howwe.biz/no-cover.png" }} />
         </a>
         <div class="activity-details">
+            {{ action_secondary_details(action) }}
             <div>
                 {% for artist in action.object.get_artists() %}
                     <span class="author">{{ artist_link(artist) }}</span>
@@ -19,7 +20,6 @@
                 &ndash;
                 {{ object_link(action.object) }}
             </div>
-            {{ action_secondary_details(action) }}
         </div>
     </div>
 {%- endmacro %}
