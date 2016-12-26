@@ -7,7 +7,7 @@ from contextlib import closing
 from bs4 import BeautifulSoup
 
 from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
-from mb_api_import import import_artist, import_release, MBID
+from mb_api_import import import_artist, standalone_import_release_group, MBID
 from template_tools import add_template_tools
 from tools import *
 
@@ -310,7 +310,7 @@ mbids_currently_importing = []
 
 def async_import(mbid, artist=True):
     def do_import():
-        import_artist(mbid) if artist else import_release(mbid)
+        import_artist(mbid) if artist else standalone_import_release_group(mbid)
         mbids_currently_importing.remove(mbid)
 
     if mbid not in mbids_currently_importing:

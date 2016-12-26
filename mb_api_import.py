@@ -89,11 +89,17 @@ def prepare_artist(artist_mbid, artist_id, artist_name):
         except TypeError:
             pass
 
-def get_release(group_mbid, release_type):
+def get_release(group_mbid):
     model = Model()
 
     print("Querying MB for release group " + group_mbid + "...")
     result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['releases'])
+
+    try:
+        release_type = result['release-group']['type']
+
+    except KeyError:
+        release_type = "Unspecified"
     release_candidates = [r for r in result['release-group']['release-list'] if 'date' in r]
 
     if not release_candidates:
@@ -112,7 +118,7 @@ def get_release(group_mbid, release_type):
 
     return release
 
-def get_release_groups(mbid):
+def get_group_mbids(mbid):
     print("Querying MB for release groups...")
     offset = 0
     release_groups = []
@@ -125,11 +131,7 @@ def get_release_groups(mbid):
             break
         print("Getting more release groups with offset " + str(offset) +"...")
 
-    return release_groups
-
-def get_release_from_group(group):
-    return get_release(group['id'], group['type']\
-        if 'type' in group else 'Unspecified')
+    return [release_group['id'] for release_group in release_groups]
 
 def prepare_release(release):
     release['full-art-url'], release['thumb-art-url'] \
@@ -193,30 +195,20 @@ class MBID(str):
 class id_(str):
     pass
 
-def import_release(release):
+def standalone_import_release_group(release_group):
     #TODO: Update specific release by id
-    if isinstance(release, MBID):
-        group_id = release
-        release_type = musicbrainzngs.get_release_group_by_id(group_id)['release-group']['type']
+    if isinstance(release_group, MBID):
+        group_mbid = release_group
 
     else:
-        result = musicbrainzngs.search_release_groups(releasegroup=release)
-        group_id = result['release-group-list'][0]['id']
-        release_type = result['release-group-list'][0]['type']
+        result = musicbrainzngs.search_release_groups(releasegroup=release_group)
+        group_mbid = result['release-group-list'][0]['id']
         
+    import_release_group(group_mbid)
+
+def import_release_group(group_mbid):
     try:
-        release = get_release(group_id, release_type)
-
-    except ReleaseImportError:
-        return
-
-    prepare_release(release)
-    add_release(release)
-
-
-def import_release_group(release_group):
-    try:
-        release = get_release_from_group(release_group)
+        release = get_release(group_mbid)
 
     except ReleaseImportError:
         return
@@ -240,6 +232,7 @@ def import_artist(artist):
         artist_mbid = artist
         result = musicbrainzngs.get_artist_by_id(artist_mbid)
         artist_name = result['artist']['name']
+
     else:
         result = musicbrainzngs.search_artists(artist=artist)
         artist_mbid = result['artist-list'][0]['id']
@@ -262,8 +255,8 @@ def import_artist(artist):
         prepare_artist(artist_mbid, artist_id, artist_name)
         
     pool = ThreadPool(8)
-    release_groups = get_release_groups(artist_mbid)
-    pool.map(import_release_group, release_groups)
+    group_mbids = get_group_mbids(artist_mbid)
+    pool.map(import_release_group, group_mbids)
 
 musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
 
