@@ -66,8 +66,8 @@ class NoDiscogsLink(Exception):
     pass
 
 def get_discogs_tags(discogs_id):
-    r = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
-    return response["genres"], response["styles"]
+    response = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
+    return response["genres"] + response["styles"]
 
 def get_discogs_id(mbid, rels=None):
     if not rels:
