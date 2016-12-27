@@ -59,15 +59,15 @@ def get_links(artist_mbid):
         print("Error getting links:", e)
         return {}
 
-headers = {'User-agent': 'r8music.com'}
-endpoint = 'https://api.discogs.com/releases/%s'
+discogs_headers = {'User-agent': 'r8music.com'}
+discogs_endpoint = 'https://api.discogs.com/releases/%s'
 
 class NoDiscogsLink(Exception):
     pass
 
 def get_discogs_tags(discogs_id):
-    r = requests.get(url = endpoint % discogs_id, headers=headers)
-    genres, styles = r.json()['genres'], r.json()['styles']
+    r = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
+    genres, styles = r['genres'], r['styles']
     return [tag.lower() for tag in styles + genres]
 
 def get_discogs_id(mbid, rels=None):
@@ -79,7 +79,7 @@ def get_discogs_id(mbid, rels=None):
         discogs_url = [rel['target'] for rel in rels if rel['type'] == 'discogs'][0]
 
     except IndexError:
-        raise NoDiscogsLink
+        raise NoDiscogsLink()
 
     return discogs_url.split('/')[-1]
 

@@ -329,7 +329,7 @@ from urllib.request import urlopen
 from urllib.error import HTTPError
 
 valid_domains = ["i.imgur.com", "my.mixtape.moe"]
-max_size = 420420 # Roll up the weed and ignite the fire
+max_size = 420420 # ~400 kB
 allowed_exts = ["jpg", "jpeg", "png"]
 
 class AvatarException(Exception):

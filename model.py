@@ -413,7 +413,7 @@ class Model(GeneralModel):
     def get_discogs_tag_id(self, discogs_name):
         try:
             (id,) = self.query_unique("select tag_id from discogs_tags"
-                                 " where discogs_name=?", discogs_name)
+                                      " where discogs_name=?", discogs_name)
 
         except NotFound:
             id = self.add_tag(discogs_name)
