@@ -3,10 +3,9 @@
 import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
-from sqlite3 import IntegrityError
 
 from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound, sortable_date
-from model import Model, NotFound
+from model import Model, NotFound, AlreadyExists
 
 limit = 100
 
@@ -194,7 +193,7 @@ def apply_tags(tags, release_id):
         try:
             model.tag_object(tag_id, release_id)
 
-        except IntegrityError:
+        except AlreadyExists:
             pass
 
 def add_release(release):

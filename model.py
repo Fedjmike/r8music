@@ -415,9 +415,13 @@ class Model(GeneralModel):
                      " where id=?", allows_artists, allows_releases, allows_tracks, tag_id)
         
     def tag_object(self, tag_id, object_id):
-        id = self.insert("insert into taggings (tag_id, object_id)"
-                         " values (?, ?)", tag_id, object_id)
-        return id
+        try:
+            id = self.insert("insert into taggings (tag_id, object_id)"
+                             " values (?, ?)", tag_id, object_id)
+            return id
+
+        except sqlite3.IntegrityError: # Unique constraint (tag, object) failed
+            raise AlreadyExists
         
     def vote_on_tagging(self, tagging_id, user_id, is_upvote):
         self.insert("insert into tag_votes (tagging_id, user_id, is_upvote)"
