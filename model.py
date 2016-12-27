@@ -384,7 +384,7 @@ class Model(GeneralModel):
         if not title:
             title = name
             
-        name = name.lowercase()
+        name = name.lower()
         id = self.insert("insert into tags (name, description, title," 
                          "  allows_artists, allows_releases, allows_tracks)"
                          " values (?, ?, ?, 1, 1, 1)", name, description, title)
