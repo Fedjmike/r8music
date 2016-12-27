@@ -108,6 +108,11 @@
                 {% for artist in release.get_artists() %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
                     <time>{{ release.date[:4] }}</time>
                 </h2>
+                <div>
+                    {% for tag in release.get_tags() %}
+                        <span class="comma-separated"><a class="de-emph" href=#>{{ tag.name }}</a></span>
+                    {% endfor %}                
+                </div>
             </header>
             
             {% set sides, runtime, track_no = release.get_tracks() %}

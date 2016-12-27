@@ -172,6 +172,7 @@ class Release(ModelObject):
         self.get_artists = get_artists
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
+        self.get_tags = lambda: model.get_tags_on_object(self.id)
         self.get_palette = lambda: model.get_palette(self.id)
         self.get_external_links = lambda: model.get_external_links(self.id, "release")
         
@@ -410,6 +411,13 @@ class Model(GeneralModel):
     def vote_on_tagging(self, tagging_id, user_id, is_upvote):
         self.insert("insert into tag_votes (tagging_id, user_id, is_upvote)"
                     " values (?, ?, ?)", tagging_id, user_id, 1 if is_upvote else 0)
+        
+    def get_tags_on_object(self, object_id):
+        return [
+            Tag(self, row) for row in
+            self.query("select t.id, t.name, t.title, t.description, t.owner_id from tags t"
+                       " join taggings on tag_id = t.id where object_id=?", object_id)
+        ]
 
     def get_discogs_tag_id(self, discogs_name):
         try:
