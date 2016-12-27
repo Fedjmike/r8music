@@ -72,7 +72,12 @@ def get_discogs_tags(discogs_id):
 def get_discogs_id(mbid, rels=None):
     if not rels:
         result = musicbrainzngs.get_release_by_id(mbid, includes=['url-rels'])
-        rels = result['release']['url-relation-list']
+
+        try:
+            rels = result['release']['url-relation-list']
+
+        except KeyError:
+            raise NoDiscogsLink()
 
     try:
         discogs_url = [rel['target'] for rel in rels if rel['type'] == 'discogs'][0]
