@@ -376,6 +376,39 @@ class Model(GeneralModel):
             self.query("select id, title, side, runtime from tracks"
                        " where release_id=? order by side asc, position asc", release_id)
         ]
+    
+    #Tags
+    
+    def add_tag(self, name, title=None, description=""):
+        if not title:
+            title = name
+            
+        id = self.insert("insert into tags (name, description," 
+                         "  allows_artists, allows_releases, allows_tracks)"
+                         " values (?, ?, 1, 1, 1)", name, description)
+        return id
+        
+    def set_tag_name(self, tag_id, name):
+        self.execute("update tags set name=? where id=?", name, tag_id)
+        
+    def set_tag_title(self, tag_id, title):
+        self.execute("update tags set title=? where id=?", title, tag_id)
+        
+    def set_tag_description(self, tag_id, description):
+        self.execute("update tags set description=? where id=?", description, tag_id)
+        
+    def set_tag_applicability(self, tag_id, allows_artists=False, allows_releases=False, allows_tracks=False):
+        self.execute("update tags set allows_artists=?, allows_releases=?, allows_tracks=?"
+                     " where id=?", allows_artists, allows_releases, allows_tracks, tag_id)
+        
+    def tag_object(self, tag_id, object_id):
+        id = self.insert("insert into taggings (tag_id, object_id)"
+                         " values (?, ?)", tag_id, object_id)
+        return id
+        
+    def vote_on_tagging(self, tagging_id, user_id, is_upvote):
+        self.insert("insert into tag_votes (tagging_id, user_id, is_upvote)"
+                    " values (?, ?, ?)", tagging_id, user_id, 1 if is_upvote else 0)
 
     #Object attachments
     

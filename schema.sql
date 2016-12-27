@@ -58,6 +58,40 @@ create table tracks (
 
 create index track_release_index on tracks(release_id);
 
+-- Tags
+
+drop table if exists tags;
+create table tags (
+    id integer primary key,
+    name text not null,
+    title text not null,
+    description text not null,
+    owner_id integer, -- Nullable
+    allows_artists integer not null,
+    allows_releases integer not null,
+    allows_tracks integer not null
+);
+
+drop table if exists taggings;
+create table taggings (
+    id integer primary key,
+    tag_id integer unique,
+    object_id integer unique,
+    unique (tag_id, object_id),
+    foreign key (tag_id) references tags(id),
+    foreign key (object_id) references objects(id)
+);
+
+drop table if exists tag_votes;
+create table tag_votes (
+    tagging_id integer not null,
+    user_id integer not null,
+    is_upvote integer not null,
+    primary key (tagging_id, user_id),
+    foreign key (tagging_id) references taggings(id),
+    foreign key (user_id) references users(id)
+);
+
 -- Object attachments
 
 drop table if exists palettes;
