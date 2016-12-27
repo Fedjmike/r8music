@@ -59,6 +59,30 @@ def get_links(artist_mbid):
         print("Error getting links:", e)
         return {}
 
+headers = {'User-agent': 'r8music.com'}
+endpoint = 'https://api.discogs.com/releases/%s'
+
+class NoDiscogsLink(Exception):
+    pass
+
+def get_discogs_styles(discogs_id):
+    r = requests.get(url = endpoint % discogs_id, headers=headers)
+    styles = r.json()['styles']
+    return [style.lower() for style in styles]
+
+def get_discogs_id(mbid, rels=None):
+    if not rels:
+        result = musicbrainzngs.get_release_by_id(mbid, includes=['url-rels'])
+        rels = result['release']['url-relation-list']
+
+    try:
+        discogs_url = [rel['target'] for rel in rels if rel['type'] == 'discogs'][0]
+
+    except IndexError:
+        raise NoDiscogsLink
+
+    return discogs_url.split('/')[-1]
+
 def prepare_artist(artist_mbid, artist_id, artist_name):
     model = Model()
 
@@ -138,10 +162,24 @@ def prepare_release(release):
         = get_album_art_urls(release['group-id'])
 
     print("Getting deets for release " + release['id'] + "...")
-    result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists'])
+    result = musicbrainzngs.get_release_by_id(release['id'], includes=['recordings', 'artists', 'url-rels'])
     mediums = sorted(result['release']['medium-list'], key=lambda m: m["position"])
     release['tracks'] = [medium['track-list'] for medium in mediums]
     release['artists'] = result['release']['artist-credit']
+
+    try:
+        rels = result['release']['url-relation-list']
+
+        try:
+            discogs_id = get_discogs_id(release['id'], rels=rels)
+            tags = get_discogs_styles(discogs_id)
+            print("TAGS BITCHES: ", tags)
+
+        except NoDiscogsLink:
+            print("No discogs link")
+
+    except KeyError: # result has no url-relation-list
+        pass
 
 def add_release(release):
     model = Model()
