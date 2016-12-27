@@ -3,6 +3,7 @@
 import sys, requests, arrow, musicbrainzngs
 from urllib.parse import urlparse
 from multiprocessing.dummy import Pool as ThreadPool
+from sqlite3 import IntegrityError
 
 from tools import guess_wikipedia_page, get_wikipedia_summary, get_wikipedia_image, WikipediaPageNotFound, sortable_date
 from model import Model, NotFound
@@ -184,6 +185,18 @@ def prepare_release(release):
     except KeyError: # result has no url-relation-list
         pass
 
+def apply_tags(tags, release_id):
+    model = Model()
+
+    for tag in tags:
+        tag_id = model.get_discogs_tag_id(tag)
+
+        try:
+            model.tag_object(tag_id, release_id)
+
+        except IntegrityError:
+            pass
+
 def add_release(release):
     model = Model()
 
@@ -232,9 +245,7 @@ def add_release(release):
 
     if 'tags' in release:
         print(release['tags'])
-        for tag in release['tags']:
-            tag_id = model.get_discogs_tag_id(tag)
-            model.tag_object(tag_id, release_id)
+        apply_tags(release['tags'], release_id)
 
 class MBID(str):
     pass
