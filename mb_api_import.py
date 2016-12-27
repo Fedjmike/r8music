@@ -189,12 +189,7 @@ def apply_tags(tags, release_id):
 
     for tag in tags:
         tag_id = model.get_discogs_tag_id(tag)
-
-        try:
-            model.tag_object(tag_id, release_id)
-
-        except AlreadyExists:
-            pass
+        model.tag_object(tag_id, release_id)
 
 def add_release(release):
     model = Model()
