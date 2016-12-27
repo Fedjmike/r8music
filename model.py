@@ -383,9 +383,9 @@ class Model(GeneralModel):
         if not title:
             title = name
             
-        id = self.insert("insert into tags (name, description," 
+        id = self.insert("insert into tags (name, description, title," 
                          "  allows_artists, allows_releases, allows_tracks)"
-                         " values (?, ?, 1, 1, 1)", name, description)
+                         " values (?, ?, ?, 1, 1, 1)", name, description, title)
         return id
         
     def set_tag_name(self, tag_id, name):
@@ -409,6 +409,19 @@ class Model(GeneralModel):
     def vote_on_tagging(self, tagging_id, user_id, is_upvote):
         self.insert("insert into tag_votes (tagging_id, user_id, is_upvote)"
                     " values (?, ?, ?)", tagging_id, user_id, 1 if is_upvote else 0)
+
+    def get_discogs_tag_id(self, discogs_name):
+        try:
+            (id,) = self.query_unique("select tag_id from discogs_tags"
+                                 " where discogs_name=?", discogs_name)
+
+        except NotFound:
+            id = self.add_tag(discogs_name)
+            self.execute("insert into discogs_tags (tag_id, discogs_name)"
+                         " values (?, ?)", id, discogs_name)
+
+        return id
+
 
     #Object attachments
     

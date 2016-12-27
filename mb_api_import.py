@@ -172,8 +172,7 @@ def prepare_release(release):
 
         try:
             discogs_id = get_discogs_id(release['id'], rels=rels)
-            tags = get_discogs_tags(discogs_id)
-            print("TAGS BITCHES: ", tags)
+            release['tags'] = get_discogs_tags(discogs_id)
 
         except NoDiscogsLink:
             print("No discogs link")
@@ -226,6 +225,12 @@ def add_release(release):
                 side,
                 length
             )
+
+    if 'tags' in release:
+        print(release['tags'])
+        for tag in release['tags']:
+            tag_id = model.get_discogs_tag_id(tag)
+            model.tag_object(tag_id, release_id)
 
 class MBID(str):
     pass

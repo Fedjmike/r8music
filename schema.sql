@@ -75,8 +75,8 @@ create table tags (
 drop table if exists taggings;
 create table taggings (
     id integer primary key,
-    tag_id integer unique,
-    object_id integer unique,
+    tag_id integer not null,
+    object_id integer not null,
     unique (tag_id, object_id),
     foreign key (tag_id) references tags(id),
     foreign key (object_id) references objects(id)
@@ -90,6 +90,13 @@ create table tag_votes (
     primary key (tagging_id, user_id),
     foreign key (tagging_id) references taggings(id),
     foreign key (user_id) references users(id)
+);
+
+drop table if exists discogs_tags;
+create table discogs_tags (
+    tag_id integer not null,
+    discogs_name text primary key not null,
+    foreign key (tag_id) references tags(id)
 );
 
 -- Object attachments
