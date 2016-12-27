@@ -795,7 +795,7 @@ class Model(GeneralModel):
         
         def build_index():
             self.execute("drop table if exists %s_indexed" % table)
-            self.execute("create virtual table %s_indexed using fts4 (tokenize=unicode61, id integer, name text)" % table)
+            self.execute("create virtual table %s_indexed using fts5(tokenize=unicode61, id, name)" % table)
             self.execute("insert into %s_indexed (id, name) select id, unidecode(name) from %s" % (table, table))
          
         build_index()
@@ -811,8 +811,10 @@ class Model(GeneralModel):
             {"id": id, "type": type, "name": name, "url": url_for(endpoint, slug=slug)}
             for id, name, slug in
             self.query(("select %s from" % columns) +
-                       " (select id as indexed_id from %s_indexed where name match (?) limit 20)"
-                       " join %s on %s.id = indexed_id" % (table, table, table), query+'*')
+                       " (select id as indexed_id from %s_indexed where"
+                       " %s_indexed match (?) order by rank limit 20)"
+                       " join %s on %s.id = indexed_id" % (table, table, table, table),
+                       "name:" + query + "*")
         ]
     
     #Misc
