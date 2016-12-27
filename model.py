@@ -243,7 +243,13 @@ class User(ModelObject):
         
         return [make_friendship(friend_id) for friend_id in friends
                 if friend_id != self.id]
+
+class Tag(ModelObject):
+    def __init__(self, model, row):
+        self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
         
+        self.get_owner = lambda: model.get_user(self.owner_id)
+
 class Action(ModelObject):
     def __init__(self, model, id, type, creation, user_id, object_id, object_type):
         self.id = id
