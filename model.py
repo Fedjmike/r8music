@@ -168,11 +168,15 @@ class Release(ModelObject):
                 previous = other_releases[index-1] if index != 0 else None
                 _next = other_releases[index+1] if index != len(other_releases)-1 else None
                 yield artist, previous, _next
-
+            
+        def get_tags():
+            return sorted(model.get_tags_on_object(self.id),
+                          key=lambda tag: tag.total_votes, reverse=True)
+            
         self.get_artists = get_artists
         self.get_tracks = get_tracks
         self.get_next_releaseses = get_next_releaseses
-        self.get_tags = lambda: model.get_tags_on_object(self.id)
+        self.get_tags = get_tags
         self.get_palette = lambda: model.get_palette(self.id)
         self.get_external_links = lambda: model.get_external_links(self.id, "release")
         
@@ -245,8 +249,9 @@ class User(ModelObject):
                 if friend_id != self.id]
 
 class Tag(ModelObject):
-    def __init__(self, model, row):
+    def __init__(self, model, row, total_votes):
         self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
+        self.total_votes = total_votes
         
         self.get_owner = lambda: model.get_user(self.owner_id)
 
@@ -420,11 +425,14 @@ class Model(GeneralModel):
         
     def get_tags_on_object(self, object_id):
         return [
-            Tag(self, row) for row in
-            self.query("select t.id, t.name, t.title, t.description, t.owner_id from tags t"
-                       " join taggings on tag_id = t.id where object_id=?", object_id)
+            Tag(self, row, total_votes if total_votes else 0) for total_votes, *row in
+            self.query("select v.total_votes, t.id, t.name, t.title, t.description, t.owner_id from tags t"
+                       " join taggings on tag_id = t.id"
+                       #Keep the tag rows that have no votes
+                       " left join tag_vote_totals v on taggings.id = v.tagging_id"
+                       " where object_id=?", object_id)
         ]
-
+        
     def get_discogs_tag_id(self, discogs_name):
         try:
             (id,) = self.query_unique("select tag_id from discogs_tags"

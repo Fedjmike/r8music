@@ -86,11 +86,16 @@ drop table if exists tag_votes;
 create table tag_votes (
     tagging_id integer not null,
     user_id integer not null,
-    is_upvote integer not null,
+    vote_weight integer not null, -- 1 or -1
     primary key (tagging_id, user_id),
     foreign key (tagging_id) references taggings(id),
     foreign key (user_id) references users(id)
 );
+
+drop view if exists tag_vote_totals;
+create view tag_vote_totals as
+    select tagging_id, sum(vote_weight) as total_votes from tag_votes
+    group by tagging_id;
 
 drop table if exists discogs_tags;
 create table discogs_tags (
