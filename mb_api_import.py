@@ -65,10 +65,10 @@ endpoint = 'https://api.discogs.com/releases/%s'
 class NoDiscogsLink(Exception):
     pass
 
-def get_discogs_styles(discogs_id):
+def get_discogs_tags(discogs_id):
     r = requests.get(url = endpoint % discogs_id, headers=headers)
-    styles = r.json()['styles']
-    return [style.lower() for style in styles]
+    genres, styles = r.json()['genres'], r.json()['styles']
+    return [tag.lower() for tag in styles + genres]
 
 def get_discogs_id(mbid, rels=None):
     if not rels:
@@ -172,7 +172,7 @@ def prepare_release(release):
 
         try:
             discogs_id = get_discogs_id(release['id'], rels=rels)
-            tags = get_discogs_styles(discogs_id)
+            tags = get_discogs_tags(discogs_id)
             print("TAGS BITCHES: ", tags)
 
         except NoDiscogsLink:
