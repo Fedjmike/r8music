@@ -60,21 +60,26 @@ def get_links(artist_mbid):
         return {}
 
 discogs_headers = {'User-agent': 'r8music.com'}
-discogs_endpoint = 'https://api.discogs.com/releases/%s'
+discogs_endpoint = 'https://api.discogs.com/masters/%s'
 
 class NoDiscogsLink(Exception):
     pass
 
+def get_group_mbid(release_mbid):
+    return musicbrainzngs.get_release_by_id(release_mbid, includes=['release-groups'])['release']['release-group']['id']
+
 def get_discogs_tags(discogs_id):
     response = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
-    return response["genres"] + response["styles"]
+    return response["genres"] if 'genres' in response else [] + \
+           response["styles"] if 'styles' in response else []
 
-def get_discogs_id(mbid, rels=None):
+def get_discogs_id(release_mbid, rels=None):
     if not rels:
-        result = musicbrainzngs.get_release_by_id(mbid, includes=['url-rels'])
+        group_mbid = get_group_mbid(release_mbid)
+        result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['url-rels'])
 
         try:
-            rels = result['release']['url-relation-list']
+            rels = result['release-group']['url-relation-list']
 
         except KeyError:
             raise NoDiscogsLink()
@@ -121,7 +126,7 @@ def get_release(group_mbid):
     model = Model()
 
     print("Querying MB for release group " + group_mbid + "...")
-    result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['releases'])
+    result = musicbrainzngs.get_release_group_by_id(group_mbid, includes=['releases', 'url-rels'])
 
     try:
         release_type = result['release-group']['type']
@@ -142,6 +147,7 @@ def get_release(group_mbid):
                   key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
 
     release['group-id'] = group_mbid
+    release['group-url-rels'] = result['release-group']['url-relation-list']
     release['type'] = release_type
 
     return release
@@ -172,10 +178,10 @@ def prepare_release(release):
     release['artists'] = result['release']['artist-credit']
 
     try:
-        rels = result['release']['url-relation-list']
+        rels = result['group-url-rels']
 
         try:
-            discogs_id = get_discogs_id(release['id'], rels=rels)
+            discogs_id = get_discogs_id(release['group-id'], rels=rels)
             release['tags'] = get_discogs_tags(discogs_id)
 
         except NoDiscogsLink:
