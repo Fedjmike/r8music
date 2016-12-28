@@ -255,7 +255,7 @@ class Tag(ModelObject):
         self.slug = slugify(self.name) #todo
         self.url = url_for("tag_page", id=self.id, slug=self.slug)
         
-        self.get_owner = lambda: model.get_user(self.owner_id)
+        self.get_owner = lambda: model.get_user(self.owner_id) if self.owner_id else None
         
         self.get_releases = lambda: model.get_tagged_releases(self.id)
 
