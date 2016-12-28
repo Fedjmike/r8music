@@ -92,8 +92,6 @@
 {% else %}
     {% set ratings = that_user.get_releases_rated() %}
     {% set listened_unrated = that_user.get_releases_listened_unrated() %}
-    {% set years, releases_by_year = group_by_year(that_user.get_releases_listened()) %}
-    {% set by_rating = group_by_rating(ratings) %}
     {% set user_datasets = get_user_datasets(ratings, listened_unrated) %}
 
     {% set rating_description = that_user.get_rating_descriptions() %}
@@ -105,7 +103,17 @@
     {% set editable = 'editable' if that_user.id == user.id else '' %}
 
     <div class="grids-list">
-    {% if group_by == "rating" %}
+    {% if order == "year" %}
+        {% set years, releases_by_year = group_by_year(that_user.get_releases_listened()) %}
+        {% for year in years %}
+            <section class="page content"><div>
+                <header><h1>{{ year }}</h1></header>
+                {{ release_grid(releases_by_year[year], user, "small", that_user=that_user if not that_user.id == user.id else None) }}
+            </div></section>
+        {% endfor %}
+        
+    {% else %}
+        {% set by_rating = group_by_rating(ratings) %}
         {% for n in range(8, 0, -1) %}
             <section class="page content"><div>
                 <header><h1>{{ n }}
@@ -116,13 +124,6 @@
                     {% endif %}
                 </h1></header>
                 {{ release_grid(sort_by_artist(by_rating[n]), user, "small", that_user=that_user if that_user.id != user.id else None) }}
-            </div></section>
-        {% endfor %}
-    {% elif group_by == "year" %}
-        {% for year in years %}
-            <section class="page content"><div>
-                <header><h1>{{ year }}</h1></header>
-                {{ release_grid(releases_by_year[year], user, "small", that_user=that_user if not that_user.id == user.id else None) }}
             </div></section>
         {% endfor %}
     {% endif %}

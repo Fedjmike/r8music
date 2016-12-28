@@ -400,10 +400,10 @@ def activity_feed():
 @app.route("/user/<slug>", methods=["GET"])
 @app.route("/user/<slug>/<any('listened-unrated', 'will-listen', activity, friends):tab>")
 @handle_not_found(what="user")
-def user_page(slug, tab=None):
+@with_request_values(keys=["order"])
+def user_page(slug, tab=None, order=None):
     that_user = model().get_user(slug)
-    group_by = request.values["group_by"] if request.values else "rating"
-    return render_template("user.html", that_user=that_user, tab=tab, group_by=group_by, user=request.user)
+    return render_template("user.html", that_user=that_user, tab=tab, order=order, user=request.user)
 
 @app.route("/user/<slug>", methods=["POST"])
 def user_post(slug):
