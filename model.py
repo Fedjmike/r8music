@@ -252,8 +252,8 @@ class User(ModelObject):
 class Tag(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
-        self.total_votes = total_votes
-        self.url = url_for("tag_page", id=self.id)
+        self.slug = slugify(self.name) #todo
+        self.url = url_for("tag_page", id=self.id, slug=self.slug)
         
         self.get_owner = lambda: model.get_user(self.owner_id)
         

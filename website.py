@@ -377,7 +377,8 @@ def update_artist(id):
     return redirect_back()
     
 @app.route("/tag/<int:id>")
-def tag_page(id):
+@app.route("/tag/<int:id>-<slug>")
+def tag_page(id, slug=None):
     return render_template("tag.html", tag=model().get_tag(id))
 
 @app.route("/")
