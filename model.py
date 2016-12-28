@@ -228,6 +228,14 @@ class User(ModelObject):
         
         self.get_listen_implies_unlist = lambda: model.get_user_listen_implies_unlist(self.id)
         
+    def get_profile(self):
+        return { 
+            "name": self.name,
+            "common_tags": sorted(self.model.get_user_common_tags(self.id),
+                                  #Sort by count, descending
+                                  key=lambda tag: tag[1], reverse=True)
+        }
+        
     def get_friendships(self):
         def make_friendship(friend_id):
             friend = self.model.get_user(friend_id)
@@ -449,7 +457,16 @@ class Model(GeneralModel):
                        " from taggings join releases on object_id = releases.id"
                        " where tag_id=?", tag_id)
         ]
-
+        
+    def get_user_common_tags(self, user_id):
+        return [
+            (Tag(self, row), count) for count, *row in
+            self.query("select count(*), t.id, t.name, t.title, t.description, t.owner_id from tags t"
+                       " join taggings on tag_id = t.id"
+                       " join active_actions_view a using (object_id)"
+                       " where a.user_id=? and a.type in (?, ?, ?) group by tag_id",
+                       user_id, *[ActionType[t].value for t in ["rate", "listen", "list"]])
+        ]
         
     def get_discogs_tag_id(self, discogs_name):
         try:

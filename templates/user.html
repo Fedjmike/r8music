@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs %}
+{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs, tag_list %}
 {% from "activity_list.html" import activity_list %}
 {% from "friend_list.html" import friend_list %}
 {% from "release_list.html" import release_list, release_grid %}
@@ -28,6 +28,8 @@
         <img class="avatar" src={{ that_user.avatar_url }}><br/>
 
         Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
+
+        {{ tag_list(profile.common_tags[:5], counts=True) }}
     </p>
     
     {% if user and that_user.id != user.id %}

@@ -97,3 +97,12 @@
     {% endfor %}
     
     <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>{%- endmacro %}
+
+{% macro tag_list(tags, counts=False) -%}
+    <span class="de-emph">
+    {% for tag, count in tags %}
+        <span class="comma-separated">
+            <a class="de-emph" href={{ tag.url }}>{{ tag.name }}</a>{% if counts %} <span class="quite-small">[{{ count }}]</span>{% endif %}</span>
+    {% endfor %}
+    </span>
+{%- endmacro %}

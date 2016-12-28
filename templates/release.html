@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, object_link, user_link, page_tabs, subpage_header, clickable_action_list, artist_details %}
+{% from "macros.html" import artist_link, object_link, user_link, page_tabs, subpage_header, clickable_action_list, artist_details, tag_list %}
 {% from "release_list.html" import release_list, release_grid, rating_widget %}
 {% from "activity_list.html" import release_activity_list %}
 
@@ -109,9 +109,7 @@
                     <time>{{ release.date[:4] }}</time>
                 </h2>
                 <div>
-                    {% for tag, total_votes in release.get_tags() %}
-                        <span class="comma-separated"><a class="de-emph" href={{ tag.url }}>{{ tag.name }}</a></span>
-                    {% endfor %}
+                {{ tag_list(release.get_tags()) }}
                 </div>
             </header>
             
