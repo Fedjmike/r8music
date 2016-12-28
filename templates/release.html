@@ -109,9 +109,9 @@
                     <time>{{ release.date[:4] }}</time>
                 </h2>
                 <div>
-                    {% for tag in release.get_tags() %}
+                    {% for tag, total_votes in release.get_tags() %}
                         <span class="comma-separated"><a class="de-emph" href={{ tag.url }}>{{ tag.name }}</a></span>
-                    {% endfor %}                
+                    {% endfor %}
                 </div>
             </header>
             

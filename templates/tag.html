@@ -5,7 +5,10 @@
 {% block content %}
 
 <section class="clearfix page content">
-	{{ release_grid(releases, class="small") }}
+    <header>
+        <h1>{{ tag.title }} <span class="de-emph">(tag)</span></h1>
+    </header>
+	{{ release_grid(tag.get_releases(), class="small") }}
 
 </section>
 

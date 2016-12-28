@@ -171,7 +171,8 @@ class Release(ModelObject):
             
         def get_tags():
             return sorted(model.get_tags_on_object(self.id),
-                          key=lambda tag: tag.total_votes, reverse=True)
+                          #Sorted on votes, descending
+                          key=lambda tagging: tagging[1], reverse=True)
             
         self.get_artists = get_artists
         self.get_tracks = get_tracks
@@ -249,12 +250,14 @@ class User(ModelObject):
                 if friend_id != self.id]
 
 class Tag(ModelObject):
-    def __init__(self, model, row, total_votes):
+    def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
         self.total_votes = total_votes
         self.url = url_for("tag_page", id=self.id)
         
         self.get_owner = lambda: model.get_user(self.owner_id)
+        
+        self.get_releases = lambda: model.get_tagged_releases(self.id)
 
 class Action(ModelObject):
     def __init__(self, model, id, type, creation, user_id, object_id, object_type):
@@ -424,9 +427,14 @@ class Model(GeneralModel):
         self.insert("replace into tag_votes (tagging_id, user_id, vote_weight)"
                     " values (?, ?, ?)", tagging_id, user_id, 1 if is_upvote else -1)
         
+    def get_tag(self, tag_id):
+        row = self.query_unique("select id, name, title, description, owner_id"
+                                " from tags where id=?", tag_id)
+        return Tag(self, row)
+        
     def get_tags_on_object(self, object_id):
         return [
-            Tag(self, row, total_votes if total_votes else 0) for total_votes, *row in
+            (Tag(self, row), total_votes if total_votes else 0) for total_votes, *row in
             self.query("select v.total_votes, t.id, t.name, t.title, t.description, t.owner_id from tags t"
                        " join taggings on tag_id = t.id"
                        #Keep the tag rows that have no votes

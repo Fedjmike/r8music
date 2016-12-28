@@ -378,8 +378,7 @@ def update_artist(id):
     
 @app.route("/tag/<int:id>")
 def tag_page(id):
-    releases = model().get_tagged_releases(id)
-    return render_template("tag.html", releases=releases)
+    return render_template("tag.html", tag=model().get_tag(id))
 
 @app.route("/")
 def homepage():
