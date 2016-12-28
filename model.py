@@ -252,6 +252,7 @@ class Tag(ModelObject):
     def __init__(self, model, row, total_votes):
         self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
         self.total_votes = total_votes
+        self.url = url_for("tag_page", id=self.id)
         
         self.get_owner = lambda: model.get_user(self.owner_id)
 
@@ -413,7 +414,7 @@ class Model(GeneralModel):
     def set_tag_applicability(self, tag_id, allows_artists=False, allows_releases=False, allows_tracks=False):
         self.execute("update tags set allows_artists=?, allows_releases=?, allows_tracks=?"
                      " where id=?", allows_artists, allows_releases, allows_tracks, tag_id)
-        
+
     def tag_object(self, tag_id, object_id):
         id = self.insert("replace into taggings (tag_id, object_id)"
                          " values (?, ?)", tag_id, object_id)
@@ -432,6 +433,15 @@ class Model(GeneralModel):
                        " left join tag_vote_totals v on taggings.id = v.tagging_id"
                        " where object_id=?", object_id)
         ]
+
+    def get_tagged_releases(self, tag_id):
+        return [
+            self._make_release(row) for row in 
+            self.query("select " + self._release_columns_rename + \
+                       " from taggings join releases on object_id = releases.id"
+                       " where tag_id=?", tag_id)
+        ]
+
         
     def get_discogs_tag_id(self, discogs_name):
         try:

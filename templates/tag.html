@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% from "release_list.html" import release_list, release_grid %}
+
+{% block content %}
+
+<section class="clearfix page content">
+	{{ release_grid(releases, class="small") }}
+
+</section>
+
+{% endblock %}

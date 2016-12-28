@@ -110,7 +110,7 @@
                 </h2>
                 <div>
                     {% for tag in release.get_tags() %}
-                        <span class="comma-separated"><a class="de-emph" href=#>{{ tag.name }}</a></span>
+                        <span class="comma-separated"><a class="de-emph" href={{ tag.url }}>{{ tag.name }}</a></span>
                     {% endfor %}                
                 </div>
             </header>
