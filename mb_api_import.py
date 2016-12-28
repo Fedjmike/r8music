@@ -70,8 +70,8 @@ def get_group_mbid(release_mbid):
 
 def get_discogs_tags(discogs_id):
     response = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
-    return response["genres"] if 'genres' in response else [] + \
-           response["styles"] if 'styles' in response else []
+    return (response["genres"] if 'genres' in response else []) + \
+           (response["styles"] if 'styles' in response else [])
 
 def get_discogs_id(release_mbid, rels=None):
     if not rels:
