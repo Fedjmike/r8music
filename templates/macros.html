@@ -69,10 +69,11 @@
 </ol>
 {%- endmacro %}
 
-{% macro load_more(content, endpoint, last_action_id) -%}
+{% macro load_more(content, endpoint, last_action_id, autoload=False) -%}
 <span class="load-more-area">
     <span class="load-more-target">{{ content }}</span>
-    <p><a class="load-more" href=# id="autoload-trigger"
+    <p><a class="load-more" href=#
+          {% if autoload %} id="autoload-trigger" {% endif %}
           data-endpoint={{ endpoint }}
           data-last_action_id={{ last_action_id }}>Load more</a></p>
 </span>

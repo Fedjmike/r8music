@@ -157,6 +157,7 @@ var autoload = function() {
 
 $(document).ready(function ($) {
     if (document.getElementById("autoload-trigger")) {
+        $("#autoload-trigger.load-more").text("");
         $(window).on('scroll',  _.debounce(autoload, 200));
     };
 
