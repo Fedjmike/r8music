@@ -147,8 +147,13 @@ def get_release(group_mbid):
                   key=lambda release: arrow.get(sortable_date(release["date"])).timestamp)
 
     release['group-id'] = group_mbid
-    release['group-url-rels'] = result['release-group']['url-relation-list']
     release['type'] = release_type
+
+    try:
+        release['group-url-rels'] = result['release-group']['url-relation-list']
+
+    except KeyError:
+        pass
 
     return release
 
