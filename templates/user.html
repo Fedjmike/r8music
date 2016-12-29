@@ -62,17 +62,17 @@
               url_for_user(that_user), current_tab=tab) }}
 
 {% if tab == "listened-unrated" %}
-    {% set listened_unrated = that_user.get_releases_listened_unrated() %}
     <section class="page content"><div>
         <header><h1>Listened to but unrated</h1></header>
-        {{ release_grid(sort_by_artist(listened_unrated), user, "small") }}
+        {% set listened_unrated = that_user.get_releases_listened_unrated(order=order if order else "artist") %}
+        {{ release_grid(listened_unrated, user, "small") }}
     </div></section>
     
 {% elif tab == "will-listen" %}
-    {% set will_listen = that_user.get_releases_listed() %}
     <section class="page content"><div>
         <header><h1>Will listen to</h1></header>
-        {{ release_grid(sort_by_artist(will_listen), user, "small") }}
+        {% set will_listen = that_user.get_releases_listed(order=order if order else "artist") %}
+        {{ release_grid(will_listen, user, "small") }}
     </div></section>
     
 {% elif tab == "activity" %}

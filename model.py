@@ -196,17 +196,36 @@ class User(ModelObject):
         self.timezone = model.get_user_timezone(self.id)
         self.avatar_url = model.get_user_avatar(self.id)
         
-        def get_releases_listened_unrated():
-            listened = model.get_releases_actioned_by_user(self.id, "listen")
-            rated_ids = [release.id for release, rating in model.get_releases_rated_by_user(self.id)]
-            return filter(lambda release: release.id not in rated_ids, listened)
+        def sort_actioned_releases(releases, order=None):
+            """The releases come from the model as [(release, action_date)]"""
             
-        def get_releases_listed():
-            return model.get_releases_actioned_by_user(self.id, "list")
+            if order == "recent":
+                releases = sorted(releases, key=lambda release_since: release_since[1], reverse=True)
+                
+            elif order == "artist":
+                artist_then_date = lambda release_since: (release_since[0].get_artists()[0].name, release_since[0].date)
+                releases = sorted(releases, key=artist_then_date)
+                
+            return releases
+            
+        def only_releases(releases_and_dates):
+            return [release for release, since in releases_and_dates]
+            
+        def get_releases_listened_unrated(order=None):
+            listened = model.get_releases_actioned_by_user(self.id, "listen")
+            #Filter out rated releases
+            rated_ids = [release.id for release, rating in model.get_releases_rated_by_user(self.id)]
+            listened_unrated = filter(lambda release_since: release_since[0].id not in rated_ids, listened)
+            #Sort and remove the action date
+            return only_releases(sort_actioned_releases(listened_unrated, order))
+                
+        def get_releases_listed(order=None):
+            listed = model.get_releases_actioned_by_user(self.id, "list")
+            return only_releases(sort_actioned_releases(listed, order))
         
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
-        self.get_releases_listened = lambda: model.get_releases_actioned_by_user(self.id, "listen")
+        self.get_releases_listened = lambda: only_releases(model.get_releases_actioned_by_user(self.id, "listen"))
         self.get_releases_listened_unrated = get_releases_listened_unrated
         self.get_releases_listed = get_releases_listed
         
@@ -731,9 +750,10 @@ class Model(GeneralModel):
         ]
         
     def get_releases_actioned_by_user(self, user_id, action):
+        """Returns [(release, action_date)]"""
         return [
-            self._make_release(row) for row in
-            self.query("select " + self._release_columns_rename +
+            (self._make_release(row), since) for since, *row in
+            self.query("select a.creation, " + self._release_columns_rename +
                        " from active_actions_view a join releases on id = object_id"
                        " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
