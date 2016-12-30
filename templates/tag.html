@@ -7,9 +7,12 @@
 <section class="clearfix page content">
     <header>
         <h1>{{ tag.title }} <span class="de-emph">(tag)</span></h1>
+        <div>
+            {{ tag.description }}
+        </div>
     </header>
+ 
 	{{ release_grid(tag.get_releases(), class="small") }}
-
 </section>
 
 {% endblock %}

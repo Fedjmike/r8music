@@ -42,7 +42,7 @@
 {%- endmacro %}
 
 {% macro release_activity_list(actions) -%}
-    {% set action_groups = action_groups(actions) %}
+    {% set action_groups = group_actions(actions) %}
     <ol class="activity-list">
     {% for action_group in action_groups %}
         {% for action in action_group.actions %}
@@ -59,7 +59,7 @@
 {%- endmacro %}
 
 {% macro activity_list(actions, same_user=False) -%}
-    {% set action_groups = action_groups(actions) %}
+    {% set action_groups = group_actions(actions) %}
     <ol class="activity-list">
     {% for action_group in action_groups %}
         <li>{{ explain_action_group(action_group, same_user) }}</li>

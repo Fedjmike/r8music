@@ -28,6 +28,8 @@
             {% set thumb, image = artist.get_image() %}
             {% if image %}
                 <a class="artist-image-container" href={{ image }}><img class="artist-image" src={{ thumb }}></a>
+            {% else %}
+                <header></header>
             {% endif %}
             
             {% set common_tags = artist.get_common_tags(limit=5) %}

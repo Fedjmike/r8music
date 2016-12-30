@@ -198,7 +198,11 @@
         <h1>{{ artist.name }}</h1>
     </header>
 	
-	{{ release_list(artist.get_releases() | selectattr("release_type", "equalto", "Album") | rejectattr("id", "equalto", release.id) | sort(attribute="date")) }} 
+	{% set other_releases = artist.get_releases()
+	    | selectattr("release_type", "equalto", "Album")
+	    | rejectattr("id", "equalto", release.id)
+	    | sort(attribute="date") %}
+    {{ release_list(other_releases[-10:]) }}
     
     {{ artist_details(artist) }}
 </section>

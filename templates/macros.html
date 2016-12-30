@@ -98,6 +98,7 @@
     {% endfor %}
     
     <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>{%- endmacro %}
+{%- endmacro %}
 
 {% macro tag_list(tags, counts=False, de_emph=False) -%}
     {% set de_demph = "de-emph" if de_emph else "" %}

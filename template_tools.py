@@ -39,7 +39,7 @@ def relative_datetime(then):
 
 ActionGroup = namedtuple("ActionGroup", ["user", "actions"])
 
-def action_groups(actions):
+def group_actions(actions):
     from model import ActionType
     
     threshold = 60*60 #1h in seconds
@@ -163,7 +163,7 @@ import json
 template_tools = [
     if_not_None, n_things,
     full_datetime, friendly_datetime, relative_datetime,
-    action_groups, sort_friendships,
+    group_actions, sort_friendships,
     sort_by_artist, group_by_year, group_by_rating,
     get_user_datasets,
     url_for_user,

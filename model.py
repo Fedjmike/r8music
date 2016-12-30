@@ -3,8 +3,7 @@
 import sqlite3, arrow
 from itertools import count, groupby
 from functools import lru_cache
-from operator import itemgetter
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from enum import Enum
 from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
@@ -232,7 +231,7 @@ class User(ModelObject):
         self.get_releases_listened_unrated = get_releases_listened_unrated
         self.get_releases_listed = get_releases_listed
         
-        self.get_picks = lambda release_id: model.get_picks(self.id, release_id)
+        self.get_picks_on_release = lambda release_id: model.get_picks_on_release(self.id, release_id)
         
         self.get_rated_no = lambda: model.get_active_action_no(self.id, "rate")
         self.get_pick_no = lambda: model.get_active_action_no(self.id, "pick")
@@ -773,7 +772,7 @@ class Model(GeneralModel):
                        " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
 
-    def get_picks(self, user_id, release_id):
+    def get_picks_on_release(self, user_id, release_id):
         return [
             pick for (pick,) in \
             self.query("select id from tracks join active_actions_view on id = object_id"

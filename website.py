@@ -2,7 +2,6 @@ import os, time, requests, multiprocessing.pool, sqlite3
 from urllib.parse import urlparse, urljoin
 
 from flask import Flask, render_template, g, request, session, redirect, jsonify, url_for, flash
-from werkzeug import secure_filename
 from contextlib import closing
 from bs4 import BeautifulSoup
 
