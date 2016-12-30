@@ -298,6 +298,9 @@ class Action(ModelObject):
         self.user = model.get_user(user_id)
     
     def describe(self):
+        if self.type == ActionType["list"]:
+            return "added a to-do"
+            
         return self.type.simple_past
     
 class RatingAction(Action):

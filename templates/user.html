@@ -57,9 +57,9 @@
 
 {{ page_tabs([(None, ("Releases rated", rated_no)),
               ("listened-unrated", ("Listened to but not rated", listened_unrated_no)),
-              ("will-listen", ("Will listen to", will_listen_no)),
               ("activity", "Activity"),
               ("reviews", "Reviews"),
+              ("to-do", ("To-do", will_listen_no)),
               ("friends", "Friends")],
               url_for_user(that_user), current_tab=tab) }}
 
@@ -70,11 +70,11 @@
         {{ release_grid(listened_unrated, user, "small") }}
     </div></section>
     
-{% elif tab == "will-listen" %}
+{% elif tab == "to-do" %}
     <section class="page content"><div>
-        <header><h1>Will listen to</h1></header>
-        {% set will_listen = that_user.get_releases_listed(order=order if order else "artist") %}
-        {{ release_grid(will_listen, user, "small") }}
+        <header><h1>To-do</h1></header>
+        {% set todo = that_user.get_releases_listed(order=order if order else "artist") %}
+        {{ release_grid(todo, user, "small") }}
     </div></section>
     
 {% elif tab == "activity" %}
