@@ -60,7 +60,8 @@ def get_links(artist_mbid):
         return {}
 
 discogs_headers = {'User-agent': 'r8music.com'}
-discogs_endpoint = 'https://api.discogs.com/masters/%s'
+discogs_master_endpoint = 'https://api.discogs.com/masters/%s'
+discogs_release_endpoint = 'https://api.discogs.com/releases/%s'
 
 class NoDiscogsLink(Exception):
     pass
@@ -70,10 +71,14 @@ def get_group_mbid(release_mbid):
 
 genre_blacklist = ['Brass & Military', 'Children\'s', 'Folk, World & Country', 'Funk / Soul', 'Non-Music', 'Pop', 'Stage & Screen']
 
-def get_discogs_tags(discogs_id):
-    response = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
+def get_discogs_tags(discogs_id, master=False):
+    response = requests.get(url=discogs_master_endpoint if master else \
+                                discogs_release_endpoint % discogs_id,
+                            headers=discogs_headers).json()
+
     tags = (response["genres"] if 'genres' in response else []) + \
            (response["styles"] if 'styles' in response else [])
+           
     return filter(lambda tag: tag not in genre_blacklist, tags)
 
 def get_discogs_id(release_mbid, rels=None):
@@ -186,17 +191,26 @@ def prepare_release(release):
     release['artists'] = result['release']['artist-credit']
 
     try:
-        rels = release['group-url-rels']
+        release['url-rels'] = result['release']['url-relation-list']
 
+    except KeyError:
+        pass
+
+    if 'group-url-rels' in release:
         try:
-            discogs_id = get_discogs_id(release['group-id'], rels=rels)
-            release['tags'] = get_discogs_tags(discogs_id)
+            discogs_master_id = get_discogs_id(release['group-id'], rels=release['group-url-rels'])
+            release['tags'] = get_discogs_tags(discogs_master_id, master=True)
 
         except NoDiscogsLink:
-            print("No discogs link")
+            pass
 
-    except KeyError: # result has no url-relation-list
-        print("Release group has no url-rels")
+    elif 'url-rels' in release:
+        try:
+            discogs_id = get_discogs_id(release['id'], rels=release['url-rels'])
+            release['tags'] = get_discogs_tags(discogs_id, master=False)
+
+        except NoDiscogsLink:
+            pass
 
 def apply_tags(tags, release_id):
     model = Model()
@@ -252,7 +266,6 @@ def add_release(release):
             )
 
     if 'tags' in release:
-        print(release['tags'])
         apply_tags(release['tags'], release_id)
 
 class MBID(str):
