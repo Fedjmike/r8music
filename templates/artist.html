@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, page_tabs, subpage_header, artist_details %}
+{% from "macros.html" import artist_link, page_tabs, subpage_header, artist_details, tag_list %}
 {% from "release_list.html" import release_list, release_grid %}
 {% from "activity_list.html" import activity_list %}
 
@@ -19,21 +19,42 @@
     </section>
 
 {% else %}
-    <section class="content page">
-        <div class="clearfix">
-            {% set thumb, image = artist.get_image() %}
-            {% if image %}
-                <a href={{ image }}><img class="artist-image" src={{ thumb }}></a>
-            {% endif %}
-            
+    <section class="page columns content">
+        <div>
             <header><h1>{{ artist.name }}</h1></header>
             {{ artist_details(artist) }}
+        </div>
+        <div class="column-1-3">
+            {% set thumb, image = artist.get_image() %}
+            {% if image %}
+                <a class="artist-image-container" href={{ image }}><img class="artist-image" src={{ thumb }}></a>
+            {% endif %}
+            
+            <table>
+                <tr>
+                    <td>Genres</td>
+                    <td>{{ tag_list(artist.get_common_tags(limit=5)) }}</td>
+                </tr>
+                <tr>
+                    <td>Picks</td>
+                    <td>
+                        <ol>
+                        {% for count, track, release in artist.get_top_tracks(limit=3) %}
+                            <li class="comma-separated"><a href={{ release.url }}>{{ track.title }}</a></li>
+                        {% endfor %}
+                        </ol>
+                    </td>
+                </tr>
+            </table>
         </div>
     </section>
     {% set albums = artist.get_releases() | selectattr("release_type", "equalto", "Album") | list %}
     {% if albums %}
     <section class="content page">
-        <header><h2>Albums</h2></header>
+        <header>
+            <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
+            <h2>Albums</h2>
+        </header>
         {{ release_grid(albums | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
     </section>
     {% endif %}

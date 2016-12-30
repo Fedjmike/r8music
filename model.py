@@ -127,7 +127,10 @@ class Artist(ModelObject):
         self.get_description = lambda: model.get_description(self.id)
         self.get_wikipedia_urls = lambda: get_wikipedia_urls(model.get_link(self.id, "wikipedia"))
         self.get_external_links = lambda: model.get_external_links(self.id, "artist")
+        
         self.get_activity_on_releases = lambda: model.get_activity_on_releases_by_artist(self.id)
+        self.get_common_tags = lambda limit=10: model.get_artist_common_tags(self.id, limit)
+        self.get_top_tracks = lambda limit=10: model.get_top_tracks_by_artist(self.id, limit)
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
@@ -477,6 +480,15 @@ class Model(GeneralModel):
                        " where tag_id=?", tag_id)
         ]
         
+    def get_artist_common_tags(self, artist_id, limit):
+        return [
+            (Tag(self, row), count) for count, *row in
+            self.query("select count(*) as count, t.id, t.name, t.title, t.description, t.owner_id from tags t"
+                       " join taggings on tag_id = t.id"
+                       " join authorships a on object_id = release_id where artist_id=?"
+                       " group by tag_id order by count desc limit ?", artist_id, limit)
+        ]
+        
     def get_user_common_tags(self, user_id):
         return [
             (Tag(self, row), count) for count, *row in
@@ -763,6 +775,20 @@ class Model(GeneralModel):
             pick for (pick,) in \
             self.query("select id from tracks join active_actions_view on id = object_id"
                        " where user_id=? and release_id=?", user_id, release_id)
+        ]
+    
+    def get_top_tracks_by_artist(self, artist_id, limit=10):
+        return [
+            (count, self.Track(id, title, side, runtime), self.get_release(release_id))
+            for count, id, title, side, runtime, release_id in
+            self.query("select count(*) as freq, t.id, t.title, t.side, t.runtime, r.id"
+                       " from tracks t"
+                       " join releases r on r.id=t.release_id" #not needed, but profile
+                       " join authorships a on r.id=a.release_id"
+                       " join active_actions_view a on t.id=object_id"
+                       " where artist_id=? and a.type=?"
+                       " group by t.id order by freq desc limit ?",
+                       artist_id, ActionType["pick"].value, limit)
         ]
     
     #Reviews
