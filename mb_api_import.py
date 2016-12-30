@@ -68,10 +68,13 @@ class NoDiscogsLink(Exception):
 def get_group_mbid(release_mbid):
     return musicbrainzngs.get_release_by_id(release_mbid, includes=['release-groups'])['release']['release-group']['id']
 
+genre_blacklist = ['Brass & Military', 'Children\'s', 'Folk, World & Country', 'Funk / Soul', 'Non-Music', 'Pop', 'Stage & Screen']
+
 def get_discogs_tags(discogs_id):
     response = requests.get(url = discogs_endpoint % discogs_id, headers=discogs_headers).json()
-    return (response["genres"] if 'genres' in response else []) + \
+    tags = (response["genres"] if 'genres' in response else []) + \
            (response["styles"] if 'styles' in response else [])
+    return filter(lambda tag: tag not in genre_blacklist, tags)
 
 def get_discogs_id(release_mbid, rels=None):
     if not rels:
@@ -183,7 +186,7 @@ def prepare_release(release):
     release['artists'] = result['release']['artist-credit']
 
     try:
-        rels = result['group-url-rels']
+        rels = release['group-url-rels']
 
         try:
             discogs_id = get_discogs_id(release['group-id'], rels=rels)
@@ -193,7 +196,7 @@ def prepare_release(release):
             print("No discogs link")
 
     except KeyError: # result has no url-relation-list
-        pass
+        print("Release group has no url-rels")
 
 def apply_tags(tags, release_id):
     model = Model()
