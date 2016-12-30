@@ -97,7 +97,7 @@
         <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a> 
     {% endfor %}
     
-    <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>{%- endmacro %}
+    <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
 {%- endmacro %}
 
 {% macro tag_list(tags, counts=False, de_emph=False) -%}
