@@ -71,14 +71,12 @@ def get_group_mbid(release_mbid):
 
 genre_blacklist = ['Brass & Military', 'Children\'s', 'Folk, World & Country', 'Funk / Soul', 'Non-Music', 'Pop', 'Stage & Screen']
 
-def get_discogs_tags(discogs_id, master=False):
-    response = requests.get(url=discogs_master_endpoint if master else \
-                                discogs_release_endpoint % discogs_id,
-                            headers=discogs_headers).json()
-
+def get_discogs_tags(discogs_id, is_master=False):
+    url = (discogs_master_endpoint if is_master else discogs_release_endpoint) % discogs_id
+    response = requests.get(url=url,headers=discogs_headers).json()
     tags = (response["genres"] if 'genres' in response else []) + \
            (response["styles"] if 'styles' in response else [])
-           
+
     return filter(lambda tag: tag not in genre_blacklist, tags)
 
 def get_discogs_id(release_mbid, rels=None):
@@ -88,9 +86,19 @@ def get_discogs_id(release_mbid, rels=None):
 
         try:
             rels = result['release-group']['url-relation-list']
+            is_master = True
 
         except KeyError:
-            raise NoDiscogsLink()
+            try:
+                result = musicbrainzngs.get_release_by_id(release_mbid, includes=['url-rels'])
+                rels = result['release']['url-relation-list']
+                is_master = False
+
+            except KeyError:    
+                raise NoDiscogsLink()
+
+    else:
+        is_master = None
 
     try:
         discogs_url = [rel['target'] for rel in rels if rel['type'] == 'discogs'][0]
@@ -98,7 +106,7 @@ def get_discogs_id(release_mbid, rels=None):
     except IndexError:
         raise NoDiscogsLink()
 
-    return discogs_url.split('/')[-1]
+    return discogs_url.split('/')[-1], is_master
 
 def prepare_artist(artist_mbid, artist_id, artist_name):
     model = Model()
@@ -198,16 +206,16 @@ def prepare_release(release):
 
     if 'group-url-rels' in release:
         try:
-            discogs_master_id = get_discogs_id(release['group-id'], rels=release['group-url-rels'])
-            release['tags'] = get_discogs_tags(discogs_master_id, master=True)
+            discogs_master_id, _ = get_discogs_id(release['group-id'], rels=release['group-url-rels'])
+            release['tags'] = get_discogs_tags(discogs_master_id, is_master=True)
 
         except NoDiscogsLink:
             pass
 
     elif 'url-rels' in release:
         try:
-            discogs_id = get_discogs_id(release['id'], rels=release['url-rels'])
-            release['tags'] = get_discogs_tags(discogs_id, master=False)
+            discogs_id, _ = get_discogs_id(release['id'], rels=release['url-rels'])
+            release['tags'] = get_discogs_tags(discogs_id, is_master=False)
 
         except NoDiscogsLink:
             pass
