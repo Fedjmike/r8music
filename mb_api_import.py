@@ -69,7 +69,7 @@ class NoDiscogsLink(Exception):
 def get_group_mbid(release_mbid):
     return musicbrainzngs.get_release_by_id(release_mbid, includes=['release-groups'])['release']['release-group']['id']
 
-genre_blacklist = ['Brass & Military', 'Children\'s', 'Folk, World & Country', 'Funk / Soul', 'Non-Music', 'Pop', 'Stage & Screen']
+genre_blacklist = ['Brass & Military', 'Children\'s', 'Folk, World, & Country', 'Funk / Soul', 'Non-Music', 'Pop', 'Stage & Screen']
 
 def get_discogs_tags(discogs_id, is_master=False):
     url = (discogs_master_endpoint if is_master else discogs_release_endpoint) % discogs_id
