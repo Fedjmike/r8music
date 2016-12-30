@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, page_tabs, subpage_header, artist_details, tag_list %}
+{% from "macros.html" import artist_link, object_link, page_tabs, subpage_header, artist_details, tag_list %}
 {% from "release_list.html" import release_list, release_grid %}
 {% from "activity_list.html" import activity_list %}
 
@@ -34,6 +34,7 @@
             
             {% set common_tags = artist.get_common_tags(limit=5) %}
             {% set top_tracks = artist.get_top_tracks(limit=3) %}
+            {% set top_release = artist.get_top_release() %}
             <table>
                 {% if common_tags %}
                 <tr>
@@ -50,6 +51,12 @@
                         {% endfor %}
                         </ol>
                     </td>
+                </tr>
+                {% endif %}
+                {% if top_release %}
+                <tr>
+                    <td>Top release</td>
+                    <td>{{ object_link(top_release) }}</td>
                 </tr>
                 {% endif %}
             </table>

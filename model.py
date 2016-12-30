@@ -130,6 +130,7 @@ class Artist(ModelObject):
         self.get_activity_on_releases = lambda: model.get_activity_on_releases_by_artist(self.id)
         self.get_common_tags = lambda limit=10: model.get_artist_common_tags(self.id, limit)
         self.get_top_tracks = lambda limit=10: model.get_top_tracks_by_artist(self.id, limit)
+        self.get_top_release = lambda: model.get_top_release_by_artist(self.id)
 
 class Release(ModelObject):
     def __init__(self, model, row, primary_artist_id, primary_artist_slug):
@@ -771,7 +772,29 @@ class Model(GeneralModel):
                        " from active_actions_view a join releases on id = object_id"
                        " where user_id=? and a.type=?", user_id, ActionType[action].value)
         ]
-
+        
+    def get_top_release_by_artist(self, artist_id):
+        top_rated = self.query("select release_id from active_actions_view a"
+                               " join ratings using (action_id)"
+                               " join authorships on release_id = object_id"
+                               " where artist_id=? group by release_id"
+                               " order by cast(sum(rating) as float) / count(*) desc limit 2", artist_id)
+        
+        if top_rated:
+            return self.get_release(top_rated[0]["release_id"])
+            
+        most_listened = self.query("select release_id from active_actions_view a"
+                                   " join authorships on release_id = object_id"
+                                   " where artist_id=? and a.type=? group by release_id"
+                                   " order by count(*) desc limit 1",
+                                   artist_id, ActionType["listen"].value)
+        
+        if most_listened:
+            return self.get_release(most_listened[0]["release_id"])
+            
+        else:
+            return None
+        
     def get_picks_on_release(self, user_id, release_id):
         return [
             pick for (pick,) in \
