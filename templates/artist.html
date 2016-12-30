@@ -30,21 +30,26 @@
                 <a class="artist-image-container" href={{ image }}><img class="artist-image" src={{ thumb }}></a>
             {% endif %}
             
+            {% set common_tags = artist.get_common_tags(limit=5) %}
+            {% set top_tracks = artist.get_top_tracks(limit=3) %}
             <table>
+                {% if common_tags %}
                 <tr>
-                    <td>Genres</td>
-                    <td>{{ tag_list(artist.get_common_tags(limit=5)) }}</td>
+                    <td>Genres</td><td>{{ tag_list(common_tags) }}</td>
                 </tr>
+                {% endif %}
+                {% if top_tracks %}
                 <tr>
                     <td>Picks</td>
                     <td>
                         <ol>
-                        {% for count, track, release in artist.get_top_tracks(limit=3) %}
+                        {% for count, track, release in top_tracks %}
                             <li class="comma-separated"><a href={{ release.url }}>{{ track.title }}</a></li>
                         {% endfor %}
                         </ol>
                     </td>
                 </tr>
+                {% endif %}
             </table>
         </div>
     </section>
