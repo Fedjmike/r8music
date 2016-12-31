@@ -141,12 +141,16 @@ var autoload = function() {
     if (!stahp && elementInScroll("#autoload-trigger")) {
         var autoloadTrigger = document.getElementById("autoload-trigger");
         stahp = true;
+        
+        $(autoloadTrigger).text("Loading");
 
         $.get(autoloadTrigger.dataset.endpoint, {last_action_id: autoloadTrigger.dataset.last_action_id}, function (msg) {
             if (msg.error)
                     return; //todo
             
             autoloadTrigger.dataset.last_action_id = msg.last_action_id;
+            
+            $(autoloadTrigger).text("Load more");
             
             var target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
             target.append(msg.html);
@@ -157,7 +161,6 @@ var autoload = function() {
 
 $(document).ready(function ($) {
     if (document.getElementById("autoload-trigger")) {
-        $("#autoload-trigger.load-more").text("");
         $(window).on('scroll',  _.debounce(autoload, 200));
     };
 
