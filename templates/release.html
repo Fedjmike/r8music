@@ -115,7 +115,7 @@
             
             {% set sides, runtime, track_no = release.get_tracks() %}
             {% set picks = user.get_picks_on_release(release.id) if user else [] %}
-            {% set comparison_picks = user_to_compare.get_picks(release.id) if user_to_compare else [] %}
+            {% set comparison_picks = user_to_compare.get_picks_on_release(release.id) if user_to_compare else [] %}
             
             {% if track_no > 17 %}
                 {# See "expandable tracklists" in the CSS #}
