@@ -42,7 +42,7 @@ ActionGroup = namedtuple("ActionGroup", ["user", "actions"])
 def group_actions(actions):
     from model import ActionType
     
-    threshold = 60*60 #1h in seconds
+    threshold = (4+1/3)*60*60 #4h20 in seconds
     
     overriding_actions = defaultdict(lambda: [])
     overriding_actions.update({
