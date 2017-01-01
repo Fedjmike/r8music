@@ -62,22 +62,24 @@
             </table>
         </div>
     </section>
-    {% set albums = artist.get_releases() | selectattr("release_type", "equalto", "Album") | list %}
-    {% if albums %}
+    {% set all_releases = artist.get_releases() %}
+    {% set albums = all_releases | selectattr("release_type", "equalto", "Album") | list %}
+    {% set album_section = albums | length != 0 %}
     <section class="content page">
         <header>
             <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
-            <h2>Albums</h2>
+            <h2>{{ "Albums" if album_section else "Releases" }}</h2>
         </header>
-        {{ release_grid(albums | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
+        {{ release_grid(albums if album_section else all_releases | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
     </section>
-    {% endif %}
+    {% if album_section %}
     <section class="content page">
-        {% set others = artist.get_releases() | rejectattr("release_type", "equalto", "Album") | list %}
+        {% set others = all_releases | rejectattr("release_type", "equalto", "Album") | list %}
         {% if others %}
             <header><h3>Other releases</h3></header>
             {{ release_grid(others | sort(attribute="date"), user, "small", show_date_not_artist=True, show_average_rating=True) }}
         {% endif %}
     </section>
+    {% endif %}
 {% endif %}
 {% endblock %}
