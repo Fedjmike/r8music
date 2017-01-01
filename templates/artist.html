@@ -70,7 +70,7 @@
             <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
             <h2>{{ "Albums" if album_section else "Releases" }}</h2>
         </header>
-        {{ release_grid(albums if album_section else all_releases | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
+        {{ release_grid((albums if album_section else all_releases) | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
     </section>
     {% if album_section %}
     <section class="content page">
