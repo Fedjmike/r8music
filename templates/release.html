@@ -114,7 +114,7 @@
             </header>
             
             {% set sides, runtime, track_no = release.get_tracks() %}
-            {% set picks = user.get_picks_on_release(release.id) if user else [] %}
+            {% set picks = user.get_pick_ids_on_release(release.id) if user else [] %}
             {% set comparison_picks = user_to_compare.get_picks_on_release(release.id) if user_to_compare else [] %}
             
             {% if track_no > 17 %}

@@ -22,6 +22,14 @@
             </div>
         </div>
     </div>
+    {% if action.type.value in [1, 3] %}
+        {% set picks = action.user.get_picks_on_release(action.object.id) %}
+        <ol class="tracks">
+        {% for pick in picks %}
+            <li>{{ pick.title }}</li>
+        {% endfor%}
+        </ol>
+    {% endif %}
 {%- endmacro %}
 
 {% macro explain_action_group(action_group, same_user=False) -%}

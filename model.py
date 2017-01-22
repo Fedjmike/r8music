@@ -225,6 +225,9 @@ class User(ModelObject):
         def get_releases_listed(order=None):
             listed = model.get_releases_actioned_by_user(self.id, "list")
             return only_releases(sort_actioned_releases(listed, order))
+
+        def get_pick_ids_on_release(release_id):
+            return [track.id for track in model.get_picks_on_release(self.id, release_id)]
         
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
@@ -233,6 +236,7 @@ class User(ModelObject):
         self.get_releases_listed = get_releases_listed
         
         self.get_picks_on_release = lambda release_id: model.get_picks_on_release(self.id, release_id)
+        self.get_pick_ids_on_release = get_pick_ids_on_release
         
         self.get_rated_no = lambda: model.get_active_action_no(self.id, "rate")
         self.get_pick_no = lambda: model.get_active_action_no(self.id, "pick")
@@ -747,7 +751,6 @@ class Model(GeneralModel):
         
     def _make_release(self, row):
         release_id = row[0]
-        
         primary_artist_id, primary_artist_slug = \
             self.query_unique("select id, slug from"
                               " (select artist_id from authorships where release_id=?)"
@@ -797,9 +800,11 @@ class Model(GeneralModel):
         
     def get_picks_on_release(self, user_id, release_id):
         return [
-            pick for (pick,) in \
-            self.query("select id from tracks join active_actions_view on id = object_id"
-                       " where user_id=? and release_id=?", user_id, release_id)
+            self.Track(*row) for row in
+            self.query("select id, title, side, runtime from tracks"
+                       " join active_actions_view a on id = object_id"
+                       " where release_id=? and a.user_id=? order by side asc, position asc",
+                       release_id, user_id)
         ]
     
     def get_top_tracks_by_artist(self, artist_id, limit=10):
