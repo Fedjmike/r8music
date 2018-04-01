@@ -230,12 +230,13 @@ form input[type="submit"] {
 [contenteditable].single-line {
     overflow: hidden;
 } 
-[contenteditable].single-line br {
-    display:none;
 
+[contenteditable].single-line br {
+    display: none;
 }
+
 [contenteditable].single-line * {
-    display:inline;
+    display: inline;
 }
 
 /*Messages*/
