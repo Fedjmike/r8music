@@ -24,14 +24,15 @@
     </div>
     {% endif %}
 
-    <header><h1>{{ that_user.name }}</h1></header>
-
+    <header>
+        <img class="avatar" src={{ that_user.avatar_url }}>
+        <h1>{{ that_user.name }}</h1>
+        <span class="de-emph">
+            joined {{ event_datetime(that_user.creation) }}
+        </span>
+    </header>
     <p>
-        <img class="avatar" src={{ that_user.avatar_url }}><br/>
-
-        Joined {{ full_and_friendly_datetime(that_user.creation) }}<br/>
-
-        {{ tag_list(profile.common_tags[:5], counts=True) }}
+        {{ tag_list(profile.common_tags[:5]) }}
     </p>
     
     {% if user and that_user.id != user.id %}
@@ -39,7 +40,6 @@
         <p>
         <form method="post" action={{ url_for_user(that_user) }}>
         {% if following_since %}
-            You started following them {{ full_and_friendly_datetime(following_since) }}<br/>
             <input type="hidden" name="action" value = "unfollow">
             <input type="submit" value="Unfollow">
         {% else %}
