@@ -84,8 +84,8 @@ class ActionType(Enum):
     unrate = 2
     listen = 3
     unlisten = 4
-    list = 5
-    unlist = 6
+    save = 5
+    unsave = 6
     share = 7
     unshare = 8
     pick = 9
@@ -93,7 +93,7 @@ class ActionType(Enum):
     
     @property
     def simple_past(self):
-        return ["rated", "unrated", "listened to", "unlistened", "listed", "unlisted", "shared", "unshared", "picked", "unpicked"][self.value-1]
+        return ["rated", "unrated", "listened to", "unlistened", "saved", "unsaved", "shared", "unshared", "picked", "unpicked"][self.value-1]
 
 class UserType(Enum):
     user = 1
@@ -222,21 +222,21 @@ class User(ModelObject):
             #Sort and remove the action date
             return only_releases(sort_actioned_releases(listened_unrated, order))
                 
-        def get_releases_listed(order=None):
-            listed = model.get_releases_actioned_by_user(self.id, "list")
-            return only_releases(sort_actioned_releases(listed, order))
+        def get_releases_saved(order=None):
+            saved = model.get_releases_actioned_by_user(self.id, "save")
+            return only_releases(sort_actioned_releases(saved, order))
         
         self.get_ratings = lambda: model.get_ratings_by_user(self.id)
         self.get_releases_rated = lambda: model.get_releases_rated_by_user(self.id)
         self.get_releases_listened = lambda: only_releases(model.get_releases_actioned_by_user(self.id, "listen"))
         self.get_releases_listened_unrated = get_releases_listened_unrated
-        self.get_releases_listed = get_releases_listed
+        self.get_releases_saved = get_releases_saved
         
         self.get_picks_on_release = lambda release_id: model.get_picks_on_release(self.id, release_id)
         
         self.get_rated_no = lambda: model.get_active_action_no(self.id, "rate")
         self.get_pick_no = lambda: model.get_active_action_no(self.id, "pick")
-        self.get_will_listen_no = lambda: model.get_active_action_no(self.id, "list")
+        self.get_saved_no = lambda: model.get_active_action_no(self.id, "save")
         self.get_listened_unrated_no = lambda: model.get_listened_unrated_no(self.id)
         
         self.get_active_actions = lambda object_id: model.get_active_actions(self.id, object_id)
@@ -248,7 +248,7 @@ class User(ModelObject):
             model.get_activity_feed(self.id, last_action_id=last_action_id)
         self.get_activity = lambda: model.get_activity_by_user(self.id)
         
-        self.get_listen_implies_unlist = lambda: model.get_user_listen_implies_unlist(self.id)
+        self.get_listen_implies_unsave = lambda: model.get_user_listen_implies_unsave(self.id)
         
     def get_profile(self):
         return { 
@@ -298,9 +298,6 @@ class Action(ModelObject):
         self.user = model.get_user(user_id)
     
     def describe(self):
-        if self.type == ActionType["list"]:
-            return "added a to-do"
-            
         return self.type.simple_past
     
 class RatingAction(Action):
@@ -499,7 +496,7 @@ class Model(GeneralModel):
                        " join taggings on tag_id = t.id"
                        " join active_actions_view a using (object_id)"
                        " where a.user_id=? and a.type in (?, ?, ?) group by tag_id",
-                       user_id, *[ActionType[t].value for t in ["rate", "listen", "list"]])
+                       user_id, *[ActionType[t].value for t in ["rate", "listen", "save"]])
         ]
         
     def get_discogs_tag_id(self, discogs_name):
@@ -611,8 +608,8 @@ class Model(GeneralModel):
             self.add_action(user_id, object_id, ActionType["listen"])
 
         if type == ActionType["listen"]:
-            if self.get_user_listen_implies_unlist(user_id):
-                self.add_action(user_id, object_id, ActionType["unlist"])
+            if self.get_user_listen_implies_unsave(user_id):
+                self.add_action(user_id, object_id, ActionType["unsave"])
 
         if not type.name.startswith('un'):
             action_id = self.insert("insert into actions (user_id, object_id, type, creation)"
@@ -885,14 +882,14 @@ class Model(GeneralModel):
         return self.query_unique("select timezone from user_timezones"
                                  " where user_id=?", user_id, fallback=("Europe/London",))[0]
 
-    def set_user_listen_implies_unlist(self, user_id, listen_implies_unlist):
-        self.execute("replace into user_listen_implies_unlists"
+    def set_user_listen_implies_unsave(self, user_id, listen_implies_unlist):
+        self.execute("replace into user_listen_implies_unsave"
                      " values (?, ?)", user_id, listen_implies_unlist)
 
-    def get_user_listen_implies_unlist(self, user_id):
+    def get_user_listen_implies_unsave(self, user_id):
         try:
-            return int(self.query_unique("select listen_implies_unlist from"
-                                         " user_listen_implies_unlists where user_id=?", user_id)[0])
+            return int(self.query_unique("select listen_implies_unsave from"
+                                         " user_listen_implies_unsave where user_id=?", user_id)[0])
 
         except NotFound:
             return True

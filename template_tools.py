@@ -47,7 +47,7 @@ def group_actions(actions):
     overriding_actions = defaultdict(lambda: [])
     overriding_actions.update({
         ActionType.listen: [ActionType.rate],
-        ActionType.list: [ActionType.rate, ActionType.listen]
+        ActionType.save: [ActionType.rate, ActionType.listen]
     })
     
     def group_by_object_and_omit(actions):

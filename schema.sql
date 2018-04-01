@@ -164,10 +164,10 @@ create table user_timezones (
     foreign key (user_id) references users(id)
 );
 
-drop table if exists user_listen_implies_unlists;
-create table user_listen_implies_unlists (
+drop table if exists user_listen_implies_unsave;
+create table user_listen_implies_unsave (
     user_id integer primary key,
-    listen_implies_unlist integer not null
+    listen_implies_unsave integer not null
 );
 
 drop table if exists user_rating_descriptions;

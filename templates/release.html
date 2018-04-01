@@ -139,7 +139,7 @@
             {% set active_actions = user.get_active_actions(release.id) if user else [] %}
             
             {# Which buttons appear / how they appear depends on their status #}
-            {% set actions = [("list", "playlist_add", "To-do")] %}
+            {% set actions = [("save", "playlist_add", "Save")] %}
             {% set _ = actions.append(("listen", "headset", "Listened to")) if release.id not in ratings %}
             {% set _ = actions.append(("share", "share", "Share")) if "listen" in active_actions %}
             

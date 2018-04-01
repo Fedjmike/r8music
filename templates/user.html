@@ -53,13 +53,13 @@
 
 {% set rated_no = that_user.get_rated_no() %}
 {% set listened_unrated_no = that_user.get_listened_unrated_no() %}
-{% set will_listen_no = that_user.get_will_listen_no() %}
+{% set saved_no = that_user.get_saved_no() %}
 
 {{ page_tabs([(None, ("Releases rated", rated_no)),
               ("listened-unrated", ("Listened to but not rated", listened_unrated_no)),
               ("activity", "Activity"),
               ("reviews", "Reviews"),
-              ("to-do", ("To-do", will_listen_no)),
+              ("saved", ("Saved", saved_no)),
               ("friends", "Friends")],
               url_for_user(that_user), current_tab=tab) }}
 
@@ -70,10 +70,10 @@
         {{ release_grid(listened_unrated, user, "small") }}
     </div></section>
     
-{% elif tab == "to-do" %}
+{% elif tab == "saved" %}
     <section class="page content"><div>
-        <header><h1>To-do</h1></header>
-        {% set todo = that_user.get_releases_listed(order=order if order else "artist") %}
+        <header><h1>Saved releases</h1></header>
+        {% set todo = that_user.get_releases_saved(order=order if order else "artist") %}
         {{ release_grid(todo, user, "small") }}
     </div></section>
     
