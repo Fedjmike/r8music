@@ -149,8 +149,8 @@
             {{ rating_widget(release, ratings[release.id] if release.id in ratings, None) }}
         </div>
         <div class="album-cover clearfix">
-            {% if release.thumb_art_url %}
-                <a href="{{ release.full_art_url }}"><img src="{{ release.thumb_art_url }}"/></a><br/>
+            {% if release.full_art_url %}
+                <a href="{{ release.full_art_url }}"><img src="{{ release.full_art_url }}"/></a><br/>
             {% endif %}
             <div class="next-albums">
                 {% for artist, previous, next in release.get_next_releaseses() %}
