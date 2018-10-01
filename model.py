@@ -27,6 +27,8 @@ class GeneralModel:
     def __init__(self, connect_db=connect_db):
         self.db = connect_db()
         self.db.row_factory = sqlite3.Row
+        self.db.enable_load_extension(True)
+        self.db.load_extension("./fts5.so")
         self.db.create_function("unidecode", 1, unidecode)
         self.db.create_function("sigmoid", 1, sigmoid)
         
