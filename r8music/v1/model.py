@@ -9,9 +9,9 @@ from werkzeug import check_password_hash, generate_password_hash
 from flask import url_for
 from unidecode import unidecode
 
-from tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score, sigmoid
-from template_tools import url_for_release
-from chromatography import get_palette
+from .tools import flatten, uniq, chop_suffix, slugify, get_wikipedia_urls, execution_time, profiled, binomial_score, sigmoid
+from .template_tools import url_for_release
+from .chromatography import get_palette
 
 class NotFound(Exception):
     pass
@@ -119,8 +119,11 @@ class ModelObject:
 class Artist(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "slug"])
-        self.url = url_for("artist_page", slug=self.slug) 
         
+        try:
+            self.url = url_for("artist_page", slug=self.slug) 
+        except RuntimeError:
+            pass
         self.get_releases = lambda: model.get_releases_by_artist(self)
         self.get_image = lambda: [model.get_link(self.id, link) for link in ["image_thumb", "image"]]
         self.get_description = lambda: model.get_description(self.id)
@@ -283,8 +286,11 @@ class Tag(ModelObject):
     def __init__(self, model, row):
         self.init_from_row(row, ["id", "name", "title", "description", "owner_id"])
         self.slug = slugify(self.name) #todo
-        self.url = url_for("tag_page", id=self.id, slug=self.slug)
-        
+        try:
+            self.url = url_for("tag_page", id=self.id, slug=self.slug)
+        except RuntimeError:
+            pass
+            
         self.get_owner = lambda: model.get_user(self.owner_id) if self.owner_id else None
         
         self.get_releases = lambda: model.get_tagged_releases(self.id)

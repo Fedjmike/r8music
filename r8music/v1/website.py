@@ -5,10 +5,10 @@ from flask import Flask, render_template, g, request, session, redirect, jsonify
 from contextlib import closing
 from bs4 import BeautifulSoup
 
-from model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
-from mb_api_import import import_artist, standalone_import_release_group, MBID
-from template_tools import add_template_tools
-from tools import *
+from .model import Model, User, connect_db, NotFound, AlreadyExists, ActionType, UserType, RatingStats
+from .mb_api_import import import_artist, standalone_import_release_group, MBID
+from .template_tools import add_template_tools
+from .tools import *
 
 app = Flask(__name__)
 

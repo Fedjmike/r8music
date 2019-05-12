@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class UserSettings(models.Model):
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="settings")
     #Stored as a UTC offset, in the format "[+-]\d\d:\d\d"
     timezone = models.TextField()
     #Does 'listening' to a release automatically remove it from the 'saved' list?
@@ -11,7 +11,7 @@ class UserSettings(models.Model):
 #
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="profile")
     avatar_url = models.TextField()
     
 class UserRatingDescription(models.Model):
@@ -21,6 +21,6 @@ class UserRatingDescription(models.Model):
     description = models.TextField()
     
 class Followership(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="followers")
-    follower = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="following")
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="followers")
+    follower = models.ForeignKey(User, on_delete=models.PROTECT, related_name="following")
     creation = models.DateTimeField(auto_now_add=True)
