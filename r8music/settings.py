@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'r8music.profiles',
+    'r8music.music',
+    'r8music.actions',
 ]
 
 MIDDLEWARE = [
