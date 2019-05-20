@@ -1,32 +1,54 @@
 from django.db import models
 
+from django.contrib.auth.models import User
 from r8music.music.models import Release, Track
-from r8music.profiles.models import UserProfile
 
 class Action(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     creation = models.DateTimeField(auto_now_add=True)
     
-class ReleaseAction(Action):
+    def _get_active_actions(self, object):
+        return object.active_actions.get_or_create(user=self.user)[0]
+        
+class SaveAction(Action):
     release = models.ForeignKey(Release, on_delete=models.PROTECT)
-
-class SaveAction(ReleaseAction):
-    pass
     
-class ListenAction(ReleaseAction):
-    pass
+    def set_as_active(self):
+        active_actions = self._get_active_actions(self.release)
+        active_actions.saved = self
+        active_actions.save()
     
-class RatingAction(ReleaseAction):
+class ListenAction(Action):
+    release = models.ForeignKey(Release, on_delete=models.PROTECT)
+    
+    def set_as_active(self):
+        active_actions = self._get_active_actions(self.release)
+        active_actions.listened = self
+        active_actions.save()
+    
+class RateAction(Action):
+    release = models.ForeignKey(Release, on_delete=models.PROTECT)
     rating = models.IntegerField()
+    
+    def set_as_active(self):
+        active_actions = self._get_active_actions(self.release)
+        active_actions.rating = self
+        active_actions.save()
     
 class PickAction(Action):
     track = models.ForeignKey(Track, on_delete=models.PROTECT)
     
-class LatestActions(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
-    release = models.ForeignKey(Release, on_delete=models.PROTECT)
+    def set_as_active(self):
+        active_actions = self._get_active_actions(self.track.release)
+        active_actions.picks.add(self)
     
+class ActiveActions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="active_actions")
+    release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="active_actions")
+    
+    #The existence of an action only means that action was taken at some point.
+    #If the user undoes that action, it is removed from these fields.
     saved = models.ForeignKey(SaveAction, on_delete=models.PROTECT, null=True)
     listened = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
-    rating = models.ForeignKey(RatingAction, on_delete=models.PROTECT, null=True)
+    rating = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)

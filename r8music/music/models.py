@@ -15,21 +15,11 @@ class DiscogsTag(Tag):
 
 #
 
-class ExternalLink(models.Model):
-    """A link to a page on an external site"""
-    url = models.TextField()
-    #Identifies the link, for example, by the name of the external website
-    name = models.TextField()
-
-#
-
 class Artist(models.Model):
     name = models.TextField()
     slug = models.TextField()
-    
-    external_links = models.ManyToManyField(ExternalLink)
     #A couple of sentences or short paragraphs about the artist
-    description = models.TextField()
+    description = models.TextField(null=True)
     
 class ReleaseType(enum.Enum):
     ALBUM = 1
@@ -52,13 +42,12 @@ class ReleaseType(enum.Enum):
 
 class Release(models.Model):
     title = models.TextField()
-    slug = models.TextField()
+    slug = models.SlugField(unique=True)
     artists = models.ManyToManyField(Artist, related_name="releases")
     type = enum.EnumField(ReleaseType, null=True, default=None)
     release_date = models.TextField()
     
     tags = models.ManyToManyField(Tag, related_name="releases")
-    external_links = models.ManyToManyField(ExternalLink)
     
     #Cover art links
     art_url_250 = models.TextField(null=True)
@@ -71,11 +60,29 @@ class Release(models.Model):
     colour3 = models.TextField(null=True)
     
 class Track(models.Model):
-    release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="tracks")
+    release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="tracks")
     
     title = models.TextField()
-    slug = models.TextField()
+    slug = models.SlugField(unique=True)
     position = models.IntegerField()
     side = models.IntegerField()
     #In miliseconds
     runtime = models.IntegerField(null=True)
+
+#
+
+class ExternalLink(models.Model):
+    """A link to a page on an external site"""
+    
+    url = models.TextField()
+    #Identifies the link, for example, by the name of the external website
+    name = models.TextField()
+    
+    class Meta:
+        abstract = True
+    
+class ArtistExternalLink(ExternalLink):
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="links")
+    
+class ReleaseExternalLink(ExternalLink):
+    release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="links")
