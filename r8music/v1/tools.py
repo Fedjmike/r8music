@@ -203,6 +203,7 @@ def decorator_with_args(decorator):
 #Profiling
 
 from cProfile import Profile
+from pstats import Stats
 from time import perf_counter
 
 @basic_decorator
@@ -224,7 +225,9 @@ def profiled(f):
         return result
     
     finally:
-        profile.print_stats(sort="cumtime")
+        stats = Stats(profile)
+        stats.sort_stats("cumtime")
+        stats.print_stats(0.1)
 
 #Wikipedia
 
