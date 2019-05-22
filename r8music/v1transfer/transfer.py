@@ -14,7 +14,7 @@ class IDMap:
     """Maps from IDs in the old database to those in the new models."""
     
     def __init__(self, link_model, kind_name):
-        """Instantiates the map from the entries of a particular link type.
+        """Instantiates the map from the entries of a particular V1Link model.
            kind_name is the name of the field in the link model in which the
            new object is stored."""
         self.kind_name = kind_name
