@@ -3,12 +3,20 @@ from django.db import transaction
 
 from django.contrib.auth.models import User
 from r8music.profiles.models import UserSettings, UserProfile, UserRatingDescription, Followership
-from r8music.music.models import Artist, Release, ReleaseType, Track, Tag, DiscogsTag, ArtistExternalLink, ReleaseExternalLink
+from r8music.music.models import Artist, Release, ReleaseType, Track, Tag, DiscogsTag, ArtistExternalLink, ReleaseExternalLink, generate_slug
 from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction
 
 from r8music.v1transfer.models import UserV1Link, TagV1Link, ArtistV1Link, ReleaseV1Link, TrackV1Link, ActionV1Link
 
 from r8music.v1.model import Model, UserType, ObjectType, ActionType, NotFound
+
+def generate_slug_tracked(used_slugs, name):
+    """Generates a slug, using a set of slugs already used. This is to avoid
+       the many slow queries otherwise required. Updates the given set in place."""
+    is_free = lambda slug: slug not in used_slugs
+    slug = generate_slug(is_free, name)
+    used_slugs.add(slug)
+    return slug
 
 class IDMap:
     """Maps from IDs in the old database to those in the new models."""
@@ -155,11 +163,12 @@ class Transferer:
         
     #
     
-    def transfer_artist(self, artist_id):
+    def transfer_artist(self, artist_id, used_slugs):
         artist = self.model.get_artist(artist_id)
         
         new_artist = Artist.objects.create(
             name=artist.name,
+            slug=generate_slug_tracked(used_slugs, artist.name),
             description=artist.get_description()
         )
         
@@ -172,8 +181,10 @@ class Transferer:
         
     @transaction.atomic
     def transfer_all_artists(self):
+        used_slugs = set()
+        
         ArtistV1Link.objects.bulk_create([
-            self.transfer_artist(artist_id)
+            self.transfer_artist(artist_id, used_slugs)
             for (artist_id,) in self.model.query("select id from artists")
         ])
         
@@ -213,10 +224,12 @@ class Transferer:
         
     def transfer_release(
         self, release_id, title, release_type, release_date,
-        thumb_art_url, full_art_url, colour1, colour2, colour3
+        thumb_art_url, full_art_url, colour1, colour2, colour3,
+        used_slugs
     ):
         new_release = Release.objects.create(
             title=title,
+            slug=generate_slug_tracked(used_slugs, title),
             type=self.get_release_type(release_type) if release_type else None,
             release_date=release_date,
             art_url_250=thumb_art_url,
@@ -231,8 +244,10 @@ class Transferer:
     
     @transaction.atomic
     def transfer_all_releases(self):
+        used_slugs = set()
+
         ReleaseV1Link.objects.bulk_create([
-            self.transfer_release(*row)
+            self.transfer_release(*row, used_slugs=used_slugs)
             for row in self.model.query(
                 "select releases.id, title, type, date, thumb_art_url, full_art_url,"
                 " color1, color2, color3 from releases"
@@ -279,9 +294,11 @@ class Transferer:
         
     #
     
-    def transfer_track(self, release_id, track_id, title, position, side, runtime):
+    def transfer_track(self, release_id, track_id, title, position, side, runtime, used_slugs):
         new_track = Track.objects.create(
-            title=title, release_id=self.new_release_ids.map(release_id),
+            title=title,
+            slug=generate_slug_tracked(used_slugs, title),
+            release_id=self.new_release_ids.map(release_id),
             position=position, side=side,
             runtime=runtime
         )
@@ -290,8 +307,10 @@ class Transferer:
         
     @transaction.atomic
     def transfer_all_tracks(self):
+        used_slugs = set()
+        
         TrackV1Link.objects.bulk_create([
-            self.transfer_track(release_id, *row)
+            self.transfer_track(release_id, *row, used_slugs=used_slugs)
             for release_id, *row in self.model.query(
                 "select release_id, id, title, position, side, runtime from tracks")
         ])

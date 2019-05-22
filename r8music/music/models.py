@@ -1,5 +1,8 @@
+from itertools import count
+
 from django.db import models
 from django_enumfield import enum
+from django.template.defaultfilters import slugify
 
 from r8music.profiles.models import User
 
@@ -86,3 +89,10 @@ class ArtistExternalLink(ExternalLink):
     
 class ReleaseExternalLink(ExternalLink):
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="links")
+
+#
+
+def generate_slug(is_free, name):
+    slug = slugify(name)
+    candidates = ("%s-%d" % (slug, n) if n else slug for n in count(0))
+    return next(filter(is_free, candidates))
