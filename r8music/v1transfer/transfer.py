@@ -18,10 +18,14 @@ class IDMap:
            kind_name is the name of the field in the link model in which the
            new object is stored."""
         self.kind_name = kind_name
-        new_id_field = kind_name + "_id"
+        self.link_model = link_model
+        self.update()
+        
+    def update(self):
+        new_id_field = self.kind_name + "_id"
         self.id_map = {
             link["old_id"]: link[new_id_field]
-            for link in link_model.objects.values(new_id_field, "old_id").all()
+            for link in self.link_model.objects.values(new_id_field, "old_id").all()
         }
         
     def map(self, id):
@@ -50,17 +54,17 @@ class Transferer:
        'release_id' etc. Those of the new model are referred to as 'new_artist'
        etc."""
 
-    #IDMaps are assigned here in each step of the process, and used in subsequent
-    #steps to avoid many individual queries to the link models.
-    new_user_ids = None
-    new_tag_ids = None
-    new_artist_ids = None
-    new_release_ids = None
-    new_track_ids = None
-    
     def __init__(self, model):
         self.model = model
         
+        #These are used to avoid numerous individual queries to the V1Link models,
+        #and must updated when new links are added.
+        self.new_user_ids = IDMap(UserV1Link, "user")
+        self.new_tag_ids = IDMap(TagV1Link, "tag")
+        self.new_artist_ids = IDMap(ArtistV1Link, "artist")
+        self.new_release_ids = IDMap(ReleaseV1Link, "release")
+        self.new_track_ids = IDMap(TrackV1Link, "track")
+    
     #
     
     def transfer_user(self, user_id):
@@ -108,7 +112,7 @@ class Transferer:
             for (user_id,) in self.model.query("select id from users")
         ])
         
-        self.new_user_ids = IDMap(UserV1Link, "user")
+        self.new_user_ids.update()
         
         Followership.objects.bulk_create([
             Followership(
@@ -147,7 +151,7 @@ class Transferer:
             for row in self.model.query("select id, name, title, description, owner_id from tags")
         ])
         
-        self.new_tag_ids = IDMap(TagV1Link, "tag")
+        self.new_tag_ids.update()
         
     #
     
@@ -173,7 +177,7 @@ class Transferer:
             for (artist_id,) in self.model.query("select id from artists")
         ])
         
-        self.new_artist_ids = IDMap(ArtistV1Link, "artist")
+        self.new_artist_ids.update()
         
     #
     
@@ -236,7 +240,7 @@ class Transferer:
             )
         ])
         
-        self.new_release_ids = IDMap(ReleaseV1Link, "release")
+        self.new_release_ids.update()
         
         Release.artists.through.objects.bulk_create([
             Release.artists.through(
@@ -292,7 +296,7 @@ class Transferer:
                 "select release_id, id, title, position, side, runtime from tracks")
         ])
         
-        self.new_track_ids = IDMap(TrackV1Link, "track")
+        self.new_track_ids.update()
         
     #
 
