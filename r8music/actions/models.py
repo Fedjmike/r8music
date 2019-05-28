@@ -15,7 +15,7 @@ class SaveAction(Action):
     
     def set_as_active(self):
         active_actions = self._get_active_actions(self.release)
-        active_actions.saved = self
+        active_actions.save = self
         active_actions.save()
     
 class ListenAction(Action):
@@ -23,7 +23,7 @@ class ListenAction(Action):
     
     def set_as_active(self):
         active_actions = self._get_active_actions(self.release)
-        active_actions.listened = self
+        active_actions.listen = self
         active_actions.save()
     
 class RateAction(Action):
@@ -32,7 +32,7 @@ class RateAction(Action):
     
     def set_as_active(self):
         active_actions = self._get_active_actions(self.release)
-        active_actions.rating = self
+        active_actions.rate = self
         active_actions.save()
     
 class PickAction(Action):
@@ -48,7 +48,7 @@ class ActiveActions(models.Model):
     
     #The existence of an action only means that action was taken at some point.
     #If the user undoes that action, it is removed from these fields.
-    saved = models.ForeignKey(SaveAction, on_delete=models.PROTECT, null=True)
-    listened = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
-    rating = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
+    save = models.ForeignKey(SaveAction, on_delete=models.PROTECT, null=True)
+    listen = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
+    rate = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)
