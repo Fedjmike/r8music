@@ -85,10 +85,10 @@ class ExternalLink(models.Model):
         abstract = True
     
 class ArtistExternalLink(ExternalLink):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="links")
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="external_links")
     
 class ReleaseExternalLink(ExternalLink):
-    release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="links")
+    release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="external_links")
 
 #
 
