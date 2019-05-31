@@ -46,41 +46,7 @@
               ("recommendations", "Recommendations", None)],
              url_for_release(release), current_tab=tab) }}
 
-{% if tab == "reviews" %}
-    <section class="page content">
-        {{ subpage_header("Reviews", object_link(release)) }}
-        
-        {% macro my_review() -%}
-        <section>
-            <header><h3>Write a review</h3></header>
-            
-            <form action=# method="post" class="review clearfix">
-                <textarea name="review" class="with-expl" rows=10 cols=50></textarea>
-                <span class="textarea-expl de-emph">
-                    Format your review with <a href="https://daringfireball.net/projects/markdown/basics" target=_blank>Markdown</a>
-                </span>
-                <input type="submit" value="Post" />
-            </form>
-        </section>
-        {%- endmacro %}
-        
-        {% set reviews = release.get_reviews() %}
-        
-        {% if reviews %}
-        <div class="reviews">
-            {{ my_review() }}
-            
-            {% for review in reviews %}
-            <section></section>
-            {% endfor %}
-        </div>
-        {% else %}
-            <p>No reviews yet.</p>
-            {{ my_review() }}
-        {% endif %}
-    </section>
-    
-{% elif tab == "activity" %}
+{% if tab == "activity" %}
     <section class="page content">
         {{ subpage_header("Activity", object_link(release)) }}
         {% set last_action, actions = release.get_activity() %}
