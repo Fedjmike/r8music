@@ -52,3 +52,9 @@ class ActiveActions(models.Model):
     listen = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
     rate = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)
+    
+    def picked_tracks(self):
+        return self.picks.all().values_list("track_id", flat=True)
+        
+    def rating(self):
+        return self.rate.rating if self.rate else None

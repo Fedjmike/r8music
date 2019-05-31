@@ -1,10 +1,17 @@
-from itertools import count
+from itertools import count, groupby
 
 from django.db import models
 from django_enumfield import enum
+from django.db.models import Avg
+
 from django.template.defaultfilters import slugify
 
 from r8music.profiles.models import User
+
+def runtime_str(milliseconds):
+    return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
+
+#
 
 class Tag(models.Model):
     name = models.TextField()
@@ -23,6 +30,9 @@ class Artist(models.Model):
     slug = models.TextField()
     #A couple of sentences or short paragraphs about the artist
     description = models.TextField(null=True)
+    
+    def wikipedia_urls(self):
+        return None
     
 class ReleaseType(enum.Enum):
     ALBUM = 1
@@ -43,6 +53,13 @@ class ReleaseType(enum.Enum):
     MIXTAPE_STREET = 14
     DEMO = 15
 
+class ReleaseQuerySet(models.QuerySet):
+    def albums(self):
+        return self.filter(type=ReleaseType.ALBUM)
+        
+    def non_albums(self):
+        return self.exclude(type=ReleaseType.ALBUM)
+        
 class Release(models.Model):
     title = models.TextField()
     slug = models.SlugField(unique=True)
@@ -62,6 +79,25 @@ class Release(models.Model):
     colour2 = models.TextField(null=True)
     colour3 = models.TextField(null=True)
     
+    objects = ReleaseQuerySet.as_manager()
+    
+    def release_year_str(self):
+        return self.release_date[:4]
+    
+    def palette(self):
+        return self.colour1, self.colour2, self.colour3
+    
+    def average_rating(self):
+        return self.active_actions.aggregate(average=Avg("rate__rating"))["average"]
+    
+    def tracks_extra(self):
+        tracks = self.tracks.all()
+        return {
+            "sides": [list(tracks) for _, tracks in groupby(tracks, lambda track: track.side)],
+            "runtime": runtime_str(sum(track.runtime for track in tracks if track.runtime)),
+            "track_no": len(tracks)
+        }
+
 class Track(models.Model):
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="tracks")
     
@@ -71,6 +107,9 @@ class Track(models.Model):
     side = models.IntegerField()
     #In miliseconds
     runtime = models.IntegerField(null=True)
+    
+    def runtime_str(self):
+        return runtime_str(self.runtime) if self.runtime else None
 
 #
 

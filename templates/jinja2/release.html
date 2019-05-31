@@ -3,13 +3,19 @@
 {% from "release_list.html" import release_list, release_grid, rating_widget %}
 {% from "activity_list.html" import release_activity_list %}
 
-{% block title %}{{ release.title }} [{{release.date[:4]}}] - {{ release.get_artists()[0].name }} {{ super() }}{% endblock %}
+{% set artists = release.artists.all() %}
 
-{% set accent_color_1, accent_color_2, accent_color_3 = release.get_palette() %}
+{% block title %}
+    {{ release.title }} [{{release.release_year_str()}}] -
+    {% for artist in artists %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
+    {{ super() }}
+{% endblock %}
 
-{% macro tracklist(sides, runtime, track_no, picks, user_to_compare, comparison_picks) -%}
+{% set accent_color_1, accent_color_2, accent_color_3 = release.palette() %}
+
+{% macro tracklist(track_info, picks, user_to_compare, comparison_picks) -%}
     <ol class="tracks">
-    {% for tracks in sides %}
+    {% for tracks in track_info["sides"] %}
         {% for track in tracks %}
             <li>
                 <span class="track-title">
@@ -23,11 +29,11 @@
                         <i class="material-icons">stars</i>
                     </a>
                 </span>
-                {% if track.runtime %} <time>{{ track.runtime }}</time> {% endif %}
+                {% if track.runtime %} <time>{{ track.runtime_str() }}</time> {% endif %}
             </li>
         {% endfor %}
     {% endfor %}
-    {% if runtime and track_no != 1 %}
+    {% if track_info["total_runtime"] and track_info["track_no"] != 1 %}
         <li class="total clearfix"><time>{{ runtime }}</time></li>
     {% endif %}
     </ol>
@@ -35,11 +41,10 @@
 
 {% block content %}
 
-{{ page_tabs([(None, release.title),
-              ("activity", "Activity"),
-              ("reviews", ("Reviews", release.get_review_no())),
-              ("recommendations", "Recommendations")],
-             release.url, current_tab=tab) }}
+{{ page_tabs([(None, release.title, None),
+              ("activity", "Activity", None),
+              ("recommendations", "Recommendations", None)],
+             url_for_release(release), current_tab=tab) }}
 
 {% if tab == "reviews" %}
     <section class="page content">
@@ -97,7 +102,7 @@
                     <h3 style="font-style: italic; margin-bottom: 0.2em;">Comparing with {{ user_link(user_to_compare) }}</h3>
                 {% endif %}
                 <h1 class="album-title">
-                    {% set average_rating = release.get_rating_stats().average %}
+                    {% set average_rating = release.average_rating() %}
                     {# Comes before but floated right, so that it doesn't get selected #}
                     <span class="unselectable" id="average-rating-section" style="{{ '' if average_rating else 'display: none;' }}">
                         <span id="average-rating">{{ "%.1f" % average_rating if average_rating else '' }}</span>
@@ -105,104 +110,72 @@
                     {{ release.title }}
                 </h1>
                 <h2 class="byline">
-                {% for artist in release.get_artists() %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
-                    <time>{{ release.date[:4] }}</time>
+                {% for artist in artists %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
+                    <time>{{ release.release_year_str() }}</time>
                 </h2>
                 <div>
-                {{ tag_list(release.get_tags()) }}
+                {{ tag_list(release.tags.all()) }}
                 </div>
             </header>
             
-            {% set sides, runtime, track_no = release.get_tracks() %}
-            {% set picks = user.get_picks_on_release(release.id) if user else [] %}
-            {% set comparison_picks = user_to_compare.get_picks_on_release(release.id) if user_to_compare else [] %}
+            {% set track_info = release.tracks_extra() %}
             
-            {% if track_no > 17 %}
-                {# See "expandable tracklists" in the CSS #}
+            {% set user_actions = request.user.profile.actions_on_release(release.id) %}{# not anon #}
+            {% set picks = user_actions.picked_tracks() if user_actions else [] %}
+
+            {% set comparison_picks = [] %}
+            
+            {% if track_info["track_no"] > 17 %}
+                {# See "expandable tracklists" in the CSS  simplify with JS #}
                 <div class="tracks-expand-container">
                     <details class="tracks-expand">
-                        {{ tracklist(sides, runtime, track_no, picks) }}
+                        {{ tracklist(track_info, picks, user_to_compare, comparison_picks) }}
                         <summary>
                             <i class="material-icons tiny expand-more" title="Show the full tracklist">expand_more</i>
                             <i class="material-icons tiny expand-less" title="Contract the tracklist">expand_less</i>
                         </summary>
                     </details>
-                    {{ tracklist(sides, runtime, track_no, picks,
-                                 user_to_compare, comparison_picks) }}
+                    {{ tracklist(track_info, picks, user_to_compare, comparison_picks) }}
                 </div>
             {% else %}
-                {{ tracklist(sides, runtime, track_no, picks,
-                             user_to_compare, comparison_picks) }}
+                {{ tracklist(track_info, picks, user_to_compare, comparison_picks) }}
             {% endif %}
-            
-            {% set ratings = user.get_ratings() if user else {} %}
-            {% set active_actions = user.get_active_actions(release.id) if user else [] %}
-            
-            {# Which buttons appear / how they appear depends on their status #}
-            {% set actions = [("save", "playlist_add", "Save")] %}
-            {% set _ = actions.append(("listen", "headset", "Listened to")) if release.id not in ratings %}
-            {% set _ = actions.append(("share", "share", "Share")) if "listen" in active_actions %}
-            
-            {{ clickable_action_list(actions, active_actions,
-                                     data=[("data-release-id", release.id)]) }}
-            
-            {{ rating_widget(release, ratings[release.id] if release.id in ratings, None) }}
+                        
+            {% if not request.user.is_anonymous %}
+                {# Which buttons appear / how they appear depends on their status #}
+                {% set actions = [("save", "playlist_add", "Save",
+                                   user_actions and user_actions.save != None)] %}
+                {% set _ = actions.append(("listen", "headset", "Listened to",
+                                           user_actions and user_actions.listen != None))
+                           if not (user_actions and user_actions.rate) %}
+                
+                {{ clickable_action_list(actions, data=[("data-release-id", release.id)]) }}
+                
+                {{ rating_widget(release, user_actions.rating() if user_actions else None, None) }}
+            {% endif %}
         </div>
         <div class="album-cover clearfix">
-            {% if release.full_art_url %}
-                <a href="{{ release.full_art_url }}"><img src="{{ release.full_art_url }}"/></a><br/>
+            {% if release.art_url_max %}
+                <a href="{{ release.art_url_max }}"><img src="{{ release.art_url_250 }}"/></a><br/>
             {% endif %}
-            <div class="next-albums">
-                {% for artist, previous, next in release.get_next_releaseses() %}
-                    {% if previous or next %}
-                        {% if loop.index != 1 %}
-                            <div>By {{ artist_link(artist) }}:</div>
-                        {% endif %}
-                        {% if previous %}
-                            <a href={{ previous.url }} class="previous">&larr; {{ previous.title }} [{{ previous.date[:4] }}]</a>
-                        {% endif %}
-                        {% if next %}
-                            <a href={{ next.url }} class="next">{{ next.title }} [{{ next.date[:4] }}]&nbsp;&rarr;</a>
-                        {% endif %}
-                        <br/>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    
-    <section class="page content columns">
-        <section>
-            <header><h2>External links</h2></header>
-            <p></p>
-            {% for site, link in release.get_external_links() %}
-                <a href={{ link }} target=_blank>{{ site }} <i class="material-icons tiny">launch</i></a><br/>
+            {% for external_link in release.external_links.all() %}
+                {% if loop.index == 1 %}<br/>{% endif %}
+                <a href={{ external_link.url }} target=_blank>{{ external_link.name }}<i class="material-icons tiny">launch</i></a>
             {% endfor %}
-        </section>
-        <section>
-            <header><h2>Contribute</h2></header>
-            Report a mistake<br/>
-            {% if user and user.type.name == "admin" %}
-                <a href={{ release.url + "/edit" }}>Edit the release palette</a><br/>
-            {% endif %}
-            Add an external link<br/>
-            Add cover art<br/>
-        </section>
+        </div>
     </section>
 {% endif %}
 
-{% for artist in release.get_artists() %}
+{% for artist in artists %}
 <section class="page content">
 	<header>
         <h3 id="more-from"><em>More from</em></h3>
         <h1>{{ artist.name }}</h1>
     </header>
 	
-	{% set other_releases = artist.get_releases()
-	    | selectattr("release_type", "equalto", "Album")
-	    | rejectattr("id", "equalto", release.id)
-	    | sort(attribute="date") %}
-    {{ release_list(other_releases[-10:]) }}
+	{% set other_releases = artist.releases.albums()
+        .exclude(id=release.id).order_by("release_date")[:10] %}
+    {{ release_list(other_releases) }}
     
     {{ artist_details(artist) }}
 </section>

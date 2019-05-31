@@ -1,4 +1,4 @@
-{% from "macros.html" import artist_link, object_link %}
+{% from "macros.html" import artist_link %}
 
 {% macro rating_widget(release, selected, class) -%}
     <ol class="{{ class if class else '' }} rating unselectable">
@@ -12,7 +12,7 @@
     <ol class="releases">
     {% for release in releases %}
         <li>
-            <h2><time>{{ release.date[:4] }}</time> {{ object_link(release) }}</a></h2>
+            <h2><time>{{ release.release_year_str() }}</time> <a href={{ url_for_release(release) }}>{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>
