@@ -39,8 +39,6 @@ class ReleaseType(enum.Enum):
     SINGLE = 2
     EP = 3
     BROADCAST = 4
-    OTHER = 7
-    #
     COMPILATION = 5
     SOUNDTRACK = 6
     SPOKENWORD = 7
@@ -52,6 +50,7 @@ class ReleaseType(enum.Enum):
     DJ_MIX = 13
     MIXTAPE_STREET = 14
     DEMO = 15
+    OTHER = 16
 
 class ReleaseQuerySet(models.QuerySet):
     def albums(self):
