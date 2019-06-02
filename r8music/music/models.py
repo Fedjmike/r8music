@@ -73,9 +73,6 @@ class ReleaseQuerySet(models.QuerySet):
     def albums(self):
         return self.filter(type=ReleaseType.ALBUM)
         
-    def non_albums(self):
-        return self.exclude(type=ReleaseType.ALBUM)
-        
     def with_average_rating(self):
         return self.annotate(average_rating=Avg("active_actions__rate__rating"))
         
@@ -106,6 +103,10 @@ class Release(models.Model):
     colour3 = models.TextField(null=True)
     
     objects = ReleaseQuerySet.as_manager()
+    
+    @property
+    def is_album(self):
+        return self.type == ReleaseType.ALBUM
     
     def release_year_str(self):
         return self.release_date[:4]

@@ -18,14 +18,12 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_grid(releases, request_user=None, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
+{% macro release_grid(releases, user_ratings={}, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
     <ol class="releases grid {{ class if class else '' }}">
-    {% set releases = releases.prefetch_related("artists")
-               .with_average_rating().with_ratings_by_user(request_user) %}
     {% for release in releases %}
         <li>
             <div class="bottom inset inset-rating-widget">
-                {{ rating_widget(release, release.user_rating, "small") }}
+                {{ rating_widget(release, user_ratings[release.id], "small") }}
             </div>
             {% if show_average_rating %}
             <div class="top inset inset-average-rating">

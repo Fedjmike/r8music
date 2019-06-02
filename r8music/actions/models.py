@@ -42,6 +42,17 @@ class PickAction(Action):
         active_actions = self._get_active_actions(self.track.release)
         active_actions.picks.add(self)
     
+#
+
+class ActiveActionsQuerySet(models.QuerySet):
+    def ratings(self):
+        """Return all the ratings in the queryset, as a dictionary from release
+           id to rating."""
+        return {
+            id: user_rating for id, user_rating
+            in self.exclude(rate=None).values_list("release_id", "rate__rating")
+        }
+        
 class ActiveActions(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="active_actions")
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="active_actions")
@@ -52,6 +63,8 @@ class ActiveActions(models.Model):
     listen = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
     rate = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)
+    
+    objects = ActiveActionsQuerySet.as_manager()
     
     def picked_tracks(self):
         return self.picks.all().values_list("track_id", flat=True)
