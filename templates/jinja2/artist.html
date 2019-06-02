@@ -7,9 +7,9 @@
 
 {% block content %}
 
-{{ page_tabs([(None, artist.name),
-              ("activity", "Activity")],
-             artist.url, current_tab=tab) }}
+{{ page_tabs([(None, artist.name, None),
+              ("activity", "Activity", None)],
+             url("artist", args=[artist.slug]), current_tab=tab) }}
 
 {% if tab == "activity" %}
     <section class="content page">
@@ -25,16 +25,16 @@
             {{ artist_details(artist) }}
         </div>
         <div class="column-1-3">
-            {% set thumb, image = artist.get_image() %}
+            {% set thumb, image = artist.image() %}
             {% if image %}
                 <a class="artist-image-container" href={{ image }}><img class="artist-image" src={{ thumb }}></a>
             {% else %}
                 <header></header>
             {% endif %}
             
-            {% set common_tags = artist.get_common_tags(limit=5) %}
-            {% set top_tracks = artist.get_top_tracks(limit=3) %}
-            {% set top_release = artist.get_top_release() %}
+            {% set common_tags = artist.all_tags.order_by_frequency().filter(frequency__gt=0)[:5] %}
+            {% set top_tracks = artist.all_tracks.order_by_popularity().filter(popularity__gt=0)[:3] %}
+            {% set top_release = artist.releases.order_by_average_rating().filter(average_rating__gt=0).first() %}
             <table>
                 {% if common_tags %}
                 <tr>
@@ -46,8 +46,8 @@
                     <td>Picks</td>
                     <td>
                         <ol>
-                        {% for count, track, release in top_tracks %}
-                            <li class="comma-separated"><a href={{ release.url }}>{{ track.title }}</a></li>
+                        {% for track in top_tracks %}
+                            <li class="comma-separated"><a href={{ url_for_release(track.release) }}>{{ track.title }}</a></li>
                         {% endfor %}
                         </ol>
                     </td>
@@ -56,29 +56,27 @@
                 {% if top_release %}
                 <tr>
                     <td>Top release</td>
-                    <td>{{ object_link(top_release) }}</td>
+                    <td><a href={{ url_for_release(top_release) }}>{{ top_release.title }}</a></td>
                 </tr>
                 {% endif %}
             </table>
         </div>
     </section>
-    {% set all_releases = artist.get_releases() %}
-    {% set albums = all_releases | selectattr("release_type", "equalto", "Album") | list %}
-    {% set album_section = albums | length != 0 %}
+    
+    {% set albums = artist.releases.albums().order_by("release_date") %}
+    {% set other_releases = artist.releases.non_albums().order_by("release_date") %}
+    {% set has_album_section = albums | length != 0 %}
     <section class="content page">
         <header>
-            <span class="right de-emph" style="clear: right">Out of date? <a href={{ url_for("update_artist", id=artist.id) }}>Update this artist</a></span>
-            <h2>{{ "Albums" if album_section else "Releases" }}</h2>
+            <span class="right de-emph" style="clear: right">Out of date? <a href={{ url("update-artist", kwargs={"id": artist.id}) }}>Update this artist</a></span>
+            <h2>{{ "Albums" if has_album_section else "Releases" }}</h2>
         </header>
-        {{ release_grid((albums if album_section else all_releases) | sort(attribute="date"), user, show_date_not_artist=True, show_average_rating=True) }}
+        {{ release_grid((albums if has_album_section else other_releases), request.user, show_date_not_artist=True, show_average_rating=True) }}
     </section>
-    {% if album_section %}
+    {% if has_album_section and other_releases %}
     <section class="content page">
-        {% set others = all_releases | rejectattr("release_type", "equalto", "Album") | list %}
-        {% if others %}
-            <header><h3>Other releases</h3></header>
-            {{ release_grid(others | sort(attribute="date"), user, "small", show_date_not_artist=True, show_average_rating=True) }}
-        {% endif %}
+        <header><h3>Other releases</h3></header>
+        {{ release_grid(other_releases, request.user, "small", show_date_not_artist=True, show_average_rating=True) }}
     </section>
     {% endif %}
 {% endif %}

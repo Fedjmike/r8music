@@ -1,8 +1,8 @@
 from itertools import count, groupby
 
 from django.db import models
+from django.db.models import Count, Avg, Q, F
 from django_enumfield import enum
-from django.db.models import Avg
 
 from django.template.defaultfilters import slugify
 
@@ -13,12 +13,18 @@ def runtime_str(milliseconds):
 
 #
 
+class TagQuerySet(models.QuerySet):
+    def order_by_frequency(self):
+        return self.annotate(frequency=Count("releases")).order_by("-frequency")
+
 class Tag(models.Model):
     name = models.TextField()
     title = models.TextField()
     description = models.TextField()
     
     owner = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    
+    objects = TagQuerySet.as_manager()
 
 class DiscogsTag(Tag):
     discogs_name = models.TextField()
@@ -31,6 +37,17 @@ class Artist(models.Model):
     #A couple of sentences or short paragraphs about the artist
     description = models.TextField(null=True)
     
+    @property
+    def all_tracks(self):
+        return Track.objects.filter(release__artists=self)
+    
+    @property
+    def all_tags(self):
+        return Tag.objects.filter(releases__artists=self)
+         
+    def image(self):
+        return None, None
+        
     def wikipedia_urls(self):
         return None
     
@@ -58,6 +75,16 @@ class ReleaseQuerySet(models.QuerySet):
         
     def non_albums(self):
         return self.exclude(type=ReleaseType.ALBUM)
+        
+    def with_average_rating(self):
+        return self.annotate(average_rating=Avg("active_actions__rate__rating"))
+        
+    def order_by_average_rating(self):
+        return self.with_average_rating().order_by("-average_rating")
+        
+    def with_ratings_by_user(self, user):
+        return self.annotate(user_rating=F("active_actions__rate__rating")) \
+            .filter(active_actions__user=user)
         
 class Release(models.Model):
     title = models.TextField()
@@ -97,6 +124,11 @@ class Release(models.Model):
             "track_no": len(tracks)
         }
 
+class TrackQuerySet(models.QuerySet):
+    def order_by_popularity(self):
+        is_picked = Q(release__active_actions__picks__track_id=F("id"))
+        return self.annotate(popularity=Count(1, filter=is_picked)).order_by("-popularity")
+        
 class Track(models.Model):
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="tracks")
     
@@ -106,6 +138,8 @@ class Track(models.Model):
     side = models.IntegerField()
     #In miliseconds
     runtime = models.IntegerField(null=True)
+    
+    objects = TrackQuerySet.as_manager()
     
     def runtime_str(self):
         return runtime_str(self.runtime) if self.runtime else None

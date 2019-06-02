@@ -18,32 +18,33 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_grid(releases, user=None, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
+{% macro release_grid(releases, request_user=None, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
     <ol class="releases grid {{ class if class else '' }}">
-    {% set ratings = user.get_ratings() if user else {} %}
+    {% set releases = releases.prefetch_related("artists")
+               .with_average_rating().with_ratings_by_user(request_user) %}
     {% for release in releases %}
         <li>
             <div class="bottom inset inset-rating-widget">
-                {{ rating_widget(release, ratings[release.id] if release.id in ratings, "small") }}
+                {{ rating_widget(release, release.user_rating, "small") }}
             </div>
             {% if show_average_rating %}
             <div class="top inset inset-average-rating">
-                {% set average_rating = release.get_rating_stats().average %}
+                {% set average_rating = release.average_rating %}
                 <span id="average-rating-section" style="{{ '' if average_rating else 'display: none;' }}">
                     <span id="average-rating">{{ "%.1f" % average_rating if average_rating else '' }}</span>
                 </span>
             </div>
             {% endif %}
-            <a href={{ release.url }}{% if that_user %}?compare={{ that_user.name }}{% endif %}>
-                <div class="cover"><img src="{{ release.thumb_art_url if release.thumb_art_url else 'http://i.imgur.com/UGgojDS.png' }}" /></div>
+            <a href={{ url_for_release(release) }}{% if that_user %}?compare={{ that_user.name }}{% endif %}>
+                <div class="cover"><img src="{{ release.art_url_250 if release.art_url_250 else 'http://i.imgur.com/UGgojDS.png' }}" /></div>
                 {% if show_date_not_artist %}
-                    <span class="title">{{ release.title }}<br/>{{ release.date[:4] }}</span>
+                    <span class="title">{{ release.title }}<br/>{{ release.release_year_str() }}</span>
             </a>
                 {% else %}
                     <strong class="title">{{ release.title }}</strong>
             </a>
                     <span>
-                    {% for artist in release.get_artists() %}
+                    {% for artist in release.artists.all() %}
                         <span class="title author">{{ artist_link(artist) }}</span>
                     {% endfor %}
                     </span>
