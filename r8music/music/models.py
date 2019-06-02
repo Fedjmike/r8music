@@ -6,7 +6,7 @@ from django_enumfield import enum
 
 from django.template.defaultfilters import slugify
 
-from r8music.profiles.models import User
+from django.contrib.auth.models import User
 
 def runtime_str(milliseconds):
     return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
@@ -86,7 +86,9 @@ class ReleaseQuerySet(models.QuerySet):
 class Release(models.Model):
     title = models.TextField()
     slug = models.SlugField(unique=True)
+    
     artists = models.ManyToManyField(Artist, related_name="releases")
+    
     type = enum.EnumField(ReleaseType, null=True, default=None)
     release_date = models.TextField()
     
@@ -135,8 +137,10 @@ class Track(models.Model):
     
     title = models.TextField()
     slug = models.SlugField(unique=True)
+    
     position = models.IntegerField()
     side = models.IntegerField()
+    
     #In miliseconds
     runtime = models.IntegerField(null=True)
     
