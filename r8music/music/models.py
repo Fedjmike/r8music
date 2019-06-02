@@ -90,11 +90,12 @@ class Release(models.Model):
     artists = models.ManyToManyField(Artist, related_name="releases")
     
     type = enum.EnumField(ReleaseType, null=True, default=None)
+    #As an ISO8601 date string, or a fragment (e.g. YYYY) in case the full date is unknown
     release_date = models.TextField()
     
     tags = models.ManyToManyField(Tag, related_name="releases")
     
-    #Cover art links
+    #Cover art URLs (in different dimensions)
     art_url_250 = models.TextField(null=True)
     art_url_500 = models.TextField(null=True)
     art_url_max = models.TextField(null=True)
@@ -138,8 +139,9 @@ class Track(models.Model):
     title = models.TextField()
     slug = models.SlugField(unique=True)
     
-    position = models.IntegerField()
     side = models.IntegerField()
+    #The position within the indicated side, not overall
+    position = models.IntegerField()
     
     #In miliseconds
     runtime = models.IntegerField(null=True)
