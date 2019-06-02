@@ -45,13 +45,7 @@ class PickAction(Action):
 #
 
 class ActiveActionsQuerySet(models.QuerySet):
-    def ratings(self):
-        """Return all the ratings in the queryset, as a dictionary from release
-           id to rating."""
-        return {
-            id: user_rating for id, user_rating
-            in self.exclude(rate=None).values_list("release_id", "rate__rating")
-        }
+    pass
         
 class ActiveActions(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="active_actions")

@@ -12,14 +12,19 @@ class ArtistPage(DetailView):
     def get_object(self):
         return Artist.objects.get(slug=self.kwargs["slug"])
 
+    def get_user_ratings(self, artist, user):
+        user_ratings = {
+            id: user_rating for id, user_rating
+            in ActiveActions.objects
+                .filter(release__artists=artist, user=user).exclude(rate=None)
+                .values_list("release_id", "rate__rating")
+        }
+        
+        return defaultdict(lambda: None, user_ratings)
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        user_ratings = ActiveActions.objects \
-            .filter(release__artists=context["artist"], user=self.request.user) \
-            .ratings()
-            
-        context["user_ratings"] = defaultdict(lambda: None, user_ratings)
+        context["user_ratings"] = self.get_user_ratings(context["artist"], self.request.user)
         return context
     
 class ReleasePage(DetailView):
