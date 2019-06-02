@@ -3,11 +3,9 @@
 {% from "release_list.html" import release_list, release_grid, rating_widget %}
 {% from "activity_list.html" import release_activity_list %}
 
-{% set artists = release.artists.all() %}
-
 {% block title %}
     {{ release.title }} [{{release.release_year_str()}}] -
-    {% for artist in artists %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
+    {% for artist in release.artists.all() %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
     {{ super() }}
 {% endblock %}
 
@@ -76,7 +74,7 @@
                     {{ release.title }}
                 </h1>
                 <h2 class="byline">
-                {% for artist in artists %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
+                {% for artist in release.artists.all() %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
                     <time>{{ release.release_year_str() }}</time>
                 </h2>
                 <div>
@@ -132,7 +130,7 @@
     </section>
 {% endif %}
 
-{% for artist in artists %}
+{% for artist in release.artists.all() %}
 <section class="page content">
 	<header>
         <h3 id="more-from"><em>More from</em></h3>

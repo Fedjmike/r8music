@@ -15,4 +15,4 @@ class ReleasePage(DetailView):
     template_name ="release.html"
     
     def get_object(self):
-        return Release.objects.get(slug=self.kwargs["release_slug"], artists__slug=self.kwargs["artist_slug"])
+        return Release.objects.prefetch_related("artists").get(slug=self.kwargs["release_slug"], artists__slug=self.kwargs["artist_slug"])
