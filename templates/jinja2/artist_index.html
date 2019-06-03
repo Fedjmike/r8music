@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Index of artists{{ super() }}{% endblock %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Index of artists</h1></header>
+
+    <p>Is an artist missing? <a href={{ url("add-artist") }}>Add them to the database</a>.</p>
+    
+    <ol>
+    {% for artist in object_list %}
+        <li><a href={{ url_for_artist(artist) }}>{{ artist.name }}</a></li>
+    {% endfor %}
+    </ol>
+</section>
+{% endblock %}

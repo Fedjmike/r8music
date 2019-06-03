@@ -1,10 +1,18 @@
 from collections import defaultdict
 
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from .models import Artist, Release
 from r8music.actions.models import ActiveActions
 
+class ArtistIndex(ListView):
+    model = Artist
+    template_name ="artist_index.html"
+    
+    def get_queryset(self):
+        #Most recently imported artists first
+        return Artist.objects.order_by("-id")
+    
 class ArtistPage(DetailView):
     model = Artist
     template_name ="artist.html"
