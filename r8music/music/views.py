@@ -47,7 +47,19 @@ class ReleasePage(DetailView):
     
     def get_object(self):
         return Release.objects.prefetch_related("artists").get(slug=self.kwargs["slug"])
-
+        
+    def get_user_actions(self, release):
+        try:
+            return self.request.user.active_actions.select_related("rate").get(release=release)
+            
+        except (AttributeError, ActiveActions.DoesNotExist):
+            return None
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user_actions"] = self.get_user_actions(context["release"])
+        return context
+        
 class TagPage(DetailView, MultipleObjectMixin):
     model = Tag
     template_name = "tag.html"

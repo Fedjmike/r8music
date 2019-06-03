@@ -83,8 +83,7 @@
             </header>
             
             {% set track_info = release.tracks_extra() %}
-            
-            {% set user_actions = request.user.profile.actions_on_release(release.id) %}{# not anon #}
+
             {% set picks = user_actions.picked_tracks() if user_actions else [] %}
 
             {% set comparison_picks = [] %}
