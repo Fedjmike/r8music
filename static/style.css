@@ -826,18 +826,14 @@ details.tracks-expand {
 
 /*Albums*/
 
-.album-cover {
+.album-side {
 	margin-top: 2em;
     margin-left: 1.5em;
+    text-align: center;
 }
 
-.album-cover img {
+img.cover-art {
     width: 100%;
-}
-
-.album-cover .next-albums {
-    padding: 0.15em 0.5em 0 0.5em;
-    font-size: 0.9em;
 }
 
 .next-albums > * {
@@ -1125,7 +1121,7 @@ input[type=submit] {
 }
 
 .artist-image,
-.album-cover img,
+img.cover-art,
 .thumb {
     /*Glowed border*/
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
@@ -1214,7 +1210,7 @@ section > section {
         margin: 0 auto;
     }
     
-    .album-cover {
+    .album-side {
         max-width: 15em;
         margin-left: auto;
         margin-right: auto;
@@ -1269,7 +1265,7 @@ section > section {
         max-width: 21em;
     }
 
-    .album-cover {
+    .album-side {
         width: 21em;
         margin-right: 0.5em;
     }

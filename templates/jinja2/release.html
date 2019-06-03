@@ -117,9 +117,9 @@
                 {{ rating_widget(release, user_actions.rating() if user_actions else None, None) }}
             {% endif %}
         </div>
-        <div class="album-cover clearfix">
+        <div class="album-side clearfix">
             {% if release.art_url_max %}
-                <a href="{{ release.art_url_max }}"><img src="{{ release.art_url_250 }}"/></a><br/>
+                <a href="{{ release.art_url_max }}"><img class="cover-art" src="{{ release.art_url_250 }}"/></a><br/>
             {% endif %}
             {% for external_link in release.external_links.all() %}
                 {% if loop.index == 1 %}<br/>{% endif %}
