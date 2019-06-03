@@ -8,6 +8,7 @@ from r8music.actions.models import ActiveActions
 class ArtistIndex(ListView):
     model = Artist
     template_name ="artist_index.html"
+    paginate_by = 25
     
     def get_queryset(self):
         #Most recently imported artists first

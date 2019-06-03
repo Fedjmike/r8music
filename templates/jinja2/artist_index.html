@@ -1,3 +1,5 @@
+{% from "macros.html" import page_links %}
+
 {% extends "layout.html" %}
 
 {% block title %}Index of artists{{ super() }}{% endblock %}
@@ -13,5 +15,7 @@
         <li><a href={{ url_for_artist(artist) }}>{{ artist.name }}</a></li>
     {% endfor %}
     </ol>
+    
+    {{ page_links(page_obj) }}
 </section>
 {% endblock %}
