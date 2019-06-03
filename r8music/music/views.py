@@ -23,14 +23,18 @@ class ArtistPage(DetailView):
         return Artist.objects.get(slug=self.kwargs["slug"])
 
     def get_user_ratings(self, artist, user):
-        user_ratings = {
-            id: user_rating for id, user_rating
-            in ActiveActions.objects
-                .filter(release__artists=artist, user=user).exclude(rate=None)
-                .values_list("release_id", "rate__rating")
-        }
+        #A defaultdict allows the template to look up a release whether or not there is a rating
+        user_ratings = defaultdict(lambda: None)
         
-        return defaultdict(lambda: None, user_ratings)
+        if not user.is_anonymous:
+            user_ratings.update({
+                id: user_rating for id, user_rating
+                in ActiveActions.objects
+                    .filter(release__artists=artist, user=user).exclude(rate=None)
+                    .values_list("release_id", "rate__rating")
+            })
+        
+        return user_ratings
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
