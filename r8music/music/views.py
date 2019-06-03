@@ -1,8 +1,9 @@
 from collections import defaultdict
 
 from django.views.generic import DetailView, ListView
+from django.views.generic.list import MultipleObjectMixin
 
-from .models import Artist, Release
+from .models import Artist, Release, Tag
 from r8music.actions.models import ActiveActions
 
 class ArtistIndex(ListView):
@@ -42,3 +43,12 @@ class ReleasePage(DetailView):
     
     def get_object(self):
         return Release.objects.prefetch_related("artists").get(slug=self.kwargs["slug"])
+
+class TagPage(DetailView, MultipleObjectMixin):
+    model = Tag
+    template_name = "tag.html"
+    paginate_by = 30
+    
+    def get_context_data(self, **kwargs):
+        releases = self.object.releases.order_by_average_rating().all()
+        return super().get_context_data(object_list=releases, **kwargs)
