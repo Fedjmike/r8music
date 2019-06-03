@@ -675,7 +675,7 @@ form.review textarea {
 ol.tracks {
     color: #333;
     counter-reset: item;
-    margin-left: 0;
+    margin: 0.5em 0;
     padding-left: 0;
 }
 
