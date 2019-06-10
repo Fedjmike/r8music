@@ -48,7 +48,7 @@ class Artist(models.Model):
     def image(self):
         return None, None
         
-    def wikipedia_urls(self):
+    def wikipedia_url(self):
         return None
     
 class ReleaseType(enum.Enum):
