@@ -8,7 +8,12 @@ from django.template.defaultfilters import slugify
 
 from django.contrib.auth.models import User
 
-def runtime_str(milliseconds):
+def generate_slug(is_free, name):
+    slug = slugify(name)
+    candidates = ("%s-%d" % (slug, n) if n else slug for n in count(0))
+    return next(filter(is_free, candidates))
+    
+def make_runtime_str(milliseconds):
     return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
 
 #
@@ -128,7 +133,7 @@ class Release(models.Model):
         tracks = self.tracks.all()
         return {
             "sides": [list(tracks) for _, tracks in groupby(tracks, lambda track: track.side)],
-            "runtime": runtime_str(sum(track.runtime for track in tracks if track.runtime)),
+            "runtime": make_runtime_str(sum(track.runtime for track in tracks if track.runtime)),
             "track_no": len(tracks)
         }
 
@@ -154,7 +159,7 @@ class Track(models.Model):
     
     @property
     def runtime_str(self):
-        return runtime_str(self.runtime) if self.runtime else None
+        return make_runtime_str(self.runtime) if self.runtime else None
 
 #
 
@@ -173,10 +178,3 @@ class ArtistExternalLink(ExternalLink):
     
 class ReleaseExternalLink(ExternalLink):
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="external_links")
-
-#
-
-def generate_slug(is_free, name):
-    slug = slugify(name)
-    candidates = ("%s-%d" % (slug, n) if n else slug for n in count(0))
-    return next(filter(is_free, candidates))
