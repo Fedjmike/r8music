@@ -45,9 +45,11 @@ class Artist(models.Model):
     def all_tags(self):
         return Tag.objects.filter(releases__artists=self)
          
+    @property
     def image(self):
         return None, None
         
+    @property
     def wikipedia_url(self):
         return None
     
@@ -111,9 +113,11 @@ class Release(models.Model):
     def is_album(self):
         return self.type == ReleaseType.ALBUM
     
+    @property
     def release_year_str(self):
         return self.release_date[:4]
     
+    @property
     def palette(self):
         return self.colour1, self.colour2, self.colour3
     
@@ -148,6 +152,7 @@ class Track(models.Model):
     
     objects = TrackQuerySet.as_manager()
     
+    @property
     def runtime_str(self):
         return runtime_str(self.runtime) if self.runtime else None
 

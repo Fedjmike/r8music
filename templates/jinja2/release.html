@@ -4,12 +4,12 @@
 {% from "activity_list.html" import release_activity_list %}
 
 {% block title %}
-    {{ release.title }} [{{release.release_year_str()}}] -
+    {{ release.title }} [{{release.release_year_str}}] -
     {% for artist in release.artists.all() %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
     {{ super() }}
 {% endblock %}
 
-{% set accent_color_1, accent_color_2, accent_color_3 = release.palette() %}
+{% set accent_color_1, accent_color_2, accent_color_3 = release.palette %}
 
 {% macro tracklist(track_info, picks, user_to_compare, comparison_picks) -%}
     <ol class="tracks">
@@ -27,7 +27,7 @@
                         <i class="material-icons">stars</i>
                     </a>
                 </span>
-                {% if track.runtime %} <time>{{ track.runtime_str() }}</time> {% endif %}
+                {% if track.runtime %} <time>{{ track.runtime_str }}</time> {% endif %}
             </li>
         {% endfor %}
     {% endfor %}
@@ -75,7 +75,7 @@
                 </h1>
                 <h2 class="byline">
                 {% for artist in release.artists.all() %}<span class="author">{{ artist_link(artist) }}</span>{% endfor %},
-                    <time>{{ release.release_year_str() }}</time>
+                    <time>{{ release.release_year_str }}</time>
                 </h2>
                 <div>
                 {{ tag_list(release.tags.all()) }}

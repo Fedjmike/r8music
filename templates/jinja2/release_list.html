@@ -12,7 +12,7 @@
     <ol class="releases">
     {% for release in releases %}
         <li>
-            <h2><time>{{ release.release_year_str() }}</time> <a href={{ url_for_release(release) }}>{{ release.title }}</a></h2>
+            <h2><time>{{ release.release_year_str }}</time> <a href={{ url_for_release(release) }}>{{ release.title }}</a></h2>
         </li>
     {% endfor %}
     </ol>
@@ -36,7 +36,7 @@
             <a href={{ url_for_release(release) }}{% if that_user %}?compare={{ that_user.name }}{% endif %}>
                 <div class="cover"><img src="{{ release.art_url_250 if release.art_url_250 else 'http://i.imgur.com/UGgojDS.png' }}" /></div>
                 {% if show_date_not_artist %}
-                    <span class="title">{{ release.title }}<br/>{{ release.release_year_str() }}</span>
+                    <span class="title">{{ release.title }}<br/>{{ release.release_year_str }}</span>
             </a>
                 {% else %}
                     <strong class="title">{{ release.title }}</strong>

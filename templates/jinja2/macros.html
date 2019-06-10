@@ -99,8 +99,8 @@
     {% set description = artist.description %}
     <p>{{ description | safe if description else "" }}</p>
     
-    {% if artist.wikipedia_url() %}
-        <p class="de-emph">[<a href="{{ artist.wikipedia_url() }}" target=_blank>Read more</a> on Wikipedia]</p>
+    {% if artist.wikipedia_url %}
+        <p class="de-emph">[<a href="{{ artist.wikipedia_url }}" target=_blank>Read more</a> on Wikipedia]</p>
     {% endif %}
 
     <header class="tight"><h4>External links</h4></header>
