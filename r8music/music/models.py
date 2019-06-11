@@ -108,9 +108,9 @@ class Release(models.Model):
     art_url_max = models.TextField(null=True)
     
     #The colour palette used on the release page, derived from the album art
-    colour1 = models.TextField(null=True)
-    colour2 = models.TextField(null=True)
-    colour3 = models.TextField(null=True)
+    colour_1 = models.TextField(null=True)
+    colour_2 = models.TextField(null=True)
+    colour_3 = models.TextField(null=True)
     
     objects = ReleaseQuerySet.as_manager()
     
@@ -124,7 +124,7 @@ class Release(models.Model):
     
     @property
     def palette(self):
-        return self.colour1, self.colour2, self.colour3
+        return self.colour_1, self.colour_2, self.colour_3
     
     def average_rating(self):
         return self.active_actions.aggregate(average=Avg("rate__rating"))["average"]

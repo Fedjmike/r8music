@@ -224,7 +224,7 @@ class Transferer:
         
     def transfer_release(
         self, release_id, title, release_type, release_date,
-        thumb_art_url, full_art_url, colour1, colour2, colour3,
+        thumb_art_url, full_art_url, colour_1, colour_2, colour_3,
         used_slugs
     ):
         new_release = Release.objects.create(
@@ -235,9 +235,9 @@ class Transferer:
             art_url_250=thumb_art_url,
             art_url_500=full_art_url,
             art_url_max=full_art_url,
-            colour1=colour1,
-            colour2=colour2,
-            colour3=colour3
+            colour_1=colour_1,
+            colour_2=colour_2,
+            colour_3=colour_3
         )
         
         return ReleaseV1Link(release=new_release, old_id=release_id)
