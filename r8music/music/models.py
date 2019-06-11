@@ -125,6 +125,10 @@ class Release(models.Model):
     @property
     def palette(self):
         return self.colour_1, self.colour_2, self.colour_3
+        
+    def set_palette(self, *colours):
+        self.colour_1, self.colour_2, self.colour_3 = colours
+        self.save()
     
     def average_rating(self):
         return self.active_actions.aggregate(average=Avg("rate__rating"))["average"]

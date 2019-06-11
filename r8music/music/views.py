@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
 
@@ -59,7 +60,25 @@ class ReleasePage(DetailView):
         context = super().get_context_data(**kwargs)
         context["user_actions"] = self.get_user_actions(context["release"])
         return context
+
+class EditReleasePage(DetailView):
+    model = Release
+    template_name ="edit_release.html"
+    
+    def get_object(self):
+        return Release.objects.prefetch_related("artists").get(slug=self.kwargs["slug"])
         
+    def post(self, request, *args, **kwargs):
+        colours = (request.POST.get(c) for c in ["colour-1", "colour-2", "colour-3"])
+        
+        release = self.get_object()
+        release.set_palette(*colours)
+        
+        #Redirect back to the edit page
+        return HttpResponseRedirect(request.path_info)
+
+#
+
 class TagPage(DetailView, MultipleObjectMixin):
     model = Tag
     template_name = "tag.html"
