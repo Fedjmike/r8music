@@ -41,7 +41,13 @@ class ArtistPage(DetailView):
         context = super().get_context_data(**kwargs)
         context["user_ratings"] = self.get_user_ratings(context["artist"])
         return context
-    
+
+#
+
+def set_page_palette(context):
+    colours = context["release"].palette
+    context["accent_color_1"], context["accent_color_2"], context["accent_color_3"] = colours
+
 class ReleasePage(DetailView):
     model = Release
     template_name ="release.html"
@@ -59,6 +65,7 @@ class ReleasePage(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user_actions"] = self.get_user_actions(context["release"])
+        set_page_palette(context)
         return context
 
 class EditReleasePage(DetailView):
@@ -67,6 +74,11 @@ class EditReleasePage(DetailView):
     
     def get_object(self):
         return Release.objects.prefetch_related("artists").get(slug=self.kwargs["slug"])
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        set_page_palette(context)
+        return context
         
     def post(self, request, *args, **kwargs):
         colours = (request.POST.get(c) for c in ["colour-1", "colour-2", "colour-3"])

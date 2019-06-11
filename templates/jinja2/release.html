@@ -9,8 +9,6 @@
     {{ super() }}
 {% endblock %}
 
-{% set accent_color_1, accent_color_2, accent_color_3 = release.palette %}
-
 {% macro tracklist(track_info, picks, user_to_compare, comparison_picks) -%}
     <ol class="tracks">
     {% for tracks in track_info["sides"] %}
