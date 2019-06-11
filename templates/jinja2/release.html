@@ -129,15 +129,7 @@
 
 {% for artist in release.artists.all() %}
 <section class="page content">
-	<header>
-        <h3 id="more-from"><em>More from</em></h3>
-        <h1>{{ artist.name }}</h1>
-    </header>
-	
-	{% set other_releases = artist.releases.albums()
-        .exclude(id=release.id).order_by("release_date")[:10] %}
-    {{ release_list(other_releases) }}
-    
+	<header><h1>{{ artist.name }}</h1></header>
     {{ artist_details(artist) }}
 </section>
 {% endfor %}
