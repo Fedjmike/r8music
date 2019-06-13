@@ -16,9 +16,9 @@ class ArtistIndex(ListView):
         #Most recently imported artists first
         return Artist.objects.order_by("-id")
     
-class ArtistPage(DetailView):
+class ArtistMainPage(DetailView):
     model = Artist
-    template_name ="artist.html"
+    template_name ="artist_main.html"
     
     def get_object(self):
         return Artist.objects.get(slug=self.kwargs["slug"])
@@ -42,7 +42,7 @@ class ArtistPage(DetailView):
         context["user_ratings"] = self.get_user_ratings(context["artist"])
         return context
 
-#
+# Releases
 
 class AbstractReleasePage(DetailView):
     model = Release
@@ -58,8 +58,8 @@ class AbstractReleasePage(DetailView):
         
         return context
 
-class ReleasePage(AbstractReleasePage):
-    template_name = "release.html"
+class ReleaseMainPage(AbstractReleasePage):
+    template_name = "release_main.html"
     
     def get_user_actions(self, release):
         try:

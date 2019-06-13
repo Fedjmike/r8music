@@ -1,84 +1,22 @@
 {% extends "layout.html" %}
-{% from "macros.html" import artist_link, object_link, page_tabs, subpage_header, artist_details, tag_list %}
-{% from "release_list.html" import release_list, release_grid %}
+{% from "macros.html" import artist_link, page_tabs, subpage_header %}
 {% from "activity_list.html" import activity_list %}
 
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
-
-{{ page_tabs([(None, artist.name, None),
-              ("activity", "Activity", None)],
-             url("artist", args=[artist.slug]), current_tab=tab) }}
-
-{% if tab == "activity" %}
-    <section class="content page">
-        {{ subpage_header("Activity", artist_link(artist)) }}
-        {% set last_action, actions = artist.get_activity_on_releases() %}
-        {{ activity_list(actions) }}
-    </section>
-
-{% else %}
-    <section class="page columns content">
-        <div>
-            <header><h1>{{ artist.name }}</h1></header>
-            {{ artist_details(artist) }}
-        </div>
-        <div class="column-1-3">
-            {% set thumb, image = artist.image %}
-            {% if image %}
-                <a class="artist-image-container" href={{ image }}><img class="artist-image" src={{ thumb }}></a>
-            {% else %}
-                <header></header>
-            {% endif %}
-            
-            {% set common_tags = artist.all_tags.order_by_frequency().filter(frequency__gt=0)[:5] %}
-            {% set top_tracks = artist.all_tracks.order_by_popularity().filter(popularity__gt=0)[:3] %}
-            {% set top_release = artist.releases.order_by_average_rating().filter(average_rating__gt=0).first() %}
-            <table>
-                {% if common_tags %}
-                <tr>
-                    <td>Genres</td><td>{{ tag_list(common_tags) }}</td>
-                </tr>
-                {% endif %}
-                {% if top_tracks %}
-                <tr>
-                    <td>Picks</td>
-                    <td>
-                        <ol>
-                        {% for track in top_tracks %}
-                            <li class="comma-separated"><a href={{ url_for_release(track.release) }}>{{ track.title }}</a></li>
-                        {% endfor %}
-                        </ol>
-                    </td>
-                </tr>
-                {% endif %}
-                {% if top_release %}
-                <tr>
-                    <td>Top release</td>
-                    <td><a href={{ url_for_release(top_release) }}>{{ top_release.title }}</a></td>
-                </tr>
-                {% endif %}
-            </table>
-        </div>
-    </section>
+    {% set tabs = [("main", url_for_artist(artist), artist.name, None),
+                   ("activity", url_for_artist(artist, route="artist_activity"), "Activity", None)] %}
     
-    {% set releases = artist.releases.order_by("release_date").with_average_rating() %}
-    {% set albums = releases | selectattr("is_album") | list %}
-    {% set has_album_section = albums | length != 0 %}
-    {% set other_releases = releases | rejectattr("is_album") %}
-    <section class="content page">
-        <header>
-            <span class="right de-emph" style="clear: right">Out of date? <a href={{ url("update-artist", kwargs={"id": artist.id}) }}>Update this artist</a></span>
-            <h2>{{ "Albums" if has_album_section else "Releases" }}</h2>
-        </header>
-        {{ release_grid((albums if has_album_section else other_releases), user_ratings, show_date_not_artist=True, show_average_rating=True) }}
-    </section>
-    {% if has_album_section and other_releases %}
-    <section class="content page">
-        <header><h3>Other releases</h3></header>
-        {{ release_grid(other_releases, user_ratings, "small", show_date_not_artist=True, show_average_rating=True) }}
-    </section>
+    {{ page_tabs(tabs, current_tab) }}
+    
+    {% block content_below_tabs %}{% endblock %}
+    
+    {% if tab == "activity" %}
+        <section class="content page">
+            {{ subpage_header("Activity", artist_link(artist)) }}
+            {% set last_action, actions = artist.get_activity_on_releases() %}
+            {{ activity_list(actions) }}
+        </section>
     {% endif %}
-{% endif %}
 {% endblock %}

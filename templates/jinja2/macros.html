@@ -51,17 +51,17 @@
     </p>
 {% endmacro %}
 
-{% macro page_tabs(tabs, base_url, current_tab) -%}
+{% macro page_tabs(tabs, current_tab) -%}
 <ol class="page tabs">
-    {% for name, description, secondary_description in tabs %}
-        {% if current_tab == name %}
+    {% for name, url, description, secondary_description in tabs %}
+        {% if name == current_tab %}
             <li class="active">
                 {{ description }}
                 {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
             </li>
         {% else %}
             <li>
-                <a href={{ base_url + ("/" + name if name else "") }}>{{ description }}</a>
+                <a href={{ url }}>{{ description }}</a>
                 {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
             </li>
         {% endif %}
