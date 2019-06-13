@@ -12,6 +12,9 @@
     {% set tabs = [("main", url_for_release(release), release.title, None),
                    ("activity", url_for_release(release, route="release_activity"), "Activity", None)] %}
     
+    {% set _ = tabs.append(("edit", url_for_release(release, route="edit_release"), "Edit", None))
+           if request.user.is_superuser %}
+    
     {{ page_tabs(tabs, current_tab) }}
     
     {% block content_below_tabs %}

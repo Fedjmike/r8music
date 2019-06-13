@@ -1,13 +1,11 @@
-{% extends "layout.html" %}
+{% extends "release.html" %}
 {% from "release_list.html" import release_list, rating_widget %}
 
-{% block title %}
-    Editing {{ release.title }} [{{release.release_year_str}}] -
-    {% for artist in artists %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
-    {{ super() }}
-{% endblock %}
+{% block title %} Editing {{ super() }} {% endblock %}
 
-{% block content %}
+{% set current_tab = "edit" %}
+
+{% block content_below_tabs %}
 <section class="album page content">
     <section>
         <header>
@@ -16,7 +14,7 @@
             </h1>
         </header>
         
-        <form action={{ url_for_release(release, edit=True) }} method="post" class="color-palette clearfix">
+        <form action={{ url_for_release(release, route="edit_release") }} method="post" class="color-palette clearfix">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             <p class="tight">Colour scheme:</p>
             <ol>
