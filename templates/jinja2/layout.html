@@ -98,7 +98,7 @@
         {% endif %}
         {% if not request.user.is_anonymous %}
             <li>
-                <a href={{ url("user", args=[request.user.username]) }}>{{ request.user.username }}</a>
+                <a href={{ url_for_user(request.user) }}>{{ request.user.username }}</a>
                 <a id="user-more" href="">&#9662;</a>
             </li>
             <li><a id="logout" href={{ url("logout") }}>log out</a></li>

@@ -86,9 +86,10 @@ class ReleaseQuerySet(models.QuerySet):
     def order_by_average_rating(self):
         return self.with_average_rating().order_by("-average_rating")
         
-    def with_ratings_by_user(self, user):
-        return self.annotate(user_rating=F("active_actions__rate__rating")) \
-            .filter(active_actions__user=user)
+    def rated_by_user(self, user):
+        return self.filter(active_actions__user=user) \
+            .annotate(rating_by_user=F("active_actions__rate__rating")) \
+            .exclude(rating_by_user=None)
         
 class Release(models.Model):
     title = models.TextField()

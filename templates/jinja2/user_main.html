@@ -1,0 +1,23 @@
+{% extends "user.html" %}
+{% from "release_list.html" import release_grid %}
+
+{% set current_tab = "main" %}
+
+{% block content_below_tabs %}
+    {% set editable = 'editable' if user.id == request.user.id else '' %}
+
+    <div class="grids-list">
+    {% for n, description, releases in releases_rated_groups %}
+        <section class="page content"><div>
+            <header><h1>{{ n }}
+                {% if description %}
+                     &ndash; &ldquo;<span class="{{ editable }} rating-description single-line"
+                                          data-rating={{ n }}>{{ description }}</span>&rdquo;
+                    {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
+                {% endif %}
+            </h1></header>
+            {{ release_grid(releases, request.user, "small", that_user=user if user.id != request.user.id else None) }}
+        </div></section>
+    {% endfor %}
+    </div>
+{% endblock %}

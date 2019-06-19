@@ -1,135 +1,35 @@
 {% extends "layout.html" %}
-{% from "macros.html" import slightly_small_and_de_emph, full_and_friendly_datetime, event_datetime, user_link, page_tabs, tag_list %}
-{% from "activity_list.html" import activity_list %}
-{% from "friend_list.html" import friend_list %}
-{% from "release_list.html" import release_list, release_grid %}
+{% from "macros.html" import event_datetime, page_tabs, tag_list %}
 
-{% block title %}{{ that_user.name }} {{ super() }}{% endblock %}
-
-{% set chart_js = True %}
-
-{% set profile = that_user.get_profile() %}
+{% block title %}{{ user.username }} {{ super() }}{% endblock %}
 
 {% block content %}
 
 <section class="clearfix page content">
-    {% if tab == None %}{# rated tab #}
-    <div class="chart">
-        <header></header>
-        <canvas id="user-chart" width="400" height="200"></canvas>
-        <form>
-            <label><input type="radio" name="chart-select" value="rating-counts" checked="true">Ratings</label>
-            <label><input type="radio" name="chart-select" value="year-counts">Years</label>
-        </form>
-    </div>
-    {% endif %}
-
     <header>
-        <img class="avatar" src={{ that_user.avatar_url }}>
-        <h1>{{ that_user.name }}</h1>
+        <img class="avatar" src={{ user.profile.avatar_url }} />
+        <h1>{{ user.username }}</h1>
         <span class="de-emph">
-            joined {{ event_datetime(that_user.creation) }}
+            joined {{ event_datetime(user.date_joined) }}
         </span>
     </header>
-    <p>
-        {{ tag_list(profile.common_tags[:5]) }}
-    </p>
-    
-    {% if user and that_user.id != user.id %}
-        {% set following_since = user.get_follow(that_user.id) %}
-        <p>
-        <form method="post" action={{ url_for_user(that_user) }}>
-        {% if following_since %}
-            <input type="hidden" name="action" value = "unfollow">
-            <input type="submit" value="Unfollow">
-        {% else %}
-            <input type="hidden" name=action value="follow">
-            <input type="submit" value="Follow">
-        {% endif %}
-        </form>
-        </p>
-    {% endif %}
 </section>
 
-{% set rated_no = that_user.get_rated_no() %}
-{% set listened_unrated_no = that_user.get_listened_unrated_no() %}
-{% set saved_no = that_user.get_saved_no() %}
+{% set tabs = [
+      ("releases-rated", url_for_user(user),
+           "Releases rated", action_counts["rated"]),
+      ("listened-unrated", url_for_user(user, "user_listened_unrated"),
+          "Listened to but not rated", action_counts["listened_unrated"]),
+      ("activity", url_for_user(user, "user_activity"),
+          "Activity", None),
+      ("saved", url_for_user(user, "user_saved"),
+          "Saved", action_counts["saved"]),
+      ("friends", url_for_user(user, "user_friends"),
+          "Friends", None)
+  ] %}
 
-{{ page_tabs([(None, ("Releases rated", rated_no)),
-              ("listened-unrated", ("Listened to but not rated", listened_unrated_no)),
-              ("activity", "Activity"),
-              ("reviews", "Reviews"),
-              ("saved", ("Saved", saved_no)),
-              ("friends", "Friends")],
-              url_for_user(that_user), current_tab=tab) }}
+{{ page_tabs(tabs, current_tab) }}
 
-{% if tab == "listened-unrated" %}
-    <section class="page content"><div>
-        <header><h1>Listened to but unrated</h1></header>
-        {% set listened_unrated = that_user.get_releases_listened_unrated(order=order if order else "artist") %}
-        {{ release_grid(listened_unrated, user, "small") }}
-    </div></section>
-    
-{% elif tab == "saved" %}
-    <section class="page content"><div>
-        <header><h1>Saved releases</h1></header>
-        {% set todo = that_user.get_releases_saved(order=order if order else "artist") %}
-        {{ release_grid(todo, user, "small") }}
-    </div></section>
-    
-{% elif tab == "activity" %}
-    <section class="page content">
-        <header><h1>Recent activity</h1></header>
-        {% set last_action, actions = that_user.get_activity() %}
-        {{ activity_list(actions, same_user=True) }}
-    </section>
-    
-{% elif tab == "friends" %}
-    <section class="page content">
-        {% set friends = that_user.get_friendships() | list %}
-        <header><h2>{{ user_link(that_user) }}'s Friends {{ slightly_small_and_de_emph(friends | length) }}</h2></header>
-        {{ friend_list(sort_friendships(friends), class="collage four") }}
-    </section>
-    
-{% else %}
-    {% set ratings = that_user.get_releases_rated() %}
-    {% set listened_unrated = that_user.get_releases_listened_unrated() %}
-    {% set user_datasets = get_user_datasets(ratings, listened_unrated) %}
-
-    {% set rating_description = that_user.get_rating_descriptions() %}
-
-    <script>
-    var userDatasets = {{ json_dumps(user_datasets) | safe }};
-    </script>
-
-    {% set editable = 'editable' if that_user.id == user.id else '' %}
-
-    <div class="grids-list">
-    {% if order == "year" %}
-        {% set years, releases_by_year = group_by_year(that_user.get_releases_listened()) %}
-        {% for year in years %}
-            <section class="page content"><div>
-                <header><h1>{{ year }}</h1></header>
-                {{ release_grid(releases_by_year[year], user, "small", that_user=that_user if not that_user.id == user.id else None) }}
-            </div></section>
-        {% endfor %}
-        
-    {% else %}
-        {% set by_rating = group_by_rating(ratings) %}
-        {% for n in range(8, 0, -1) %}
-            <section class="page content"><div>
-                <header><h1>{{ n }}
-                    {% if rating_description[n] %} &ndash;
-                    &ldquo;<span class="{{ editable }} rating-description single-line"
-                                 data-rating={{ n }}>{{ rating_description[n] }}</span>&rdquo;
-                     {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
-                    {% endif %}
-                </h1></header>
-                {{ release_grid(sort_by_artist(by_rating[n]), user, "small", that_user=that_user if that_user.id != user.id else None) }}
-            </div></section>
-        {% endfor %}
-    {% endif %}
-    </div>
-{% endif %}
+{% block content_below_tabs %}{% endblock %}
 
 {% endblock %}
