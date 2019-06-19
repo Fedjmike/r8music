@@ -108,7 +108,8 @@ class Release(models.Model):
     art_url_500 = models.TextField(null=True)
     art_url_max = models.TextField(null=True)
     
-    #The colour palette used on the release page, derived from the album art
+    #The colour palette used on the release page, expressed as HTML RGB codes (#rrggbb),
+    #derived from the album art
     colour_1 = models.TextField(null=True)
     colour_2 = models.TextField(null=True)
     colour_3 = models.TextField(null=True)

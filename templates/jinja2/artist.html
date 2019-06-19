@@ -5,8 +5,10 @@
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
 {% block content %}
-    {% set tabs = [("main", url_for_artist(artist), artist.name, None),
-                   ("activity", url_for_artist(artist, route="artist_activity"), "Activity", None)] %}
+    {% set tabs = [
+          ("main", url_for_artist(artist), artist.name, None),
+          ("activity", url_for_artist(artist, "artist_activity"), "Activity", None)
+       ] %}
     
     {{ page_tabs(tabs, current_tab) }}
     

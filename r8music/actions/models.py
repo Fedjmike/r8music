@@ -41,12 +41,9 @@ class PickAction(Action):
     def set_as_active(self):
         active_actions = self._get_active_actions(self.track.release)
         active_actions.picks.add(self)
-    
+
 #
 
-class ActiveActionsQuerySet(models.QuerySet):
-    pass
-        
 class ActiveActions(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="active_actions")
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="active_actions")
@@ -57,8 +54,6 @@ class ActiveActions(models.Model):
     listen = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
     rate = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)
-    
-    objects = ActiveActionsQuerySet.as_manager()
     
     def picked_tracks(self):
         return self.picks.all().values_list("track_id", flat=True)
