@@ -2,16 +2,14 @@ from itertools import groupby
 from collections import Counter
 
 from django.views.generic import DetailView
-from django.views.generic.base import TemplateResponseMixin
 
 from django.db.models import Count, Q
 
 from django.contrib.auth.models import User
 from r8music.music.models import Release
 
-class UserMainPage(DetailView, TemplateResponseMixin):
+class AbstractUserPage(DetailView):
     model = User
-    template_name = "user_main.html"
     
     def get_object(self):
         return User.objects.get(username=self.kwargs.get("slug"))
@@ -24,6 +22,14 @@ class UserMainPage(DetailView, TemplateResponseMixin):
             saved=Count("id", filter=~Q(save=None))
         )
         
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action_counts"] = self.get_actions_counts(context["user"])
+        return context
+        
+class UserMainPage(AbstractUserPage):
+    template_name = "user_main.html"
+    
     def get_releases_rated_groups(self, user):
         """Return the releases rated by a user, grouped by rating, as list of tuples,
            [(rating, rating_description, [releases])], where rating_description is the
@@ -43,6 +49,5 @@ class UserMainPage(DetailView, TemplateResponseMixin):
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["action_counts"] = self.get_actions_counts(context["user"])
         context["releases_rated_groups"] = self.get_releases_rated_groups(context["user"])
         return context
