@@ -16,7 +16,7 @@
 </section>
 
 {% set tabs = [
-      ("releases-rated", url_for_user(user),
+      ("main", url_for_user(user),
            "Releases rated", action_counts["rated"]),
       ("listened-unrated", url_for_user(user, "user_listened_unrated"),
           "Listened to but not rated", action_counts["listened_unrated"]),
