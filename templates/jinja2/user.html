@@ -25,7 +25,9 @@
       ("saved", url_for_user(user, "user_saved"),
           "Saved", action_counts["saved"]),
       ("friends", url_for_user(user, "user_friends"),
-          "Friends", None)
+          "Friends", None),
+      ("stats", url_for_user(user, "user_stats"),
+          "Stats", None)
   ] %}
 
 {{ page_tabs(tabs, current_tab) }}

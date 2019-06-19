@@ -930,15 +930,6 @@ ol.references {
     visibility: hidden;
 }
 
-.chart {
-    float: right;
-}
-
-.chart canvas {
-    width: 21em;
-    height: 11em;
-}
-
 .chart form {
     text-align: center;
 }

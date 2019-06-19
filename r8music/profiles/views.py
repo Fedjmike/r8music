@@ -51,3 +51,41 @@ class UserMainPage(AbstractUserPage):
         context = super().get_context_data(**kwargs)
         context["releases_rated_groups"] = self.get_releases_rated_groups(context["user"])
         return context
+
+class UserStatsPage(AbstractUserPage):
+    template_name = "user_stats.html"
+    
+    def get_rating_counts(self, user):
+        """Return counts of releases given each rating by a user."""
+        
+        rating_counts = user.active_actions.aggregate(**{
+            ("rated_%d" % n): Count("id", filter=Q(rate__rating=n))
+            for n in range(1, 8+1)
+        })
+        
+        return [rating_counts["rated_%d" % n] for n in range(1, 8+1)]
+        
+        
+    def get_release_year_counts(self, user):
+        """Return counts of releases listened to by a user for each year between
+           the years of the earliest and latest releases, as ([years], [counts])."""
+        
+        release_dates = user.active_actions \
+            .exclude(listen=None) \
+            .order_by("release__release_date") \
+            .values_list("release__release_date", flat=True)
+        release_years = [int(date[:4]) for date in release_dates]
+        
+        year_counts = Counter(release_years)
+        
+        range_of = lambda iterable: \
+            range(min(iterable), max(iterable)+1) if iterable else []
+        year_range = list(range_of(list(year_counts.keys())))
+        
+        return (year_range, [year_counts.get(year, 0) for year in year_range])
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["rating_counts"] = self.get_rating_counts(context["user"])
+        context["release_year_counts"] = self.get_release_year_counts(context["user"])
+        return context

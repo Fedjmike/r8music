@@ -1,0 +1,26 @@
+{% extends "user.html" %}
+{% from "release_list.html" import release_grid %}
+
+{% set current_tab = "stats" %}
+
+{% set chart_js = True %}
+
+{% block content_below_tabs %}
+    <script>
+    var userDatasets = {{ json_dumps({
+        "ratingCounts":  rating_counts,
+        "releaseYearCounts": release_year_counts
+    }) | safe }};
+    </script>
+    
+    <section class="page content">
+        <div class="chart">
+            <header></header>
+            <canvas id="user-chart" width="400" height="200"></canvas>
+            <form>
+                <label><input type="radio" name="chart-select" value="rating-counts" checked="true">Ratings</label>
+                <label><input type="radio" name="chart-select" value="year-counts">Years</label>
+            </form>
+        </div>
+    </section>
+{% endblock %}
