@@ -52,6 +52,14 @@ class UserMainPage(AbstractUserPage):
         context["releases_rated_groups"] = self.get_releases_rated_groups(context["user"])
         return context
 
+class UserListenedUnratedPage(AbstractUserPage):
+    template_name = "user_listened_unrated.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["listened_unrated"] = Release.objects.listened_unrated_by_user(context["user"])
+        return context
+
 class UserStatsPage(AbstractUserPage):
     template_name = "user_stats.html"
     

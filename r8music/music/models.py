@@ -90,6 +90,11 @@ class ReleaseQuerySet(models.QuerySet):
         return self.filter(active_actions__user=user) \
             .annotate(rating_by_user=F("active_actions__rate__rating")) \
             .exclude(rating_by_user=None)
+            
+    def listened_unrated_by_user(self, user):
+        return self.filter(active_actions__user=user) \
+            .annotate(rate=F("active_actions__rate"), listen=F("active_actions__listen")) \
+            .filter(rate=None).exclude(listen=None)
         
 class Release(models.Model):
     title = models.TextField()

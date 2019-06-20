@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.urls import path, reverse
 
-from .views import UserMainPage, UserStatsPage
+from .views import UserMainPage, UserListenedUnratedPage, UserStatsPage
 
 null_view = lambda: None
 
@@ -9,7 +9,7 @@ urlpatterns = [
     path("users", null_view, name="user_index"),
     
     path("user/<slug>", UserMainPage.as_view(), name="user_main"),
-    path("user/<slug>/listened-unrated", null_view, name="user_listened_unrated"),
+    path("user/<slug>/listened-unrated", UserListenedUnratedPage.as_view(), name="user_listened_unrated"),
     path("user/<slug>/saved", null_view, name="user_saved"),
     path("user/<slug>/activity", null_view, name="user_activity"),
     path("user/<slug>/friends", null_view, name="user_friends"),
