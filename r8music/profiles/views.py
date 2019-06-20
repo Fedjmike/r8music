@@ -1,12 +1,22 @@
 from itertools import groupby
 from collections import Counter
 
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from django.db.models import Count, Q
 
 from django.contrib.auth.models import User
 from r8music.music.models import Release
+
+class UserIndex(ListView):
+    model = User
+    template_name = "user_index.html"
+    paginate_by = 25
+    
+    def get_queryset(self):
+        return User.objects.order_by("id")
+
+#
 
 class AbstractUserPage(DetailView):
     model = User

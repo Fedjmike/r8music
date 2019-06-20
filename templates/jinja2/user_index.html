@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import user_link %}
+{% from "macros.html" import user_link, page_links %}
 
 {% block title %}Users index {{ super() }}{% endblock %}
 
@@ -8,9 +8,11 @@
     <header><h1>Users</h1></header>
 
     <ol>
-    {% for user in users %}
+    {% for user in object_list %}
         <li>{{ user_link(user) }}</li>
     {% endfor %}
     </ol>
+    
+    {{ page_links(page_obj) }}
 </section>
 {% endblock %}

@@ -23,7 +23,7 @@
 {%- endmacro %}
 
 {% macro user_link(user) -%}
-    <a href={{ url_for_user(user) }}>{{ user.name }}</a>
+    <a href={{ url_for_user(user) }}>{{ user.username }}</a>
 {%- endmacro %}
 
 {% macro avatar_thumb(user) -%}
