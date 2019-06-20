@@ -60,6 +60,14 @@ class UserListenedUnratedPage(AbstractUserPage):
         context["listened_unrated"] = Release.objects.listened_unrated_by_user(context["user"])
         return context
 
+class UserSavedPage(AbstractUserPage):
+    template_name = "user_saved.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["saved"] = Release.objects.saved_by_user(context["user"])
+        return context
+
 class UserStatsPage(AbstractUserPage):
     template_name = "user_stats.html"
     

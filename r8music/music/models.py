@@ -91,10 +91,20 @@ class ReleaseQuerySet(models.QuerySet):
             .annotate(rating_by_user=F("active_actions__rate__rating")) \
             .exclude(rating_by_user=None)
             
-    def listened_unrated_by_user(self, user):
+    def with_actions_by_user(self, user):
         return self.filter(active_actions__user=user) \
-            .annotate(rate=F("active_actions__rate"), listen=F("active_actions__listen")) \
+            .annotate(
+                save=F("active_actions__save"),
+                listen=F("active_actions__listen"),
+                rate=F("active_actions__rate")
+            )
+        
+    def listened_unrated_by_user(self, user):
+        return self.with_actions_by_user(user) \
             .filter(rate=None).exclude(listen=None)
+    
+    def saved_by_user(self, user):
+        return self.with_actions_by_user(user).exclude(save=None)
         
 class Release(models.Model):
     title = models.TextField()
