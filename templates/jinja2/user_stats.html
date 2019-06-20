@@ -14,13 +14,10 @@
     </script>
     
     <section class="page content">
-        <div class="chart">
-            <header></header>
-            <canvas id="user-chart" width="400" height="200"></canvas>
-            <form>
-                <label><input type="radio" name="chart-select" value="rating-counts" checked="true">Ratings</label>
-                <label><input type="radio" name="chart-select" value="year-counts">Years</label>
-            </form>
-        </div>
+        <header><h4>Number of releases by rating</h4></header>
+        <canvas class="chart" id="rating-counts-chart"></canvas>
+        
+        <header><h4>Number of releases by year</h4></header>
+        <canvas class="chart" id="year-counts-chart"></canvas>
     </section>
 {% endblock %}

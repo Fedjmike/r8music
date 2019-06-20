@@ -197,17 +197,8 @@ $(document).ready(function ($) {
     $(".action.clickable").click(handleAction);
     
     if (typeof Chart !== "undefined") {
-        $("input[type=radio][name=chart-select]").change(function () {
-            var canvas = document.getElementById("user-chart");
-            
-            switch (this.value) {
-            case "rating-counts": renderRatingCounts(canvas); break;
-            case "year-counts": renderYearCounts(canvas); break;
-            }
-        });
-        
-        /*Trigger a change on the default checked radio to create a chart*/
-        $("input[type=radio][name=chart-select]:checked").change();
+        renderRatingCounts(document.getElementById("rating-counts-chart"));
+        renderYearCounts(document.getElementById("year-counts-chart"));
     }
     
     $(".editable.rating-description")
