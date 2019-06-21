@@ -14,6 +14,9 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar_url = models.TextField()
     
+    def follows(self, other_user):
+        return Followership.objects.filter(user=other_user, follower=self.user).exists()
+        
 class UserRatingDescription(models.Model):
     """The description of this rating displayed on the user's profile page"""
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="rating_descriptions")
