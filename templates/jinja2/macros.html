@@ -28,7 +28,7 @@
 
 {% macro avatar_thumb(user) -%}
     <a href={{ url_for_user(user) }}>
-        <img class=thumb src={{ user.avatar_url }} />
+        <img class=thumb src={{ user.profile.avatar_url }} />
     </a>
 {%- endmacro %}
 

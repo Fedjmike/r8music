@@ -78,6 +78,14 @@ class UserSavedPage(AbstractUserPage):
         context["saved"] = Release.objects.saved_by_user(context["user"])
         return context
 
+class UserFriendsPage(AbstractUserPage):
+    template_name = "user_friends.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["friends"] = context["user"].profile.friendships()
+        return context
+
 class UserStatsPage(AbstractUserPage):
     template_name = "user_stats.html"
     

@@ -17,6 +17,18 @@ class UserProfile(models.Model):
     def follows(self, other_user):
         return Followership.objects.filter(user=other_user, follower=self.user).exists()
         
+    def friendships(self):
+        followers = [f.follower for f in self.user.followers.select_related("follower")]
+        following = [f.user for f in self.user.following.select_related("user")]
+        
+        friends = set(followers + following)
+        
+        for friend in friends:
+            friend.follows = friend in following
+            friend.followed_by = friend in followers
+            
+        return list(friends)
+        
 class UserRatingDescription(models.Model):
     """The description of this rating displayed on the user's profile page"""
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="rating_descriptions")
