@@ -29,7 +29,7 @@ class AbstractUserPage(DetailView):
         return user.active_actions.aggregate(
             rated=Count("id", filter=~Q(rate=None)),
             listened_unrated=Count("id", filter=~Q(listen=None) & Q(rate=None)),
-            saved=Count("id", filter=~Q(save=None))
+            saved=Count("id", filter=~Q(save_action=None))
         )
         
     def get_context_data(self, **kwargs):

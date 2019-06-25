@@ -79,7 +79,7 @@
         {% if not request.user.is_anonymous %}
             {# Which buttons appear / how they appear depends on their status #}
             {% set actions = [("save", "playlist_add", "Save",
-                               user_actions and user_actions.save != None)] %}
+                               user_actions and user_actions.save_action != None)] %}
             {% set _ = actions.append(("listen", "headset", "Listened to",
                                        user_actions and user_actions.listen != None))
                        if not (user_actions and user_actions.rate) %}

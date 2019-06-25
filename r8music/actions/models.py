@@ -15,7 +15,7 @@ class SaveAction(Action):
     
     def set_as_active(self):
         active_actions = self._get_active_actions(self.release)
-        active_actions.save = self
+        active_actions.save_action = self
         active_actions.save()
     
 class ListenAction(Action):
@@ -50,7 +50,7 @@ class ActiveActions(models.Model):
     
     #The existence of an action only means that action was taken at some point.
     #If the user undoes that action, it is removed from these fields.
-    save = models.ForeignKey(SaveAction, on_delete=models.PROTECT, null=True)
+    save_action = models.ForeignKey(SaveAction, on_delete=models.PROTECT, null=True)
     listen = models.ForeignKey(ListenAction, on_delete=models.PROTECT, null=True)
     rate = models.ForeignKey(RateAction, on_delete=models.PROTECT, null=True)
     picks = models.ManyToManyField(PickAction)

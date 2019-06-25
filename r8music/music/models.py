@@ -94,7 +94,7 @@ class ReleaseQuerySet(models.QuerySet):
     def with_actions_by_user(self, user):
         return self.filter(active_actions__user=user) \
             .annotate(
-                save=F("active_actions__save"),
+                save=F("active_actions__save_action"),
                 listen=F("active_actions__listen"),
                 rate=F("active_actions__rate")
             )
