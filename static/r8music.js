@@ -46,7 +46,7 @@ function handleAction(event) {
     var action = (is_undo ? "un" : "") + clickable.name;
     var url =   "releaseId" in clickable.dataset
         ? "/releases/" + clickable.dataset.releaseId + "/" + action + "/"
-        : "/tracks/" + clickable.dataset.trackId + "/pick" + "/";
+        : "/tracks/" + clickable.dataset.trackId + "/" + action + "/";
     
     $.ajax({
         method: "POST",

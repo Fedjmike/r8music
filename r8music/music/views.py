@@ -8,8 +8,8 @@ from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Artist, Release, Tag
-from r8music.actions.models import SaveAction, ListenAction, RateAction, ActiveActions
+from r8music.music.models import Artist, Release, Track, Tag
+from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
 
 class ArtistIndex(ListView):
     model = Artist
@@ -89,7 +89,7 @@ class EditReleasePage(AbstractReleasePage):
         #Redirect back to the edit page
         return HttpResponseRedirect(request.path_info)
 
-# Release API
+# Release and track APIs
 
 class NullSerializer(serializers.Serializer):
     pass
@@ -156,7 +156,28 @@ class ReleaseViewSet(viewsets.ModelViewSet):
         aa.save()
         
         return Response()
+
+class TrackViewSet(viewsets.ModelViewSet):
+    queryset = Track.objects.all()
+    serializer_class = NullSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    @action(detail=True, methods=["post"])
+    def pick(self, request, pk=None):
+        PickAction.objects.create(
+            track=self.get_object(), user=request.user
+        ).set_as_active()
         
+        return Response()
+        
+    @action(detail=True, methods=["post"])
+    def unpick(self, request, pk=None):   
+        track = self.get_object()
+        aa = track.release.active_actions.get_or_create(user=request.user)[0]
+        aa.picks.filter(track=track).delete()
+        
+        return Response()
+
 #
 
 class TagPage(DetailView, MultipleObjectMixin):
