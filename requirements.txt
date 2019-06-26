@@ -1,3 +1,4 @@
 django
 django-enumfield
+djangorestframework
 jinja2

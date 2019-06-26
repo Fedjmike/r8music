@@ -1,35 +1,32 @@
-function updateAverageRating(msg) {
-    if (msg.ratingFrequency == 0)
+function updateAverageRating(averageRating) {
+    if (!averageRating) {
         $("#average-rating-section").css("display", "none");
         
-    else {
+    } else {
         $("#average-rating-section").css("display", "inline");
-        $("#rating-frequency").text(msg.ratingFrequency);
-        $("#average-rating").text(msg.ratingAverage.toFixed(1));
-        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
+        $("#average-rating").text(averageRating.toFixed(1));
     }
 }
 
 function rateRelease(clicked_element, release_id, rating) {
-    /*User clicked the already selected rating
-       => unrate*/
-    var unrating = clicked_element.classList.contains("selected");
+    /*User clicked the already selected rating => unrate*/
+    var is_undo = clicked_element.classList.contains("selected");
+    var action = is_undo ? "unrate" : "rate";
     
     $.ajax({
         method: "POST",
-        url: "/release/" + release_id,
-        data: {action: unrating ? "unrate" : "rate", rating: rating}
-        
+        url: "/releases/" + release_id + "/" + action + "/",
+        data: {rating: rating}
     }).done(function (msg) {
         if (msg.error)
             return;
             
         /*Success, update rating widget*/
         
-        if (unrating)
+        if (is_undo) {
             clicked_element.classList.remove("selected");
         
-        else {
+        } else {
             var siblings = clicked_element.parentNode.children;
             
             for (var i = 0; i < siblings.length; i++)
@@ -38,30 +35,28 @@ function rateRelease(clicked_element, release_id, rating) {
             clicked_element.classList.add("selected");
         }
         
-        updateAverageRating(msg);
+        updateAverageRating(msg.averageRating);
     });
 }
 
 function handleAction(event) {
     event.preventDefault();
     var clickable = this;
-    var action = clickable.name;
-    var undo = clickable.classList.contains("selected");
-    
-    var url =   "releaseId" in clickable.dataset ? "/release/" + clickable.dataset.releaseId
-              : "/track/" + clickable.dataset.trackId
+    var is_undo = clickable.classList.contains("selected");
+    var action = (is_undo ? "un" : "") + clickable.name;
+    var url =   "releaseId" in clickable.dataset
+        ? "/releases/" + clickable.dataset.releaseId + "/" + action + "/"
+        : "/tracks/" + clickable.dataset.trackId + "/pick" + "/";
     
     $.ajax({
         method: "POST",
-        url: url,
-        data: {"action": undo ? "un" + action : action}
-        
+        url: url
     }).done(function (msg) {
         if (msg.error)
             return;
         
         var classes = clickable.classList;
-        classes[undo ? "remove" : "add"]("selected");
+        classes[is_undo ? "remove" : "add"]("selected");
     })
 }
 

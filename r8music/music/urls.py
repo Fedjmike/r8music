@@ -1,7 +1,9 @@
 from django.conf.urls import url
 from django.urls import path, reverse
+from rest_framework import routers
 
 from .views import ArtistIndex, ArtistMainPage, ReleaseMainPage, EditReleasePage, TagPage
+from .views import ReleaseViewSet
 
 null_view = lambda: None
 
@@ -16,6 +18,10 @@ urlpatterns = [
     
     path("tag/<int:pk>", TagPage.as_view(), name="tag"),
 ]
+
+router = routers.SimpleRouter()
+router.register("releases", ReleaseViewSet)
+urlpatterns += router.urls
 
 #Functions to produce URLs from model instances, available in templates
 

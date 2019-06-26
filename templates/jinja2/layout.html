@@ -33,6 +33,10 @@
     
     <script>
     var palette = ["{{ accent_color_1 }}", "{{ accent_color_2 }}"];
+    
+    $.ajaxSetup({
+      data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
     </script>
     
     <script src="/static/r8music.js"></script>
