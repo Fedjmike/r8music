@@ -2,10 +2,13 @@ from itertools import groupby
 from collections import Counter
 
 from django.views.generic import DetailView, ListView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from django.db.models import Count, Q
 
 from django.contrib.auth.models import User
+from r8music.profiles.models import UserRatingDescription
 from r8music.music.models import Release
 
 class UserIndex(ListView):
@@ -123,3 +126,24 @@ class UserStatsPage(AbstractUserPage):
         context["rating_counts"] = self.get_rating_counts(context["user"])
         context["release_year_counts"] = self.get_release_year_counts(context["user"])
         return context
+
+# User API
+
+@api_view(["post"])
+def rating_description(request):
+    try:
+        rating = int(request.data.get("rating"))
+        description = request.data.get("description")
+
+    except ValueError:
+        return Response({"error": "Rating not provided, or not an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    if not description:
+        return Response({"error": "Description not provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    else:
+        rd, _ = UserRatingDescription.objects.get_or_create(user=request.user.profile, rating=rating)
+        rd.description = description
+        rd.save()
+        
+        return Response()

@@ -202,11 +202,9 @@ $(document).ready(function ($) {
         var description = event.target.innerHTML;
         var rating = event.target.dataset.rating;
         
-        $.post("/rating-descriptions", {rating: rating, description: description}, function (msg) {
+        $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
             if (msg.error)
                 return; //todo
-            
-            event.target.innerHTML = msg.description;
         });
     });
     
