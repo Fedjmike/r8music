@@ -2,6 +2,8 @@ from itertools import groupby
 from collections import Counter
 
 from django.views.generic import DetailView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -126,6 +128,22 @@ class UserStatsPage(AbstractUserPage):
         context["rating_counts"] = self.get_rating_counts(context["user"])
         context["release_year_counts"] = self.get_release_year_counts(context["user"])
         return context
+
+# User 'post' views which redirect to the referrer
+
+class FollowUser(AbstractUserPage, LoginRequiredMixin):
+    model = User
+    
+    def post(self, request, **kwargs):
+        request.user.following.get_or_create(user=self.get_object())
+        return redirect(request.POST.get("next"))
+
+class UnfollowUser(AbstractUserPage, LoginRequiredMixin):
+    model = User
+    
+    def post(self, request, **kwargs):
+        request.user.following.filter(user=self.get_object()).delete()
+        return redirect(request.POST.get("next"))
 
 # User API
 

@@ -15,15 +15,20 @@
     </header>
     
     {% if not request.user.is_anonymous and user.id != request.user.id %}
-        <p><form method="post" action={{ url_for_user(user) }}>
-        {% if request.user.profile.follows(user) %}
-            <input type="hidden" name="action" value = "unfollow" />
-            <input type="submit" value="Unfollow" />
-        {% else %}
-            <input type="hidden" name=action value="follow" />
-            <input type="submit" value="Follow" />
-        {% endif %}
-        </form></p>
+        <p>
+            {% if request.user.profile.follows(user) %}
+            <form method="post" action={{ url_for_user(user, "unfollow_user") }}>
+                <input type="hidden" name="action" value = "unfollow" />
+                <input type="submit" value="Unfollow" />
+            {% else %}
+            <form method="post" action={{ url_for_user(user, "follow_user") }}>
+                <input type="hidden" name="action" value="follow" />
+                <input type="submit" value="Follow" />
+            {% endif %}
+                <input type="hidden" name="next" value="{{ request.path }}" />
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            </form>
+        </p>
     {% endif %}
 </section>
 
