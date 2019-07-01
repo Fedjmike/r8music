@@ -66,6 +66,7 @@ class UserMainPage(AbstractUserPage):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["releases_rated_groups"] = self.get_releases_rated_groups(context["user"])
+        context["get_user_rating"] = lambda release: release.rating_by_user
         return context
 
 class UserListenedUnratedPage(AbstractUserPage):

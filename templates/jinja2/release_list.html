@@ -18,12 +18,12 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_grid(releases, user_ratings={}, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
+{% macro release_grid(releases, get_user_rating=None, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
     <ol class="releases grid {{ class if class else '' }}">
     {% for release in releases %}
         <li>
             <div class="bottom inset inset-rating-widget">
-                {{ rating_widget(release, user_ratings[release.id], "small") }}
+                {{ rating_widget(release, get_user_rating(release) if get_user_rating else None, "small") }}
             </div>
             {% if show_average_rating %}
             <div class="top inset inset-average-rating">

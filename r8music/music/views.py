@@ -44,7 +44,8 @@ class ArtistMainPage(DetailView):
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["user_ratings"] = self.get_user_ratings(context["artist"])
+        user_ratings = self.get_user_ratings(context["artist"])
+        context["get_user_rating"] = lambda release: user_ratings[release.id]
         return context
 
 # Releases
