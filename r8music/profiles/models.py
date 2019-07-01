@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from r8music.music.models import Tag
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="settings")
@@ -28,6 +29,10 @@ class UserProfile(models.Model):
             friend.followed_by = friend in followers
             
         return list(friends)
+        
+    @property
+    def all_tags(self):
+        return Tag.objects.filter(releases__active_actions__user=self.user)
         
 class UserRatingDescription(models.Model):
     """The description of this rating displayed on the user's profile page"""
