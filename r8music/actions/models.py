@@ -7,8 +7,8 @@ class Action(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     creation = models.DateTimeField(auto_now_add=True)
     
-    def _get_active_actions(self, object):
-        return object.active_actions.get_or_create(user=self.user)[0]
+    def _get_active_actions(self, release):
+        return release.active_actions.get_or_create(user=self.user)[0]
         
 class SaveAction(Action):
     release = models.ForeignKey(Release, on_delete=models.PROTECT)

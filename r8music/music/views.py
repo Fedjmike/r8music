@@ -57,10 +57,8 @@ class AbstractReleasePage(DetailView):
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        colours = context["release"].palette
-        context["accent_color_1"], context["accent_color_2"], context["accent_color_3"] = colours
-        
+        context["accent_color_1"], context["accent_color_2"], context["accent_color_3"] \
+            = context["release"].palette
         return context
 
 class ReleaseMainPage(AbstractReleasePage):
@@ -174,7 +172,7 @@ class TrackViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def unpick(self, request, pk=None):   
         track = self.get_object()
-        aa = track.release.active_actions.get_or_create(user=request.user)[0]
+        aa, _ = track.release.active_actions.get_or_create(user=request.user)
         aa.picks.filter(track=track).delete()
         
         return Response()
@@ -187,5 +185,5 @@ class TagPage(DetailView, MultipleObjectMixin):
     paginate_by = 30
     
     def get_context_data(self, **kwargs):
-        releases = self.object.releases.order_by_average_rating().all()
+        releases = self.object.releases.order_by_average_rating()
         return super().get_context_data(object_list=releases, **kwargs)
