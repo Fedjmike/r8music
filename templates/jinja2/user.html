@@ -10,7 +10,7 @@
         <img class="avatar" src={{ user.profile.avatar_url }} />
         <h1>{{ user.username }}</h1>
         <span class="de-emph">
-            joined {{ event_datetime(user.date_joined) }}
+            joined {{ event_datetime(user.date_joined, request) }}
         </span>
     </header>
     
