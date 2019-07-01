@@ -3,6 +3,7 @@ from collections import Counter
 
 from django.views.generic import DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -133,6 +134,7 @@ class UserStatsPage(AbstractUserPage):
 
 class FollowUser(AbstractUserPage, LoginRequiredMixin):
     model = User
+    http_method_names = ["post"]
     
     def post(self, request, **kwargs):
         request.user.following.get_or_create(user=self.get_object())
@@ -140,6 +142,7 @@ class FollowUser(AbstractUserPage, LoginRequiredMixin):
 
 class UnfollowUser(AbstractUserPage, LoginRequiredMixin):
     model = User
+    http_method_names = ["post"]
     
     def post(self, request, **kwargs):
         request.user.following.filter(user=self.get_object()).delete()
@@ -148,6 +151,7 @@ class UnfollowUser(AbstractUserPage, LoginRequiredMixin):
 # User API
 
 @api_view(["post"])
+@login_required
 def rating_description(request):
     try:
         rating = int(request.data.get("rating"))
