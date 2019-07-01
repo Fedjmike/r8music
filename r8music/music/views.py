@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
@@ -77,7 +78,7 @@ class ReleaseMainPage(AbstractReleasePage):
         context["user_actions"] = self.get_user_actions(context["release"])
         return context
 
-class EditReleasePage(AbstractReleasePage):
+class EditReleasePage(LoginRequiredMixin, AbstractReleasePage):
     template_name ="edit_release.html"
     
     def post(self, request, *args, **kwargs):
