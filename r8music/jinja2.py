@@ -2,6 +2,8 @@ from datetime import datetime
 from pytz import timezone
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
+from urllib.parse import urlencode
+
 import json
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -38,6 +40,11 @@ def friendly_datetime(then):
              else "today at %X"
     return then.strftime(format)
 
+def add_url_params(request, **new_params):
+    params = dict(request.GET.items())
+    params.update(new_params)
+    return "?" + urlencode(params)
+
 #
 
 def environment(**options):
@@ -51,7 +58,8 @@ def environment(**options):
     })
     
     template_tools = [
-        if_not_None, n_things, full_datetime, friendly_datetime, isinstance, tuple
+        if_not_None, n_things, full_datetime, friendly_datetime, add_url_params,
+        isinstance, tuple
     ]
     
     template_tools += profile_urlreversers + music_urlreversers
