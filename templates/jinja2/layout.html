@@ -96,7 +96,7 @@
         <ol class="nav right">
         {% if not dont_display_search %}
             {% from "forms.html" import small_search_form %}
-            <li>{{ small_search_form() }}</li>
+            <li>{{ small_search_form(csrf_token) }}</li>
         {% endif %}
         {% if not request.user.is_anonymous %}
             <li>

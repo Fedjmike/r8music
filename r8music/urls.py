@@ -20,4 +20,5 @@ urlpatterns = [
     url(r"^admin/", admin.site.urls),
     url(r"^", include("r8music.profiles.urls")),
     url(r"^", include("r8music.music.urls")),
+    url(r"^", include("r8music.search.urls")),
 ]

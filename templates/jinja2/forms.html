@@ -85,35 +85,26 @@
     </form>
 {%- endmacro %}
 
-{% macro small_search_form(previous_search=None) -%}
-    <form action="/search" method="post" class="{{ '' if full else 'small' }}" id="search">
+{% macro small_search_form(csrf_token, csrf_tokenprevious_search=None) -%}
+    <form action="/search" method="post" class="small" id="search">
         <div class="search">
             <input type="text" name="query" placeholder="Search r8music" id="autocomplete" class="form-control input-lg"
                    {% if previous_search and previous_search.query %} value="{{ previous_search.query }}" {% endif %} />
             <input type="submit" class="material-icons" value="search" />
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         </div>
     </form>
 {% endmacro %}
 
-{% macro search_form(previous_search=None, full=True) -%}
-    <form action="/search" method="post" class="{{ '' if full else 'small' }}" id="search">
+{% macro search_form(csrf_token, previous_query=None, full_size=False) -%}
+    <form action="/search" method="post" class="{{ '' if full_size else 'small' }}" id="search">
         <dl>
             <dd class="search">
                 <input type="text" name="query" placeholder="Search r8music" id="autocomplete" class="form-control input-lg"
-                       {% if previous_search and previous_search.query %} value="{{ previous_search.query }}" {% endif %} />
+                       {% if previous_query %} value="{{ previous_query }}" {% endif %} />
                 <input type="submit" class="material-icons" value="search" />
             </dd>
-            <dd>
-            {% if full %}
-                {% for type in ["artists", "users"] %}
-                    <label>
-                        <input type="radio" name="type" value={{ type }}
-                               {{ 'checked' if previous_search and previous_search.args.type == type else '' }} />
-                        {{ type.capitalize() }}
-                    </label>
-                {% endfor %}
-            {% endif %}
-            </dd>
         </dl>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
     </form>
 {%- endmacro %}

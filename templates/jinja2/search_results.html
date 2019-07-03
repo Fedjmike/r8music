@@ -1,33 +1,36 @@
 ﻿{% extends "layout.html" %}
-{% from "add_artist_search_results.html" import add_artist_form %}
+{% from "macros.html" import page_links %}
+{% from "forms.html" import search_form %}
 
-{% block title %}'{{ search.query }}' &ndash; Search results {{ super() }}{% endblock %}
+{% block title %}'{{ query }}' &ndash; Search results {{ super() }}{% endblock %}
 
 {% set dont_display_search = True %}
 
 {% block content %}
 <section class="page content">
-    {% from "forms.html" import search_form %}
     <section class="right">
         <header></header>
-        {{ search_form(search) }}
+        {{ search_form(csrf_token, query, full_size=True) }}
     </section>
 	
     <header>
-        <h1>&lsquo;{{ search.query }}&rsquo;</h1>
         <h3>Search results</h3>
+        <h1>&lsquo;{{ query }}&rsquo;</h1>
     </header>
     
-    {% if not search.results %}
-        <p>No matches! Try <a href={{ url_for("add_artist_search_results", query=search.encoded_query) }}>adding the artist to the database?</a></p>
-    {% else %}
+    {% if results %}
         <ol class="search-results">
-        {% for result in search.results %}
-            <li><a href="{{ result.url }}">{{ result.name }}</a></li>
+        {% for artist in results %}
+            <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
         {% endfor %}
         </ol>
-        <p>No matches? Try <a href={{ url_for("add_artist_search_results", query=search.encoded_query) }}>adding the artist to the database!</a></p>
+        
+        {% if results.paginator.num_pages != 1 %}
+            {{ page_links(results, request) }}
+        {% endif %}
+        
+    {% else %}
+        <p>No matches!</p>
     {% endif %}
-    {{ add_artist_form(search.import_candidates) }}
 </section>
 {% endblock %}

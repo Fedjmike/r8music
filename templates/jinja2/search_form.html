@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% from "forms.html" import search_form %}
+
+{% block title %}Search {{ super() }}{% endblock %}
+
+{% set dont_display_search = True %}
+
+{% block content %}
+    <section class="page content">
+        <header></header>
+        {{ search_form(csrf_token, None, full_size=True) }}
+    </section>
+{% endblock %}
