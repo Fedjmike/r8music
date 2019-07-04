@@ -108,7 +108,7 @@ class ReleaseQuerySet(models.QuerySet):
         
 class Release(models.Model):
     title = models.TextField()
-    slug = models.SlugField(unique=True)
+    slug = models.TextField(unique=True)
     
     artists = models.ManyToManyField(Artist, related_name="releases")
     
@@ -167,7 +167,7 @@ class Track(models.Model):
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="tracks")
     
     title = models.TextField()
-    slug = models.SlugField(unique=True)
+    slug = models.TextField(unique=True)
     
     side = models.IntegerField()
     #The position within the indicated side, not overall
