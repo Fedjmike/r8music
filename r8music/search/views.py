@@ -5,14 +5,18 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.urls import reverse
 
-from django.contrib.postgres.search import SearchQuery
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 from r8music.music.models import Release, Artist
 
 def search(query_str):
     #:* allows prefix matches, quotes escape the query from the search syntax
     query = SearchQuery("'%s':*" % query_str, search_type="raw")
-    return Artist.objects.filter(name__search=query)
+    
+    artist_rank = SearchRank(SearchVector("name"), query)
+    return Artist.objects \
+        .annotate(rank=artist_rank) \
+        .exclude(rank=0).order_by("-rank")
 
 def encode_query_str(query):
     #Not a bijection: ' ' and '+' both go to '+'
