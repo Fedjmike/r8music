@@ -20,9 +20,7 @@
     
     {% if results %}
         <ol class="search-results">
-        {% for artist in results %}
-            <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
-        {% endfor %}
+            {% block search_results %}{% endblock %}
         </ol>
         
         {% if results.paginator.num_pages != 1 %}

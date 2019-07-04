@@ -9,20 +9,27 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 from r8music.music.models import Release, Artist
 
-def search(query_str):
+class Search:
     #The minimum search rank to be included
     #Some irrelevant results still get above zero (e.g. 1e-20).
     rank_threshold = 0.001
 
-    #:* allows prefix matches, quotes escape the query from the search syntax
-    query = SearchQuery("'%s':*" % query_str, search_type="raw")
-    
-    artist_rank = SearchRank(SearchVector("name"), query)
-    return Artist.objects \
-        .annotate(rank=artist_rank) \
-        .filter(rank__gte=rank_threshold) \
-        .order_by("-rank")
-
+    def __init__(self, query_str):
+        #:* allows prefix matches, quotes escape the query from the search syntax
+        self.query = SearchQuery("'%s':*" % query_str, search_type="raw")
+        
+    def search(self, model, search_vector):
+        return model.objects \
+            .annotate(rank=SearchRank(search_vector, self.query)) \
+            .filter(rank__gte=self.rank_threshold) \
+            .order_by("-rank")
+        
+    def search_artists(self):
+        return self.search(Artist, SearchVector("name"))
+        
+    def search_releases(self):
+        return self.search(Release, SearchVector("title"))
+        
 def encode_query_str(query):
     #Not a bijection: ' ' and '+' both go to '+'
     return "+".join(query.split(" "))
@@ -37,18 +44,26 @@ class SearchPage(View):
     
     def get_results_page(self, request):
         query_str = request.GET.get("q")
+        category = request.GET.get("category")
         page = request.GET.get("page")
         
         query = decode_query_str(query_str)
-        full_results = search(query)
+        search = Search(query)
+        
+        if category == "release":
+            full_results = search.search_releases()
+            template_name = "search/release_results.html"
+            
+        elif category == "artist":
+            full_results = search.search_artists()
+            template_name = "search/artist_results.html"    
+            
         results = Paginator(full_results, self.paginate_by).get_page(page)
         
-        context = {
+        return render(request, template_name, {
             "query": query,
             "results": results
-        }
-        
-        return render(request, "search_results.html", context)
+        })
         
     def get(self, request):
         if request.GET.get("q"):
