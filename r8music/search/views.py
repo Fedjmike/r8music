@@ -10,13 +10,18 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from r8music.music.models import Release, Artist
 
 def search(query_str):
+    #The minimum search rank to be included
+    #Some irrelevant results still get above zero (e.g. 1e-20).
+    rank_threshold = 0.001
+
     #:* allows prefix matches, quotes escape the query from the search syntax
     query = SearchQuery("'%s':*" % query_str, search_type="raw")
     
     artist_rank = SearchRank(SearchVector("name"), query)
     return Artist.objects \
         .annotate(rank=artist_rank) \
-        .exclude(rank=0).order_by("-rank")
+        .filter(rank__gte=rank_threshold) \
+        .order_by("-rank")
 
 def encode_query_str(query):
     #Not a bijection: ' ' and '+' both go to '+'
