@@ -1,5 +1,7 @@
 {% extends "search/category_results.html" %}
 
+{% block headline %} {{ super() }} (releases) {% endblock %}
+
 {% block search_results %}
     {% for release in results %}
         <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>

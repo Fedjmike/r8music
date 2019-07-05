@@ -14,7 +14,11 @@
     </section>
 	
     <header>
-        <h3>Search results</h3>
+        <h3>
+        {% block headline %}
+            Search results 
+        {% endblock %}
+        </h3>
         <h1>&lsquo;{{ query }}&rsquo;</h1>
     </header>
     

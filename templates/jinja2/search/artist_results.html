@@ -1,5 +1,7 @@
 {% extends "search/category_results.html" %}
 
+{% block headline %} {{ super() }} (artists) {% endblock %}
+
 {% block search_results %}
     {% for artist in results %}
         <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
