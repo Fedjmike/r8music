@@ -1,9 +1,6 @@
-from urllib.parse import urlencode
-
 from django.views.generic import View, TemplateView
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.core.paginator import Paginator
-from django.urls import reverse
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
@@ -30,16 +27,10 @@ class Search:
     def search_releases(self):
         return self.search(Release, SearchVector("title"), order="release_date")
         
-def encode_query_str(query):
-    #Not a bijection: ' ' and '+' both go to '+'
-    return "+".join(query.split(" "))
-    
 def decode_query_str(query):
     return query.replace("+", " ")
 
 class SearchPage(View):
-    http_method_names = ["get", "post"]
-    
     paginate_by = 25
     
     def get_results_page(self, request):
@@ -71,9 +62,3 @@ class SearchPage(View):
             
         else:
             return render(request, "search_form.html")
-            
-    def post(self, request):
-        #Redirect to an URL with the query from the submitted form as a parameter
-        query = request.POST.get("query")
-        url_as_get = reverse("search", ) + "?" + urlencode({"q": query})
-        return redirect(url_as_get)
