@@ -237,8 +237,8 @@ $(document).ready(function ($) {
     $("#autocomplete").autocomplete({
         minLength: 2,
         source: function (request, response) {
-            $.getJSON("/search/" + request.term, {
-                return_json: 1
+            $.getJSON("/api/search", {
+                q: request.term, 
             }, function (data) {
                 assignLabels(data.results, result => result.name);
                 response(data.results);

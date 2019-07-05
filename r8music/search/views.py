@@ -1,12 +1,16 @@
 from urllib.parse import urlencode
+from django.urls import reverse
 
 from django.views.generic import View, ListView
 from django.shortcuts import render
-from django.urls import reverse
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 from r8music.music.models import Release, Artist
+from r8music.music.urls import url_for_artist
 
 class AbstractSearchPage:
     #The minimum search rank to be included
@@ -76,3 +80,12 @@ class ReleaseSearchPage(AbstractCategorySearchPage):
     
     def get_queryset(self):
         return self.search_releases()
+
+class SearchAPI(APIView, AbstractSearchPage):
+    def get(self, request):
+        return Response({
+            "results": [
+                {"name": artist.name, "url": url_for_artist(artist)}
+                for artist in self.search_artists()[:15]
+            ]
+        })
