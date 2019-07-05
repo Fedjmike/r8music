@@ -1,4 +1,4 @@
-﻿{% extends "layout.html" %}
+{% extends "layout.html" %}
 {% from "macros.html" import page_links %}
 {% from "forms.html" import search_form %}
 
@@ -14,23 +14,26 @@
     </section>
 	
     <header>
-        <h3>
-        {% block headline %}
-            <a href={{ url_for_general_search }}>&larr;</a>
-            Search results 
-        {% endblock %}
-        </h3>
+        <h3>Search results</h3>
         <h1>&lsquo;{{ query }}&rsquo;</h1>
     </header>
     
-    {% if results %}
+    {% if artists or releases %}
+        <h4><a href={{ url_for_artist_search }}>Artists</a></h4>
         <ol class="search-results">
-            {% block search_results %}{% endblock %}
+        {% for artist in artists %}
+            <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
+        {% endfor %}
         </ol>
         
-        {% if page_obj.paginator.num_pages != 1 %}
-            {{ page_links(page_obj, request) }}
-        {% endif %}
+        <br/>
+        
+        <h4><a href={{ url_for_release_search }}>Releases</a></h4>
+        <ol class="search-results">
+        {% for release in releases %}
+            <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>
+        {% endfor %}
+        </ol>
         
     {% else %}
         <p>No matches!</p>
