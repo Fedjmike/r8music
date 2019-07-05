@@ -61,4 +61,4 @@ class SearchPage(View):
             return self.get_results_page(request)
             
         else:
-            return render(request, "search_form.html")
+            return render(request, "search/search_form.html")
