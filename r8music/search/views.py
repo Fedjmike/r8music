@@ -18,17 +18,17 @@ class Search:
         #:* allows prefix matches, quotes escape the query from the search syntax
         self.query = SearchQuery("'%s':*" % query_str, search_type="raw")
         
-    def search(self, model, search_vector):
+    def search(self, model, search_vector, order):
         return model.objects \
             .annotate(rank=SearchRank(search_vector, self.query)) \
             .filter(rank__gte=self.rank_threshold) \
-            .order_by("-rank")
+            .order_by("-rank", order)
         
     def search_artists(self):
-        return self.search(Artist, SearchVector("name"))
+        return self.search(Artist, SearchVector("name"), order="name")
         
     def search_releases(self):
-        return self.search(Release, SearchVector("title"))
+        return self.search(Release, SearchVector("title"), order="release_date")
         
 def encode_query_str(query):
     #Not a bijection: ' ' and '+' both go to '+'
