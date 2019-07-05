@@ -19,21 +19,25 @@
     </header>
     
     {% if artists or releases %}
-        <h4><a href={{ url_for_artist_search }}>Artists</a></h4>
-        <ol class="search-results">
-        {% for artist in artists %}
-            <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
-        {% endfor %}
-        </ol>
+        {% if artists %}
+            <h4><a href={{ url_for_artist_search }}>Artists</a></h4>
+            <ol class="search-results">
+            {% for artist in artists %}
+                <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
+            {% endfor %}
+            </ol>
+        {% endif %}
         
         <br/>
         
-        <h4><a href={{ url_for_release_search }}>Releases</a></h4>
-        <ol class="search-results">
-        {% for release in releases %}
-            <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>
-        {% endfor %}
-        </ol>
+        {% if releases %}
+            <h4><a href={{ url_for_release_search }}>Releases</a></h4>
+            <ol class="search-results">
+            {% for release in releases %}
+                <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>
+            {% endfor %}
+            </ol>
+        {% endif %}
         
     {% else %}
         <p>No matches!</p>
