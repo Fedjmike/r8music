@@ -22,9 +22,11 @@
     <ol class="releases grid {{ class if class else '' }}">
     {% for release in releases %}
         <li>
+            {% if get_user_rating %}
             <div class="bottom inset inset-rating-widget">
-                {{ rating_widget(release, get_user_rating(release) if get_user_rating else None, "small") }}
+                {{ rating_widget(release, get_user_rating(release), "small") }}
             </div>
+            {% endif %}
             {% if show_average_rating %}
             <div class="top inset inset-average-rating">
                 {% set average_rating = release.average_rating %}
