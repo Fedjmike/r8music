@@ -1,9 +1,10 @@
 {% extends "search/category_results.html" %}
+{% from "macros.html" import artist_list %}
 
 {% block headline %} {{ super() }} (releases) {% endblock %}
 
 {% block search_results %}
     {% for release in results %}
-        <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>
+        <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a> by {{ artist_list(release.artists) }}</li>
     {% endfor %}
 {% endblock %}

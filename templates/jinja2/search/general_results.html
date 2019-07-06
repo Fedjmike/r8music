@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros.html" import page_links %}
+{% from "macros.html" import page_links, artist_list %}
 {% from "forms.html" import search_form %}
 
 {% block title %}'{{ query }}' &ndash; Search results {{ super() }}{% endblock %}
@@ -34,7 +34,7 @@
             <h4><a href={{ url_for_release_search }}>Releases</a></h4>
             <ol class="search-results">
             {% for release in releases %}
-                <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a></li>
+                <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a> by {{ artist_list(release.artists) }}</li>
             {% endfor %}
             </ol>
         {% endif %}

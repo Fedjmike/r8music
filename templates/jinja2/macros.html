@@ -16,6 +16,13 @@
     <a href={{ url_for_artist(artist) }}>{{ artist.name }}</a>
 {%- endmacro %}
 
+{% macro artist_list(artists) -%}
+    {% for artist in artists.all() %}
+        {{ artist_link(artist) }}
+        {% if not loop.last %} & {% endif %}
+    {% endfor %}
+{%- endmacro %}
+
 {% macro object_link(object) -%}
     <a href={{ object.url }}>{{ object.title }}</a>
 {%- endmacro %}

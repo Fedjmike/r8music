@@ -47,7 +47,7 @@ class GeneralSearchPage(View, AbstractSearchPage):
         return render(self.request, "search/general_results.html", {
             "query": self.get_query_str(),
             "artists": self.search_artists()[:10],
-            "releases": self.search_releases()[:10],
+            "releases": self.search_releases().prefetch_related("artists")[:10],
             "url_for_artist_search": self.get_search_url("artist_search"),
             "url_for_release_search": self.get_search_url("release_search")
         })
@@ -79,7 +79,7 @@ class ReleaseSearchPage(AbstractCategorySearchPage):
     template_name = "search/release_results.html"
     
     def get_queryset(self):
-        return self.search_releases()
+        return self.search_releases().prefetch_related("artists")
 
 class SearchAPI(APIView, AbstractSearchPage):
     def get(self, request):
