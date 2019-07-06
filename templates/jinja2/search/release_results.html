@@ -1,10 +1,9 @@
 {% extends "search/category_results.html" %}
+{% from "release_list.html" import release_grid %}
 {% from "macros.html" import artist_list %}
 
 {% block headline %} {{ super() }} (releases) {% endblock %}
 
 {% block search_results %}
-    {% for release in results %}
-        <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a> by {{ artist_list(release.artists) }}</li>
-    {% endfor %}
+    {{ release_grid(results, class="small") }}
 {% endblock %}

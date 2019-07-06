@@ -60,7 +60,6 @@ class GeneralSearchPage(View, AbstractSearchPage):
             return render(request, "search/search_form.html")
 
 class AbstractCategorySearchPage(ListView, AbstractSearchPage):
-    paginate_by = 25
     context_object_name = "results"
     
     def get_context_data(self):        
@@ -71,12 +70,14 @@ class AbstractCategorySearchPage(ListView, AbstractSearchPage):
         
 class ArtistSearchPage(AbstractCategorySearchPage):
     template_name = "search/artist_results.html"
+    paginate_by = 25
     
     def get_queryset(self):
         return self.search_artists()
     
 class ReleaseSearchPage(AbstractCategorySearchPage):
     template_name = "search/release_results.html"
+    paginate_by = 18
     
     def get_queryset(self):
         return self.search_releases().prefetch_related("artists")
