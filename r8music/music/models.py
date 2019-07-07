@@ -131,6 +131,9 @@ class Release(models.Model):
     
     objects = ReleaseQuerySet.as_manager()
     
+    class Meta:
+        ordering = ["release_date"]
+    
     @property
     def is_album(self):
         return self.type == ReleaseType.ALBUM
@@ -177,6 +180,9 @@ class Track(models.Model):
     runtime = models.IntegerField(null=True)
     
     objects = TrackQuerySet.as_manager()
+    
+    class Meta:
+        ordering = ["side", "position"]
     
     @property
     def runtime_str(self):
