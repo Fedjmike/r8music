@@ -7,10 +7,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.db.models import Value, IntegerField
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 from r8music.music.models import Release, Artist
-from r8music.music.urls import url_for_artist
+from r8music.music.urls import url_for_artist, url_for_release
 
 class AbstractSearchPage:
     #The minimum search rank to be included
@@ -83,10 +84,43 @@ class ReleaseSearchPage(AbstractCategorySearchPage):
         return self.search_releases().prefetch_related("artists")
 
 class SearchAPI(APIView, AbstractSearchPage):
+    """"An API for search autocompletion"""
+    
     def get(self, request):
+        #Used to differentiate search result kinds
+        artist_category, release_category = 0, 1
+        
+        #Combine search results from different categories (by only selecting the same columns)
+        artist_qs = self.search_artists() \
+            .values("id", "rank", category=Value(artist_category, IntegerField()))
+        release_qs = self.search_releases() \
+            .values("id", "rank", category=Value(release_category, IntegerField()))
+        results = artist_qs.union(release_qs)
+        
+        results = results.order_by("-rank")[:15]
+        
+        artist_ids, release_ids = (
+            (r["id"] for r in results if r["category"] == category)
+            for category in [artist_category, release_category]
+        )
+        
+        #Fetch the full objects and turn them into menu items
+        
+        artists = [
+            {"name": artist.name, "url": url_for_artist(artist)}
+            for artist in Artist.objects.in_bulk(artist_ids).values()
+        ]
+        
+        releases = [
+            {
+                "name": release.title + " by "
+                    + " & ".join(artist.name for artist in release.artists.all()),
+                "url": url_for_release(release)
+            }
+            for release in Release.objects.in_bulk(release_ids).values()
+        ]
+        
         return Response({
-            "results": [
-                {"name": artist.name, "url": url_for_artist(artist)}
-                for artist in self.search_artists()[:15]
-            ]
+            #Show artists before releases (for predictability as much as code simplicity)
+            "results": artists + releases
         })
