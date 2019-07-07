@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% from "forms.html" import login_form %}
+
+{% block title %} Log in {{ super() }} {% endblock %}
+
+{% set dont_display_login_register = True %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Log in</h1></header>
+    {% if form.errors %}
+        <p>{{ form.errors }}</p>
+    {% endif %}
+    
+    {{ login_form(csrf_token, next) }}
+</section>
+{% endblock %}

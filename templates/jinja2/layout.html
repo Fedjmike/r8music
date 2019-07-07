@@ -103,18 +103,18 @@
                 <a href={{ url_for_user(request.user) }}>{{ request.user.username }}</a>
                 <a id="user-more" href="">&#9662;</a>
             </li>
-            <li><a id="logout" href={{ url("logout") }}>log out</a></li>
+            <li><a id="logout" href="{{ url("logout") }}?next={{ request.path }}">log out</a></li>
             <div class="small popup"><div class="popup-content" id="user-popup">
-                <a class="right" href={{ url("set-password") }}>change your password</a><br/>
+                <a class="right" href={{ url("password_change") }}>change your password</a><br/>
                 <a class="right" href={{ url("settings") }}>settings</a><br/>
-                <a class="right" id="logout" href={{ url("logout") }}>log out</a><br/>
+                <a class="right" id="logout" href="{{ url("logout") }}?next={{ request.path }}">log out</a><br/>
             </div></div>
         {% elif not dont_display_login_register %}
             <li><a id="login" href={{ url("login") }}>sign in</a></li>
             <li><a id="register" href={{ url("register") }}>register</a></li>
             <div class="popup">
                 {% from "forms.html" import login_form, register_form %}
-                <div class="popup-content" id="login-popup">{{ login_form() }}</div>
+                <div class="popup-content" id="login-popup">{{ login_form(csrf_token, next=request.path) }}</div>
                 <div class="popup-content" id="register-popup">{{ register_form() }}</div>
             </div>
         {% endif %}

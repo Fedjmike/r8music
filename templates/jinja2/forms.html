@@ -13,16 +13,14 @@
     </dd>
 {%- endmacro %}
 
-{% macro login_form(standalone=False) -%}
-    <form action={{ url_for("login") }} method="post" class="clearfix">
+{% macro login_form(csrf_token, next) -%}
+    <form action={{ url("login") }} method="post" class="clearfix">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <dl>
             {{ form_field("Username", "username", "text", form_prefill)}}
             {{ form_field("Password", "password", "password")}}
             <dd><input type="submit" value="Sign in" /></dd>
-            <a href={{ url_for("recover_password") }}>Recover password</a>
-            {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}" />
-            {% endif %}
+            <input type="hidden" name="next" value="{{ next }}" />
         </dl>
     </form>
 {%- endmacro %}

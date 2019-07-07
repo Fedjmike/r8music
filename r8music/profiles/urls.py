@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.urls import path, reverse
 
 from .views import UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage, UserFriendsPage, UserStatsPage
@@ -20,11 +20,9 @@ urlpatterns = [
     path("user/<slug>/unfollow", UnfollowUser.as_view(), name="unfollow_user"),
     
     path("settings/rating-description", rating_description, name="rating_description"),
-    
+
+    path("accounts/", include("django.contrib.auth.urls")),
     path("register", null_view, name="register"),
-    path("login", null_view, name="login"),
-    path("logout", null_view, name="logout"),
-    path("set-password", null_view, name="set-password"),
     path("settings", null_view, name="settings"),
 ]
 
