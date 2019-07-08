@@ -4,6 +4,7 @@ from collections import Counter
 from django.views.generic import DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect
 
 from rest_framework.decorators import api_view
@@ -162,6 +163,14 @@ class RegistrationPage(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("login")
     
+    def form_valid(self, form):
+        redirect_without_next = super().form_valid(form)
+        
+        if "next" in self.request.POST:
+            return redirect_to_login(self.request.POST.get("next"), login_url=self.success_url)
+            
+        else: 
+            return redirect_without_next
 # User API
 
 @api_view(["post"])

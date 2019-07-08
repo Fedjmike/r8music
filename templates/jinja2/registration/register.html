@@ -17,7 +17,9 @@
             {{ django_form_fields(form) }}
             {{ recaptcha() }}
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-            <input type="hidden" name="next" value="{{ next }}" />
+            {% if request.GET.get("next") %}
+                <input type="hidden" name="next" value="{{ request.GET.get("next") }}" />
+            {% endif %}
             <dd><input type="submit" value="Register" /></dd>
         </dl>
     </form>
