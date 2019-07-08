@@ -7,7 +7,9 @@
 
 <section class="clearfix page content">
     <header>
-        <img class="avatar" src={{ user.profile.avatar_url }} />
+        {% if user.profile.avatar_url %}
+            <img class="avatar" src={{ user.profile.avatar_url }} />
+        {% endif %}
         <h1>{{ user.username }}</h1>
         <span class="de-emph">
             joined {{ event_datetime(user.date_joined, request) }}
