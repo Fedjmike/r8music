@@ -13,6 +13,16 @@
     </dd>
 {%- endmacro %}
 
+{% macro django_form_fields(form) -%}
+    {% for field in form %}
+        <dt>{{ field.label_tag() }}</dt>
+        <dd>
+            {{ field }}
+            {{ field.errors }}
+        </dd>
+    {% endfor %}
+{%- endmacro %}
+
 {% macro recaptcha() -%}
     <!-- "I'm not a robot" reCAPTCHA -->
     <script src='https://www.google.com/recaptcha/api.js'></script>

@@ -2,7 +2,8 @@ from django.conf.urls import url, include
 from django.urls import path, reverse
 
 from .views import UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage, UserFriendsPage, UserStatsPage
-from .views import FollowUser, UnfollowUser, rating_description
+from .views import FollowUser, UnfollowUser
+from .views import RegistrationPage, rating_description
 
 null_view = lambda: None
 
@@ -22,7 +23,7 @@ urlpatterns = [
     path("settings/rating-description", rating_description, name="rating_description"),
 
     path("accounts/", include("django.contrib.auth.urls")),
-    path("register", null_view, name="register"),
+    path("register", RegistrationPage.as_view(), name="register"),
     path("settings", null_view, name="settings"),
 ]
 

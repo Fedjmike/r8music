@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% from "forms.html" import django_form_fields, recaptcha %}
+
+{% block title %} Register an account {{ super() }} {% endblock %}
+
+{% set dont_display_login_register = True %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Register an account</h1></header>
+    {% if form.errors %}
+        <p>{{ form.errors }}</p>
+    {% endif %}
+    
+    <form action={{ url("register") }} method="post" class="clearfix">
+        <dl>
+            {{ django_form_fields(form) }}
+            {{ recaptcha() }}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="hidden" name="next" value="{{ next }}" />
+            <dd><input type="submit" value="Register" /></dd>
+        </dl>
+    </form>
+</section>
+{% endblock %}

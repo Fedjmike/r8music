@@ -111,7 +111,7 @@
             </div></div>
         {% elif not dont_display_login_register %}
             <li><a id="login" href="{{ url("login") }}?next={{ request.path }}">sign in</a></li>
-            <li><a id="register" href="{{ url("register") }}?next={{ request.path }}">register</a></li>
+            <li><a id="register" href={{ url("register") }}>register</a></li>
         {% endif %}
         </ol>
 	</div>
