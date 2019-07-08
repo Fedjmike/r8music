@@ -23,7 +23,7 @@ class ArtistIndex(ListView):
     
 class ArtistMainPage(DetailView):
     model = Artist
-    template_name ="artist_main.html"
+    template_name = "artist_main.html"
     
     def get_object(self):
         return Artist.objects.get(slug=self.kwargs["slug"])

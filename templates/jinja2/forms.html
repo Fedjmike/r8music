@@ -13,18 +13,6 @@
     </dd>
 {%- endmacro %}
 
-{% macro login_form(csrf_token, next) -%}
-    <form action={{ url("login") }} method="post" class="clearfix">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <dl>
-            {{ form_field("Username", "username", "text", form_prefill)}}
-            {{ form_field("Password", "password", "password")}}
-            <dd><input type="submit" value="Sign in" /></dd>
-            <input type="hidden" name="next" value="{{ next }}" />
-        </dl>
-    </form>
-{%- endmacro %}
-
 {% macro recaptcha() -%}
     <!-- "I'm not a robot" reCAPTCHA -->
     <script src='https://www.google.com/recaptcha/api.js'></script>
@@ -32,24 +20,6 @@
         <div class="g-recaptcha" data-sitekey="6LeJzxgTAAAAAO9KpMEH9DsZKG9ax0C3DAIYSpgA"></div>
         {{ flash_area("recaptcha") }}
     </dd>
-{%- endmacro %}
-
-{% macro register_form(form_prefill, standalone=False) -%}
-    <form action={{ url_for("register") }} method="post" class="clearfix">
-        <dl>
-            {{ form_field("Create a username", "username", "text", form_prefill)}}
-            {{ form_field("Create a password", "new-password", "password")}}
-            {{ form_field("Confirm the password", "verify-new-password", "password")}}
-            {{ form_field("Email (optional)", "email", "text", form_prefill)}}
-            {{ recaptcha() }}
-            
-            <dd><input type="submit" value="Register" /></dd>
-            
-            {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}" />
-            {% endif %}
-        </dl>
-    </form>
 {%- endmacro %}
 
 {% macro set_pw_form(user, standalone=False) -%}

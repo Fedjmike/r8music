@@ -158,20 +158,6 @@ $(document).ready(function ($) {
     if (document.getElementById("autoload-trigger")) {
         $(window).on('scroll',  _.debounce(autoload, 200));
     };
-
-    $("a#login").click(function (event) {
-        event.preventDefault();
-        $(".popup-content:not(#login-popup)").toggle(false);
-        $("#login-popup").toggle({duration: 100});
-        $("#login-popup [name='username']").focus()
-    });
-    
-    $("a#register").click(function (event) {
-        event.preventDefault();
-        $(".popup-content:not(#register-popup)").toggle(false);
-        $("#register-popup").toggle({duration: 100});
-        $("#register-popup [name='username']").focus()
-    });
     
     $("#logout").parent().remove();
     $("#user-more").show();

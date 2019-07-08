@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "forms.html" import login_form %}
+{% from "forms.html" import form_field %}
 
 {% block title %} Log in {{ super() }} {% endblock %}
 
@@ -12,6 +12,14 @@
         <p>{{ form.errors }}</p>
     {% endif %}
     
-    {{ login_form(csrf_token, next) }}
+    <form action={{ url("login") }} method="post" class="clearfix">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <dl>
+            {{ form_field("Username", "username", "text", form_prefill)}}
+            {{ form_field("Password", "password", "password")}}
+            <dd><input type="submit" value="Sign in" /></dd>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </dl>
+    </form>
 </section>
 {% endblock %}

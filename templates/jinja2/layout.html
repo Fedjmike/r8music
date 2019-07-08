@@ -110,13 +110,8 @@
                 <a class="right" id="logout" href="{{ url("logout") }}?next={{ request.path }}">log out</a><br/>
             </div></div>
         {% elif not dont_display_login_register %}
-            <li><a id="login" href={{ url("login") }}>sign in</a></li>
-            <li><a id="register" href={{ url("register") }}>register</a></li>
-            <div class="popup">
-                {% from "forms.html" import login_form, register_form %}
-                <div class="popup-content" id="login-popup">{{ login_form(csrf_token, next=request.path) }}</div>
-                <div class="popup-content" id="register-popup">{{ register_form() }}</div>
-            </div>
+            <li><a id="login" href="{{ url("login") }}?next={{ request.path }}">sign in</a></li>
+            <li><a id="register" href="{{ url("register") }}?next={{ request.path }}">register</a></li>
         {% endif %}
         </ol>
 	</div>
