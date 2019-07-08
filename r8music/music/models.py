@@ -173,7 +173,7 @@ class Track(models.Model):
     slug = models.TextField(unique=True)
     
     side = models.IntegerField()
-    #The position within the indicated side, not overall
+    #The position within the indicated side (not overall)
     position = models.IntegerField()
     
     #In miliseconds

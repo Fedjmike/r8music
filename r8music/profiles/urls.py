@@ -20,11 +20,14 @@ urlpatterns = [
     path("user/<slug>/follow", FollowUser.as_view(), name="follow_user"),
     path("user/<slug>/unfollow", UnfollowUser.as_view(), name="unfollow_user"),
     
-    path("settings/rating-description", rating_description, name="rating_description"),
-
+    #Include the following preset routes and views:
+    # login (using registration/login.html)
+    # logout
     path("accounts/", include("django.contrib.auth.urls")),
+    
     path("register", RegistrationPage.as_view(), name="register"),
     path("settings", null_view, name="settings"),
+    path("settings/rating-description", rating_description, name="rating_description"),
 ]
 
 def url_for_user(user, route="user_main"):
