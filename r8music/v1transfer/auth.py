@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
+from .models import UserV1Link
 
 from werkzeug.security import check_password_hash
 
@@ -12,5 +13,5 @@ class V1PasswordAuthBackend(ModelBackend):
             if flask_hash and check_password_hash(flask_hash, password):
                 return user
             
-        except (User.DoesNotExist, User.v1_link.DoesNotExist):
+        except (User.DoesNotExist, UserV1Link.DoesNotExist):
             pass
