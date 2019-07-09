@@ -30,9 +30,11 @@ def n_things(n, noun):
 def full_datetime(then, timezone_name):
     return then.astimezone(timezone(timezone_name)).strftime("%A, %d %B %Y at %X")
     
-def friendly_datetime(then):
+def friendly_datetime(then, timezone_name):
     """Omit what is common between the given date and the current date"""
-    now = datetime.now()
+    
+    then = then.astimezone(timezone(timezone_name))
+    now = datetime.now().astimezone(timezone(timezone_name))
 
     #d is the day number, b is the short month name, Y is the year, X is the time
     format =      "%d %B %Y" if then.year != now.year \

@@ -3,12 +3,12 @@
 {%- endmacro %}
 
 {% macro full_and_friendly_datetime(datetime) -%}
-    {% set timezone = request.user.timezone if request.user else "UTC" %}
-    <time title="{{ full_datetime(datetime, timezone) }}">{{ friendly_datetime(datetime) }}</time>
+    {% set timezone = request.user.settings.timezone or "UTC" %}
+    <time title="{{ full_datetime(datetime, timezone) }}">{{ friendly_datetime(datetime, timezone) }}</time>
 {%- endmacro %}
 
 {% macro event_datetime(datetime, request) -%}
-    {% set timezone = request.user.timezone if request.user.timezone else "UTC" %}
+    {% set timezone = request.user.settings.timezone or "UTC" %}
     <time class="de-emph" title="{{ full_datetime(datetime, timezone) }}">{{ relative_datetime(datetime) }}</time>
 {%- endmacro %}
 
