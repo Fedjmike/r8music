@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "forms.html" import django_form_fields, recaptcha %}
+{% from "forms.html" import django_form_fields %}
 
 {% block title %} Register an account {{ super() }} {% endblock %}
 
@@ -15,7 +15,6 @@
     <form action={{ url("register") }} method="post" class="clearfix">
         <dl>
             {{ django_form_fields(form) }}
-            {{ recaptcha() }}
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             {% if request.GET.get("next") %}
                 <input type="hidden" name="next" value="{{ request.GET.get("next") }}" />

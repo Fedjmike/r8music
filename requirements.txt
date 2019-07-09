@@ -3,5 +3,6 @@ psycopg2
 django-enumfield
 djangorestframework
 jinja2
+recaptcha
 #For checking passwords from r8music v1
 werkzeug

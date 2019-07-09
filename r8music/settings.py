@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
+    'captcha',
     'r8music.profiles',
     'r8music.music',
     'r8music.actions',
@@ -121,6 +122,12 @@ AUTHENTICATION_BACKENDS = [
    'r8music.v1transfer.auth.V1PasswordAuthBackend',
    'django.contrib.auth.backends.ModelBackend',
 ]
+
+# Recaptcha
+# https://pypi.org/project/django-recaptcha/
+
+RECAPTCHA_PUBLIC_KEY = ''
+RECAPTCHA_PRIVATE_KEY = ''
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

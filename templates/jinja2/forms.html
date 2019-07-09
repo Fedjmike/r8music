@@ -23,15 +23,6 @@
     {% endfor %}
 {%- endmacro %}
 
-{% macro recaptcha() -%}
-    <!-- "I'm not a robot" reCAPTCHA -->
-    <script src='https://www.google.com/recaptcha/api.js'></script>
-    <dd>
-        <div class="g-recaptcha" data-sitekey="6LeJzxgTAAAAAO9KpMEH9DsZKG9ax0C3DAIYSpgA"></div>
-        {{ flash_area("recaptcha") }}
-    </dd>
-{%- endmacro %}
-
 {% macro set_pw_form(user, standalone=False) -%}
     <form action={{ url_for("set_password") }} method="post" class="clearfix">
         <dl>

@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from django.views.generic import CreateView
 from django.contrib.auth.forms import UserCreationForm
+from captcha.fields import ReCaptchaField
 
 from django.db.models import Count, Q
 
@@ -158,9 +159,13 @@ class UnfollowUser(AbstractUserPage, LoginRequiredMixin):
 
 #
 
+class R8MUserCreationForm(UserCreationForm):
+    #Require Google recaptcha confirmation (by default, the checkbox)
+    captcha = ReCaptchaField()
+
 class RegistrationPage(CreateView):
     template_name = "registration/register.html"
-    form_class = UserCreationForm
+    form_class = R8MUserCreationForm
     success_url = reverse_lazy("login")
     
     def form_valid(self, form):
