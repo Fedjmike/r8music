@@ -8,6 +8,8 @@ import json
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django import urls
+from django.contrib import messages
+
 from jinja2 import Environment
 
 from r8music.profiles.urls import urlreversers as profile_urlreversers
@@ -55,6 +57,7 @@ def environment(**options):
     env.globals.update({
         "static": staticfiles_storage.url,
         "url": urls.reverse,
+        "get_messages": messages.get_messages,
         "json_dumps": json.dumps,
         "relative_datetime": naturaltime
     })

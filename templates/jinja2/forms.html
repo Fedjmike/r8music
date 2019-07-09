@@ -1,15 +1,8 @@
-{% macro flash_area(name) -%}
-    {% for message in get_flashed_messages(category_filter=[name + "-message", name + "-error"]) %}
-        <span class="error">{{ message }}</span>
-    {% endfor %}
-{%- endmacro %}
-
 {% macro form_field(description, name, type, form_prefill=None, prefill=None) -%}
     <dt>{{ description }}</dt>
     <dd>
         <input type={{ type }} name={{ name }}
                value="{{ prefill if prefill else form_prefill[name] if form_prefill and name in form_prefill else ''}}" />
-        {{ flash_area(name) }}
     </dd>
 {%- endmacro %}
 

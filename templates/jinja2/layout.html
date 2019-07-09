@@ -116,12 +116,14 @@
         </ol>
 	</div>
     
-    {% for message in get_flashed_messages(category_filter=["success"]) %}
-        <div class="page content success message"><i class="material-icons">done</i>{{ message }}</div>
-    {% endfor %}
-
-    {% for message in get_flashed_messages(category_filter=["error"]) %}
-        <div class="page content error message"><i class="material-icons">error_outline</i>{{ message }}</div>
+    {% for message in get_messages(request) %}
+        {% if "success" in message.tags %}
+            <div class="page content success message"><i class="material-icons">done</i>{{ message }}</div>
+        {% elif "error" in message.tags %}
+            <div class="page content error message"><i class="material-icons">error_outline</i>{{ message }}</div>
+        {% else %}
+            <div class="page content message">{{ message }}</div>
+        {% endif %}
     {% endfor %}
     
     {% block content %}{% endblock %}
