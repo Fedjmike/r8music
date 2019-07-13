@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'r8music.music',
     'r8music.actions',
     'r8music.v1transfer',
+    'r8music.importation',
 ]
 
 MIDDLEWARE = [
