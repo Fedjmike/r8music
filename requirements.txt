@@ -6,3 +6,6 @@ jinja2
 recaptcha
 #For checking passwords from r8music v1
 werkzeug
+
+wikipedia
+bs4
