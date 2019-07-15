@@ -3,20 +3,12 @@ from django.db import transaction
 
 from django.contrib.auth.models import User
 from r8music.profiles.models import UserSettings, UserProfile, UserRatingDescription, Followership
-from r8music.music.models import Artist, Release, ReleaseType, Track, Tag, DiscogsTag, ArtistExternalLink, ReleaseExternalLink, generate_slug
+from r8music.music.models import Artist, Release, ReleaseType, Track, Tag, DiscogsTag, ArtistExternalLink, ReleaseExternalLink, generate_slug_tracked
 from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction
 
 from r8music.v1transfer.models import UserV1Link, TagV1Link, ArtistV1Link, ReleaseV1Link, TrackV1Link, ActionV1Link
 
 from r8music.v1.model import Model, UserType, ObjectType, ActionType, NotFound
-
-def generate_slug_tracked(used_slugs, name):
-    """Generates a slug, using a set of slugs already used. This is to avoid
-       the many slow queries otherwise required. Updates the given set in place."""
-    is_free = lambda slug: slug not in used_slugs
-    slug = generate_slug(is_free, name)
-    used_slugs.add(slug)
-    return slug
 
 class IDMap:
     """Maps from IDs in the old database to those in the new models."""

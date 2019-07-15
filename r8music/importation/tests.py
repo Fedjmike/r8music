@@ -160,3 +160,25 @@ class CoverArtTest(TestCase):
             "ba45590f-8e3b-48aa-9082-f2f7f22460ac", "5c9f1f0f-d079-4fa3-b2b7-858249c36703",
             release_artwork=False, release_group_artwork=False
         ))
+
+
+class ArtistTest(TestCase):
+    def setUp(self):
+        self.importer = Importer()
+        
+    def test_artist(self):
+        def check(response, expected_extra_links, description_expected=True, images_expected=True):
+            for key in ["id", "name"]:
+                self.assertIn(key, response.json)
+                
+            self.assertCountEqual(response.extra_links, expected_extra_links)
+            
+            (self.assertIsNotNone if description_expected else self.assertIsNone)(response.description)
+            
+            for url in [response.image_url, response.image_thumb_url]:
+                (self.assertIsNotNone if description_expected else self.assertIsNone)(url)
+            
+        response = self.importer.query_artist("7a2533c3-790e-4828-9b30-ca5467c609c5")
+        check(response, ["https://en.wikipedia.org/wiki/Kate_Tempest"], True, True)
+        
+        self.importer.create_artists([response])

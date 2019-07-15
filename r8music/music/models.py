@@ -13,6 +13,14 @@ def generate_slug(is_free, name):
     candidates = ("%s-%d" % (slug, n) if n else slug for n in count(0))
     return next(filter(is_free, candidates))
     
+def generate_slug_tracked(used_slugs, name):
+    """Generates a slug, using a set of slugs already used. This is to avoid
+       the many slow queries otherwise required. Updates the given set in place."""
+    is_free = lambda slug: slug not in used_slugs
+    slug = generate_slug(is_free, name)
+    used_slugs.add(slug)
+    return slug
+
 def make_runtime_str(milliseconds):
     return "%d:%02d" % (milliseconds//60000, (milliseconds/1000) % 60)
 

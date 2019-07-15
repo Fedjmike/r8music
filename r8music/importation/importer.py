@@ -1,6 +1,9 @@
 import re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urlparse, urljoin
+
+from r8music.music.models import Artist, ArtistExternalLink, generate_slug_tracked
+from .models import ArtistMBLink, ArtistMBImportation, ArtistMBIDMap
 
 class Importer:
     discogs_genre_blacklist = set([
@@ -55,7 +58,7 @@ class Importer:
             image_url = image_link["href"]
             
         except (IndexError, KeyError):
-            return None
+            return None, None
             
         else:            
             #srcset is a list of images of different sizes, with scales
@@ -64,7 +67,7 @@ class Importer:
             thumb_url, scale = max(thumbs, key=lambda thumb_scale: thumb_scale[1])
             
             #Turn the URLs (which might be relative) into absolute URLs
-            absolute_urls = [urljoin(wikipedia_page.url, url) for url in [thumb_url, image_url]]
+            absolute_urls = [urljoin(wikipedia_page.url, url) for url in [image_url, thumb_url]]
             
             return absolute_urls
             
@@ -86,6 +89,90 @@ class Importer:
                 wikipedia_page.summary,
                 self.get_wikipedia_images(wikipedia_page)
             )
+            
+    # Artists (MusicBrainz)
+    
+    class ArtistResponse:
+        """Contains the response(s) from queries to MusicBrainz etc.
+           The JSON (from MusicBrainz) can either be from a full artist query,
+           or from the artist-credits key from a release query."""
+        def __init__(self, json, extra_links=None, description=None, image_url=None, image_thumb_url=None):
+            self.json = json
+            self.extra_links = extra_links
+            self.description = description
+            self.image_url = image_url
+            self.image_thumb_url = image_thumb_url
+        
+    def query_artist(self, artist_mbid):
+        artist_json = self.musicbrainz.get_artist_by_id(artist_mbid, includes=["url-rels"])["artist"]
+        
+        url_relations = artist_json.get("url-relation-list", [])
+        candidates = (rel["target"] for rel in url_relations if rel["type"] == "wikipedia")
+        wikipedia_url = next(candidates, None)
+        
+        guessed_wikipedia_url, description, images = \
+            self.query_wikipedia(artist_json["name"], wikipedia_url)
+        
+        extra_links = [guessed_wikipedia_url]
+        return self.ArtistResponse(artist_json, extra_links, description, *images)
+        
+    def replace_artist(self, existing_artist, artist):
+        #Move related objects onto the new artist object, except those which
+        #have been recreated in the importation.
+        for related_model in [ArtistMBLink, ArtistMBImportation, Release.artists.through]:
+            related_model.objects.filter(artist=existing_artist).update(artist=artist)
+        
+        existing_artist.delete()
+        
+    def create_artist(self, artist_response, slug, existing_artist=None):        
+        artist = Artist.objects.create(
+            name=artist_response.json["name"],
+            slug=slug,
+            description=artist_response.description,
+            image_url=artist_response.image_url,
+            image_thumb_url=artist_response.image_thumb_url
+        )
+        
+        ArtistMBImportation.objects.create(artist=artist)
+        
+        external_links = [
+            ArtistExternalLink(artist=artist, url=url_relation["target"], name=url_relation["type"])
+            for url_relation in artist_response.json.get("url-relation-list", [])
+        ]
+        
+        external_links += [
+            ArtistExternalLink(artist=artist, url=url, name=urlparse(url).netloc)
+            for url in artist_response.extra_links
+        ]
+        
+        ArtistExternalLink.objects.bulk_create(external_links)
+        
+        if existing_artist:
+            self.replace_artist(existing_artist, artist)
+        
+        else:
+            ArtistMBLink.objects.create(artist=artist, mbid=artist_response.json["id"])
+        
+    def create_artists(self, artist_responses):
+        mbids = [response.json["id"] for response in artist_responses]
+        
+        #Artists already in the database
+        artists_for_update = {
+            artist.mb_link.mbid: artist for artist
+            in Artist.objects.filter(mb_link__mbid__in=mbids).select_related("mb_link")
+        }
+        
+        used_slugs = set(Artist.objects.values_list("slug", flat=True))
+        
+        for artist_response in artist_responses:
+            existing_artist = artists_for_update.get(artist_response.json["id"], None)
+            
+            slug = existing_artist.slug if existing_artist \
+                else generate_slug_tracked(used_slugs, artist_response.json["name"])
+            
+            self.create_artist(artist_response, slug, existing_artist)
+                
+        return ArtistMBIDMap()
         
     # Discogs (used for populating tags)
     
