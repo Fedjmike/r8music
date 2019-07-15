@@ -42,6 +42,9 @@ class Artist(models.Model):
     #A couple of sentences or short paragraphs about the artist
     description = models.TextField(null=True)
     
+    image_url = models.TextField(null=True)
+    image_thumb_url = models.TextField(null=True)
+    
     @property
     def all_tracks(self):
         return Track.objects.filter(release__artists=self)
@@ -49,10 +52,6 @@ class Artist(models.Model):
     @property
     def all_tags(self):
         return Tag.objects.filter(releases__artists=self)
-         
-    @property
-    def image(self):
-        return None, None
         
     @property
     def wikipedia_url(self):
