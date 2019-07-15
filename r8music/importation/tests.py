@@ -30,14 +30,16 @@ class WikipediaTest(TestCase):
     
     def setUp(self):
         self.wikipedia_fixture = fixture_path("wikipedia_test")
-        self.wikipedia_storage = try_load_memoization(self.wikipedia_fixture)
         
-        memoized_wikipedia = MemoizedModule(wikipedia, storage=self.wikipedia_storage, mock_only=True)
+        self.memoized_wikipedia = MemoizedModule(
+            wikipedia, mock_only=True,
+            storage=try_load_memoization(self.wikipedia_fixture)
+        )
         
-        self.importer = Importer(wikipedia=memoized_wikipedia)
+        self.importer = Importer(wikipedia=self.memoized_wikipedia)
         
     def save_fixtures(self):
-        save_memoization(self.wikipedia_storage, self.wikipedia_fixture)
+        save_memoization(self.memoized_wikipedia.storage, self.wikipedia_fixture)
     
     def test_wikipedia(self):
         def assert_results(results, expected_guessed_url, description_expected, images_expected):
