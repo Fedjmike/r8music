@@ -100,7 +100,7 @@ class DiscogsTest(TestCase):
             release_id, master_id, tags = results
             self.assertEquals(release_id, expected_release_id)
             self.assertEquals(master_id, expected_master_id)
-            self.assertEquals(set(tags), set(expected_tags))
+            self.assertCountEqual(tags, expected_tags)
             
         #No discogs link
         check(self.importer.query_discogs({}, {}), None, None, [])

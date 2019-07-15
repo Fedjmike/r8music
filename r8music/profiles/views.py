@@ -176,6 +176,7 @@ class RegistrationPage(CreateView):
             
         else: 
             return redirect_without_next
+
 # User API
 
 @api_view(["post"])

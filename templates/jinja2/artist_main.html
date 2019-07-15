@@ -13,7 +13,9 @@
     </div>
     <div class="column-1-3">
         {% if artist.image_url %}
-            <a class="artist-image-container" href={{ artist.image_url }}><img class="artist-image" src={{ artist.image_thumb_url }}></a>
+            <a class="artist-image-container" href={{ artist.image_url }}>
+                <img class="artist-image" src={{ artist.image_thumb_url }} />
+            </a>
         {% else %}
             <header></header>
         {% endif %}
