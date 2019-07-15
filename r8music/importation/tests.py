@@ -1,4 +1,4 @@
-import os, pickle, wikipedia
+import os, pickle, musicbrainzngs, wikipedia
 from django.test import TestCase
 
 from .utils import MemoizedModule
@@ -79,3 +79,53 @@ class WikipediaTest(TestCase):
         #Provided URL, no image
         results = self.importer.query_wikipedia("Shopping", "https://en.wikipedia.org/wiki/Shopping_(band)")
         check(results, None, True, False)
+
+
+class CoverArtTest(TestCase):
+    def setUp(self):
+        self.mb_fixture = fixture_path("cover_art_test")
+        
+        self.memoized_musicbrainz = MemoizedModule(
+            musicbrainzngs, exceptions=["set_useragent"], mock_only=True,
+            storage=try_load_memoization(self.mb_fixture)
+        )
+        
+        self.importer = Importer(musicbrainz=self.memoized_musicbrainz)
+        
+    def save_fixtures(self):
+        save_memoization(self.memoized_musicbrainz.storage, self.mb_fixture)
+        
+    def test_cover_art(self):
+        def json(mbid, has_artwork):
+            return {
+                "id": mbid,
+                "cover-art-archive": {"artwork": "true" if has_artwork else "false"}
+            }
+            
+        def query(release_mbid, release_group_mbid, release_artwork=True, release_group_artwork=True):
+            return self.importer.query_cover_art(
+                json(release_mbid, release_artwork),
+                json(release_group_mbid, release_group_artwork)
+            )
+            
+        def check(art_urls):
+            self.assertEquals(set(art_urls.keys()), set(["max", "250", "500"]))
+            
+            for url in art_urls.values():
+                self.assertIsNotNone(url)
+        
+        #Art for group but not release. A query whose response from the CAA uses
+        #the old keys, "large" and "small", not "500" and "250".
+        check(query(
+            "672de9bc-fca5-4d26-84fd-075ab440c753", "06448e12-18d8-4d52-a51f-d4c83d07ec09",
+            release_artwork=False
+        ))
+        
+        #Art for both release and group. The response uses the new keys.
+        check(query("508a9f90-bf4b-46ee-a5d4-5d09c40ea6d5", "696f2388-f520-4e50-bcc6-9c58dcfd879c"))
+        
+        #No cover art
+        self.assertIsNone(query(
+            "ba45590f-8e3b-48aa-9082-f2f7f22460ac", "5c9f1f0f-d079-4fa3-b2b7-858249c36703",
+            release_artwork=False, release_group_artwork=False
+        ))

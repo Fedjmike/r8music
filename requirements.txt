@@ -8,4 +8,5 @@ recaptcha
 werkzeug
 
 wikipedia
+musicbrainzngs
 bs4
