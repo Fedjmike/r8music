@@ -42,7 +42,7 @@ class WikipediaTest(TestCase):
         save_memoization(self.memoized_wikipedia.storage, self.wikipedia_fixture)
     
     def test_wikipedia(self):
-        def assert_results(results, expected_guessed_url, description_expected, images_expected):
+        def check(results, expected_guessed_url, description_expected, images_expected):
             guessed_url, description, images = results
             
             if expected_guessed_url:
@@ -66,16 +66,16 @@ class WikipediaTest(TestCase):
         
         #Guessed URL
         results = self.importer.query_wikipedia("Julien Baker")
-        assert_results(results, "https://en.wikipedia.org/wiki/Julien_Baker", True, True)
+        check(results, "https://en.wikipedia.org/wiki/Julien_Baker", True, True)
         
         #Guessed via a disambiguation page
         results = self.importer.query_wikipedia("Can")
-        assert_results(results, "https://en.wikipedia.org/wiki/Can_(band)", True, True)
+        check(results, "https://en.wikipedia.org/wiki/Can_(band)", True, True)
         
         #No wikipedia page (despite a redirect to /wiki/Dud)
         results = self.importer.query_wikipedia("Duds")
-        assert_results(results, None, False, False)
+        check(results, None, False, False)
         
         #Provided URL, no image
         results = self.importer.query_wikipedia("Shopping", "https://en.wikipedia.org/wiki/Shopping_(band)")
-        assert_results(results, None, True, False)
+        check(results, None, True, False)
