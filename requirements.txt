@@ -9,4 +9,5 @@ werkzeug
 
 wikipedia
 musicbrainzngs
+discogs_client
 bs4

@@ -1,12 +1,18 @@
-import re, requests, wikipedia, musicbrainzngs
+import re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
 class Importer:
-    def __init__(self, requests=requests, musicbrainz=musicbrainzngs, wikipedia=wikipedia):
+    discogs_genre_blacklist = set([
+        "Brass & Military", "Children's", "Folk, World, & Country",
+        "Funk / Soul", "Non-Music", "Pop", "Stage & Screen"
+    ])
+    
+    def __init__(self, requests=requests, musicbrainz=musicbrainzngs, wikipedia=wikipedia, discogs_client=discogs_client):
         self.requests = requests
         self.musicbrainz = musicbrainz
         self.wikipedia = wikipedia
+        self.discogs = discogs_client.Client("r8music")
         
         self.musicbrainz.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
         
@@ -80,6 +86,37 @@ class Importer:
                 wikipedia_page.summary,
                 self.get_wikipedia_images(wikipedia_page)
             )
+        
+    # Discogs (used for populating tags)
+    
+    discogs_url_pattern = re.compile("discogs.com(/.*)?/(release|master)/(\d*)")
+    
+    def find_discogs_url(self, url_relations):
+        candidates = (rel["target"] for rel in url_relations if rel["type"] == "discogs")
+        return next(candidates, None)
+    
+    def get_discogs_id(self, discogs_url):
+        match = self.discogs_url_pattern.search(discogs_url)
+        return match.group(3) if match else None
+    
+    def query_discogs_tags(self, discogs_id, is_master=False):
+        release = (self.discogs.master if is_master else self.discogs.release)(discogs_id)
+        tags = set(release.genres + release.styles) - self.discogs_genre_blacklist
+        return tags
+    
+    def query_discogs(self, release_json, release_group_json):
+        def get(json, is_master=False):
+            url = self.find_discogs_url(json["url-relation-list"]) \
+                if "url-relation-list" in json else None
+            id = self.get_discogs_id(url) if url else None
+            tags = self.query_discogs_tags(id, is_master) if id else set()
+            return id, tags
+        
+        #Query both the release and its master and combine their tags
+        discogs_release_id, release_tags = get(release_json)
+        discogs_master_id, master_tags = get(release_group_json, is_master=True)
+        tags = release_tags | master_tags
+        return discogs_release_id, discogs_master_id, list(tags)
         
     # Cover art archive
     

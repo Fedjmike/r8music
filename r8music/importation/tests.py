@@ -81,6 +81,37 @@ class WikipediaTest(TestCase):
         check(results, None, True, False)
 
 
+class DiscogsTest(TestCase):
+    def setUp(self):
+        self.importer = Importer()
+        
+    def test_discogs_tags(self):
+        def json(discogs_url):
+            return {
+                "url-relation-list": [
+                    {"type": "discogs", "target": discogs_url}
+                ]
+            }
+            
+        def query(discogs_url, discogs_master_url):
+            return self.importer.query_discogs(json(discogs_url), json(discogs_master_url))
+            
+        def check(results, expected_release_id, expected_master_id, expected_tags):
+            release_id, master_id, tags = results
+            self.assertEquals(release_id, expected_release_id)
+            self.assertEquals(master_id, expected_master_id)
+            self.assertEquals(set(tags), set(expected_tags))
+            
+        #No discogs link
+        check(self.importer.query_discogs({}, {}), None, None, [])
+        
+        #A release with some tags, including one to be excluded.
+        check(
+            query("https://www.discogs.com/release/4577604", "https://www.discogs.com/master/4030"),
+            "4577604", "4030", ["Blues", "Folk"]
+        )
+
+
 class CoverArtTest(TestCase):
     def setUp(self):
         self.mb_fixture = fixture_path("cover_art_test")
