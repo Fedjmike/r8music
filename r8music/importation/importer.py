@@ -28,7 +28,7 @@ class Importer:
     wikipedia_url_pattern = re.compile("/wiki/(/?.*)")
     
     def guess_wikipedia_page(self, artist_name):
-        music_categories = ["musician", "band", "rapper"]
+        music_categories = ["musician", "band", "rapper", "artist", "singer", "songwriter"]
         is_music_page = lambda str: any(category in str for category in music_categories)
         
         try:
