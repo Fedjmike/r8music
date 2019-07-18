@@ -231,16 +231,19 @@ class Importer:
         art_urls = {size: self.get_canonical_url(url) for size, url in art_urls.items()}
         return art_urls
         
-    def query_cover_art(self, release_json, release_group_json):
-        art_urls = None
-        
-        #Prefer cover art specific to the release
-        if release_json["cover-art-archive"]["artwork"] == "true":
-            art_json = self.musicbrainz.get_image_list(release_json["id"])
-            art_urls = self.select_cover_art(art_json)
+    def query_cover_art(self, release_mbid, release_group_mbid):
+        for getter, mbid in [
+            #Prefer cover art specific to the release
+            (self.musicbrainz.get_image_list, release_mbid),
+            (self.musicbrainz.get_release_group_image_list, release_group_mbid)
+        ]:
+            try:
+                art_urls = self.select_cover_art(getter(mbid))
+                
+                if art_urls:
+                    return art_urls
             
-        if not art_urls and release_group_json["cover-art-archive"]["artwork"] == "true":
-            art_json = self.musicbrainz.get_release_group_image_list(release_group_json["id"])
-            art_urls = self.select_cover_art(art_json)
+            except self.musicbrainz.ResponseError:
+                pass
             
-        return art_urls
+        return None
