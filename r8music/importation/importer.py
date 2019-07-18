@@ -98,7 +98,7 @@ class Importer:
            or from the artist-credits key from a release query."""
         def __init__(self, json, extra_links=None, description=None, image_url=None, image_thumb_url=None):
             self.json = json
-            self.extra_links = extra_links
+            self.extra_links = extra_links or []
             self.description = description
             self.image_url = image_url
             self.image_thumb_url = image_thumb_url
