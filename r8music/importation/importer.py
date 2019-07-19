@@ -5,7 +5,11 @@ from urllib.parse import urlparse, urljoin
 from r8music.music.models import Artist, ArtistExternalLink, generate_slug_tracked
 from .models import ArtistMBLink, ArtistMBImportation, ArtistMBIDMap
 
+from .utils import mode_items, query_and_collect
+
 class Importer:
+    mb_browse_limit = 100
+    
     discogs_genre_blacklist = set([
         "Brass & Military", "Children's", "Folk, World, & Country",
         "Funk / Soul", "Non-Music", "Pop", "Stage & Screen"
@@ -247,3 +251,70 @@ class Importer:
                 pass
             
         return None
+        
+    # Querying releases
+    
+    class ReleaseResponse:
+        def __init__(self, release_json, release_group_json, art_urls, discogs_tags):
+            self.json, self.group_json, self.art_urls, self.discogs_tags \
+                = release_json, release_group_json, art_urls, discogs_tags
+    
+    def browse_release_groups(self, artist_mbid, includes=[]):
+        def query(limit, offset):
+            return self.musicbrainz.browse_release_groups(
+                artist_mbid, includes=includes,
+                limit=limit, offset=offset
+            )["release-group-list"]
+        
+        return query_and_collect(query, limits=self.mb_browse_limit)
+    
+    def browse_releases(self, release_group_mbid, includes=[]):
+        def query(limit, offset):
+            return self.musicbrainz.browse_releases(
+                release_group=release_group_mbid, includes=includes,
+                limit=limit, offset=offset
+            )["release-list"]
+        
+        return query_and_collect(query, limits=self.mb_browse_limit)
+        
+    def select_release(self, release_jsons):
+        def track_count(release):
+            return sum(medium["track-count"] for medium in release["medium-list"])
+        
+        def best_date(release):
+            #Prefer fuller dates, then earlier dates
+            return (-len(release["date"]), release["date"])
+        
+        #Assume that releases with unusual track counts (non-mode) are not canonical
+        releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
+        
+        #Better if they have a date
+        those_with_dates = [r for r in releases_of_mode_track_count if r["date"]]
+        
+        if those_with_dates:
+            return min(those_with_dates, key=best_date)
+            
+        else:
+            return next(iter(releases_of_mode_track_count), None)
+
+    def query_release(self, release_group_json):
+        release_jsons = self.browse_releases(
+            release_group_json["id"], includes=["recordings", "url-rels"]
+        )
+        
+        release_json = self.select_release(release_jsons)
+        
+        art_urls = self.query_cover_art(release_json["id"], release_group_json["id"])
+        _, _, discogs_tags = self.query_discogs(release_json, release_group_json)
+        
+        return self.ReleaseResponse(
+            release_json, release_group_json, art_urls, discogs_tags
+        )
+        
+    def query_all_releases(self, artist_response):
+        return [
+            self.query_release(release_group_json)
+            for release_group_json in self.browse_release_groups(
+                artist_response.json["id"], includes=["artist-credits", "url-rels"]
+            )
+        ]

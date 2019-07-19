@@ -140,11 +140,11 @@ class CoverArtTest(TestCase):
         ))
 
 
-class ArtistTest(TestCase):
+class ImportTest(TestCase):
     def setUp(self):
         self.importer = Importer()
         
-    def test_artist(self):
+    def test(self):
         def check(response, expected_extra_links, description_expected=True, images_expected=True):
             for key in ["id", "name"]:
                 self.assertIn(key, response.json)
@@ -156,7 +156,8 @@ class ArtistTest(TestCase):
             for url in [response.image_url, response.image_thumb_url]:
                 (self.assertIsNotNone if description_expected else self.assertIsNone)(url)
             
-        response = self.importer.query_artist("7a2533c3-790e-4828-9b30-ca5467c609c5")
-        check(response, ["https://en.wikipedia.org/wiki/Kate_Tempest"], True, True)
+        artist_response = self.importer.query_artist("7a2533c3-790e-4828-9b30-ca5467c609c5")
+        release_responses = self.importer.query_all_releases("7a2533c3-790e-4828-9b30-ca5467c609c5")
         
-        self.importer.create_artists([response])
+        check(artist_response, ["https://en.wikipedia.org/wiki/Kate_Tempest"], True, True)
+        self.importer.create_artists([artist_response])
