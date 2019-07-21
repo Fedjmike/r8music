@@ -36,7 +36,7 @@ class RateAction(Action):
         active_actions.save()
     
 class PickAction(Action):
-    track = models.ForeignKey(Track, on_delete=models.PROTECT)
+    track = models.ForeignKey(Track, on_delete=models.PROTECT, related_name="pick_actions")
     
     def set_as_active(self):
         active_actions = self._get_active_actions(self.track.release)

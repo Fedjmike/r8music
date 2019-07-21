@@ -1,14 +1,25 @@
 from django.db import models
 
-from r8music.music.models import Artist, Release
+from r8music.music.models import Artist, Release, DiscogsTag
 
 class ArtistMBLink(models.Model):
     artist = models.OneToOneField(Artist, on_delete=models.CASCADE, related_name="mb_link")
-    mbid = models.TextField()
+    mbid = models.TextField(unique=True)
 
 class ArtistMBImportation(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="mb_importations")
     date = models.DateTimeField(auto_now_add=True)
+
+
+class ReleaseMBLink(models.Model):
+    release = models.OneToOneField(Release, on_delete=models.CASCADE, related_name="mb_link")
+    release_mbid = models.TextField(unique=True)
+    release_group_mbid = models.TextField(unique=True)
+    
+class ReleaseDuplication(models.Model):
+    """In some cases, an updated release cannot replace the original version."""
+    original = models.OneToOneField(Release, on_delete=models.CASCADE, related_name="duplication_of")
+    updated = models.ForeignKey(Release, on_delete=models.CASCADE, related_name="duplications")
 
 
 class ModelMap:
@@ -31,8 +42,21 @@ class ModelMap:
             
         except KeyError as e:
             raise ValueError(f"id={id} was not found") from e
+            
+    def __contains__(self, id):
+        return id in self.id_map
 
 class ArtistMBIDMap(ModelMap):
     map_model = ArtistMBLink
     from_field = "mbid"
     to_field = "artist_id"
+
+class ReleaseMBIDMap(ModelMap):
+    map_model = ReleaseMBLink
+    from_field = "release_mbid"
+    to_field = "release_id"
+
+class DiscogsTagMap(ModelMap):
+    map_model = DiscogsTag
+    from_field = "discogs_name"
+    to_field = "id"

@@ -2,10 +2,20 @@ import re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
-from r8music.music.models import Artist, ArtistExternalLink, generate_slug_tracked
-from .models import ArtistMBLink, ArtistMBImportation, ArtistMBIDMap
+from django.db import transaction
 
-from .utils import mode_items, query_and_collect
+from r8music.music.models import (
+    Artist, Release, Track, generate_slug_tracked,
+    DiscogsTag, ArtistExternalLink, ReleaseExternalLink
+)
+from .models import (
+    ArtistMBLink, ArtistMBImportation, ReleaseMBLink, ReleaseDuplication,
+    ArtistMBIDMap, ReleaseMBIDMap, DiscogsTagMap
+)
+from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
+
+from .utils import uniqify, mode_items, query_and_collect, get_release_type_from_mb_str
+from .chromatography import get_palette
 
 class Importer:
     mb_browse_limit = 100
@@ -318,3 +328,215 @@ class Importer:
                 artist_response.json["id"], includes=["artist-credits", "url-rels"]
             )
         ]
+    
+    #
+    
+    class UnsuitableReplacementError(Exception):
+        pass
+    
+    def create_featured_artists(self, release_responses, artist_map):        
+        featured_artists = (
+            self.ArtistResponse(artist_credit["artist"])
+            for response in release_responses
+            for artist_credit in response.group_json["artist-credit"]
+            if isinstance(artist_credit, dict)
+                and artist_credit["artist"]["id"] not in artist_map
+        )
+        
+        #Artists may have featured in multiple releases
+        featured_artists = uniqify(featured_artists, key=lambda response: response.json["id"])
+        
+        artist_map = self.create_artists(featured_artists)
+        
+        return artist_map
+        
+    def create_tracks(self, release_json, release):
+        Track.objects.bulk_create([
+            Track(
+                release_id=release.id,
+                title=track["recording"]["title"],
+                runtime=track["recording"].get("length", None),
+                position=int(track["position"]),
+                side=int(medium["position"])
+            )
+            for medium in release_json["medium-list"]
+            for track in medium["track-list"]
+        ])
+        
+        return release.tracks
+        
+    def replace_tracks(self, existing_release, release):
+        tracks = list(release.tracks.all())
+        
+        #Move actions from the existing tracks onto matching tracks in the new release
+        for existing_track in existing_release.tracks.exclude(pick_actions=None):
+            matching_tracks = (track for track in tracks if track.title == existing_track.title)
+            matching_track = next(matching_tracks, None)
+            
+            #Without a matching track for an existing track which has actions, the
+            #release replacement must be aborted
+            if not matching_track:
+                raise self.UnsuitableReplacementError()
+            
+            #Each new track can only match one existing track
+            tracks.remove(matching_track)
+            
+            existing_track.pick_actions.update(track=matching_track)
+        
+    def replace_release(self, existing_release, release):
+        #Move related objects to the new release object
+        for related_model in [SaveAction, ListenAction, RateAction, ActiveActions]:
+            related_model.objects.filter(release=existing_release).update(release=release)
+        
+        #The new release object was given a temporary slug
+        release.slug = existing_release.slug
+        
+        existing_release.delete()
+        
+        #Save the slug now that a clash is avoided
+        release.save()
+        
+    def create_release(
+        self, release_json, release_group_json, art_urls,
+        slug, existing_release, artist_map
+    ):
+        """Can raise UnsuitableReplacementError"""
+        
+        if art_urls:
+            extra_args = {
+                "art_url_250": art_urls["250"],
+                "art_url_500": art_urls["500"],
+                "art_url_max": art_urls["max"]
+            }
+            
+            #Download the cover art and extract a palette of the three main colours
+            extra_args["colour_1"], extra_args["colour_2"], extra_args["colour_3"] \
+                = get_palette(art_urls["500"])
+                
+        else:
+            extra_args = {}
+        
+        release = Release.objects.create(
+            title=release_json["title"],
+            type=get_release_type_from_mb_str(release_group_json["type"]),
+            release_date=release_json["date"],
+            #Use a temporary slug if the release is being updated (i.e. temporarily duplicated)
+            slug=slug if not existing_release else slug + "-[new]",
+            **extra_args
+        )
+        
+        tracks = self.create_tracks(release_json, release)
+        
+        if existing_release:
+            self.replace_tracks(existing_release, release)
+            self.replace_release(existing_release, release)
+        
+        ReleaseMBLink.objects.create(
+            release=release,
+            release_mbid=release_json["id"],
+            release_group_mbid=release_group_json["id"]
+        )
+        
+        Release.artists.through.objects.bulk_create([
+            Release.artists.through(
+                release=release,
+                artist_id=artist_map.get(artist_credit["artist"]["id"])
+            )
+            for artist_credit in release_group_json["artist-credit"]
+            #artist-credit can include joining phrases (like "&")
+            if isinstance(artist_credit, dict)
+        ])
+        
+        ReleaseExternalLink.objects.bulk_create([
+            ReleaseExternalLink(
+                release=release, url=url_relation["target"], name=url_relation["type"]
+            )
+            for url_relation in
+                release_json.get("url-relation-list", [])
+                + release_group_json.get("url-relation-list", [])
+        ])
+        
+    def create_releases(self, release_responses, artist_map):        
+        #Those releases already imported
+        #(identified by group MBID, as a different release may have been selected)
+        releases_for_update = {
+            release.mb_link.release_mbid: release
+            for release in Release.objects.filter(mb_link__release_group_mbid__in=[
+                response.group_json["id"] for response in release_responses
+            ]).select_related("mb_link")
+        }
+        
+        used_slugs = set(Release.objects.values_list("slug", flat=True))
+        
+        for response in release_responses:
+            existing_release = releases_for_update.get(response.json["id"], None)
+            
+            try:
+                #Try replacing the existing release
+                with transaction.atomic():
+                    self.create_release(
+                        response.json, response.group_json, response.art_urls,
+                        existing_release.slug, existing_release, artist_map
+                    )
+                
+            #AttributeError is raised when existing_release is None
+            #UnsuitableReplacementError means the existing release must remain
+            except (AttributeError, self.UnsuitableReplacementError):
+                if existing_release:
+                    #Only the updated version retains the link to MusicBrainz
+                    existing_release.mb_link.delete()
+                
+                slug = generate_slug_tracked(used_slugs, response.json["title"])
+                
+                release = self.create_release(
+                    response.json, response.group_json, response.art_urls,
+                    slug, None, artist_map
+                )
+                
+                if existing_release:
+                    ReleaseDuplication.objects.create(original=existing_release, updated=release)
+        
+        return ReleaseMBIDMap()
+        
+    def create_tags_and_taggings(self, release_responses, release_map):
+        tags_map = DiscogsTagMap()
+        
+        new_discogs_tags = set(
+            tag_name for response in release_responses
+            for tag_name in response.discogs_tags
+            if tag_name not in tags_map
+        )
+        
+        #(Can't be bulk created because DiscogsTag uses model inheritance)
+        for tag_name in new_discogs_tags:
+            DiscogsTag.objects.create(discogs_name=tag_name, name=tag_name)
+        
+        tags_map.update()
+        
+        for response in release_responses:
+            for tag_name in response.discogs_tags:
+                if not tags_map.get(tag_name):
+                    print(response.json["title"], tag_name)
+        
+        Release.tags.through.objects.bulk_create([
+            Release.tags.through(
+                release_id=release_map.get(response.json["id"]),
+                tag_id=tags_map.get(tag_name)
+            )
+            for response in release_responses
+            for tag_name in response.discogs_tags
+        ])
+        
+    def create_from_release_responses(self, release_responses, artist_map):
+        artist_map = self.create_featured_artists(release_responses, artist_map)
+        release_map = self.create_releases(release_responses, artist_map)
+        self.create_tags_and_taggings(release_responses, release_map)
+        
+    #
+    
+    def import_artist(self, artist_mbid):
+        artist_response = self.query_artist(artist_mbid)
+        release_responses = self.query_all_releases(artist_response)
+        
+        artist_map = self.create_artists([artist_response])
+        release_map = self.create_from_release_responses(release_responses, artist_map)

@@ -1,6 +1,11 @@
 import inspect
 from collections import defaultdict
 
+from r8music.music.models import ReleaseType
+
+def uniqify(iterable, key):
+    return {key(item): item for item in iterable}.values()
+
 def mode_items(iterable, key=lambda x: x):
     """Select the mode item(s) (i.e. the most common ones) from an iterable,
        as identified by the given key."""
@@ -37,6 +42,30 @@ def query_and_collect(query, limits):
             break
     
     return reponses
+    
+def get_release_type_from_mb_str(release_type_str):        
+    try:
+        return {
+            "Album": ReleaseType.ALBUM,
+            "Single": ReleaseType.SINGLE,
+            "EP": ReleaseType.EP,
+            "Broadcast": ReleaseType.BROADCAST,
+            "Other": ReleaseType.OTHER,
+            "Compilation": ReleaseType.COMPILATION,
+            "Soundtrack": ReleaseType.SOUNDTRACK,
+            "Spokenword": ReleaseType.SPOKENWORD,
+            "Interview": ReleaseType.INTERVIEW,
+            "Audiobook": ReleaseType.AUDIOBOOK,
+            "Audio drama": ReleaseType.AUDIO_DRAMA,
+            "Live": ReleaseType.LIVE,
+            "Remix": ReleaseType.REMIX,
+            "DJ-mix": ReleaseType.DJ_MIX,
+            "Mixtape/Street": ReleaseType.MIXTAPE_STREET,
+            "Demo": ReleaseType.DEMO
+        }[release_type_str]
+    
+    except KeyError:
+        raise ValueError("Unknown release type string: " + release_type_str)
     
 class MemoizedModule:
     """Replicates the functionality of a module and memoizes its functions.
