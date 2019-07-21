@@ -1,6 +1,11 @@
 import os, pickle, musicbrainzngs, wikipedia
 from django.test import TestCase
 
+from django.contrib.auth.models import User
+from r8music.music.models import Artist, Release
+from r8music.actions.models import ListenAction
+from .models import ArtistMBLink
+
 from .utils import MemoizedModule
 from .importer import Importer
 
@@ -145,19 +150,58 @@ class ImportTest(TestCase):
         self.importer = Importer()
         
     def test(self):
-        def check(response, expected_extra_links, description_expected=True, images_expected=True):
-            for key in ["id", "name"]:
-                self.assertIn(key, response.json)
-                
-            self.assertCountEqual(response.extra_links, expected_extra_links)
+        def create_dummy(artist_mbid, release_title):
+            artist = Artist.objects.create(name="Kate Tempest")
+            ArtistMBLink.objects.create(artist=artist, mbid=artist_mbid)
             
-            (self.assertIsNotNone if description_expected else self.assertIsNone)(response.description)
+            R1 = Release.objects.create(title=release_title)
+            R1.artists.add(artist)
             
-            for url in [response.image_url, response.image_thumb_url]:
-                (self.assertIsNotNone if description_expected else self.assertIsNone)(url)
-            
-        artist_response = self.importer.query_artist("7a2533c3-790e-4828-9b30-ca5467c609c5")
-        release_responses = self.importer.query_all_releases("7a2533c3-790e-4828-9b30-ca5467c609c5")
+        artist_mbid = "7a2533c3-790e-4828-9b30-ca5467c609c5"
         
-        check(artist_response, ["https://en.wikipedia.org/wiki/Kate_Tempest"], True, True)
-        self.importer.create_artists([artist_response])
+        #Create the artist with a dummy release
+        
+        dummy_release_title = "a release"
+        create_dummy(artist_mbid, dummy_release_title)
+        
+        #Import the artist (updating what was created)
+        
+        artist_response = self.importer.query_artist(artist_mbid)
+        release_responses = self.importer.query_all_releases(artist_response)
+        
+        artist_map = self.importer.create_artists([artist_response])
+        self.importer.create_from_release_responses(release_responses, artist_map)
+        
+        #Check that the dummy release has been transferred to the new version of the artist
+        
+        artist = Artist.objects.get(mb_link__mbid=artist_mbid)
+        self.assertTrue(artist.releases.filter(title=dummy_release_title).exists())
+        
+        #
+        
+        release_count = artist.releases.count()
+        
+        #Create an action on one of the artist's releases
+        
+        real_release = artist.releases.exclude(mb_link__release_mbid=None)[0]
+        real_release_mbid = real_release.mb_link.release_mbid
+        
+        test_user = User.objects.create_user("test_user")
+        listen_action = ListenAction.objects.create(release=real_release, user=test_user)
+        listen_action.set_as_active()
+        
+        #Re-import the artist (using the original query responses)
+        
+        artist_map = self.importer.create_artists([artist_response])
+        self.importer.create_from_release_responses(release_responses, artist_map)
+        
+        #Check that the releases were updated, not duplicated
+        
+        artist = Artist.objects.get(mb_link__mbid=artist_mbid)
+        self.assertEquals(artist.releases.count(), release_count)
+        
+        #Check that this update transferred the action onto the new version of the release
+        
+        real_release = Release.objects.get(mb_link__release_mbid=real_release_mbid)
+        test_user_actions = real_release.active_actions.get(user=test_user)
+        self.assertEquals(test_user_actions.listen, listen_action)
