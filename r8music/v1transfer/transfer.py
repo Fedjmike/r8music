@@ -286,10 +286,9 @@ class Transferer:
         
     #
     
-    def transfer_track(self, release_id, track_id, title, position, side, runtime, used_slugs):
+    def transfer_track(self, release_id, track_id, title, position, side, runtime):
         new_track = Track.objects.create(
             title=title,
-            slug=generate_slug_tracked(used_slugs, title),
             release_id=self.new_release_ids.map(release_id),
             position=position, side=side,
             runtime=runtime
@@ -299,10 +298,8 @@ class Transferer:
         
     @transaction.atomic
     def transfer_all_tracks(self):
-        used_slugs = set()
-        
         TrackV1Link.objects.bulk_create([
-            self.transfer_track(release_id, *row, used_slugs=used_slugs)
+            self.transfer_track(release_id, *row)
             for release_id, *row in self.model.query(
                 "select release_id, id, title, position, side, runtime from tracks")
         ])
