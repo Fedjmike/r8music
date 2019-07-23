@@ -23,7 +23,7 @@ urlpatterns = [
     #Include the following preset routes and views:
     # login (using registration/login.html)
     # logout
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("", include("django.contrib.auth.urls")),
     
     path("register", RegistrationPage.as_view(), name="register"),
     path("settings", null_view, name="settings"),
