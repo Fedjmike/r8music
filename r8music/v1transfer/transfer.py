@@ -1,3 +1,4 @@
+import shelve, musicbrainzngs
 from datetime import datetime
 from django.db import transaction
 
@@ -6,6 +7,7 @@ from r8music.profiles.models import UserSettings, UserProfile, UserRatingDescrip
 from r8music.music.models import Artist, Release, ReleaseType, Track, Tag, DiscogsTag, ArtistExternalLink, ReleaseExternalLink, generate_slug_tracked
 from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction
 
+from r8music.importation.models import ArtistMBLink, ReleaseMBLink, ReleaseDuplication
 from r8music.v1transfer.models import UserV1Link, TagV1Link, ArtistV1Link, ReleaseV1Link, TrackV1Link, ActionV1Link
 
 from r8music.v1.model import Model, UserType, ObjectType, ActionType, NotFound
@@ -54,8 +56,10 @@ class Transferer:
        'release_id' etc. Those of the new model are referred to as 'new_artist'
        etc."""
 
-    def __init__(self, model):
+    def __init__(self, model, mbid_shelve_name="mbids"):
         self.model = model
+        
+        self.mbid_shelve_name = mbid_shelve_name
         
         #These are used to avoid numerous individual queries to the V1Link models,
         #and must updated when new links are added.
@@ -64,6 +68,39 @@ class Transferer:
         self.new_artist_ids = IDMap(ArtistV1Link, "artist")
         self.new_release_ids = IDMap(ReleaseV1Link, "release")
         self.new_track_ids = IDMap(TrackV1Link, "track")
+        
+    #
+    
+    def query_release_group_mbids(self):
+        """Query MusicBrainz for release group MBIDs, since the V1 database
+           only stored the MBIDs of the release, not its release group."""
+           
+        musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+        
+        mb_type_id = self.model.get_link_type_id("musicbrainz")
+        
+        with shelve.open(self.mbid_shelve_name, writeback=True) as db:
+            if "mbids" not in db:
+                db["mbids"] = {}
+            
+            for release_id, release_mbid in self.model.query(
+                "select id, target from links where type_id=?",
+                mb_type_id
+            ):
+                if release_id in db["mbids"]:
+                    continue
+                
+                try:
+                    release_group_mbid = musicbrainzngs.get_release_by_id(
+                        release_mbid, includes=["release-groups"]
+                    )["release"]["release-group"]["id"]
+                    
+                except musicbrainzngs.ResponseError:
+                    release_group_mbid = None
+                
+                db["mbids"][release_id] = (release_mbid, release_group_mbid)
+                
+            self.release_mbids = db["mbids"]
     
     #
     
@@ -157,12 +194,18 @@ class Transferer:
     
     def transfer_artist(self, artist_id, used_slugs):
         artist = self.model.get_artist(artist_id)
+        mb_type_id = self.model.get_link_type_id("musicbrainz")
+        (mbid,) = self.model.query_unique(
+            "select target from links where type_id=? and id=?", mb_type_id, artist_id
+        )
         
         new_artist = Artist.objects.create(
             name=artist.name,
             slug=generate_slug_tracked(used_slugs, artist.name),
             description=artist.get_description()
         )
+        
+        ArtistMBLink.objects.create(artist=new_artist, mbid=mbid)
         
         ArtistExternalLink.objects.bulk_create([
             ArtistExternalLink(artist=new_artist, name=name, url=url)
@@ -231,6 +274,26 @@ class Transferer:
             colour_2=colour_2,
             colour_3=colour_3
         )
+        
+        if release_id in self.release_mbids:
+            #Add an MBLink, if there's no other release linked to this MBID
+            mb_link, created = ReleaseMBLink.objects.get_or_create(
+                release_group_mbid=self.release_mbids[release_id][1],
+                defaults={
+                    "release": new_release,
+                    "release_mbid": self.release_mbids[release_id][0]
+                }
+            )
+
+            #If there is, mark that one as a duplicate
+            if not created:
+                ReleaseDuplication.objects.create(
+                    original=mb_link.release, updated=new_release
+                )
+                
+                mb_link.release = new_release
+                mb_link.release_mbid = self.release_mbids[release_id][0]
+                mb_link.save()
         
         return ReleaseV1Link(release=new_release, old_id=release_id)
     
@@ -360,6 +423,8 @@ class Transferer:
     #
     
     def transfer_database(self, verbose=False):
+        if verbose: print("Quering release group MBIDs")
+        self.query_release_group_mbids()
         if verbose: print("Transferring users")
         self.transfer_all_users()
         if verbose: print("Transferring tags")

@@ -14,7 +14,8 @@ class ArtistMBImportation(models.Model):
 class ReleaseMBLink(models.Model):
     release = models.OneToOneField(Release, on_delete=models.CASCADE, related_name="mb_link")
     release_mbid = models.TextField(unique=True)
-    release_group_mbid = models.TextField(unique=True)
+    #Some releases from V1 have no release group attached
+    release_group_mbid = models.TextField(unique=True, null=True)
     
 class ReleaseDuplication(models.Model):
     """In some cases, an updated release cannot replace the original version."""
