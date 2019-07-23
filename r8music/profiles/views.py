@@ -82,7 +82,7 @@ class UserListenedUnratedPage(AbstractUserPage):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["listened_unrated"] = Release.objects.listened_unrated_by_user(context["user"])
+        context["listened_unrated"] = Release.objects.listened_unrated_by_user(context["user"]).prefetch_related("artists")
         return context
 
 class UserSavedPage(AbstractUserPage):
