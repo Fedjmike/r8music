@@ -21,4 +21,5 @@ urlpatterns = [
     url(r"^", include("r8music.profiles.urls")),
     url(r"^", include("r8music.music.urls")),
     url(r"^", include("r8music.search.urls")),
+    url(r"^", include("r8music.importation.urls")),
 ]
