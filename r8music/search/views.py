@@ -100,7 +100,7 @@ class SearchAPI(APIView, AbstractSearchPage):
         results = results.order_by("-rank")[:15]
         
         artist_ids, release_ids = (
-            (r["id"] for r in results if r["category"] == category)
+            [r["id"] for r in results if r["category"] == category]
             for category in [artist_category, release_category]
         )
         
