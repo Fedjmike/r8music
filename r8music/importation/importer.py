@@ -72,7 +72,7 @@ class Importer:
             image_url = image_link["href"]
             
         except (IndexError, KeyError):
-            return None, None
+            return None
             
         else:            
             #srcset is a list of images of different sizes, with scales
@@ -110,12 +110,11 @@ class Importer:
         """Contains the response(s) from queries to MusicBrainz etc.
            The JSON (from MusicBrainz) can either be from a full artist query,
            or from the artist-credits key from a release query."""
-        def __init__(self, json, extra_links=None, description=None, image_url=None, image_thumb_url=None):
+        def __init__(self, json, extra_links=None, description=None, images=None):
             self.json = json
             self.extra_links = extra_links or []
             self.description = description
-            self.image_url = image_url
-            self.image_thumb_url = image_thumb_url
+            self.image_url, self.image_thumb_url = images if images else (None, None)
         
     def query_artist(self, artist_mbid):
         artist_json = self.musicbrainz.get_artist_by_id(artist_mbid, includes=["url-rels"])["artist"]
@@ -127,8 +126,8 @@ class Importer:
         guessed_wikipedia_url, description, images = \
             self.query_wikipedia(artist_json["name"], wikipedia_url)
         
-        extra_links = [guessed_wikipedia_url]
-        return self.ArtistResponse(artist_json, extra_links, description, *images)
+        extra_links = [guessed_wikipedia_url] if guessed_wikipedia_url else []
+        return self.ArtistResponse(artist_json, extra_links, description, images)
         
     def replace_artist(self, existing_artist, artist):
         #Move related objects onto the new artist object, except those which
