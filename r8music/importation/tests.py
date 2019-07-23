@@ -149,7 +149,7 @@ class ImportTest(TestCase):
     def setUp(self):
         self.importer = Importer()
         
-    def test(self):
+    def test_import_artist(self):
         def create_dummy(artist_mbid, release_title):
             artist = Artist.objects.create(name="Kate Tempest")
             ArtistMBLink.objects.create(artist=artist, mbid=artist_mbid)
@@ -205,3 +205,7 @@ class ImportTest(TestCase):
         real_release = Release.objects.get(mb_link__release_mbid=real_release_mbid)
         test_user_actions = real_release.active_actions.get(user=test_user)
         self.assertEquals(test_user_actions.listen, listen_action)
+
+    def test_import_release(self):
+        release_group_mbid = "5c9f1f0f-d079-4fa3-b2b7-858249c36703"
+        self.importer.import_release(release_group_mbid)

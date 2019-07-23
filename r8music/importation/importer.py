@@ -328,6 +328,12 @@ class Importer:
                 artist_response.json["id"], includes=["artist-credits", "url-rels"]
             )
         ]
+        
+    def query_single_release(self, release_group_mbid):
+        release_group_json = self.musicbrainz.get_release_group_by_id(
+            release_group_mbid, includes=["artist-credits", "url-rels"]
+        )["release-group"]
+        return self.query_release(release_group_json)
     
     #
     
@@ -533,6 +539,10 @@ class Importer:
         self.create_tags_and_taggings(release_responses, release_map)
         
     #
+    
+    def import_release(self, release_group_mbid):
+        release_response = self.query_single_release(release_group_mbid)
+        self.create_from_release_responses([release_response], ArtistMBIDMap())
     
     def import_artist(self, artist_mbid):
         artist_response = self.query_artist(artist_mbid)
