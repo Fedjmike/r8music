@@ -11,3 +11,5 @@ wikipedia
 musicbrainzngs
 discogs_client
 bs4
+
+django-background-tasks

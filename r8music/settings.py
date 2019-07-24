@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'captcha',
+    'background_task',
     'r8music.profiles',
     'r8music.music',
     'r8music.actions',
