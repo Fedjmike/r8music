@@ -465,7 +465,7 @@ class Importer:
         #Those releases already imported
         #(identified by group MBID, as a different release may have been selected)
         releases_for_update = {
-            release.mb_link.release_mbid: release
+            release.mb_link.release_group_mbid: release
             for release in Release.objects.filter(mb_link__release_group_mbid__in=[
                 response.group_json["id"] for response in release_responses
             ]).select_related("mb_link")
@@ -474,7 +474,7 @@ class Importer:
         used_slugs = set(Release.objects.values_list("slug", flat=True))
         
         for response in release_responses:
-            existing_release = releases_for_update.get(response.json["id"], None)
+            existing_release = releases_for_update.get(response.group_json["id"], None)
             
             try:
                 #Try replacing the existing release
