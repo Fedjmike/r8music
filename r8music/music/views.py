@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
@@ -26,7 +27,7 @@ class ArtistMainPage(DetailView):
     template_name = "artist_main.html"
     
     def get_object(self):
-        return Artist.objects.get(slug=self.kwargs["slug"])
+        return get_object_or_404(Artist, slug=self.kwargs["slug"])
 
     def get_user_ratings(self, artist):
         #A defaultdict allows the template to look up a release whether or not there is a rating
@@ -54,7 +55,9 @@ class AbstractReleasePage(DetailView):
     model = Release
     
     def get_object(self):
-        return Release.objects.prefetch_related("artists").get(slug=self.kwargs["slug"])
+        return get_object_or_404(
+            Release.objects.prefetch_related("artists"),
+            slug=self.kwargs["slug"])
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

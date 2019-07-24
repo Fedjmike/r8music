@@ -5,7 +5,7 @@ from django.views.generic import DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -36,7 +36,7 @@ class AbstractUserPage(DetailView):
     model = User
     
     def get_object(self):
-        return User.objects.get(username=self.kwargs.get("slug"))
+        return get_object_or_404(User, username=self.kwargs.get("slug"))
         
     def get_actions_counts(self, user):
         """Return the number of releases interacted with in certain ways by a user."""
