@@ -39,8 +39,14 @@
             </ol>
         {% endif %}
         
+        <p>
+            Not what you were looking for?
+            
     {% else %}
-        <p>No matches!</p>
+        <p>
+            No matches!
     {% endif %}
+            Try <a href={{ url("import_artist_search") + "?name=" + query }}>importing an artist to the database.</a>
+        </p>
 </section>
 {% endblock %}
