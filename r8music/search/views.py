@@ -19,9 +19,7 @@ class AbstractSearchPage:
     rank_threshold = 0.001
     
     def get_query_str(self):
-        query_param = self.request.GET.get("q")
-        #Translate the query as it appeared in the URL into what the user typed
-        return query_param.replace("+", " ")
+        return self.request.GET.get("q")
         
     def get_search_url(self, view_name):
         query_param = self.request.GET.get("q")
