@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 
-{% block title %}Add an artist {{ super() }}{% endblock %}
+{% block title %}Import an artist {{ super() }}{% endblock %}
 
 {% block content %}
 <section class="page content">
-    <header><h1>Add an artist</h1></header>
+    <header><h1>Import an artist</h1></header>
 
     <form action={{ url("import_artist_search") }} method="get" class="clearfix">
         <dl>
@@ -18,7 +18,7 @@
 
     <form action={{ url("import_artist_search") }} method="get" class="clearfix">
         <dl>
-            <dt>Add an artist with a specific <a href="//musicbrainz.org">MusicBrainz</a> ID.</dt><dd></dd>
+            <dt>Import an artist with a specific <a href="//musicbrainz.org">MusicBrainz</a> ID.</dt><dd></dd>
             <dd><input type="text" name="mbid" placeholder="MusicBrainz ID"></dd>
             <dd><input type="submit" value="Add"></dd>
         </dl>

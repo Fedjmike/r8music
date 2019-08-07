@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}'{{ query }}' search results - Add an artist {{ super() }}{% endblock %}
+{% block title %}'{{ query }}' search results - Import an artist {{ super() }}{% endblock %}
 
 {% macro search_results(results) -%}
     {% for result in results %}
@@ -18,7 +18,7 @@
 
 {% block content %}
 <section class="page content">
-    <header><h1>Add an artist</h1></header>
+    <header><h1>Import an artist</h1></header>
 
     <form action={{ url("import_artist_search") }} method="get" class="clearfix">
         <input type="text" name="name" placeholder="Artist name" value="{{ query }}" id="autocomplete-mb" class="form-control input-lg">
