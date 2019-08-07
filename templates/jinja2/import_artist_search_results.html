@@ -2,6 +2,20 @@
 
 {% block title %}'{{ query }}' search results - Add an artist {{ super() }}{% endblock %}
 
+{% macro search_results(results) -%}
+    {% for result in results %}
+        <label>
+            <input type="radio" name="artist-mbid" value={{ result.mbid }}>
+            {{ result.name }}
+            <span class="de-emph">
+                {{ ' (%s)' % result.disambiguation if result.disambiguation else '' }}
+            </span>
+        </label>
+        <a href="https://musicbrainz.org/artist/{{ result.mbid }}" target=_blank><i class="material-icons tiny" title="View this artist on MusicBrainz">launch</i></a>
+        </br>
+    {% endfor %}
+{%- endmacro %}
+
 {% block content %}
 <section class="page content">
     <header><h1>Add an artist</h1></header>
@@ -16,17 +30,13 @@
         <form action={{ url("import_artist") }} method="post" class="clearfix">
             <input type="hidden" name="csrfmiddlewaretoken" value={{ csrf_token }} />
             
-            {% for result in results %}
-                <label>
-                    <input type="radio" name="artist-mbid" value={{ result.mbid }}>
-                    {{ result.name }}
-                    <span class="de-emph">
-                        {{ ' (%s)' % result.disambiguation if result.disambiguation else '' }}
-                    </span>
-                </label>
-                <a href="https://musicbrainz.org/artist/{{ result.mbid }}" target=_blank><i class="material-icons tiny" title="View this artist on MusicBrainz">launch</i></a>
-                </br>
-            {% endfor %}
+            {{ search_results(results | rejectattr("already_imported")) }}
+            
+            {% set already_imported = results | selectattr("already_imported") | list %}
+            {% if already_imported %}
+                <p>The following artists have already been imported, and can be updated.</p>
+                {{ search_results(already_imported) }}
+            {% endif %}
             
             <div>
                 <input type="submit" value="Add">

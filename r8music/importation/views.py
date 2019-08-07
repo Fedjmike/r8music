@@ -8,6 +8,7 @@ from background_task import background
 
 from r8music.music.models import Artist
 from r8music.music.urls import url_for_artist
+from .models import ArtistMBLink
 from .importer import Importer
 
 def search_artists(query):
@@ -47,10 +48,17 @@ class ImportArtistSearchResults(TemplateView):
         
         mb_results = search_artists(artist_name)
         
+        already_imported_mbids = set(
+            ArtistMBLink.objects
+                .filter(mbid__in=[result["id"] for result in mb_results])
+                .values_list("mbid", flat=True)
+        )
+        
         results = [
             {
                 "mbid": result["id"],
                 "name": result["name"],
+                "already_imported": result["id"] in already_imported_mbids,
                 "disambiguation":
                     result["disambiguation"] if "disambiguation" in result
                     else result["area"]["name"] if "area" in result
