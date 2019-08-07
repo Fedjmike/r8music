@@ -120,7 +120,7 @@
         {% if "success" in message.tags %}
             <div class="page content success message"><i class="material-icons">done</i>{{ message }}</div>
         {% elif "error" in message.tags %}
-            <div class="page content error message"><i class="material-icons">error_outline</i>{{ message }}</div>
+            <div class="page content error message"><i class="material-icons">error_outline</i>Error: {{ message }}</div>
         {% else %}
             <div class="page content message">{{ message }}</div>
         {% endif %}

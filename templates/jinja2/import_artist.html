@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}Add an artist {{ super() }}{% endblock %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Add an artist</h1></header>
+
+    <form action={{ url("import_artist_search") }} method="get" class="clearfix">
+        <dl>
+            <dt>Search for an artist.</dt><dd></dd>
+            <dd><input type="text" name="name" placeholder="Artist name" id="autocomplete-mb" class="form-control input-lg" />
+            <dd><input type="submit" value="Search"></dd>
+        </dl>
+    </form>
+
+    <p>or</p>
+
+    <form action={{ url("import_artist_search") }} method="get" class="clearfix">
+        <dl>
+            <dt>Add an artist with a specific <a href="//musicbrainz.org">MusicBrainz</a> ID.</dt><dd></dd>
+            <dd><input type="text" name="mbid" placeholder="MusicBrainz ID"></dd>
+            <dd><input type="submit" value="Add"></dd>
+        </dl>
+    </form>
+</section>
+{% endblock %}
