@@ -2,6 +2,7 @@ import re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
+from django.conf import settings
 from django.db import transaction
 
 from r8music.music.models import (
@@ -29,9 +30,9 @@ class Importer:
         self.requests = requests
         self.musicbrainz = musicbrainz
         self.wikipedia = wikipedia
-        self.discogs = discogs_client.Client("r8music")
+        self.discogs = discogs_client.Client(settings.DISCOGS_USERAGENT_STRING)
         
-        self.musicbrainz.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+        musicbrainzngs.set_useragent(*settings.MUSICBRAINZ_USERAGENT)
         
     def get_canonical_url(self, url):
         """Skip through redirects to get the "actual" URL"""

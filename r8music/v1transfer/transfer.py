@@ -1,5 +1,6 @@
 import shelve, musicbrainzngs
 from datetime import datetime
+from django.conf import settings
 from django.db import transaction
 
 from django.contrib.auth.models import User
@@ -75,7 +76,7 @@ class Transferer:
         """Query MusicBrainz for release group MBIDs, since the V1 database
            only stored the MBIDs of the release, not its release group."""
            
-        musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+        musicbrainzngs.set_useragent(*settings.MUSICBRAINZ_USERAGENT)
         
         mb_type_id = self.model.get_link_type_id("musicbrainz")
         

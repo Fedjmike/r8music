@@ -1,5 +1,6 @@
 import musicbrainzngs
 
+from django.conf import settings
 from django.views.generic import TemplateView, DetailView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -12,7 +13,7 @@ from .models import ArtistMBLink
 from .importer import Importer
 
 def search_artists(query):
-    musicbrainzngs.set_useragent("Skiller", "0.0.0", "mb@satyarth.me")
+    musicbrainzngs.set_useragent(*settings.MUSICBRAINZ_USERAGENT)
     return musicbrainzngs.search_artists(artist=query)["artist-list"]
 
 @background

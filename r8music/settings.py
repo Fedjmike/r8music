@@ -152,3 +152,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+#
+
+MUSICBRAINZ_USERAGENT = ('Skiller', '0.0.0', 'mb@satyarth.me')
+DISCOGS_USERAGENT_STRING = 'r8music'
