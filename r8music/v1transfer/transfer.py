@@ -13,6 +13,8 @@ from r8music.v1transfer.models import UserV1Link, TagV1Link, ArtistV1Link, Relea
 
 from r8music.v1.model import Model, UserType, ObjectType, ActionType, NotFound
 
+from r8music.v1transfer.auth import werkzeug_pw_hash_to_django
+
 class IDMap:
     """Maps from IDs in the old database to those in the new models."""
     
@@ -107,13 +109,16 @@ class Transferer:
     
     def transfer_user(self, user_id):
         user = self.model.get_user(user_id)
+        (password_hash,) = self.model.query_unique("select pw_hash from users where id=?", user.id)
         
         new_user = User.objects.create_user(
             username=user.name,
             email=user.email,
             date_joined=user.creation.datetime
-            #No password provided, will be unable to login by built-in authenticator
         )
+        
+        new_user.password = werkzeug_pw_hash_to_django(password_hash)
+        new_user.save()
         
         if user.type == UserType.admin:
             new_user.is_superuser = new_user.is_staff = True
@@ -133,14 +138,9 @@ class Transferer:
         for rating, description in user.get_rating_descriptions().items():
             UserRatingDescription.objects.create(user=new_user.profile, rating=rating, description=description)
         
-        #Store the Flask-generated password (in the V1 link), which can be used to log in through
-        #a custom authenticator
-        (password_hash,) = self.model.query_unique("select pw_hash from users where id=?", user.id)
-        
         return UserV1Link(
             user=new_user,
-            old_id=user.id,
-            password_hash=password_hash
+            old_id=user.id
         )
          
     @transaction.atomic

@@ -9,9 +9,6 @@ from r8music.actions.models import Action
 class UserV1Link(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="v1_link")
     old_id = models.IntegerField(unique=True)
-    #If this user still uses a password created in V1,
-    #the (Flask created) hash is stored here.
-    password_hash = models.TextField(null=True)
     
 class TagV1Link(models.Model):
     tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name="v1_link")
