@@ -1,7 +1,9 @@
+import requests
 from itertools import groupby
 from collections import Counter
+from urllib.parse import urlparse
 
-from django.views.generic import DetailView, ListView
+from django.views.generic import TemplateView, DetailView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, redirect_to_login
@@ -10,14 +12,14 @@ from django.shortcuts import redirect, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from django.views.generic import CreateView
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from captcha.fields import ReCaptchaField
 
 from django.db.models import Count, Q
 
 from django.contrib.auth.models import User
-from r8music.profiles.models import UserRatingDescription
+from r8music.profiles.models import UserSettings, UserProfile, UserRatingDescription
 from r8music.music.models import Release
 
 from django.urls import reverse_lazy
@@ -183,6 +185,82 @@ class ChangePasswordPage(PasswordChangeView):
     
 class PasswordChangeDonePage(PasswordChangeDoneView):
     template_name = "registration/password_change_done.html"
+
+# Settings
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("email",)
+        
+class SettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserSettings
+        fields = ("timezone", "listen_implies_unsave")
+        labels = {"listen_implies_unsave": "Listening to a release unsaves it"}
+        
+class ProfileForm(forms.ModelForm):
+    approved_hosts = ["i.imgur.com", "my.mixtape.moe"]
+    max_file_size = 500*1024 # 500 kB
+    allowed_exts = ["jpg", "jpeg", "png"]
+    
+    class Meta:
+        model = UserProfile
+        fields = ("avatar_url",)
+        labels = {"avatar_url": "Avatar URL"}
+        
+    def clean_avatar_url(self):
+        avatar_url = self.cleaned_data["avatar_url"]
+        _, domain, path, _, _, _ = urlparse(avatar_url)
+        
+        if domain not in self.approved_hosts:
+            raise forms.ValidationError(
+                 "'%s' is not a whitelisted host. Approved hosts: %s"
+                 % (domain, ", ".join(self.approved_hosts))
+            )
+        
+        elif path.split(".")[-1] not in self.allowed_exts:
+            raise forms.ValidationError("Must be a JPG or PNG image")
+            
+        file_size = len(requests.get(avatar_url).content)
+        
+        if file_size > self.max_file_size:
+            raise forms.ValidationError(
+                "File size (%s kB) exceeds the maximum (%s kB)"
+                % (file_size // 1024, self.max_file_size // 1024)
+            )
+        
+        return avatar_url
+
+class SettingsPage(TemplateView):
+    template_name = "registration/settings.html"
+    
+    def get_forms(self):
+        kwargs = {} if self.request.method != "POST" else {
+            "data": self.request.POST,
+            "files": self.request.FILES,
+        }
+        
+        return (
+            UserForm(instance=self.request.user, **kwargs),
+            SettingsForm(instance=self.request.user.settings, **kwargs),
+            ProfileForm(instance=self.request.user.profile, **kwargs)
+        )
+        
+    def get_context_data(self, **kwargs):
+        user_form, settings_form, profile_form = self.get_forms()
+        return super().get_context_data(
+            user_form=user_form, settings_form=settings_form, profile_form=profile_form)
+        
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response(self.get_context_data())
+        
+    def post(self, request, *args, **kwargs):
+        for form in self.get_forms():
+            if form.is_valid():
+                form.save()
+        
+        return self.render_to_response(self.get_context_data())
 
 # User API
 

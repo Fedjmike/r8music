@@ -3,7 +3,7 @@ from django.urls import path, reverse
 
 from .views import UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage, UserFriendsPage, UserStatsPage
 from .views import FollowUser, UnfollowUser
-from .views import RegistrationPage, ChangePasswordPage, PasswordChangeDonePage, rating_description
+from .views import RegistrationPage, ChangePasswordPage, PasswordChangeDonePage, SettingsPage, rating_description
 
 null_view = lambda: None
 
@@ -29,7 +29,7 @@ urlpatterns = [
     path("change-password", ChangePasswordPage.as_view(), name="change_password"),
     path("password-change-done", PasswordChangeDonePage.as_view(), name="password_change_done"),
     
-    path("settings", null_view, name="settings"),
+    path("settings", SettingsPage.as_view(), name="settings"),
     path("settings/rating-description", rating_description, name="rating_description"),
 ]
 

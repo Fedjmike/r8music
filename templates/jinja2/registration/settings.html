@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% from "forms.html" import django_form_fields %}
+
+{% block title %} Settings {{ super() }} {% endblock %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Settings</h1></header>
+    <form action={{ url("settings") }} method="post" class="clearfix">
+        <dl>
+            {{ django_form_fields(user_form) }}
+            {{ django_form_fields(settings_form) }}
+            {{ django_form_fields(profile_form) }}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <dd><input type="submit" value="Save changes" /></dd>
+        </dl>
+    </form>
+</section>
+{% endblock %}
