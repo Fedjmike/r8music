@@ -272,13 +272,20 @@ def rating_description(request):
         description = request.data.get("description")
 
     except ValueError:
-        return Response({"error": "Rating not provided, or not an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Rating not provided, or not an integer"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
     if not description:
-        return Response({"error": "Description not provided"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Description not provided"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
     else:
-        rd, _ = UserRatingDescription.objects.get_or_create(user=request.user.profile, rating=rating)
+        rd, _ = UserRatingDescription.objects.get_or_create(
+            user=request.user.profile, rating=rating)
         rd.description = description
         rd.save()
         

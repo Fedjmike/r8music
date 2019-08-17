@@ -4,6 +4,7 @@ django-enumfield
 django-timezone-field
 djangorestframework
 jinja2
+
 recaptcha
 #For checking passwords from r8music v1
 werkzeug
