@@ -4,7 +4,7 @@ from collections import Counter
 from django.views.generic import DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, redirect_to_login
 from django.shortcuts import redirect, get_object_or_404
 
 from rest_framework.decorators import api_view
@@ -176,6 +176,13 @@ class RegistrationPage(CreateView):
             
         else: 
             return redirect_without_next
+
+class ChangePasswordPage(PasswordChangeView):
+    template_name = "registration/change_password.html"
+    success_url = reverse_lazy("password_change_done")
+    
+class PasswordChangeDonePage(PasswordChangeDoneView):
+    template_name = "registration/password_change_done.html"
 
 # User API
 
