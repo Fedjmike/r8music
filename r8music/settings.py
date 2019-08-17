@@ -131,6 +131,10 @@ PASSWORD_HASHERS = [
     'r8music.v1transfer.auth.WerkzeugHasher',
 ]
 
+LOGIN_URL = "login" #This is a route name
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
 # Recaptcha
 # https://pypi.org/project/django-recaptcha/
 
