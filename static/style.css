@@ -137,23 +137,31 @@ td:first-child {
 
 /*Input elements*/
 
-textarea, input {
+textarea, input, select, option {
     box-sizing: border-box;
 }
 
 textarea, .textarea-expl,
 input[type=text],
 input[type=email],
-input[type=password] {
+input[type=password],
+input[type=url],
+select {
     padding: 0.3em;
     border: 2px solid rgba(0,0,0, 0.15);
     border-radius: 0.4em;
     outline: none;
 }
 
+select {
+    padding: 0.15em 0;
+}
+
 input[type=text],
 input[type=email],
-input[type=password] {
+input[type=password],
+input[type=url],
+select {
     height: 1.8em;
 }
 
@@ -220,13 +228,17 @@ form dd {
     margin-bottom: 0.7em;
 }
 
-form input {
+form input,
+form select,
+form option {
     font-size: 1rem;
 }
 
 form input[type="text"],
 form input[type=email],
-form input[type="password"] {
+form input[type="password"],
+input[type=url],
+form select {
     width: 17.5em;
     box-sizing: border-box;
 }
