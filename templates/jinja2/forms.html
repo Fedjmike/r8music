@@ -16,37 +16,6 @@
     {% endfor %}
 {%- endmacro %}
 
-{% macro set_pw_form(user, standalone=False) -%}
-    <form action={{ url_for("set_password") }} method="post" class="clearfix">
-        <dl>
-            {{ form_field("Current password", "password", "password")}}
-            {{ form_field("New password", "new-password", "password")}}
-            {{ form_field("Confirm new password", "verify-new-password", "password")}}
-            
-            <dd><input type="submit" value="Change" /></dd>
-            
-            {% if standalone %}
-                <input type="hidden" name="next" value="{{ request.referrer }}" />
-            {% endif %}
-        </dl>
-    </form>
-{%- endmacro %}
-
-{% macro settings_form(user) -%}
-    <form action={{ url_for("user_settings") }} method="post" class="clearfix">
-        <dl>
-            {{ form_field("Email address", "email", "text", prefill=user.email if user.email else "") }}
-            {{ form_field("Timezone", "timezone", "text", prefill=user.timezone) }}
-            {{ form_field("Avatar URL", "avatar_url", "text", prefill=user.avatar_url) }}
-            <p>Image must be within size constraints and on an approved host</p>
-            <dt>Listening to a release unlists it</dt>
-            <dd><input type="checkbox" name="listen_implies_unlist" {% if user.get_listen_implies_unlist() %}checked{% endif %}></dd>
-            
-            <dd><input type="submit" value="Save changes" /></dd>
-        </dl>
-    </form>
-{%- endmacro %}
-
 {% macro small_search_form(previous_search=None) -%}
     <form action="/search" method="get" class="small" id="search">
         <div class="search">
