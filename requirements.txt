@@ -1,6 +1,7 @@
 django
 psycopg2
 django-enumfield
+django-timezone-field
 djangorestframework
 jinja2
 recaptcha

@@ -1,5 +1,4 @@
-from datetime import datetime
-from pytz import timezone
+from datetime import datetime, timezone
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
 from urllib.parse import urlencode
@@ -29,14 +28,14 @@ def pluralise(noun):
 def n_things(n, noun):
     return "%d %s" % (n, noun if n == 1 else pluralise(noun))
 
-def full_datetime(then, timezone_name):
-    return then.astimezone(timezone(timezone_name)).strftime("%A, %d %B %Y at %X")
+def full_datetime(then, tz=timezone.utc):
+    return then.astimezone(tz).strftime("%A, %d %B %Y at %X")
     
-def friendly_datetime(then, timezone_name):
+def friendly_datetime(then, tz=timezone.utc):
     """Omit what is common between the given date and the current date"""
     
-    then = then.astimezone(timezone(timezone_name))
-    now = datetime.now().astimezone(timezone(timezone_name))
+    then = then.astimezone(tz)
+    now = datetime.now().astimezone(tz)
 
     #d is the day number, b is the short month name, Y is the year, X is the time
     format =      "%d %B %Y" if then.year != now.year \

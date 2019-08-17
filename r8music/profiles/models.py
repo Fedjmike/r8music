@@ -1,11 +1,12 @@
 from django.db import models
+from timezone_field import TimeZoneField
+
 from django.contrib.auth.models import User
 from r8music.music.models import Tag
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="settings")
-    #Stored as a UTC offset, in the format "[+-]\d\d:\d\d"
-    timezone = models.TextField()
+    timezone = TimeZoneField(default="Europe/London")
     #Does 'listening' to a release automatically remove it from the 'saved' list?
     listen_implies_unsave = models.BooleanField()
 
@@ -13,7 +14,7 @@ class UserSettings(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar_url = models.TextField()
+    avatar_url = models.URLField()
     
     def follows(self, other_user):
         return Followership.objects.filter(user=other_user, follower=self.user).exists()
