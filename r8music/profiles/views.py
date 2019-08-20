@@ -241,7 +241,7 @@ class ProfileForm(forms.ModelForm):
             
         return avatar_url
 
-class SettingsPage(TemplateView):
+class SettingsPage(LoginRequiredMixin, TemplateView):
     template_name = "registration/settings.html"
     
     def get_forms(self):
