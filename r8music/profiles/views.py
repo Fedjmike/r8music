@@ -223,7 +223,7 @@ class ProfileForm(forms.ModelForm):
             raise forms.ValidationError("Must be a JPG or PNG image")
             
         try:
-            response = requests.get(avatar_url)
+            response = requests.head(avatar_url)
             file_size = int(response.headers.get("content-length", 0))
             
             if not response:
