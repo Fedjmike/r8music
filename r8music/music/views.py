@@ -10,6 +10,7 @@ from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from django.contrib.auth.models import User
 from r8music.music.models import Artist, Release, Track, Tag
 from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
 
@@ -68,16 +69,25 @@ class AbstractReleasePage(DetailView):
 class ReleaseMainPage(AbstractReleasePage):
     template_name = "release_main.html"
     
-    def get_user_actions(self, release):
+    def get_user_actions(self, user, release):
         try:
-            return self.request.user.active_actions.select_related("rate").get(release=release)
+            active_actions = user.active_actions.select_related("rate").get(release=release)
+            picks = active_actions.picked_tracks() if active_actions else []
+            return active_actions, picks
             
         except (AttributeError, ActiveActions.DoesNotExist):
-            return None
+            return None, []
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["user_actions"] = self.get_user_actions(context["release"])
+        
+        context["user_actions"], context["picks"] \
+            = self.get_user_actions(self.request.user, context["release"])
+        context["comparison_user"] \
+            = User.objects.filter(username=self.request.GET.get("compare")).first()
+        _, context["comparison_picks"] \
+            = self.get_user_actions(context["comparison_user"], context["release"])
+        
         return context
 
 class EditReleasePage(LoginRequiredMixin, AbstractReleasePage):

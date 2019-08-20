@@ -35,7 +35,7 @@
                 </span>
             </div>
             {% endif %}
-            <a href={{ url_for_release(release) }}{% if that_user %}?compare={{ that_user.name }}{% endif %}>
+            <a href={{ url_for_release(release) }}{% if that_user %}?compare={{ that_user.username }}{% endif %}>
                 <div class="cover"><img src="{{ release.art_url_250 if release.art_url_250 else 'http://i.imgur.com/UGgojDS.png' }}" /></div>
                 {% if show_date_not_artist %}
                     <span class="title">{{ release.title }}<br/>{{ release.release_year_str }}</span>
