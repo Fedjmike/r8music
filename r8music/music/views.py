@@ -143,31 +143,23 @@ class ReleaseViewSet(viewsets.ModelViewSet):
                         
             return Response({"averageRating": release.average_rating()})
         
-    def _get_active_actions(self, request):
-        return self.get_object().active_actions.get_or_create(user=request.user)[0]
+    def set_release_actions(self, **changes):
+        return self.get_object().active_actions \
+            .update_or_create(user=self.request.user, defaults=changes)[0]
         
     @action(detail=True, methods=["post"])
     def unsave(self, request, pk=None):
-        aa = self._get_active_actions(request)
-        aa.save_action = None
-        aa.save()
-        
+        self.set_release_actions(save_action=None)
         return Response()
         
     @action(detail=True, methods=["post"])
     def unlisten(self, request, pk=None):
-        aa = self._get_active_actions(request)
-        aa.listen = None
-        aa.save()
-        
+        self.set_release_actions(listen=None)
         return Response()
         
     @action(detail=True, methods=["post"])
     def unrate(self, request, pk=None):
-        aa = self._get_active_actions(request)
-        aa.rate = None
-        aa.save()
-        
+        self.set_release_actions(rate=None)
         return Response()
 
 class TrackViewSet(viewsets.ModelViewSet):
@@ -184,11 +176,10 @@ class TrackViewSet(viewsets.ModelViewSet):
         return Response()
         
     @action(detail=True, methods=["post"])
-    def unpick(self, request, pk=None):   
-        track = self.get_object()
-        aa, _ = track.release.active_actions.get_or_create(user=request.user)
-        aa.picks.filter(track=track).delete()
-        
+    def unpick(self, request, pk=None):
+        request.user.active_actions \
+            .get_or_create(release=self.get_object().release)[0] \
+            .picks.filter(track=self.get_object()).delete()
         return Response()
 
 #
