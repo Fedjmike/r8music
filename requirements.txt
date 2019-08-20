@@ -13,5 +13,6 @@ wikipedia
 musicbrainzngs
 discogs_client
 bs4
+requests-mock
 
 django-background-tasks
