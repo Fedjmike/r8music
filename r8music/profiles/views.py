@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, redirect_to_login
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
+from django.utils.html import escape
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -287,7 +288,7 @@ class SettingsPage(LoginRequiredMixin, TemplateView):
 def rating_description(request):
     try:
         rating = int(request.data.get("rating"))
-        description = request.data.get("description")
+        description = escape(request.data.get("description"))
 
     except ValueError:
         return Response(
