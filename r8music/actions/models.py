@@ -7,40 +7,33 @@ class Action(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     creation = models.DateTimeField(auto_now_add=True)
     
-    def _get_active_actions(self, release):
-        return release.active_actions.get_or_create(user=self.user)[0]
+    def release_actions(self, release, **changes):
+        return release.active_actions.update_or_create(user=self.user, defaults=changes)[0]
         
 class SaveAction(Action):
     release = models.ForeignKey(Release, on_delete=models.PROTECT)
     
     def set_as_active(self):
-        active_actions = self._get_active_actions(self.release)
-        active_actions.save_action = self
-        active_actions.save()
+        self.release_actions(self.release, save_action=self)
     
 class ListenAction(Action):
     release = models.ForeignKey(Release, on_delete=models.PROTECT)
     
     def set_as_active(self):
-        active_actions = self._get_active_actions(self.release)
-        active_actions.listen = self
-        active_actions.save()
+        self.release_actions(self.release, listen=self)
     
 class RateAction(Action):
     release = models.ForeignKey(Release, on_delete=models.PROTECT)
     rating = models.IntegerField()
     
     def set_as_active(self):
-        active_actions = self._get_active_actions(self.release)
-        active_actions.rate = self
-        active_actions.save()
+        self.release_actions(self.release, rate=self)
     
 class PickAction(Action):
     track = models.ForeignKey(Track, on_delete=models.PROTECT, related_name="pick_actions")
     
     def set_as_active(self):
-        active_actions = self._get_active_actions(self.track.release)
-        active_actions.picks.add(self)
+        self.release_actions(self.track.release).picks.add(self)
 
 #
 
