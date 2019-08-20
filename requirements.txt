@@ -4,15 +4,13 @@ django-enumfield
 django-timezone-field
 djangorestframework
 jinja2
-
 recaptcha
 #For checking passwords from r8music v1
 werkzeug
-
 wikipedia
 musicbrainzngs
 discogs_client
 bs4
 requests-mock
-
 django-background-tasks
+editdistance

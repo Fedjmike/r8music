@@ -1,8 +1,9 @@
+from editdistance import eval as edit_distance
 from urllib.parse import urlencode
-from django.urls import reverse
 
 from django.views.generic import View, ListView
-from django.shortcuts import render
+from django.urls import reverse
+from django.shortcuts import render, redirect
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -43,9 +44,18 @@ class AbstractSearchPage:
 
 class GeneralSearchPage(View, AbstractSearchPage):
     def get_results_page(self):
+        artist_results = self.search_artists()[:10]
+        
+        #Redirect to the artist page if there's a single close match
+        if len(artist_results) == 1:
+            result_distance = edit_distance(self.get_query_str(), artist_results[0].name)
+            
+            if result_distance < 4:
+                return redirect(url_for_artist(artist_results[0]))
+        
         return render(self.request, "search/general_results.html", {
             "query": self.get_query_str(),
-            "artists": self.search_artists()[:10],
+            "artists": artist_results,
             "releases": self.search_releases().prefetch_related("artists")[:10],
             "url_for_artist_search": self.get_search_url("artist_search"),
             "url_for_release_search": self.get_search_url("release_search")
