@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, redirect_to_login
 from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -265,9 +266,17 @@ class SettingsPage(LoginRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data())
         
     def post(self, request, *args, **kwargs):
+        errors = False
+        
         for form in self.get_forms():
-            if form.is_valid():
+            try:
                 form.save()
+                
+            except ValueError:
+                errors = True
+                
+        if not errors:
+            messages.success(request, "Settings saved")
         
         return self.render_to_response(self.get_context_data())
 
