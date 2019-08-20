@@ -222,14 +222,23 @@ class ProfileForm(forms.ModelForm):
         elif path.split(".")[-1] not in self.allowed_exts:
             raise forms.ValidationError("Must be a JPG or PNG image")
             
-        file_size = len(requests.get(avatar_url).content)
+        try:
+            response = requests.get(avatar_url)
+            file_size = int(response.headers.get("content-length", 0))
+            
+            if not response:
+                raise ValueError()
+            
+        except (requests.exceptions.RequestException, ValueError):
+            raise forms.ValidationError("Invalid URL")
         
-        if file_size > self.max_file_size:
-            raise forms.ValidationError(
-                "File size (%s kB) exceeds the maximum (%s kB)"
-                % (file_size // 1024, self.max_file_size // 1024)
-            )
-        
+        else:
+            if file_size > self.max_file_size:
+                raise forms.ValidationError(
+                    "File size (%s kB) exceeds the maximum (%s kB)"
+                    % (file_size // 1024, self.max_file_size // 1024)
+                )
+            
         return avatar_url
 
 class SettingsPage(TemplateView):
