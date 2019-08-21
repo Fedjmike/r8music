@@ -114,18 +114,12 @@ class ReleaseViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=["post"])
     def save(self, request, pk=None):
-        SaveAction.objects.create(
-            release=self.get_object(), user=request.user
-        ).set_as_active()
-        
+        SaveAction.objects.create(release=self.get_object(), user=request.user)
         return Response()
         
     @action(detail=True, methods=["post"])
     def listen(self, request, pk=None):
-        ListenAction.objects.create(
-            release=self.get_object(), user=request.user
-        ).set_as_active()
-        
+        ListenAction.objects.create(release=self.get_object(), user=request.user)
         return Response()
         
     @action(detail=True, methods=["post"])
@@ -137,10 +131,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
             return Response({"error": "No rating given"}, status=status.HTTP_400_BAD_REQUEST)
             
         else:
-            RateAction.objects.create(
-                release=release, user=request.user, rating=rating
-            ).set_as_active()
-                        
+            RateAction.objects.create(release=release, user=request.user, rating=rating)
             return Response({"averageRating": release.average_rating()})
         
     def set_release_actions(self, **changes):
@@ -169,10 +160,7 @@ class TrackViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=["post"])
     def pick(self, request, pk=None):
-        PickAction.objects.create(
-            track=self.get_object(), user=request.user
-        ).set_as_active()
-        
+        PickAction.objects.create(track=self.get_object(), user=request.user)
         return Response()
         
     @action(detail=True, methods=["post"])

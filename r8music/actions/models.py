@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from django.contrib.auth.models import User
 from r8music.music.models import Release, Track
@@ -34,6 +36,14 @@ class PickAction(Action):
     
     def set_as_active(self):
         self.release_actions(self.track.release).picks.add(self)
+
+@receiver(post_save, sender=SaveAction)
+@receiver(post_save, sender=ListenAction)
+@receiver(post_save, sender=RateAction)
+@receiver(post_save, sender=PickAction)
+def action_post_save(sender, instance, created, **kwargs):
+    if created:
+        instance.set_as_active()
 
 #
 
