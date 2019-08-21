@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from django.contrib.auth.models import User
@@ -36,6 +36,15 @@ class PickAction(Action):
     
     def set_as_active(self):
         self.release_actions(self.track.release).picks.add(self)
+
+@receiver(pre_save, sender=ListenAction)
+def listen_pre_save(sender, instance, **kwargs):
+    if instance.user.settings.listen_implies_unsave:
+        instance.release_actions(instance.release, save_action=None)
+    
+@receiver(pre_save, sender=RateAction)
+def rate_pre_save(sender, instance, **kwargs):
+    ListenAction.objects.create(release=instance.release, user=instance.user)
 
 @receiver(post_save, sender=SaveAction)
 @receiver(post_save, sender=ListenAction)
