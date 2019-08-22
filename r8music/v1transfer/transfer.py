@@ -1,5 +1,5 @@
 import shelve, musicbrainzngs
-from datetime import datetime
+from datetime import datetime, timezone
 from django.conf import settings
 from django.db import transaction
 
@@ -156,7 +156,7 @@ class Transferer:
             Followership(
                 follower_id=self.new_user_ids.map(follower_id),
                 user_id=self.new_user_ids.map(user_id),
-                creation=datetime.fromtimestamp(creation)
+                creation=datetime.fromtimestamp(creation, timezone.utc)
             )
             for follower_id, user_id, creation in self.model.query(
                 "select follower, user_id, creation from followerships"
@@ -377,7 +377,7 @@ class Transferer:
         
         fields = dict(
             user_id=self.new_user_ids.map(user_id),
-            creation=datetime.fromtimestamp(creation)
+            creation=datetime.fromtimestamp(creation, timezone.utc)
         )
         
         if type in [ActionType.save, ActionType.listen, ActionType.rate]:
