@@ -89,7 +89,7 @@ class Importer:
     def query_wikipedia(self, artist_name, wikipedia_url=None):        
         if wikipedia_url:
             title = self.wikipedia_url_pattern.search(wikipedia_url).group(1)
-            wikipedia_page = self.wikipedia.page(title)
+            wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
             
         else:
             wikipedia_page = self.guess_wikipedia_page(artist_name) 
