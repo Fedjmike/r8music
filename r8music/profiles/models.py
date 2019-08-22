@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from timezone_field import TimeZoneField
 
 from django.contrib.auth.models import User
@@ -44,4 +45,4 @@ class UserRatingDescription(models.Model):
 class Followership(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
-    creation = models.DateTimeField(auto_now_add=True)
+    creation = models.DateTimeField(default=timezone.now)

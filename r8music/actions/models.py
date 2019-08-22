@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
@@ -7,7 +9,7 @@ from r8music.music.models import Release, Track
 
 class Action(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    creation = models.DateTimeField(auto_now_add=True)
+    creation = models.DateTimeField(default=timezone.now)
     
     def release_actions(self, release, **changes):
         return release.active_actions.update_or_create(user=self.user, defaults=changes)[0]
