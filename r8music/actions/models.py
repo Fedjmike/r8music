@@ -51,6 +51,10 @@ class RateAction(Action):
 class PickAction(Action):
     track = models.ForeignKey(Track, on_delete=models.PROTECT, related_name="pick_actions")
     
+    @property
+    def release(self):
+        return self.track.release
+    
     def set_as_active(self):
         self.release_actions(self.track.release).picks.add(self)
 
@@ -98,10 +102,11 @@ max_activity_gap = 4*60*60 #4h in seconds
 class ReleaseActivityItem:
     """Represents actions by one user on one release"""
     
-    def __init__(self, release, primary_action):
+    def __init__(self, release, primary_action, picks):
         self.release = release
         #The most interesting action, the one worth mentioning
         self.primary_action = primary_action
+        self.picks = picks
         
     @staticmethod
     def from_actions(release, actions):
@@ -111,7 +116,9 @@ class ReleaseActivityItem:
             for model in [RateAction, ListenAction, SaveAction]
         ]), None)
         
-        return ReleaseActivityItem(release, primary_action)
+        picks = filter(lambda action: isinstance(action, PickAction), actions)
+        
+        return ReleaseActivityItem(release, primary_action, picks)
         
 class UserActivityGroup:
     """Represents actions by one user"""
@@ -135,13 +142,15 @@ def group_actions(actions):
         )
     ]
 
-def get_activity_feed(filter_actions):
+def get_activity_feed(filter_release_actions, filter_track_actions):
     """Get the actions which are active and match a filter, in reverse
        chronological order, grouped by user, creation and release."""
     
     querysets = [
-        filter_actions(model.objects).exclude(active_actions=None)
+        filter_release_actions(model.objects).exclude(active_actions=None)
         for model in [SaveAction, ListenAction, RateAction]
+    ] + [
+        filter_track_actions(PickAction.objects).exclude(active_actions=None)
     ]
 
     #The querysets must select the same values in order to be combined

@@ -57,7 +57,9 @@ class ArtistActivityPage(AbstractArtistPage):
     
     def get_activity(self, artist):
         return get_activity_feed(
-            lambda release_actions: release_actions.filter(release__artists=artist)
+            lambda release_actions: release_actions.filter(release__artists=artist),
+            #Exclude actions on tracks
+            lambda track_actions: track_actions.filter(pk=None)
         )
         
     def get_context_data(self, **kwargs):
@@ -110,7 +112,9 @@ class ReleaseActivityPage(AbstractReleasePage):
     
     def get_activity(self, release):
         return get_activity_feed(
-            lambda release_actions: release_actions.filter(release=release)
+            lambda release_actions: release_actions.filter(release=release),
+            #Exclude actions on tracks
+            lambda track_actions: track_actions.filter(pk=None)
         )
         
     def get_context_data(self, **kwargs):
