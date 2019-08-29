@@ -23,8 +23,8 @@
     {% endfor %}
 {%- endmacro %}
 
-{% macro object_link(object) -%}
-    <a href={{ object.url }}>{{ object.title }}</a>
+{% macro release_link(release) -%}
+    <a href={{ url_for_release(release) }}>{{ release.title }}</a>
 {%- endmacro %}
 
 {% macro user_link(user) -%}

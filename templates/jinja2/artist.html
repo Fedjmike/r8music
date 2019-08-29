@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% from "macros.html" import artist_link, page_tabs, subpage_header %}
-{% from "activity_list.html" import activity_list %}
 
 {% block title %}{{ artist.name }} {{ super() }}{% endblock %}
 
@@ -13,12 +12,4 @@
     {{ page_tabs(tabs, current_tab) }}
     
     {% block content_below_tabs %}{% endblock %}
-    
-    {% if tab == "activity" %}
-        <section class="content page">
-            {{ subpage_header("Activity", artist_link(artist)) }}
-            {% set last_action, actions = artist.get_activity_on_releases() %}
-            {{ activity_list(actions) }}
-        </section>
-    {% endif %}
 {% endblock %}

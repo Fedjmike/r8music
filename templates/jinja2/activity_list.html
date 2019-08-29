@@ -1,74 +1,50 @@
-{% from "macros.html" import event_datetime, artist_link, object_link, user_link, avatar_thumb %}
+{% from "macros.html" import event_datetime, artist_link, release_link, user_link, avatar_thumb %}
 
-{% macro action_secondary_details(action) -%}
+{% macro action_secondary_details(action, request) -%}
     <div class="secondary-details">
-        {{ action.describe() }} &middot; {{ event_datetime(action.creation) }}
+        {{ action.describe() }} &middot; {{ event_datetime(action.creation, request) }}
     </div>
 {%- endmacro %}
 
-{% macro explain_action(action) -%}
+{% macro explain_release_activity(activity, request) -%}
     <div class="activity-item thumb-box">
-        <a href={{ action.object.url }}>
-            <img class="thumb" src={{ action.object.thumb_art_url or "http://i.imgur.com/UGgojDS.png" }} />
+        <a href={{ activity.release.url }}>
+            <img class="thumb" src={{ activity.release.art_url_250 or "http://i.imgur.com/UGgojDS.png" }} />
         </a>
         <div class="activity-details">
-            {{ action_secondary_details(action) }}
+            {% if activity.primary_action %}
+                {{ action_secondary_details(activity.primary_action, request) }}
+            {% endif %}
             <div>
-                {% for artist in action.object.get_artists() %}
+                {% for artist in activity.release.artists.all() %}
                     <span class="author">{{ artist_link(artist) }}</span>
                 {% endfor %}
                 &ndash;
-                {{ object_link(action.object) }}
+                {{ release_link(activity.release) }}
             </div>
         </div>
     </div>
 {%- endmacro %}
 
-{% macro explain_action_group(action_group, same_user=False) -%}
-    {% set n_actions = action_group.actions | length %}
-    
-    {% if not same_user %}
+{% macro explain_activity_group(activity_group, request, show_user=True) -%}    
+    {% if show_user %}
     <div class="thumb-box">
-        {{ avatar_thumb(action_group.user) }}
-        {{ user_link(action_group.user) }}
+        {{ avatar_thumb(activity_group.user) }}
+        {{ user_link(activity_group.user) }}
     </div>
     {% endif %}
     
-    <ol class="activity-group {{ 'same-user' if same_user else '' }}">
-    {% for action in action_group.actions %}
-        <li>{{ explain_action(action)}}</li>
+    <ol class="activity-group {{ 'same-user' if not show_user else '' }}">
+    {% for activity in activity_group.activity %}
+        <li>{{ explain_release_activity(activity, request)}}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
 
-{% macro release_activity_list(actions) -%}
-    {% set action_groups = group_actions(actions) %}
+{% macro activity_list(activity_groups, show_user=True) -%}
     <ol class="activity-list">
-    {% for action_group in action_groups %}
-        {% for action in action_group.actions %}
-            <li class="activity-item thumb-box">
-                {{ avatar_thumb(action.user) }}
-                <div>
-                    {{ user_link(action.user) }}
-                    {{ action_secondary_details(action) }}
-                </div>
-            </li>
-        {% endfor %}
+    {% for activity_group in activity_groups %}
+        <li>{{ explain_activity_group(activity_group, request, show_user) }}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
-
-{% macro activity_list(actions, same_user=False) -%}
-    {% set action_groups = group_actions(actions) %}
-    <ol class="activity-list">
-    {% for action_group in action_groups %}
-        <li>{{ explain_action_group(action_group, same_user) }}</li>
-    {% endfor %}
-    </ol>
-{%- endmacro %}
-
-{% block content %}
-    {% if request.user %}
-        {{ activity_list(actions) }}
-    {% endif %}
-{% endblock %}

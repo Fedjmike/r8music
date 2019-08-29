@@ -1,0 +1,12 @@
+{% extends "release.html" %}
+{% from "macros.html" import release_link, subpage_header %}
+{% from "activity_list.html" import activity_list with context %}
+
+{% set current_tab = "activity" %}
+
+{% block content_below_tabs %}
+    <section class="page content">
+        {{ subpage_header("Activity", release_link(release)) }} {#object link#}
+        {{ activity_list(activity) }}
+    </section>
+{% endblock %}

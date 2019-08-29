@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 from r8music.music.models import Artist, Release, Track, Tag
-from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
+from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions, get_activity_feed
 
 class ArtistIndex(ListView):
     model = Artist
@@ -23,12 +23,14 @@ class ArtistIndex(ListView):
         #Most recently imported artists first
         return Artist.objects.order_by("-id")
     
-class ArtistMainPage(DetailView):
+class AbstractArtistPage(DetailView):
     model = Artist
-    template_name = "artist_main.html"
     
     def get_object(self):
         return get_object_or_404(Artist, slug=self.kwargs["slug"])
+        
+class ArtistMainPage(AbstractArtistPage):
+    template_name = "artist_main.html"
 
     def get_user_ratings(self, artist):
         #A defaultdict allows the template to look up a release whether or not there is a rating
@@ -48,6 +50,19 @@ class ArtistMainPage(DetailView):
         context = super().get_context_data(**kwargs)
         user_ratings = self.get_user_ratings(context["artist"])
         context["get_user_rating"] = lambda release: user_ratings[release.id]
+        return context
+
+class ArtistActivityPage(AbstractArtistPage):
+    template_name = "artist_activity.html"
+    
+    def get_activity(self, artist):
+        return get_activity_feed(
+            lambda release_actions: release_actions.filter(release__artists=artist)
+        )
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["activity"] = self.get_activity(context["artist"])
         return context
 
 # Releases
@@ -88,6 +103,19 @@ class ReleaseMainPage(AbstractReleasePage):
         _, context["comparison_picks"] \
             = self.get_user_actions(context["comparison_user"], context["release"])
         
+        return context
+
+class ReleaseActivityPage(AbstractReleasePage):
+    template_name = "release_activity.html"
+    
+    def get_activity(self, release):
+        return get_activity_feed(
+            lambda release_actions: release_actions.filter(release=release)
+        )
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["activity"] = self.get_activity(context["release"])
         return context
 
 class EditReleasePage(LoginRequiredMixin, AbstractReleasePage):

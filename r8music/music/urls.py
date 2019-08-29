@@ -2,18 +2,19 @@ from django.conf.urls import url
 from django.urls import path, reverse
 from rest_framework import routers
 
-from .views import ArtistIndex, ArtistMainPage, ReleaseMainPage, EditReleasePage, TagPage
-from .views import ReleaseViewSet, TrackViewSet
-
-null_view = lambda: None
+from .views import (
+    ArtistIndex, ArtistMainPage, ArtistActivityPage,
+    ReleaseMainPage, ReleaseActivityPage, EditReleasePage,
+    TagPage, ReleaseViewSet, TrackViewSet
+)
 
 urlpatterns = [
     path("artists", ArtistIndex.as_view(), name="artist_index"),
     path("artist/<slug>", ArtistMainPage.as_view(), name="artist"),
-    path("artist/<slug>/activity", null_view, name="artist_activity"),
+    path("artist/<slug>/activity", ArtistActivityPage.as_view(), name="artist_activity"),
     
     path("release/<slug>", ReleaseMainPage.as_view(), name="release"),
-    path("release/<slug>/activity", null_view, name="release_activity"),
+    path("release/<slug>/activity", ReleaseActivityPage.as_view(), name="release_activity"),
     path("release/<slug>/edit", EditReleasePage.as_view(), name="edit_release"),
     
     path("tag/<int:pk>", TagPage.as_view(), name="tag"),
