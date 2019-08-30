@@ -93,13 +93,13 @@ class ActiveActions(models.Model):
 
 #
 
-#The maximum gap between two actions which can be grouped in an activity feed
+#The maximum period of time between two actions which can be grouped in an activity feed
 max_activity_gap = 4*60*60 #4h in seconds
 
 class ReleaseActivityItem:
     """Represents actions by one user on one release"""
     
-    def __init__(self, release, primary_action, picks):
+    def __init__(self, release, primary_action=None, picks=[]):
         self.release = release
         #The most interesting action, the one worth mentioning
         self.primary_action = primary_action
@@ -125,7 +125,8 @@ class UserActivityGroup:
         self.activity = activity
         
 def group_actions(actions):
-    """Group a chronological series of actions by user, creation and release."""
+    """Group a chronological series of actions first by user and creation
+       timestamp, then by release."""
     
     return [
         UserActivityGroup(user, [
@@ -143,14 +144,16 @@ def get_activity_feed(filter_release_actions, filter_track_actions):
     """Get the actions which are active and match a filter, in reverse
        chronological order, grouped by user, creation and release."""
     
+    #Separate querysets are needed because the active_actions field involves
+    #a different join for each model
     querysets = [
         filter_release_actions(model.objects).exclude(active_actions=None)
         for model in [SaveAction, ListenAction, RateAction]
     ] + [
         filter_track_actions(PickAction.objects).exclude(active_actions=None)
     ]
-
-    #The querysets must select the same values in order to be combined
+    
+    #The querysets must select a common subset of fields in order to be combined
     querysets = [qs.values_list("id", "creation") for qs in querysets]
     #A queryset of actions of any kind which match the query
     combined_queryset = querysets[0].union(*querysets[1:])
@@ -169,7 +172,7 @@ def get_activity_feed(filter_release_actions, filter_track_actions):
         **fetch(RateAction), **fetch(PickAction, track_action=True)
     }
     
-    #Put them in order
+    #Put them back in order
     recent_actions = [actions_by_id[id] for id in recent_action_ids]
     
     return group_actions(recent_actions)
