@@ -2,7 +2,6 @@ from itertools import groupby
 from r8music.utils import fuzzy_groupby
 
 from django.db import models
-from model_utils.managers import InheritanceManager
 from django.utils import timezone
 
 from django.db.models.signals import pre_save, post_save
@@ -14,8 +13,6 @@ from r8music.music.models import Release, Track
 class Action(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     creation = models.DateTimeField(default=timezone.now)
-    
-    objects = InheritanceManager()
     
     def release_actions(self, release, **changes):
         return release.active_actions.update_or_create(user=self.user, defaults=changes)[0]
@@ -161,8 +158,18 @@ def get_activity_feed(filter_release_actions, filter_track_actions):
     recent_actions = combined_queryset.order_by("-creation")
     recent_action_ids = [id for id, creation in recent_actions]
     
-    #Fetch the full objects and put them in order
-    actions_by_id = Action.objects.select_subclasses().in_bulk(recent_action_ids)
+    #To fetch the full objects
+    fetch = lambda model, track_action=False: model.objects \
+        .select_related("user__profile", "track__release" if track_action else "release") \
+        .prefetch_related("track__release__artists" if track_action else "release__artists") \
+        .in_bulk(recent_action_ids, field_name="action_ptr_id")
+    
+    actions_by_id = {
+        **fetch(SaveAction), **fetch(ListenAction),
+        **fetch(RateAction), **fetch(PickAction, track_action=True)
+    }
+    
+    #Put them in order
     recent_actions = [actions_by_id[id] for id in recent_action_ids]
     
     return group_actions(recent_actions)

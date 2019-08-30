@@ -1,6 +1,5 @@
 django
 psycopg2
-django-model-utils
 django-enumfield
 django-timezone-field
 djangorestframework
