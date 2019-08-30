@@ -138,17 +138,19 @@ var autoload = function() {
         stahp = true;
         
         $(autoloadTrigger).text("Loading");
-
-        $.get(autoloadTrigger.dataset.endpoint, {last_action_id: autoloadTrigger.dataset.last_action_id}, function (msg) {
+        
+        var next_page_no = parseInt(autoloadTrigger.dataset.page_no) + 1;
+        
+        $.get(autoloadTrigger.dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            autoloadTrigger.dataset.last_action_id = msg.last_action_id;
+            autoloadTrigger.dataset.page_no = next_page_no;
             
             $(autoloadTrigger).text("Load more");
             
             var target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
-            target.append(msg.html);
+            target.append(msg);
             stahp = false;
         });
     };
@@ -199,14 +201,16 @@ $(document).ready(function ($) {
         
         var dataset = event.target.dataset;
         
-        $.get(dataset.endpoint, {last_action_id: dataset.last_action_id}, function (msg) {
+        var next_page_no = parseInt(dataset.page_no) + 1;
+        
+        $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            dataset.last_action_id= msg.last_action_id;
+            dataset.page_no = msg.next_page_no;
             
             var target = $(event.target).closest(".load-more-area").find(".load-more-target");
-            target.append(msg.html);
+            target.append(msg);
         });
     });
     

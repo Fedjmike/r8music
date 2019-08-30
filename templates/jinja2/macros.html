@@ -2,7 +2,7 @@
     <span class="de-emph slightly-small">{{ x | safe }}</span>
 {%- endmacro %}
 
-{% macro full_and_friendly_datetime(datetime) -%}
+{% macro full_and_friendly_datetime(datetime, request) -%}
     {% set timezone = request.user.settings.timezone if request.user.settings else None %}
     <time title="{{ full_datetime(datetime, timezone) }}">{{ friendly_datetime(datetime, timezone) }}</time>
 {%- endmacro %}
@@ -98,13 +98,13 @@
 </ol>
 {%- endmacro %}
 
-{% macro load_more(content, endpoint, last_action_id, autoload=False) -%}
+{% macro load_more(content, endpoint, page_no, autoload=False) -%}
 <span class="load-more-area">
     <span class="load-more-target">{{ content }}</span>
     <p><a class="load-more" href=#
           {% if autoload %} id="autoload-trigger" {% endif %}
           data-endpoint={{ endpoint }}
-          data-last_action_id={{ last_action_id }}>Load more</a></p>
+          data-page_no={{ page_no }}>Load more</a></p>
 </span>
 {%- endmacro %}
 
