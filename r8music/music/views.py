@@ -12,7 +12,10 @@ from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 from r8music.music.models import Artist, Release, Track, Tag
-from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions, get_activity_feed
+from r8music.actions.models import (
+    SaveAction, ListenAction, RateAction, PickAction,
+    ActiveActions, get_paginated_activity_feed
+)
 
 class ArtistIndex(ListView):
     model = Artist
@@ -55,16 +58,19 @@ class ArtistMainPage(AbstractArtistPage):
 class ArtistActivityPage(AbstractArtistPage):
     template_name = "artist_activity.html"
     
-    def get_activity(self, artist):
-        return get_activity_feed(
-            lambda release_actions: release_actions.filter(release__artists=artist),
-            #Exclude actions on tracks
-            lambda track_actions: track_actions.filter(pk=None)
-        )
-        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["activity"] = self.get_activity(context["artist"])
+        
+        page_no = self.request.GET.get("page")
+        artist = context["artist"]
+        
+        context["activity"], context["page_obj"] = get_paginated_activity_feed(
+            lambda release_actions: release_actions.filter(release__artists=artist),
+            #Exclude actions on tracks
+            lambda track_actions: track_actions.filter(pk=None),
+            paginate_by=20, page_no=page_no
+        )
+        
         return context
 
 # Releases
@@ -110,16 +116,19 @@ class ReleaseMainPage(AbstractReleasePage):
 class ReleaseActivityPage(AbstractReleasePage):
     template_name = "release_activity.html"
     
-    def get_activity(self, release):
-        return get_activity_feed(
-            lambda release_actions: release_actions.filter(release=release),
-            #Exclude actions on tracks
-            lambda track_actions: track_actions.filter(pk=None)
-        )
-        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["activity"] = self.get_activity(context["release"])
+        
+        page_no = self.request.GET.get("page")
+        release = context["release"]
+        
+        context["activity"], context["page_obj"] = get_paginated_activity_feed(
+            lambda release_actions: release_actions.filter(release=release),
+            #Exclude actions on tracks
+            lambda track_actions: track_actions.filter(pk=None),
+            paginate_by=20, page_no=page_no
+        )
+        
         return context
 
 class EditReleasePage(LoginRequiredMixin, AbstractReleasePage):

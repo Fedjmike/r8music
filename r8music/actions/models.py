@@ -3,6 +3,7 @@ from r8music.utils import fuzzy_groupby
 
 from django.db import models
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -140,7 +141,10 @@ def group_actions(actions):
         )
     ]
 
-def get_activity_feed(filter_release_actions, filter_track_actions):
+def get_paginated_activity_feed(
+    filter_release_actions, filter_track_actions,
+    paginate_by, page_no=0
+):
     """Get the actions which are active and match a filter, in reverse
        chronological order, grouped by user, creation and release."""
     
@@ -158,14 +162,16 @@ def get_activity_feed(filter_release_actions, filter_track_actions):
     #A queryset of actions of any kind which match the query
     combined_queryset = querysets[0].union(*querysets[1:])
     
-    recent_actions = combined_queryset.order_by("-creation")
-    recent_action_ids = [id for id, creation in recent_actions]
+    chronological_actions = combined_queryset.order_by("-creation")
+    page_of_actions = Paginator(chronological_actions, paginate_by).get_page(page_no)
+    
+    action_ids = [id for id, creation in page_of_actions]
     
     #To fetch the full objects
     fetch = lambda model, track_action=False: model.objects \
         .select_related("user__profile", "track__release" if track_action else "release") \
         .prefetch_related("track__release__artists" if track_action else "release__artists") \
-        .in_bulk(recent_action_ids, field_name="action_ptr_id")
+        .in_bulk(action_ids, field_name="action_ptr_id")
     
     actions_by_id = {
         **fetch(SaveAction), **fetch(ListenAction),
@@ -173,6 +179,7 @@ def get_activity_feed(filter_release_actions, filter_track_actions):
     }
     
     #Put them back in order
-    recent_actions = [actions_by_id[id] for id in recent_action_ids]
+    recent_actions = [actions_by_id[id] for id in action_ids]
     
-    return group_actions(recent_actions)
+    #(Return the page object as well)
+    return group_actions(recent_actions), page_of_actions
