@@ -1,7 +1,10 @@
 from django.conf.urls import url, include
 from django.urls import path, reverse
 
-from .views import UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage, UserFriendsPage, UserStatsPage
+from .views import (
+    UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage,
+    UserActivityPage, UserFriendsPage, UserStatsPage
+)
 from .views import FollowUser, UnfollowUser
 from .views import RegistrationPage, ChangePasswordPage, PasswordChangeDonePage, SettingsPage, rating_description
 
@@ -13,7 +16,7 @@ urlpatterns = [
     path("user/<slug>", UserMainPage.as_view(), name="user_main"),
     path("user/<slug>/listened-unrated", UserListenedUnratedPage.as_view(), name="user_listened_unrated"),
     path("user/<slug>/saved", UserSavedPage.as_view(), name="user_saved"),
-    path("user/<slug>/activity", null_view, name="user_activity"),
+    path("user/<slug>/activity", UserActivityPage.as_view(), name="user_activity"),
     path("user/<slug>/friends", UserFriendsPage.as_view(), name="user_friends"),
     path("user/<slug>/stats", UserStatsPage.as_view(), name="user_stats"),
     

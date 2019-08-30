@@ -23,6 +23,7 @@ from django.db.models import Count, Q
 from django.contrib.auth.models import User
 from r8music.profiles.models import UserSettings, UserProfile, UserRatingDescription
 from r8music.music.models import Release
+from r8music.actions.models import get_paginated_activity_feed
 
 from django.urls import reverse_lazy
 
@@ -95,6 +96,24 @@ class UserSavedPage(AbstractUserPage):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["saved"] = Release.objects.saved_by_user(context["user"])
+        return context
+
+class UserActivityPage(AbstractUserPage):
+    template_name = "user_activity.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        user = context["user"]
+        page_no = self.request.GET.get("page")
+        
+        context["activity"], context["page_obj"] = get_paginated_activity_feed(
+            lambda release_actions: release_actions.filter(user=user),
+            #Exclude actions on tracks
+            lambda track_actions: track_actions.filter(pk=None),
+            paginate_by=20, page_no=page_no
+        )
+        
         return context
 
 class UserFriendsPage(AbstractUserPage):
