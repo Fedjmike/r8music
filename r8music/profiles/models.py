@@ -9,7 +9,7 @@ class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="settings")
     timezone = TimeZoneField(default="Europe/London")
     #Does 'listening' to a release automatically remove it from the 'saved' list?
-    listen_implies_unsave = models.BooleanField()
+    listen_implies_unsave = models.BooleanField(default=True)
 
 #
 
