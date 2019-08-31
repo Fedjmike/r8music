@@ -1,14 +1,14 @@
 {% extends "user.html" %}
 
 {% from "macros.html" import page_links %}
-{% from "activity_list.html" import activity_list with context %}
+{% from "activity_list.html" import user_activity_list with context %}
 
 {% set current_tab = "activity" %}
 
 {% block content_below_tabs %}
     <section class="page content"><div>
         <header><h1>Activity</h1></header>
-        {{ activity_list(activity) }}
+        {{ user_activity_list(activity) }}
         {{ page_links(page_obj, request) }}
     </div></section>
 {% endblock %}

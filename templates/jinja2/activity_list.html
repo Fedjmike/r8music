@@ -26,25 +26,57 @@
     </div>
 {%- endmacro %}
 
-{% macro explain_activity_group(activity_group, request, show_user=True) -%}    
-    {% if show_user %}
+{% macro explain_activity_group(activity_group, request) -%}
     <div class="thumb-box">
         {{ avatar_thumb(activity_group.user) }}
         {{ user_link(activity_group.user) }}
     </div>
-    {% endif %}
     
-    <ol class="activity-group {{ 'same-user' if not show_user else '' }}">
+    <ol class="activity-group">
     {% for activity in activity_group.activity %}
         <li>{{ explain_release_activity(activity, request)}}</li>
     {% endfor %}
     </ol>
 {%- endmacro %}
 
-{% macro activity_list(activity_groups, show_user=True) -%}
+{% macro activity_list(activity_groups) -%}
     <ol class="activity-list">
     {% for activity_group in activity_groups %}
-        <li>{{ explain_activity_group(activity_group, request, show_user) }}</li>
+        <li>{{ explain_activity_group(activity_group, request) }}</li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{# Omits the user #}
+{% macro user_activity_list(activity_groups) -%}
+    <ol class="activity-list">
+    {% for activity_group in activity_groups %}
+        <li><ol class="activity-group">
+        {% for activity in activity_group.activity %}
+            <li>{{ explain_release_activity(activity, request)}}</li>
+        {% endfor %}
+        </ol></li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{# Omits the release and artist, shows the use in their place #}
+{% macro release_activity_list(activity) -%}
+    <ol class="activity-list">
+    {% for activity_group in activity %}
+        <li>
+        {% for activity in activity_group.activity %}
+            <div class="activity-item thumb-box">
+                {{ avatar_thumb(activity_group.user) }}
+                <div>
+                    {{ user_link(activity_group.user) }}
+                    {% if activity.primary_action %}
+                        {{ action_secondary_details(activity.primary_action, request) }}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </li>
     {% endfor %}
     </ol>
 {%- endmacro %}

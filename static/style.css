@@ -633,16 +633,19 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-group {
+.activity-list > * {
     margin-bottom: 1.5em;
+}
+
+.activity-group {
     border-left: 2px solid;
 }
 
-.activity-group:not(.same-user) {
+.activity-group {
     margin-left: 0.75em;
 }
 
-.activity-group:not(.same-user) > li {
+.activity-group > li {
     margin-left: 1em;
 }
 
