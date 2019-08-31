@@ -56,23 +56,18 @@ class PickAction(Action):
     def set_as_active(self):
         self.release_actions(self.track.release).picks.add(self)
 
-@receiver(pre_save, sender=ListenAction)
-def listen_pre_save(sender, instance, **kwargs):
-    if instance.user.settings.listen_implies_unsave:
-        instance.release_actions(instance.release, save_action=None)
+def enact(action):
+    """Enact the complete semantics of an action."""
+
+    if isinstance(action, SaveAction):
+        enact(ListenAction.objects.create(release=action.release, user=action.user))
     
-@receiver(pre_save, sender=RateAction)
-def rate_pre_save(sender, instance, **kwargs):
-    ListenAction.objects.create(release=instance.release, user=instance.user)
-
-@receiver(post_save, sender=SaveAction)
-@receiver(post_save, sender=ListenAction)
-@receiver(post_save, sender=RateAction)
-@receiver(post_save, sender=PickAction)
-def action_post_save(sender, instance, created, **kwargs):
-    if created:
-        instance.set_as_active()
-
+    elif isinstance(action, ListenAction):
+        if action.user.settings.listen_implies_unsave:
+            action.release_actions(action.release, save_action=None)
+        
+    action.set_as_active()
+    
 #
 
 class ActiveActions(models.Model):
