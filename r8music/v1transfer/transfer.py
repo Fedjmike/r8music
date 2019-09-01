@@ -325,10 +325,17 @@ class Transferer:
             )
         ])
         
+        #MusicBrainz links were not stored as MBIDs and must be expanded
+        def expand_url(url, name):
+            if name == "musicbrainz":
+                url = "//musicbrainz.org/release/" + url
+                
+            return url
+            
         ReleaseExternalLink.objects.bulk_create([
             ReleaseExternalLink(
                 release_id=self.new_release_ids.map(release_id),
-                name=name, url=url
+                name=name, url=expand_url(url, name)
             )
             for release_id, name, url in self.model.query(
                 "select releases.id, link_types.type, target from links"
