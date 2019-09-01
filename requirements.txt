@@ -5,7 +5,7 @@ django-enumfield
 django-timezone-field
 djangorestframework
 jinja2
-recaptcha
+django-recaptcha
 #For checking passwords from r8music v1
 werkzeug
 wikipedia
@@ -15,3 +15,8 @@ bs4
 requests-mock
 django-background-tasks
 editdistance
+pillow
+#For V1
+unidecode
+flask
+arrow
