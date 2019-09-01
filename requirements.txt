@@ -1,5 +1,6 @@
 django
 psycopg2
+whitenoise
 django-enumfield
 django-timezone-field
 djangorestframework
