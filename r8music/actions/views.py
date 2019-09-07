@@ -4,12 +4,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import views, permissions, renderers
 from rest_framework.response import Response
 
+from django.db.models import Q
 from r8music.actions.models import get_paginated_activity_feed
 
 def get_user_activity_feed(user, page_no=1, paginate_by=25):
     return get_paginated_activity_feed(
         lambda release_actions: release_actions
-            .filter(user__followers__follower=user),
+            .filter(Q(user__followers__follower=user) | Q(user=user)),
         #Exclude actions on tracks
         lambda track_actions: track_actions.filter(pk=None),
         paginate_by=paginate_by, page_no=page_no
