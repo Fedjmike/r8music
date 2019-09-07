@@ -57,7 +57,7 @@ class GeneralModel:
         return result[0]
         
     def query_print(self, query, *args):
-        print([[c for c in r] for r in self.query(query, args)])
+        print([[c for c in r] for r in self.query(query, *args)])
         
     def execute(self, query, *args):
         self.query(query, *args)
