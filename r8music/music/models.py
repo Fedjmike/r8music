@@ -1,4 +1,5 @@
 from itertools import count, groupby
+from unidecode import unidecode
 
 from django.db import models
 from django.db.models import Count, Avg, Q, F
@@ -9,8 +10,9 @@ from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 
 def generate_slug(is_free, name):
-    slug = slugify(name)
-    candidates = ("%s-%d" % (slug, n) if n else slug for n in count(0))
+    slug = slugify(unidecode(name))
+    only_index = not slug
+    candidates = ("%s-%d" % (slug, n) if n or only_index else slug for n in count(0))
     return next(filter(is_free, candidates))
     
 def generate_slug_tracked(used_slugs, name):
