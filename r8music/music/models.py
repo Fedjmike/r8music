@@ -123,7 +123,7 @@ class Release(models.Model):
     
     type = enum.EnumField(ReleaseType, null=True, default=None)
     #As an ISO8601 date string, or a fragment (e.g. YYYY) in case the full date is unknown
-    release_date = models.TextField()
+    release_date = models.TextField(null=True)
     
     tags = models.ManyToManyField(Tag, related_name="releases")
     

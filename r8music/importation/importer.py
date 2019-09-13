@@ -299,7 +299,7 @@ class Importer:
         releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
         
         #Better if they have a date
-        those_with_dates = [r for r in releases_of_mode_track_count if r["date"]]
+        those_with_dates = [r for r in releases_of_mode_track_count if "date" in r]
         
         if those_with_dates:
             return min(those_with_dates, key=best_date)
@@ -425,7 +425,7 @@ class Importer:
         release = Release.objects.create(
             title=release_json["title"],
             type=get_release_type_from_mb_str(release_group_json["type"]),
-            release_date=release_json["date"],
+            release_date=release_json["date"] if "date" in release_json else None,
             #Use a temporary slug if the release is being updated (i.e. temporarily duplicated)
             slug=slug if not existing_release else slug + "-[new]",
             **extra_args
