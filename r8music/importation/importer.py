@@ -422,9 +422,11 @@ class Importer:
         else:
             extra_args = {}
         
+        if "type" in release_group_json:
+            extra_args["type"] = get_release_type_from_mb_str(release_group_json["type"])
+        
         release = Release.objects.create(
             title=release_json["title"],
-            type=get_release_type_from_mb_str(release_group_json["type"]),
             release_date=release_json["date"] if "date" in release_json else None,
             #Use a temporary slug if the release is being updated (i.e. temporarily duplicated)
             slug=slug if not existing_release else slug + "-[new]",
