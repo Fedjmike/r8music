@@ -202,8 +202,8 @@ class Importer:
     
     def query_discogs_tags(self, discogs_id, is_master=False):
         release = (self.discogs.master if is_master else self.discogs.release)(discogs_id)
-        tags = set(release.genres + release.styles) - self.discogs_genre_blacklist
-        return tags
+        tags = (release.genres or []) + (release.styles or [])
+        return set(tags) - self.discogs_genre_blacklist
     
     def query_discogs(self, release_json, release_group_json):
         def get(json, is_master=False):
