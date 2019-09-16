@@ -2,6 +2,7 @@ import musicbrainzngs
 
 from django.conf import settings
 from django.views.generic import TemplateView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
@@ -20,7 +21,7 @@ def search_artists(query):
 def schedule_import_artist(artist_mbid):
     Importer().import_artist(artist_mbid)
 
-class ImportArtistPage(TemplateView):
+class ImportArtistPage(LoginRequiredMixin, TemplateView):
     """Displays the artist search form after a GET, and imports an artist given in a POST"""
     
     template_name = "import_artist.html"
@@ -39,7 +40,7 @@ class ImportArtistPage(TemplateView):
         
         return redirect(reverse("artist_index"))
         
-class ImportArtistSearchResults(TemplateView):
+class ImportArtistSearchResults(LoginRequiredMixin, TemplateView):
     """Displays the importation options from a search of MusicBrainz"""
     
     template_name =  "import_artist_search_results.html"
@@ -70,7 +71,7 @@ class ImportArtistSearchResults(TemplateView):
         
         return super().get_context_data(query=artist_name, results=results, **kwargs)
         
-class UpdateArtist(DetailView):
+class UpdateArtist(LoginRequiredMixin, DetailView):
     model = Artist
     
     def get(self, request, id):
