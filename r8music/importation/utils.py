@@ -43,6 +43,9 @@ def query_and_collect(query, limits):
     
     return reponses
     
+def musicbrainz_url(mbid, artist=False):
+    return "//musicbrainz.org/%s/%s" % ("artist" if artist else "release", mbid)
+    
 def get_release_type_from_mb_str(release_type_str):        
     try:
         return {

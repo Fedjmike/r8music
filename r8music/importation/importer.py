@@ -15,7 +15,10 @@ from .models import (
 )
 from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
 
-from .utils import uniqify, mode_items, query_and_collect, get_release_type_from_mb_str
+from .utils import (
+    uniqify, mode_items, query_and_collect,
+    musicbrainz_url, get_release_type_from_mb_str
+)
 from .chromatography import get_palette
 
 class Importer:
@@ -158,6 +161,11 @@ class Importer:
             ArtistExternalLink(artist=artist, url=url, name=urlparse(url).netloc)
             for url in artist_response.extra_links
         ]
+        
+        external_links.append(ArtistExternalLink(
+            artist=artist, name="musicbrainz",
+            url=musicbrainz_url(artist_response.json["id"], artist=True)
+        ))
         
         ArtistExternalLink.objects.bulk_create(external_links)
         
@@ -454,6 +462,10 @@ class Importer:
             #artist-credit can include joining phrases (like "&")
             if isinstance(artist_credit, dict)
         ])
+        
+        ReleaseExternalLink.objects.create(
+            release=release, name="musicbrainz", url=musicbrainz_url(release_json["id"])
+        )
         
         ReleaseExternalLink.objects.bulk_create([
             ReleaseExternalLink(
