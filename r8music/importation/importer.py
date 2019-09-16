@@ -292,8 +292,8 @@ class Importer:
             return sum(medium["track-count"] for medium in release["medium-list"])
         
         def best_date(release):
-            #Prefer fuller dates, then earlier dates
-            return (-len(release["date"]), release["date"])
+            #Prefer earlier years, then fuller dates, then earlier dates
+            return (release["date"][:4], -len(release["date"]), release["date"])
         
         #Assume that releases with unusual track counts (non-mode) are not canonical
         releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
