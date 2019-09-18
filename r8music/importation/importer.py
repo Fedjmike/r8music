@@ -1,4 +1,4 @@
-import re, requests, wikipedia, musicbrainzngs, discogs_client
+import time, re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 from urllib.parse import unquote
@@ -209,6 +209,7 @@ class Importer:
     # Discogs (used for populating tags)
     
     discogs_url_pattern = re.compile("discogs.com(/.*)?/(release|master)/(\d*)")
+    discogs_ratelimit_wait_time = 15 #in seconds
     
     def find_discogs_url(self, url_relations):
         candidates = (rel["target"] for rel in url_relations if rel["type"] == "discogs")
@@ -219,9 +220,19 @@ class Importer:
         return match.group(3) if match else None
     
     def query_discogs_tags(self, discogs_id, is_master=False):
-        release = (self.discogs.master if is_master else self.discogs.release)(discogs_id)
-        tags = (release.genres or []) + (release.styles or [])
-        return set(tags) - self.discogs_genre_blacklist
+        #The discogs client currently has no rate limiting, so retry after a pause.
+        while True:
+            try:
+                release = (self.discogs.master if is_master else self.discogs.release)(discogs_id)
+                tags = (release.genres or []) + (release.styles or [])
+                return set(tags) - self.discogs_genre_blacklist
+                
+            except discogs_client.exceptions.HTTPError as e:
+                if e.status_code == 429: #"Too Many Requests"
+                    time.sleep(self.discogs_ratelimit_wait_time)
+                    continue
+                    
+                return set()
     
     def query_discogs(self, release_json, release_group_json):
         def get(json, is_master=False):
