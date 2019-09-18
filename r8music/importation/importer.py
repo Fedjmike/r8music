@@ -98,10 +98,13 @@ class Importer:
             match = self.en_wikipedia_url_pattern.search(wikipedia_url)
             
             if match:
-                #Unicode characters in the title may be HTTP encoded
-                title = unquote(match.group(1))
-            
-                wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
+                try:
+                    #Unicode characters in the title may be HTTP encoded
+                    title = unquote(match.group(1))
+                    wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
+                    
+                except self.wikipedia.exceptions.PageError:
+                    pass
             
         if not wikipedia_page:
             wikipedia_page = self.guess_wikipedia_page(artist_name) 
