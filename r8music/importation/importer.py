@@ -1,6 +1,7 @@
 import re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.db import transaction
@@ -92,6 +93,9 @@ class Importer:
     def query_wikipedia(self, artist_name, wikipedia_url=None):        
         if wikipedia_url:
             title = self.wikipedia_url_pattern.search(wikipedia_url).group(1)
+            #Unicode characters in the title may be HTTP encoded
+            title = unquote(title)
+            
             wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
             
         else:
