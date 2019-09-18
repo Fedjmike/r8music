@@ -44,7 +44,7 @@ class Importer:
     
     # Wikipedia
     
-    wikipedia_url_pattern = re.compile("/wiki/(/?.*)")
+    en_wikipedia_url_pattern = re.compile("en.wikipedia.org/wiki/(/?.*)")
     
     def guess_wikipedia_page(self, artist_name):
         music_categories = ["musician", "band", "rapper", "artist", "singer", "songwriter"]
@@ -91,14 +91,20 @@ class Importer:
             return absolute_urls
             
     def query_wikipedia(self, artist_name, wikipedia_url=None):        
+        wikipedia_page = None
+        
         if wikipedia_url:
-            title = self.wikipedia_url_pattern.search(wikipedia_url).group(1)
-            #Unicode characters in the title may be HTTP encoded
-            title = unquote(title)
+            #Only use pages on the english wikipedia
+            #(because of limitations of the wikipedia library)
+            match = self.en_wikipedia_url_pattern.search(wikipedia_url)
             
-            wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
+            if match:
+                #Unicode characters in the title may be HTTP encoded
+                title = unquote(match.group(1))
             
-        else:
+                wikipedia_page = self.wikipedia.page(title, auto_suggest=False)
+            
+        if not wikipedia_page:
             wikipedia_page = self.guess_wikipedia_page(artist_name) 
             
         if not wikipedia_page:
