@@ -474,14 +474,20 @@ class Importer:
             release_group_mbid=release_group_json["id"]
         )
         
-        Release.artists.through.objects.bulk_create([
-            Release.artists.through(
-                release=release,
-                artist_id=artist_map.get(artist_credit["artist"]["id"])
-            )
+        #Uniqify the contributing artists (who may appear multiple times)
+        artists_mbids = set(
+            artist_credit["artist"]["id"]
             for artist_credit in release_group_json["artist-credit"]
             #artist-credit can include joining phrases (like "&")
             if isinstance(artist_credit, dict)
+        )
+        
+        Release.artists.through.objects.bulk_create([
+            Release.artists.through(
+                release=release,
+                artist_id=artist_map.get(artist_mbid)
+            )
+            for artist_mbid in artists_mbids
         ])
         
         ReleaseExternalLink.objects.create(
