@@ -1,7 +1,6 @@
 import time, re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin
-from urllib.parse import unquote
+from urllib.parse import urlparse, urljoin, unquote
 
 from django.conf import settings
 from django.db import transaction
