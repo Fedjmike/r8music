@@ -6,6 +6,6 @@
 {% block content_below_tabs %}
     <section class="page content"><div>
         <header><h1>Saved releases</h1></header>
-        {{ release_grid(saved, class="small") }}
+        {{ release_grid(saved, request.user, class="small") }}
     </div></section>
 {% endblock %}

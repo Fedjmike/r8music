@@ -6,6 +6,6 @@
 {% block content_below_tabs %}
     <section class="page content"><div>
         <header><h1>Listened to but unrated</h1></header>
-        {{ release_grid(listened_unrated, class="small") }}
+        {{ release_grid(listened_unrated, request.user, class="small") }}
     </div></section>
 {% endblock %}

@@ -67,13 +67,13 @@
         {% endif %}
         <h2>{{ "Albums" if has_album_section else "Releases" }}</h2>
     </header>
-    {{ release_grid((albums if has_album_section else other_releases), get_user_rating, show_date_not_artist=True, show_average_rating=True) }}
+    {{ release_grid((albums if has_album_section else other_releases), request.user, get_user_rating, show_date_not_artist=True, show_average_rating=True) }}
 </section>
 
 {% if has_album_section and other_releases %}
     <section class="content page">
         <header><h3>Other releases</h3></header>
-        {{ release_grid(other_releases, get_user_rating, "small", show_date_not_artist=True, show_average_rating=True) }}
+        {{ release_grid(other_releases, request.user, get_user_rating, "small", show_date_not_artist=True, show_average_rating=True) }}
     </section>
 {% endif %}
 {% endblock %}

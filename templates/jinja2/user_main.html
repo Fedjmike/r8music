@@ -16,7 +16,7 @@
                     {% if editable %}<i class="material-icons edit-sign">edit</i>{% endif %}
                 {% endif %}
             </h1></header>
-            {{ release_grid(releases, get_user_rating, "small", that_user=user if user.id != request.user.id else None) }}
+            {{ release_grid(releases, request.user, get_user_rating, "small", that_user=user if user.id != request.user.id else None) }}
         </div></section>
     {% endfor %}
     </div>
