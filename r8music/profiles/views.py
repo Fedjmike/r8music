@@ -59,10 +59,9 @@ class AbstractUserPage(DetailView):
 class UserMainPage(AbstractUserPage):
     template_name = "user_main.html"
     
-    def get_releases_rated_groups(self, user):
-        """Return the releases rated by a user, grouped by rating, as list of tuples,
-           [(rating, rating_description, [releases])], where rating_description is the
-           heading given by the user for that rating group."""
+    def add_releases_rated_data(self, context):
+        #The user whose profile is being viewed
+        user = context["user"]
         
         releases_rated = Release.objects \
             .rated_by_user(user) \
@@ -71,15 +70,25 @@ class UserMainPage(AbstractUserPage):
         
         descriptions = {desc.rating: desc.description for desc in user.profile.rating_descriptions.all()}
         
-        return [
+        #The releases rated by the user, grouped by rating, as list of tuples,
+        #[(rating, rating_description, [releases])], where rating_description is the
+        #heading given by the user for that rating group."""
+        context["releases_rated_groups"] = [
             (rating, descriptions.get(rating, None), list(releases))
             for rating, releases in groupby(releases_rated, lambda r: r.rating_by_user)
         ]
         
+        rated_by_request_user = Release.objects \
+            .rated_by_user(self.request.user) \
+            .in_bulk([r.id for r in releases_rated]) \
+            if not self.request.user.is_anonymous else {}
+        
+        context["get_user_rating"] = lambda release: rated_by_request_user[release.id].rating_by_user \
+            if release.id in rated_by_request_user else None
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["releases_rated_groups"] = self.get_releases_rated_groups(context["user"])
-        context["get_user_rating"] = lambda release: release.rating_by_user
+        self.add_releases_rated_data(context)
         return context
 
 class UserListenedUnratedPage(AbstractUserPage):
