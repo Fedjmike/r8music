@@ -22,8 +22,8 @@
             </li>
         {% endfor %}
     {% endfor %}
-    {% if track_info["total_runtime"] and track_info["track_no"] != 1 %}
-        <li class="total clearfix"><time>{{ runtime }}</time></li>
+    {% if track_info["runtime"] and track_info["track_no"] != 1 %}
+        <li class="total clearfix"><time>{{ track_info["runtime"] }}</time></li>
     {% endif %}
     </ol>
 {%- endmacro %}
