@@ -8,19 +8,6 @@
     </ol>
 {%- endmacro %}
 
-{% macro release_list(releases) -%}
-    <ol class="releases">
-    {% for release in releases %}
-        <li><h2>
-            {% if release.release_year_str %}
-                <time>{{ release.release_year_str }}</time>
-            {% endif %}
-            <a href={{ url_for_release(release) }}>{{ release.title }}</a>
-        </h2></li>
-    {% endfor %}
-    </ol>
-{%- endmacro %}
-
 {% macro release_grid(releases, request_user=None, get_user_rating=None, class=None, show_date_not_artist=False, show_average_rating=False, that_user=None) -%}
     <ol class="releases grid {{ class if class else '' }}">
     {% for release in releases %}
