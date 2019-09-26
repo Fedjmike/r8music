@@ -13,10 +13,10 @@
     {% endif %}
     
     <form action={{ url("login") }} method="post" class="clearfix">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <dl>
             {{ form_field("Username", "username", "text", form_prefill)}}
             {{ form_field("Password", "password", "password")}}
+            {{ csrf_input }}
             <dd><input type="submit" value="Sign in" /></dd>
             <input type="hidden" name="next" value="{{ next }}" />
         </dl>

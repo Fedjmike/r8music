@@ -15,7 +15,7 @@
     <form action={{ url("register") }} method="post" class="clearfix">
         <dl>
             {{ django_form_fields(form) }}
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {{ csrf_input }}
             {% if request.GET.get("next") %}
                 <input type="hidden" name="next" value="{{ request.GET.get("next") }}" />
             {% endif %}

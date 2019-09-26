@@ -33,7 +33,7 @@
         <p>Choose the artist to import.</p>
         
         <form action={{ url("import_artist") }} method="post" class="clearfix">
-            <input type="hidden" name="csrfmiddlewaretoken" value={{ csrf_token }} />
+            {{ csrf_input }}
             
             {{ search_results(results | rejectattr("already_imported")) }}
             

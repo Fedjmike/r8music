@@ -11,7 +11,7 @@
             {{ django_form_fields(user_form) }}
             {{ django_form_fields(settings_form) }}
             {{ django_form_fields(profile_form) }}
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {{ csrf_input }}
             <dd><input type="submit" value="Save changes" /></dd>
         </dl>
     </form>
