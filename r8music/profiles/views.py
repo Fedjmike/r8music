@@ -155,7 +155,7 @@ class UserStatsPage(AbstractUserPage):
             .exclude(listen=None) \
             .order_by("release__release_date") \
             .values_list("release__release_date", flat=True)
-        release_years = [int(date[:4]) for date in release_dates]
+        release_years = [int(date[:4]) for date in release_dates if date]
         
         year_counts = Counter(release_years)
         

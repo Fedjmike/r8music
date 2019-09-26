@@ -149,7 +149,7 @@ class Release(models.Model):
     
     @property
     def release_year_str(self):
-        return self.release_date[:4]
+        return self.release_date[:4] if self.release_date else None
     
     @property
     def palette(self):
