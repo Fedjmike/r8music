@@ -6,7 +6,9 @@
     {{ release.title }}
     {{ "[%s]" % release.release_year_str if release.release_year_str else "" }}
     -
-    {% for artist in release.artists.all() %} {{ artist.name }} {{ "&" if not loop.last else "" }} {% endfor %}
+    {% for artist in release.artists.all() %}
+        {{ artist.name }} {{ "&" if not loop.last else "" }}
+    {% endfor %}
     {{ super() }}
 {% endblock %}
 

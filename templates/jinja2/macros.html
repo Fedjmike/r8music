@@ -3,13 +3,17 @@
 {%- endmacro %}
 
 {% macro full_and_friendly_datetime(datetime, request) -%}
-    {% set timezone = request.user.settings.timezone if request.user.settings else None %}
-    <time title="{{ full_datetime(datetime, timezone) }}">{{ friendly_datetime(datetime, timezone) }}</time>
+    {% set timezone = request.user.settings.timezone
+                      if request.user.settings else None %}
+    <time title="{{ full_datetime(datetime, timezone) }}">
+        {{ friendly_datetime(datetime, timezone) }}</time>
 {%- endmacro %}
 
 {% macro event_datetime(datetime, request) -%}
-    {% set timezone = request.user.settings.timezone if request.user.settings else None %}
-    <time class="de-emph" title="{{ full_datetime(datetime, timezone) }}">{{ relative_datetime(datetime) }}</time>
+    {% set timezone = request.user.settings.timezone
+                      if request.user.settings else None %}
+    <time class="de-emph" title="{{ full_datetime(datetime, timezone) }}">
+        {{ relative_datetime(datetime) }}</time>
 {%- endmacro %}
 
 {% macro artist_link(artist) -%}
@@ -113,7 +117,10 @@
     <p>{{ description | safe if description else "" }}</p>
     
     {% if artist.wikipedia_url %}
-        <p class="de-emph">[<a href="{{ artist.wikipedia_url }}" target=_blank>Read more</a> on Wikipedia]</p>
+        <p class="de-emph">
+            [<a href="{{ artist.wikipedia_url }}" target=_blank>Read more</a>
+            on Wikipedia]
+        </p>
     {% endif %}
 
     <header class="tight"><h4>External links</h4></header>
@@ -121,7 +128,10 @@
         {% if loop.index == 1 %}
         {% elif (loop.index-1) % 4 == 0 %}<br/>
         {% else %}&#183;{% endif %}
-        <a href={{ external_link.url }} target=_blank>{{ external_link.name }} <i class="material-icons tiny">launch</i></a> 
+        <a href={{ external_link.url }} target=_blank>
+            {{ external_link.name }}
+            <i class="material-icons tiny">launch</i>
+        </a> 
     {% endfor %}
 {%- endmacro %}
 
@@ -130,7 +140,9 @@
     <span class="{{ de_emph }}">
     {% for tag in tags %}
         <span class="comma-separated">
-            <a class="{{ de_emph }}" href={{ url_for_tag(tag) }}>{{ tag.name }}</a>{% if counts %} <span class="quite-small">[{{ count }}]</span>{% endif %}</span>
+            <a class="{{ de_emph }}" href={{ url_for_tag(tag) }}>{{ tag.name }}</a>
+            {% if counts %} <span class="quite-small">[{{ count }}]</span>{% endif %}
+        </span>
     {% endfor %}
     </span>
 {%- endmacro %}

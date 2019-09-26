@@ -4,13 +4,16 @@
 
 {% macro tracklist(track_info) -%}
     <ol class="tracks">
-    {% for tracks in track_info["sides"] %}
-        {% for track in tracks %}
+        {% for tracks in track_info["sides"] %}
+            {% for track in tracks %}
             <li>
                 <span class="track-title">
                     {{ track.title }}
                     {% if track.id in comparison_picks %}
-                        <span class="track-pick comparison-selected" title="{{ comparison_user.username }}'s pick"><i class="material-icons">stars</i></span>
+                        <span class="track-pick comparison-selected"
+                              title="{{ comparison_user.username }}'s pick">
+                            <i class="material-icons">stars</i>
+                        </span>
                     {% endif %}
                     <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
                        name="pick" href=# data-track-id={{ track.id }}
@@ -20,11 +23,12 @@
                 </span>
                 {% if track.runtime %} <time>{{ track.runtime_str }}</time> {% endif %}
             </li>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-    {% if track_info["runtime"] and track_info["track_no"] != 1 %}
-        <li class="total clearfix"><time>{{ track_info["runtime"] }}</time></li>
-    {% endif %}
+        
+        {% if track_info["runtime"] and track_info["track_no"] != 1 %}
+            <li class="total clearfix"><time>{{ track_info["runtime"] }}</time></li>
+        {% endif %}
     </ol>
 {%- endmacro %}
 
@@ -35,13 +39,16 @@
     <div class="album-main">
         <header>
             {% if comparison_user %}
-                <h3 style="font-style: italic; margin-bottom: 0.2em;">Comparing with {{ user_link(comparison_user) }}</h3>
+                <h3 style="font-style: italic; margin-bottom: 0.2em;">
+                    Comparing with {{ user_link(comparison_user) }}</h3>
             {% endif %}
             <h1 class="album-title">
                 {% set average_rating = release.average_rating() %}
                 {# Comes before but floated right, so that it doesn't get selected #}
-                <span class="unselectable" id="average-rating-section" style="{{ '' if average_rating else 'display: none;' }}">
-                    <span id="average-rating">{{ "%.1f" % average_rating if average_rating else '' }}</span>
+                <span class="unselectable" id="average-rating-section"
+                      style="{{ '' if average_rating else 'display: none;' }}">
+                    <span id="average-rating">
+                        {{ "%.1f" % average_rating if average_rating else '' }}</span>
                 </span>
                 {{ release.title }}
             </h1>
@@ -67,8 +74,10 @@
                 <details class="tracks-expand">
                     {{ tracklist(track_info) }}
                     <summary>
-                        <i class="material-icons tiny expand-more" title="Show the full tracklist">expand_more</i>
-                        <i class="material-icons tiny expand-less" title="Contract the tracklist">expand_less</i>
+                        <i class="material-icons tiny expand-more" title="Show the full tracklist">
+                            expand_more</i>
+                        <i class="material-icons tiny expand-less" title="Contract the tracklist">
+                            expand_less</i>
                     </summary>
                 </details>
                 {{ tracklist(track_info) }}
@@ -92,11 +101,15 @@
     </div>
     <div class="album-side clearfix">
         {% if release.art_url_max %}
-            <a href="{{ release.art_url_max }}"><img class="cover-art" src="{{ release.art_url_500 }}"/></a><br/>
+            <a href="{{ release.art_url_max }}">
+                <img class="cover-art" src="{{ release.art_url_500 }}"/></a><br/>
         {% endif %}
         {% for external_link in release.external_links.all() %}
             {% if loop.index == 1 %}<br/>{% endif %}
-            <a href={{ external_link.url }} target=_blank>{{ external_link.name }}<i class="material-icons tiny">launch</i></a>
+            <a href={{ external_link.url }} target=_blank>
+                {{ external_link.name }}
+                <i class="material-icons tiny">launch</i>
+            </a>
         {% endfor %}
     </div>
 </section>

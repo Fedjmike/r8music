@@ -1,12 +1,14 @@
 {% extends "user.html" %}
-{% from "macros.html" import event_datetime, user_link, avatar_thumb, slightly_small_and_de_emph %}
+{% from "macros.html"
+    import event_datetime, user_link, avatar_thumb, slightly_small_and_de_emph %}
 
 {% set current_tab = "friends" %}
 
 {% block content_below_tabs %}
     <section class="page content">
         <header><h2>
-            {{ user_link(user) }}'s Friends {{ slightly_small_and_de_emph(friends | length) }}
+            {{ user_link(user) }}'s Friends
+            {{ slightly_small_and_de_emph(friends | length) }}
         </h2></header>
         
         <ol class="collage four">
@@ -16,11 +18,12 @@
                 <div>
                     <div>
                         {% if not friend.follows or not friend.followed_by %}
-                            <span class="de-emph">{{ "followed by" if friend.follows else "follows" }}</span>
+                            <span class="de-emph">
+                                {{ "followed by" if friend.follows else "follows" }}
+                            </span>
                         {% endif %}
                         {{ user_link(friend) }}
                     </div>
-                    {#<span class="secondary-details de-emph">{{ event_datetime(friend.since, request) }}</span>#}
                 </div>
             </li>
         {% endfor %}

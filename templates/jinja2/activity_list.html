@@ -9,7 +9,8 @@
 {% macro explain_release_activity(activity, request) -%}
     <div class="activity-item thumb-box">
         <a href={{ url_for_release(activity.release) }}>
-            <img class="thumb" src={{ activity.release.art_url_250 or "http://i.imgur.com/UGgojDS.png" }} />
+            <img class="thumb"
+                 src={{ activity.release.art_url_250 or "http://i.imgur.com/UGgojDS.png" }} />
         </a>
         <div class="activity-details">
             {% if activity.primary_action %}

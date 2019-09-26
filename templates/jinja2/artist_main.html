@@ -20,9 +20,12 @@
             <header></header>
         {% endif %}
         
-        {% set common_tags = artist.all_tags.order_by_frequency().filter(frequency__gt=0)[:5] %}
-        {% set top_tracks = artist.all_tracks.order_by_popularity().filter(popularity__gt=0)[:3] %}
-        {% set top_release = artist.releases.order_by_average_rating().filter(average_rating__gt=0).first() %}
+        {% set common_tags = artist.all_tags.order_by_frequency()
+                                            .filter(frequency__gt=0)[:5] %}
+        {% set top_tracks = artist.all_tracks.order_by_popularity()
+                                             .filter(popularity__gt=0)[:3] %}
+        {% set top_release = artist.releases.order_by_average_rating()
+                                            .filter(average_rating__gt=0).first() %}
         
         <table>
             {% if common_tags %}
@@ -33,13 +36,12 @@
             {% if top_tracks %}
             <tr>
                 <td>Picks</td>
-                <td>
-                    <ol>
+                <td><ol>
                     {% for track in top_tracks %}
-                        <li class="comma-separated"><a href={{ url_for_release(track.release) }}>{{ track.title }}</a></li>
+                    <li class="comma-separated"><a href={{ url_for_release(track.release) }}>
+                        {{ track.title }}</a></li>
                     {% endfor %}
-                    </ol>
-                </td>
+                </ol></td>
             </tr>
             {% endif %}
             {% if top_release %}
@@ -67,13 +69,16 @@
         {% endif %}
         <h2>{{ "Albums" if has_album_section else "Releases" }}</h2>
     </header>
-    {{ release_grid((albums if has_album_section else other_releases), request.user, get_user_rating, show_date_not_artist=True, show_average_rating=True) }}
+    {{ release_grid(
+           (albums if has_album_section else other_releases), request.user, get_user_rating, 
+           show_date_not_artist=True, show_average_rating=True) }}
 </section>
 
 {% if has_album_section and other_releases %}
     <section class="content page">
         <header><h3>Other releases</h3></header>
-        {{ release_grid(other_releases, request.user, get_user_rating, "small", show_date_not_artist=True, show_average_rating=True) }}
+        {{ release_grid(other_releases, request.user, get_user_rating, "small",
+               show_date_not_artist=True, show_average_rating=True) }}
     </section>
 {% endif %}
 {% endblock %}

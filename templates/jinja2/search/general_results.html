@@ -34,7 +34,10 @@
             <h4><a href={{ url_for_release_search }}>Releases</a></h4>
             <ol class="search-results">
             {% for release in releases %}
-                <li><a href="{{ url_for_release(release) }}">{{ release.title }}</a> by {{ artist_list(release.artists) }}</li>
+                <li>
+                    <a href="{{ url_for_release(release) }}">{{ release.title }}</a>
+                    by {{ artist_list(release.artists) }}
+                </li>
             {% endfor %}
             </ol>
         {% endif %}
@@ -46,7 +49,9 @@
         <p>
             No matches!
     {% endif %}
-            Try <a href={{ url("import_artist_search") + "?name=" + query }}>importing an artist to the database.</a>
+            Try
+            <a href={{ url("import_artist_search") + "?name=" + query }}>
+                importing an artist to the database.</a>
         </p>
 </section>
 {% endblock %}

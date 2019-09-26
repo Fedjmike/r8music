@@ -19,8 +19,13 @@
 {% macro small_search_form(previous_search=None) -%}
     <form action="/search" method="get" class="small" id="search">
         <div class="search">
-            <input type="text" name="q" placeholder="Search r8music" id="autocomplete" class="form-control input-lg"
-                   {% if previous_search and previous_search.query %} value="{{ previous_search.query }}" {% endif %} />
+            <input
+                type="text" name="q" placeholder="Search r8music"
+                id="autocomplete" class="form-control input-lg"
+                {% if previous_search and previous_search.query %}
+                    value="{{ previous_search.query }}"
+                {% endif %}
+            />
             <input type="submit" class="material-icons" value="search" />
         </div>
     </form>
@@ -30,8 +35,11 @@
     <form action="/search" method="get" class="{{ '' if full_size else 'small' }}" id="search">
         <dl>
             <dd class="search">
-                <input type="text" name="q" placeholder="Search r8music" id="autocomplete" class="form-control input-lg"
-                       {% if previous_query %} value="{{ previous_query }}" {% endif %} />
+                <input
+                    type="text" name="q" placeholder="Search r8music"
+                    id="autocomplete" class="form-control input-lg"
+                    {% if previous_query %} value="{{ previous_query }}" {% endif %}
+                />
                 <input type="submit" class="material-icons" value="search" />
             </dd>
         </dl>
