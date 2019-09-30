@@ -12,6 +12,17 @@
     {{ super() }}
 {% endblock %}
 
+{% block opengraph_meta %}
+    <meta property="og:title" content="{{ release.title }}">
+    <meta property="og:description" content="{{ ' & '.join(release.artists.values_list('name', flat=True)) }}">
+    
+    {% if release.art_url_250 %}
+        <meta property="og:image" content="{{ release.art_url_250 }}">
+    {% endif %}
+    
+    {{ super() }}
+{% endblock %}
+
 {% block content %}
     {% set tabs = [
           ("main", url_for_release(release), release.title, None),
