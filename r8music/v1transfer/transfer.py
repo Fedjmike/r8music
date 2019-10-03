@@ -165,7 +165,7 @@ class Transferer:
         
     #
 
-    def transfer_tag(self, tag_id, name, title, description, owner_id):        
+    def transfer_tag(self, tag_id, name, title, description, owner_id):
         fields = dict(
             name=name, title=title, description=description,
             owner_id=self.new_user_ids.map(owner_id) if owner_id else None
@@ -398,8 +398,8 @@ class Transferer:
             
         elif type == ActionType.rate:
             (rating,) = self.model.query_unique(
-                "select rating from ratings where action_id=?", action_id
-            )
+                "select rating from ratings where action_id=?", action_id)
+            
             new_action = RateAction.objects.create(rating=rating, **fields)
         
         elif type == ActionType.pick:
@@ -431,7 +431,7 @@ class Transferer:
     #
     
     def transfer_database(self, verbose=False):
-        if verbose: print("Quering release group MBIDs")
+        if verbose: print("Querying release group MBIDs")
         self.query_release_group_mbids()
         if verbose: print("Transferring users")
         self.transfer_all_users()

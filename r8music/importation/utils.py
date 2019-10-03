@@ -46,7 +46,7 @@ def query_and_collect(query, limits):
 def musicbrainz_url(mbid, artist=False):
     return "//musicbrainz.org/%s/%s" % ("artist" if artist else "release", mbid)
     
-def get_release_type_from_mb_str(release_type_str):        
+def get_release_type_from_mb_str(release_type_str):
     try:
         return {
             "Album": ReleaseType.ALBUM,

@@ -71,7 +71,7 @@ class GeneralSearchPage(View, AbstractSearchPage):
 class AbstractCategorySearchPage(ListView, AbstractSearchPage):
     context_object_name = "results"
     
-    def get_context_data(self):        
+    def get_context_data(self):
         return super().get_context_data(
             query=self.get_query_str(),
             url_for_general_search=self.get_search_url("search")

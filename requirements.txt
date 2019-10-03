@@ -16,7 +16,7 @@ requests-mock
 django-background-tasks
 editdistance
 pillow
-#For V1
 unidecode
+#For V1
 flask
 arrow

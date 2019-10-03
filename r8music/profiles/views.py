@@ -206,7 +206,7 @@ class RegistrationPage(CreateView):
         if "next" in self.request.POST:
             return redirect_to_login(self.request.POST.get("next"), login_url=self.success_url)
             
-        else: 
+        else:
             return redirect_without_next
 
 class ChangePasswordPage(PasswordChangeView):

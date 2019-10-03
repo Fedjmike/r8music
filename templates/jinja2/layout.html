@@ -1,11 +1,11 @@
 <!doctype html>
 <html prefix="og: http://ogp.me/ns#">
 <head>
-	<title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}</title>
 
-	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<meta http-equiv="content-language" content="en" />
-	<meta http-equiv="content-language" content="en-gb" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="content-language" content="en" />
+    <meta http-equiv="content-language" content="en-gb" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block opengraph_meta %}
@@ -13,8 +13,8 @@
         <meta property="og:site_name" content="r8music">
     {% endblock %}
 
-	<link rel="stylesheet" type="text/css" href="/static/style.css" />
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Signika:400,300" />
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Signika:400,300" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     
     <link rel="shortcut icon" href="/static/favicon.png" />
@@ -92,7 +92,7 @@
     </style>
 </head>
 <body>
-	<div class="page clearfix">
+    <div class="page clearfix">
         <ol class="main nav unselectable">
             <li><a href="/" class="banner">r8music</a></li>
             <li><a href={{ url("artist_index") }}>artists</a></li>
@@ -119,7 +119,7 @@
             <li><a id="register" href="{{ url("register") }}?next={{ request.path }}">register</a></li>
         {% endif %}
         </ol>
-	</div>
+    </div>
     
     {% for message in get_messages(request) %}
         {% if "success" in message.tags %}
