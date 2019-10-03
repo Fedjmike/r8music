@@ -581,11 +581,6 @@ class Importer:
         
         tags_map.update()
         
-        for response in release_responses:
-            for tag_name in response.discogs_tags:
-                if not tags_map.get(tag_name):
-                    print(response.json["title"], tag_name)
-        
         Release.tags.through.objects.bulk_create([
             Release.tags.through(
                 release_id=release_map.get(response.json["id"]),
