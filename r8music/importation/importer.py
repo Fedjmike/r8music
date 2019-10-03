@@ -22,6 +22,11 @@ from .utils import (
 from .chromatography import get_palette
 
 class Importer:
+    """Imports music data (artists, releases, tracks, tags etc) from MusicBrainz
+       and various other web APIs. Automatically updates the artists and release,
+       if they are already in the database, by replacing them with freshly
+       imported copies."""
+    
     mb_browse_limit = 100
     
     discogs_genre_blacklist = set([
@@ -69,32 +74,36 @@ class Importer:
             title = next(filter(is_music_page, disambiguation.options), None)
             return self.wikipedia.page(title) if title else None
             
-    def get_wikipedia_images(self, wikipedia_page):        
+    def get_wikipedia_images(self, wikipedia_page):
         try:
             html = BeautifulSoup(wikipedia_page.html(), features="html.parser")
+            #Find the image, if any, within the infobox on the side
             image_link = html.select(".infobox a.image")[0]
             image_url = image_link["href"]
             
         except (IndexError, KeyError):
             return None
             
-        else:            
-            #srcset is a list of images of different sizes, with scales
+        else:
+            #srcset is a list of images of different sizes, with scales, in the
+            #format of "<url> <scale>x" separated by commas
             thumbs = re.findall("(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
-            #Get the largest image
-            thumb_url, scale = max(thumbs, key=lambda thumb_scale: thumb_scale[1])
+            #Get the largest thumbnail (which should be 220px wide)
+            thumb_url, scale = max(thumbs, key=lambda url_and_scale: url_and_scale[1])
             
+            urls = [image_url, thumb_url]
             #Turn the URLs (which might be relative) into absolute URLs
-            absolute_urls = [urljoin(wikipedia_page.url, url) for url in [image_url, thumb_url]]
+            absolute_urls = [urljoin(wikipedia_page.url, url) for url in urls]
             
             return absolute_urls
             
-    def query_wikipedia(self, artist_name, wikipedia_url=None):        
+    def query_wikipedia(self, artist_name, wikipedia_url=None):
         wikipedia_page = None
         
         if wikipedia_url:
-            #Only use pages on the english wikipedia
-            #(because of limitations of the wikipedia library)
+            #Deconstruct the URL to get the article title
+            #(We can only use pages on the english wikipedia
+            # because of limitations of the wikipedia library)
             match = self.en_wikipedia_url_pattern.search(wikipedia_url)
             
             if match:
@@ -107,7 +116,7 @@ class Importer:
                     pass
             
         if not wikipedia_page:
-            wikipedia_page = self.guess_wikipedia_page(artist_name) 
+            wikipedia_page = self.guess_wikipedia_page(artist_name)
             
         if not wikipedia_page:
             return None, None, None
@@ -153,7 +162,7 @@ class Importer:
         
         existing_artist.delete()
         
-    def create_artist(self, artist_response, slug, existing_artist=None):        
+    def create_artist(self, artist_response, slug, existing_artist=None):
         artist = Artist.objects.create(
             name=artist_response.json["name"],
             slug=slug,
@@ -253,8 +262,9 @@ class Importer:
     # Cover art archive
     
     def select_cover_art(self, art_json):
-    	#See https://musicbrainz.org/doc/Cover_Art_Archive/API
-    	
+        """Select the front cover and its thumbnails from the CAA response
+           See https://musicbrainz.org/doc/Cover_Art_Archive/API"""
+        
         if len(art_json["images"]) == 0:
             return None
         
@@ -284,12 +294,13 @@ class Importer:
         ]:
             try:
                 art_urls = self.select_cover_art(getter(mbid))
-                
-                if art_urls:
-                    return art_urls
             
             except (self.musicbrainz.ResponseError, self.musicbrainz.NetworkError):
                 pass
+            
+            else:
+                if art_urls:
+                    return art_urls
             
         return None
         
@@ -319,6 +330,8 @@ class Importer:
         return query_and_collect(query, limits=self.mb_browse_limit)
         
     def select_release(self, release_jsons):
+        """Select the preferred version of a release"""
+        
         def track_count(release):
             return sum(medium["track-count"] for medium in release["medium-list"])
         
@@ -375,7 +388,7 @@ class Importer:
     class UnsuitableReplacementError(Exception):
         pass
     
-    def create_featured_artists(self, release_responses, artist_map):        
+    def create_featured_artists(self, release_responses, artist_map):
         featured_artists = (
             self.ArtistResponse(artist_credit["artist"])
             for response in release_responses
@@ -432,6 +445,8 @@ class Importer:
         #The new release object was given a temporary slug
         release.slug = existing_release.slug
         
+        #Delete the release as well as related objects which weren't moved
+        #(e.g. the MB link, tracks)
         existing_release.delete()
         
         #Save the slug now that a clash is avoided
@@ -462,7 +477,7 @@ class Importer:
         
         release = Release.objects.create(
             title=release_json["title"],
-            release_date=release_json["date"] if "date" in release_json else None,
+            release_date=release_json.get("date", None),
             #Use a temporary slug if the release is being updated (i.e. temporarily duplicated)
             slug=slug if not existing_release else slug + "-[new]",
             **extra_args
@@ -509,9 +524,10 @@ class Importer:
                 + release_group_json.get("url-relation-list", [])
         ])
         
-    def create_releases(self, release_responses, artist_map):        
+    def create_releases(self, release_responses, artist_map):
         #Those releases already imported
-        #(identified by group MBID, as a different release may have been selected)
+        #(identified by the MBID of the group, as a different release from the
+        # group may have been selected)
         releases_for_update = {
             release.mb_link.release_group_mbid: release
             for release in Release.objects.filter(mb_link__release_group_mbid__in=[
@@ -596,4 +612,4 @@ class Importer:
         release_responses = self.query_all_releases(artist_response)
         
         artist_map = self.create_artists([artist_response])
-        release_map = self.create_from_release_responses(release_responses, artist_map)
+        self.create_from_release_responses(release_responses, artist_map)
