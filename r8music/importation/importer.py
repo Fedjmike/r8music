@@ -288,7 +288,7 @@ class Importer:
                 if art_urls:
                     return art_urls
             
-            except self.musicbrainz.ResponseError:
+            except (self.musicbrainz.ResponseError, self.musicbrainz.NetworkError):
                 pass
             
         return None
