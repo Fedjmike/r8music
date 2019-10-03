@@ -46,6 +46,12 @@ class Importer:
         """Skip through redirects to get the "actual" URL"""
         return self.requests.get(url).url
     
+    def search_url_relations(self, json, type_name):
+        """Search a MusicBrainz JSON for an URL relation"""
+        url_relations = json.get("url-relation-list", [])
+        candidates = (rel["target"] for rel in url_relations if rel["type"] == type_name)
+        return next(candidates, None)
+    
     # Wikipedia
     
     en_wikipedia_url_pattern = re.compile("en.wikipedia.org/wiki/(/?.*)")
@@ -144,9 +150,7 @@ class Importer:
     def query_artist(self, artist_mbid):
         artist_json = self.musicbrainz.get_artist_by_id(artist_mbid, includes=["url-rels"])["artist"]
         
-        url_relations = artist_json.get("url-relation-list", [])
-        candidates = (rel["target"] for rel in url_relations if rel["type"] == "wikipedia")
-        wikipedia_url = next(candidates, None)
+        wikipedia_url = self.search_url_relations(artist_json, "wikipedia")
         
         guessed_wikipedia_url, description, images = \
             self.query_wikipedia(artist_json["name"], wikipedia_url)
@@ -222,10 +226,6 @@ class Importer:
     discogs_url_pattern = re.compile("discogs.com(/.*)?/(release|master)/(\d*)")
     discogs_ratelimit_wait_time = 15 #in seconds
     
-    def find_discogs_url(self, url_relations):
-        candidates = (rel["target"] for rel in url_relations if rel["type"] == "discogs")
-        return next(candidates, None)
-    
     def get_discogs_id(self, discogs_url):
         match = self.discogs_url_pattern.search(discogs_url)
         return match.group(3) if match else None
@@ -247,8 +247,7 @@ class Importer:
     
     def query_discogs(self, release_json, release_group_json):
         def get(json, is_master=False):
-            url = self.find_discogs_url(json["url-relation-list"]) \
-                if "url-relation-list" in json else None
+            url = self.search_url_relations(json, "discogs")
             id = self.get_discogs_id(url) if url else None
             tags = self.query_discogs_tags(id, is_master) if id else set()
             return id, tags
