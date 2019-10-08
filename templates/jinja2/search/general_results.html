@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% from "macros.html" import page_links, artist_list %}
+{% from "forms.html" import search_form %}
+
+{% block title %}'{{ query }}' &ndash; Search results {{ super() }}{% endblock %}
+
+{% set dont_display_search = True %}
+
+{% block content %}
+<section class="page content">
+    <section class="right">
+        <header></header>
+        {{ search_form(query, full_size=True) }}
+    </section>
+	
+    <header>
+        <h3>Search results</h3>
+        <h1>&lsquo;{{ query }}&rsquo;</h1>
+    </header>
+    
+    {% if artists or releases %}
+        {% if artists %}
+            <h4><a href={{ url_for_artist_search }}>Artists</a></h4>
+            <ol class="search-results">
+            {% for artist in artists %}
+                <li><a href="{{ url_for_artist(artist) }}">{{ artist.name }}</a></li>
+            {% endfor %}
+            </ol>
+        {% endif %}
+        
+        <br/>
+        
+        {% if releases %}
+            <h4><a href={{ url_for_release_search }}>Releases</a></h4>
+            <ol class="search-results">
+            {% for release in releases %}
+                <li>
+                    <a href="{{ url_for_release(release) }}">{{ release.title }}</a>
+                    by {{ artist_list(release.artists) }}
+                </li>
+            {% endfor %}
+            </ol>
+        {% endif %}
+        
+        <p>
+            Not what you were looking for?
+            
+    {% else %}
+        <p>
+            No matches!
+    {% endif %}
+            Try
+            <a href={{ url("import_artist_search") + "?name=" + query }}>
+                importing an artist to the database.</a>
+        </p>
+</section>
+{% endblock %}

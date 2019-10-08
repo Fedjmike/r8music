@@ -1,0 +1,83 @@
+{% from "macros.html" import event_datetime, artist_link, release_link, user_link, avatar_thumb %}
+
+{% macro action_secondary_details(action, request) -%}
+    <div class="secondary-details">
+        {{ action.describe() }} &middot; {{ event_datetime(action.creation, request) }}
+    </div>
+{%- endmacro %}
+
+{% macro explain_release_activity(activity, request) -%}
+    <div class="activity-item thumb-box">
+        <a href={{ url_for_release(activity.release) }}>
+            <img class="thumb"
+                 src={{ activity.release.art_url_250 or "http://i.imgur.com/UGgojDS.png" }} />
+        </a>
+        <div class="activity-details">
+            {% if activity.primary_action %}
+                {{ action_secondary_details(activity.primary_action, request) }}
+            {% endif %}
+            <div>
+                {% for artist in activity.release.artists.all() %}
+                    <span class="author">{{ artist_link(artist) }}</span>
+                {% endfor %}
+                &ndash;
+                {{ release_link(activity.release) }}
+            </div>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro explain_activity_group(activity_group, request) -%}
+    <div class="thumb-box">
+        {{ avatar_thumb(activity_group.user) }}
+        {{ user_link(activity_group.user) }}
+    </div>
+    
+    <ol class="activity-group">
+    {% for activity in activity_group.activity %}
+        <li>{{ explain_release_activity(activity, request)}}</li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{% macro activity_list(activity_groups) -%}
+    <ol class="activity-list">
+    {% for activity_group in activity_groups %}
+        <li>{{ explain_activity_group(activity_group, request) }}</li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{# Omits the user #}
+{% macro user_activity_list(activity_groups) -%}
+    <ol class="activity-list">
+    {% for activity_group in activity_groups %}
+        <li><ol class="activity-group">
+        {% for activity in activity_group.activity %}
+            <li>{{ explain_release_activity(activity, request)}}</li>
+        {% endfor %}
+        </ol></li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}
+
+{# Omits the release and artist, shows the use in their place #}
+{% macro release_activity_list(activity) -%}
+    <ol class="activity-list">
+    {% for activity_group in activity %}
+        <li>
+        {% for activity in activity_group.activity %}
+            <div class="activity-item thumb-box">
+                {{ avatar_thumb(activity_group.user) }}
+                <div>
+                    {{ user_link(activity_group.user) }}
+                    {% if activity.primary_action %}
+                        {{ action_secondary_details(activity.primary_action, request) }}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </li>
+    {% endfor %}
+    </ol>
+{%- endmacro %}

@@ -1,0 +1,39 @@
+﻿{% extends "layout.html" %}
+{% from "macros.html" import page_links %}
+{% from "forms.html" import search_form %}
+
+{% block title %}'{{ query }}' &ndash; Search results {{ super() }}{% endblock %}
+
+{% set dont_display_search = True %}
+
+{% block content %}
+<section class="page content">
+    <section class="right">
+        <header></header>
+        {{ search_form(query, full_size=True) }}
+    </section>
+	
+    <header>
+        <h3>
+        {% block headline %}
+            <a href={{ url_for_general_search }}>&larr;</a>
+            Search results 
+        {% endblock %}
+        </h3>
+        <h1>&lsquo;{{ query }}&rsquo;</h1>
+    </header>
+    
+    {% if results %}
+        <ol class="search-results">
+            {% block search_results %}{% endblock %}
+        </ol>
+        
+        {% if page_obj.paginator.num_pages != 1 %}
+            {{ page_links(page_obj, request) }}
+        {% endif %}
+        
+    {% else %}
+        <p>No matches!</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,2 +1,4 @@
-*.pyc
-*.db
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.coverage

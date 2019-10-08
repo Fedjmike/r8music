@@ -1,0 +1,47 @@
+{% macro form_field(description, name, type, form_prefill=None, prefill=None) -%}
+    <dt>{{ description }}</dt>
+    <dd>
+        <input type={{ type }} name={{ name }}
+               value="{{ prefill if prefill else form_prefill[name] if form_prefill and name in form_prefill else ''}}" />
+    </dd>
+{%- endmacro %}
+
+{% macro django_form_fields(form) -%}
+    {% for field in form %}
+        <dt>{{ field.label_tag() }}</dt>
+        <dd>
+            {{ field }}
+            {{ field.errors }}
+        </dd>
+    {% endfor %}
+{%- endmacro %}
+
+{% macro small_search_form(previous_search=None) -%}
+    <form action="/search" method="get" class="small" id="search">
+        <div class="search">
+            <input
+                type="text" name="q" placeholder="Search r8music"
+                id="autocomplete" class="form-control input-lg"
+                {% if previous_search and previous_search.query %}
+                    value="{{ previous_search.query }}"
+                {% endif %}
+            />
+            <input type="submit" class="material-icons" value="search" />
+        </div>
+    </form>
+{% endmacro %}
+
+{% macro search_form(previous_query=None, full_size=False) -%}
+    <form action="/search" method="get" class="{{ '' if full_size else 'small' }}" id="search">
+        <dl>
+            <dd class="search">
+                <input
+                    type="text" name="q" placeholder="Search r8music"
+                    id="autocomplete" class="form-control input-lg"
+                    {% if previous_query %} value="{{ previous_query }}" {% endif %}
+                />
+                <input type="submit" class="material-icons" value="search" />
+            </dd>
+        </dl>
+    </form>
+{%- endmacro %}

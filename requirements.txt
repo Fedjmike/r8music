@@ -1,8 +1,22 @@
-musicbrainzngs>=0.5
-arrow>=0.7
-unidecode>=0.4
-flask>=0.10
-Pillow>=3.0.0
-wikipedia>=1.4.0
-pytz
+django
+psycopg2
+whitenoise
+django-enumfield
+django-timezone-field
+djangorestframework
+jinja2
+django-recaptcha
+#For checking passwords from r8music v1
+werkzeug
+wikipedia
+musicbrainzngs
+discogs_client
+bs4
+requests-mock
+django-background-tasks
 editdistance
+pillow
+unidecode
+#For V1
+flask
+arrow

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% from "macros.html" import page_tabs, artist_details %}
+
+{% block title %}
+    {{ release.title }}
+    {{ "[%s]" % release.release_year_str if release.release_year_str else "" }}
+    -
+    {% for artist in release.artists.all() %}
+        {{ artist.name }} {{ "&" if not loop.last else "" }}
+    {% endfor %}
+    {{ super() }}
+{% endblock %}
+
+{% block opengraph_meta %}
+    <meta property="og:title" content="{{ release.title }}">
+    <meta property="og:description" content="{{ ' & '.join(release.artists.values_list('name', flat=True)) }}">
+    
+    {% if release.art_url_250 %}
+        <meta property="og:image" content="{{ release.art_url_250 }}">
+    {% endif %}
+    
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    {% set tabs = [
+          ("main", url_for_release(release), release.title, None),
+          ("activity", url_for_release(release, "release_activity"), "Activity", None)
+       ] %}
+    
+    {% set _ = tabs.append(("edit", url_for_release(release, "edit_release"), "Edit", None))
+           if request.user.is_superuser %}
+    
+    {{ page_tabs(tabs, current_tab) }}
+    
+    {% block content_below_tabs %}
+    {% endblock %}
+    
+    {% for artist in release.artists.all() %}
+    <section class="page content">
+        <header><h1>{{ artist.name }}</h1></header>
+        {{ artist_details(artist) }}
+    </section>
+    {% endfor %}
+{% endblock %}

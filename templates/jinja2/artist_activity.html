@@ -1,0 +1,15 @@
+{% extends "artist.html" %}
+
+{% from "macros.html" import artist_link, page_links %}
+{% from "activity_list.html" import activity_list with context %}
+
+{% set current_tab = "activity" %}
+
+{% block content_below_tabs %}
+    <section class="content page">
+        {{ subpage_header("Activity", artist_link(artist)) }}
+        {{ activity_list(activity) }}
+        {{ page_links(page_obj, request) }}
+    </section>
+{% endblock %}
+

@@ -1,0 +1,148 @@
+{% macro slightly_small_and_de_emph(x) -%}
+    <span class="de-emph slightly-small">{{ x | safe }}</span>
+{%- endmacro %}
+
+{% macro full_and_friendly_datetime(datetime, request) -%}
+    {% set timezone = request.user.settings.timezone
+                      if request.user.settings else None %}
+    <time title="{{ full_datetime(datetime, timezone) }}">
+        {{ friendly_datetime(datetime, timezone) }}</time>
+{%- endmacro %}
+
+{% macro event_datetime(datetime, request) -%}
+    {% set timezone = request.user.settings.timezone
+                      if request.user.settings else None %}
+    <time class="de-emph" title="{{ full_datetime(datetime, timezone) }}">
+        {{ relative_datetime(datetime) }}</time>
+{%- endmacro %}
+
+{% macro artist_link(artist) -%}
+    <a href={{ url_for_artist(artist) }}>{{ artist.name }}</a>
+{%- endmacro %}
+
+{% macro artist_list(artists) -%}
+    {% for artist in artists.all() %}
+        {{ artist_link(artist) }}
+        {% if not loop.last %} & {% endif %}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro release_link(release) -%}
+    <a href={{ url_for_release(release) }}>{{ release.title }}</a>
+{%- endmacro %}
+
+{% macro user_link(user) -%}
+    <a href={{ url_for_user(user) }}>{{ user.username }}</a>
+{%- endmacro %}
+
+{% macro avatar_thumb(user) -%}
+    <a href={{ url_for_user(user) }}>
+        <img class=thumb src={{ user.profile.avatar_url }} />
+    </a>
+{%- endmacro %}
+
+{% macro page_links(page_obj, request) %}
+    <p>
+        {% if page_obj.has_previous() %}
+            {% if page_obj.previous_page_number() != 1 %}
+                <a href="{{ add_url_params(request, page=1) }}">{{ 1 }}</a> ..
+            {% endif %}
+            <a href="{{ add_url_params(request, page=page_obj.previous_page_number()) }}">
+                {{ page_obj.previous_page_number() }}
+            </a>
+            /
+        {% endif %}
+        {{ page_obj.number }}
+        {% if page_obj.has_next() %}
+            /
+            {% if page_obj.next_page_number() != page_obj.paginator.num_pages %}
+                <a href="{{ add_url_params(request, page=page_obj.next_page_number()) }}">
+                    {{ page_obj.next_page_number() }}
+                </a>
+                ..
+            {% endif %}
+            <a href="{{ add_url_params(request, page=page_obj.paginator.num_pages) }}">
+                {{ page_obj.paginator.num_pages }}
+            </a>
+        {% endif %}
+    </p>
+{% endmacro %}
+
+{% macro page_tabs(tabs, current_tab) -%}
+<ol class="page tabs">
+    {% for name, url, description, secondary_description in tabs %}
+        {% if name == current_tab %}
+            <li class="active">
+                {{ description }}
+                {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
+            </li>
+        {% else %}
+            <li>
+                <a href={{ url }}>{{ description }}</a>
+                {{ slightly_small_and_de_emph(if_not_None(secondary_description)) }}
+            </li>
+        {% endif %}
+    {% endfor %}
+</ol>
+{%- endmacro %}
+
+{% macro subpage_header(subpage_title, main_link) -%}
+    <header><h2>{{ subpage_title }} &ndash; {{ main_link }}</h2></header>
+{%- endmacro %}
+
+{% macro clickable_action_list(actions, data) -%}
+<ol class="action-list inline unselectable">
+    {% for name, icon, description, active in actions %}
+        <li><a class="clickable {{ 'selected' if active else '' }}"
+               name={{ name }} href=#
+               {% for key, value in data %} {{ key }}="{{ value }}" {% endfor %}>
+            <i class="material-icons">{{ icon }}</i>{{ description }}
+        </a></li>
+    {% endfor %}
+</ol>
+{%- endmacro %}
+
+{% macro load_more(content, endpoint, page_no, autoload=False) -%}
+<span class="load-more-area">
+    <span class="load-more-target">{{ content }}</span>
+    <p><a class="load-more" href=#
+          {% if autoload %} id="autoload-trigger" {% endif %}
+          data-endpoint={{ endpoint }}
+          data-page_no={{ page_no }}>Load more</a></p>
+</span>
+{%- endmacro %}
+
+{% macro artist_details(artist) -%}
+    {% set description = artist.description %}
+    <p>{{ description | safe if description else "" }}</p>
+    
+    {% if artist.wikipedia_url %}
+        <p class="de-emph">
+            [<a href="{{ artist.wikipedia_url }}" target=_blank>Read more</a>
+            on Wikipedia]
+        </p>
+    {% endif %}
+
+    <header class="tight"><h4>External links</h4></header>
+    {% for external_link in artist.external_links.all() %}
+        {% if loop.index == 1 %}
+        {% elif (loop.index-1) % 4 == 0 %}<br/>
+        {% else %}&#183;{% endif %}
+        <a href={{ external_link.url }} target=_blank>
+            {{ external_link.name }}
+            <i class="material-icons tiny">launch</i>
+        </a> 
+    {% endfor %}
+{%- endmacro %}
+
+{% macro tag_list(tags, counts=False, de_emph=False) -%}
+    {% set de_demph = "de-emph" if de_emph else "" %}
+    <span class="{{ de_emph }}">
+    {% for tag in tags %}
+        <span class="comma-separated">
+            <a class="{{ de_emph }}" href={{ url_for_tag(tag) }}>{{ tag.name }}</a>
+            {% if counts %} <span class="quite-small">[{{ count }}]</span>{% endif %}
+        </span>
+    {% endfor %}
+    </span>
+{%- endmacro %}

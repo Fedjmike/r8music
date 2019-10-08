@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% from "macros.html" import load_more %}
+{% from "activity_list.html" import activity_list with context %}
+
+{% block title %}r8music{% endblock %}
+
+{% set lodash=True %}
+
+{% block content %}
+    <section class="page content">
+        <header><h1>Recent activity</h1></header>
+        
+        {{ load_more(
+            activity_list(activity),
+            url("activity_feed"),
+            page_obj.number,
+            autoload=True) }}
+    </section>
+{% endblock %}

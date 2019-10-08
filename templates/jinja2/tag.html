@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% from "macros.html" import page_links %}
+{% from "release_list.html" import release_grid %}
+
+{% block title %}Tag: {{ tag.title }} {{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="clearfix page content">
+    <header>
+        <h1>{{ tag.title }} <span class="de-emph">(tag)</span></h1>
+        <div>
+            {{ tag.description }}
+        </div>
+    </header>
+ 
+	{{ release_grid(object_list, class="small") }}
+    
+    {{ page_links(page_obj, request) }}
+</section>
+
+{% endblock %}

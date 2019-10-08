@@ -1,0 +1,116 @@
+{% extends "release.html" %}
+{% from "macros.html" import artist_link, user_link, clickable_action_list, tag_list %}
+{% from "release_list.html" import rating_widget %}
+
+{% macro tracklist(track_info) -%}
+    <ol class="tracks">
+        {% for tracks in track_info["sides"] %}
+            {% for track in tracks %}
+            <li>
+                <span class="track-title">
+                    {{ track.title }}
+                    {% if track.id in comparison_picks %}
+                        <span class="track-pick comparison-selected"
+                              title="{{ comparison_user.username }}'s pick">
+                            <i class="material-icons">stars</i>
+                        </span>
+                    {% endif %}
+                    <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
+                       name="pick" href=# data-track-id={{ track.id }}
+                       title="Select as a pick">
+                        <i class="material-icons">stars</i>
+                    </a>
+                </span>
+                {% if track.runtime %} <time>{{ track.runtime_str }}</time> {% endif %}
+            </li>
+            {% endfor %}
+        {% endfor %}
+        
+        {% if track_info["runtime"] and track_info["track_no"] != 1 %}
+            <li class="total clearfix"><time>{{ track_info["runtime"] }}</time></li>
+        {% endif %}
+    </ol>
+{%- endmacro %}
+
+{% set current_tab = "main" %}
+
+{% block content_below_tabs %}
+<section class="album page content">
+    <div class="album-main">
+        <header>
+            {% if comparison_user %}
+                <h3 style="font-style: italic; margin-bottom: 0.2em;">
+                    Comparing with {{ user_link(comparison_user) }}</h3>
+            {% endif %}
+            <h1 class="album-title">
+                {% set average_rating = release.average_rating() %}
+                {# Comes before but floated right, so that it doesn't get selected #}
+                <span class="unselectable" id="average-rating-section"
+                      style="{{ '' if average_rating else 'display: none;' }}">
+                    <span id="average-rating">
+                        {{ "%.1f" % average_rating if average_rating else '' }}</span>
+                </span>
+                {{ release.title }}
+            </h1>
+            <h2 class="byline">
+                {% for artist in release.artists.all() %}
+                    {# The unusual arrangement here ensures there's no whitespace 
+                       between the last artist and the comma. #}
+                    <span class="author">{{ artist_link(artist) 
+                    }}</span>{% endfor %}{% if release.release_year_str %},
+                    <time>{{ release.release_year_str }}</time>
+                {% endif %}
+            </h2>
+            <div>
+            {{ tag_list(release.tags.all()) }}
+            </div>
+        </header>
+        
+        {% set track_info = release.tracks_extra() %}
+        
+        {% if track_info["track_no"] > 17 %}
+            {# See "expandable tracklists" in the CSS  simplify with JS #}
+            <div class="tracks-expand-container">
+                <details class="tracks-expand">
+                    {{ tracklist(track_info) }}
+                    <summary>
+                        <i class="material-icons tiny expand-more" title="Show the full tracklist">
+                            expand_more</i>
+                        <i class="material-icons tiny expand-less" title="Contract the tracklist">
+                            expand_less</i>
+                    </summary>
+                </details>
+                {{ tracklist(track_info) }}
+            </div>
+        {% else %}
+            {{ tracklist(track_info) }}
+        {% endif %}
+                    
+        {% if not request.user.is_anonymous %}
+            {# Which buttons appear / how they appear depends on their status #}
+            {% set actions = [("save", "playlist_add", "Save",
+                               user_actions and user_actions.save_action != None)] %}
+            {% set _ = actions.append(("listen", "headset", "Listened to",
+                                       user_actions and user_actions.listen != None))
+                       if not (user_actions and user_actions.rate) %}
+            
+            {{ clickable_action_list(actions, data=[("data-release-id", release.id)]) }}
+            
+            {{ rating_widget(release, user_actions.rating() if user_actions else None, None) }}
+        {% endif %}
+    </div>
+    <div class="album-side clearfix">
+        {% if release.art_url_max %}
+            <a href="{{ release.art_url_max }}">
+                <img class="cover-art" src="{{ release.art_url_500 }}"/></a><br/>
+        {% endif %}
+        {% for external_link in release.external_links.all() %}
+            {% if loop.index == 1 %}<br/>{% endif %}
+            <a href={{ external_link.url }} target=_blank>
+                {{ external_link.name }}
+                <i class="material-icons tiny">launch</i>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

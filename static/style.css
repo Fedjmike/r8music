@@ -67,6 +67,11 @@ h3 {
 	font-size: 1.17em;
 }
 
+h4 {
+    font-weight: normal;
+    font-size: 1em;
+}
+
 header > h1 ~ div {
     margin-top: 0.2em;
 }
@@ -132,21 +137,31 @@ td:first-child {
 
 /*Input elements*/
 
-textarea, input {
+textarea, input, select, option {
     box-sizing: border-box;
 }
 
 textarea, .textarea-expl,
 input[type=text],
-input[type=password] {
+input[type=email],
+input[type=password],
+input[type=url],
+select {
     padding: 0.3em;
     border: 2px solid rgba(0,0,0, 0.15);
     border-radius: 0.4em;
     outline: none;
 }
 
+select {
+    padding: 0.15em 0;
+}
+
 input[type=text],
-input[type=password] {
+input[type=email],
+input[type=password],
+input[type=url],
+select {
     height: 1.8em;
 }
 
@@ -213,12 +228,17 @@ form dd {
     margin-bottom: 0.7em;
 }
 
-form input {
+form input,
+form select,
+form option {
     font-size: 1rem;
 }
 
 form input[type="text"],
-form input[type="password"] {
+form input[type=email],
+form input[type="password"],
+input[type=url],
+form select {
     width: 17.5em;
     box-sizing: border-box;
 }
@@ -613,16 +633,19 @@ ol.tabs > li {
 
 /*Activity lists*/
 
-.activity-group {
+.activity-list > * {
     margin-bottom: 1.5em;
+}
+
+.activity-group {
     border-left: 2px solid;
 }
 
-.activity-group:not(.same-user) {
+.activity-group {
     margin-left: 0.75em;
 }
 
-.activity-group:not(.same-user) > li {
+.activity-group > li {
     margin-left: 1em;
 }
 
@@ -675,13 +698,13 @@ form.review textarea {
 ol.tracks {
     color: #333;
     counter-reset: item;
-    margin-left: 0;
+    margin: 0.5em 0;
     padding-left: 0;
 }
 
 .tracks li {
     display: block;
-    line-height: 1.3em;
+    line-height: 1.4em;
 }
 
 .tracks li:not(.total):before {
@@ -697,12 +720,12 @@ ol.tracks {
 
 .track-title {
     display: inline-block;
-    word-break: break-all;
 }
 
 .tracks time {
     float: right;
     color: #aaa;
+    line-height: 1.4em;
 }
 
 .tracks li:not(.total):nth-child(2n) {
@@ -826,18 +849,14 @@ details.tracks-expand {
 
 /*Albums*/
 
-.album-cover {
+.album-side {
 	margin-top: 2em;
     margin-left: 1.5em;
+    text-align: center;
 }
 
-.album-cover img {
+img.cover-art {
     width: 100%;
-}
-
-.album-cover .next-albums {
-    padding: 0.15em 0.5em 0 0.5em;
-    font-size: 0.9em;
 }
 
 .next-albums > * {
@@ -935,24 +954,7 @@ ol.references {
 }
 
 .chart {
-    float: right;
-}
-
-.chart canvas {
-    width: 21em;
-    height: 11em;
-}
-
-.chart form {
-    text-align: center;
-}
-
-.chart label {
-    margin-left: 0.75em;
-}
-
-.chart input[type=radio] {
-    margin-right: 0.2em;
+    margin: 2em 0;
 }
 
 /*Search*/
@@ -1125,7 +1127,7 @@ input[type=submit] {
 }
 
 .artist-image,
-.album-cover img,
+img.cover-art,
 .thumb {
     /*Glowed border*/
     box-shadow: 0px 0px 3px 1px rgba(0,0,0, 0.2);
@@ -1214,7 +1216,7 @@ section > section {
         margin: 0 auto;
     }
     
-    .album-cover {
+    .album-side {
         max-width: 15em;
         margin-left: auto;
         margin-right: auto;
@@ -1269,7 +1271,7 @@ section > section {
         max-width: 21em;
     }
 
-    .album-cover {
+    .album-side {
         width: 21em;
         margin-right: 0.5em;
     }

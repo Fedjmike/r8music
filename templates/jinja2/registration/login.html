@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% from "forms.html" import form_field %}
+
+{% block title %} Log in {{ super() }} {% endblock %}
+
+{% set dont_display_login_register = True %}
+
+{% block content %}
+<section class="page content">
+    <header><h1>Log in</h1></header>
+    {% if form.errors %}
+        <p>{{ form.errors }}</p>
+    {% endif %}
+    
+    <form action={{ url("login") }} method="post" class="clearfix">
+        <dl>
+            {{ form_field("Username", "username", "text", form_prefill)}}
+            {{ form_field("Password", "password", "password")}}
+            {{ csrf_input }}
+            <dd><input type="submit" value="Sign in" /></dd>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </dl>
+    </form>
+</section>
+{% endblock %}

@@ -1,35 +1,32 @@
-function updateAverageRating(msg) {
-    if (msg.ratingFrequency == 0)
+function updateAverageRating(averageRating) {
+    if (!averageRating) {
         $("#average-rating-section").css("display", "none");
         
-    else {
+    } else {
         $("#average-rating-section").css("display", "inline");
-        $("#rating-frequency").text(msg.ratingFrequency);
-        $("#average-rating").text(msg.ratingAverage.toFixed(1));
-        $("#user-demonym").text(msg.ratingFrequency == 1 ? "user" : "users");
+        $("#average-rating").text(averageRating.toFixed(1));
     }
 }
 
 function rateRelease(clicked_element, release_id, rating) {
-    /*User clicked the already selected rating
-       => unrate*/
-    var unrating = clicked_element.classList.contains("selected");
+    /*User clicked the already selected rating => unrate*/
+    var is_undo = clicked_element.classList.contains("selected");
+    var action = is_undo ? "unrate" : "rate";
     
     $.ajax({
         method: "POST",
-        url: "/release/" + release_id,
-        data: {action: unrating ? "unrate" : "rate", rating: rating}
-        
+        url: "/releases/" + release_id + "/" + action + "/",
+        data: {rating: rating}
     }).done(function (msg) {
         if (msg.error)
             return;
             
         /*Success, update rating widget*/
         
-        if (unrating)
+        if (is_undo) {
             clicked_element.classList.remove("selected");
         
-        else {
+        } else {
             var siblings = clicked_element.parentNode.children;
             
             for (var i = 0; i < siblings.length; i++)
@@ -38,30 +35,28 @@ function rateRelease(clicked_element, release_id, rating) {
             clicked_element.classList.add("selected");
         }
         
-        updateAverageRating(msg);
+        updateAverageRating(msg.averageRating);
     });
 }
 
 function handleAction(event) {
     event.preventDefault();
     var clickable = this;
-    var action = clickable.name;
-    var undo = clickable.classList.contains("selected");
-    
-    var url =   "releaseId" in clickable.dataset ? "/release/" + clickable.dataset.releaseId
-              : "/track/" + clickable.dataset.trackId
+    var is_undo = clickable.classList.contains("selected");
+    var action = (is_undo ? "un" : "") + clickable.name;
+    var url =   "releaseId" in clickable.dataset
+        ? "/releases/" + clickable.dataset.releaseId + "/" + action + "/"
+        : "/tracks/" + clickable.dataset.trackId + "/" + action + "/";
     
     $.ajax({
         method: "POST",
-        url: url,
-        data: {"action": undo ? "un" + action : action}
-        
+        url: url
     }).done(function (msg) {
         if (msg.error)
             return;
         
         var classes = clickable.classList;
-        classes[undo ? "remove" : "add"]("selected");
+        classes[is_undo ? "remove" : "add"]("selected");
     })
 }
 
@@ -143,17 +138,19 @@ var autoload = function() {
         stahp = true;
         
         $(autoloadTrigger).text("Loading");
-
-        $.get(autoloadTrigger.dataset.endpoint, {last_action_id: autoloadTrigger.dataset.last_action_id}, function (msg) {
+        
+        var next_page_no = parseInt(autoloadTrigger.dataset.page_no) + 1;
+        
+        $.get(autoloadTrigger.dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            autoloadTrigger.dataset.last_action_id = msg.last_action_id;
+            autoloadTrigger.dataset.page_no = next_page_no;
             
             $(autoloadTrigger).text("Load more");
             
             var target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
-            target.append(msg.html);
+            target.append(msg);
             stahp = false;
         });
     };
@@ -163,20 +160,6 @@ $(document).ready(function ($) {
     if (document.getElementById("autoload-trigger")) {
         $(window).on('scroll',  _.debounce(autoload, 200));
     };
-
-    $("a#login").click(function (event) {
-        event.preventDefault();
-        $(".popup-content:not(#login-popup)").toggle(false);
-        $("#login-popup").toggle({duration: 100});
-        $("#login-popup [name='username']").focus()
-    });
-    
-    $("a#register").click(function (event) {
-        event.preventDefault();
-        $(".popup-content:not(#register-popup)").toggle(false);
-        $("#register-popup").toggle({duration: 100});
-        $("#register-popup [name='username']").focus()
-    });
     
     $("#logout").parent().remove();
     $("#user-more").show();
@@ -189,7 +172,7 @@ $(document).ready(function ($) {
     
     $("form#search input[type='submit']").click(function (event) {
         /*Cancel the click if the search query is empty*/
-        if ($("form#search [name='query']").val().trim() == "")
+        if ($("form#search [name='q']").val().trim() == "")
             event.preventDefault();
     });
     
@@ -197,17 +180,8 @@ $(document).ready(function ($) {
     $(".action.clickable").click(handleAction);
     
     if (typeof Chart !== "undefined") {
-        $("input[type=radio][name=chart-select]").change(function () {
-            var canvas = document.getElementById("user-chart");
-            
-            switch (this.value) {
-            case "rating-counts": renderRatingCounts(canvas); break;
-            case "year-counts": renderYearCounts(canvas); break;
-            }
-        });
-        
-        /*Trigger a change on the default checked radio to create a chart*/
-        $("input[type=radio][name=chart-select]:checked").change();
+        renderRatingCounts(document.getElementById("rating-counts-chart"));
+        renderYearCounts(document.getElementById("year-counts-chart"));
     }
     
     $(".editable.rating-description")
@@ -216,11 +190,9 @@ $(document).ready(function ($) {
         var description = event.target.innerHTML;
         var rating = event.target.dataset.rating;
         
-        $.post("/rating-descriptions", {rating: rating, description: description}, function (msg) {
+        $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
             if (msg.error)
                 return; //todo
-            
-            event.target.innerHTML = msg.description;
         });
     });
     
@@ -229,14 +201,16 @@ $(document).ready(function ($) {
         
         var dataset = event.target.dataset;
         
-        $.get(dataset.endpoint, {last_action_id: dataset.last_action_id}, function (msg) {
+        var next_page_no = parseInt(dataset.page_no) + 1;
+        
+        $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
                     return; //todo
             
-            dataset.last_action_id= msg.last_action_id;
+            dataset.page_no = msg.next_page_no;
             
             var target = $(event.target).closest(".load-more-area").find(".load-more-target");
-            target.append(msg.html);
+            target.append(msg);
         });
     });
     
@@ -253,8 +227,8 @@ $(document).ready(function ($) {
     $("#autocomplete").autocomplete({
         minLength: 2,
         source: function (request, response) {
-            $.getJSON("/search/" + request.term, {
-                return_json: 1
+            $.getJSON("/api/search", {
+                q: request.term, 
             }, function (data) {
                 assignLabels(data.results, result => result.name);
                 response(data.results);

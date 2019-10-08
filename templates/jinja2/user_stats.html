@@ -1,0 +1,23 @@
+{% extends "user.html" %}
+{% from "release_list.html" import release_grid %}
+
+{% set current_tab = "stats" %}
+
+{% set chart_js = True %}
+
+{% block content_below_tabs %}
+    <script>
+    var userDatasets = {{ json_dumps({
+        "ratingCounts":  rating_counts,
+        "releaseYearCounts": release_year_counts
+    }) | safe }};
+    </script>
+    
+    <section class="page content">
+        <header><h4>Number of releases by rating</h4></header>
+        <canvas class="chart" id="rating-counts-chart"></canvas>
+        
+        <header><h4>Number of releases by year</h4></header>
+        <canvas class="chart" id="year-counts-chart"></canvas>
+    </section>
+{% endblock %}

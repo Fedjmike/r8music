@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% from "macros.html" import event_datetime, page_tabs, tag_list %}
+
+{% block title %}{{ user.username }} {{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="clearfix page content">
+    <header>
+        {% if user.profile.avatar_url %}
+            <img class="avatar" src={{ user.profile.avatar_url }} />
+        {% endif %}
+        <h1>{{ user.username }}</h1>
+        <span class="de-emph">
+            joined {{ event_datetime(user.date_joined, request) }}
+        </span>
+    </header>
+    
+    <p>{{ tag_list(user.profile.all_tags.order_by_frequency()[:5]) }}</p>
+    
+    {% if not request.user.is_anonymous and user.id != request.user.id %}
+        <p>
+            {% if request.user.profile.follows(user) %}
+            <form method="post" action={{ url_for_user(user, "unfollow_user") }}>
+                <input type="hidden" name="action" value = "unfollow" />
+                <input type="submit" value="Unfollow" />
+            {% else %}
+            <form method="post" action={{ url_for_user(user, "follow_user") }}>
+                <input type="hidden" name="action" value="follow" />
+                <input type="submit" value="Follow" />
+            {% endif %}
+                <input type="hidden" name="next" value="{{ request.path }}" />
+                {{ csrf_input }}
+            </form>
+        </p>
+    {% endif %}
+</section>
+
+{% set tabs = [
+      ("main", url_for_user(user),
+           "Releases rated", action_counts["rated"]),
+      ("listened-unrated", url_for_user(user, "user_listened_unrated"),
+          "Listened to but not rated", action_counts["listened_unrated"]),
+      ("activity", url_for_user(user, "user_activity"),
+          "Activity", None),
+      ("saved", url_for_user(user, "user_saved"),
+          "Saved", action_counts["saved"]),
+      ("friends", url_for_user(user, "user_friends"),
+          "Friends", None),
+      ("stats", url_for_user(user, "user_stats"),
+          "Stats", None)
+  ] %}
+
+{{ page_tabs(tabs, current_tab) }}
+
+{% block content_below_tabs %}{% endblock %}
+
+{% endblock %}
