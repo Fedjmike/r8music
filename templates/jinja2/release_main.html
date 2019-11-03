@@ -104,10 +104,13 @@
             <a href="{{ release.art_url_max }}">
                 <img class="cover-art" src="{{ release.art_url_500 }}"/></a><br/>
         {% endif %}
-        {% for external_link in release.external_links.all() %}
+        {% for website, external_link in release.external_links.from_sites([
+               "AZLyrics", "Allmusic", "Bandcamp", "MusicBrainz",
+               "SoundCloud", "UltimateGuitar", "Wikipedia"
+           ]) %}
             {% if loop.index == 1 %}<br/>{% endif %}
             <a href={{ external_link.url }} target=_blank>
-                {{ external_link.name }}
+                {{ website }}
                 <i class="material-icons tiny">launch</i>
             </a>
         {% endfor %}

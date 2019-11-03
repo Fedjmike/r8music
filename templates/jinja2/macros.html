@@ -124,12 +124,15 @@
     {% endif %}
 
     <header class="tight"><h4>External links</h4></header>
-    {% for external_link in artist.external_links.all() %}
+    {% for website, external_link in artist.external_links.from_sites([
+           "Allmusic", "Bandcamp", "Facebook", "MusicBrainz",
+           "Twitter", "SoundCloud", "Wikipedia"
+       ]) %}
         {% if loop.index == 1 %}
         {% elif (loop.index-1) % 4 == 0 %}<br/>
         {% else %}&#183;{% endif %}
         <a href={{ external_link.url }} target=_blank>
-            {{ external_link.name }}
+            {{ website }}
             <i class="material-icons tiny">launch</i>
         </a> 
     {% endfor %}

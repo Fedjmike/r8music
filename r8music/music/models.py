@@ -198,12 +198,28 @@ class Track(models.Model):
 
 #
 
+class ExternalLinkQuerySet(models.QuerySet):
+    def from_sites(self, site_names):
+        """Returns a sequence of (site, link) for all links with matching website
+           names (case-insensitive), in the order they were given."""
+        
+        all_links_by_name = {link.name.lower(): link for link in self.all()}
+        
+        for site_name in site_names:
+            try:
+                yield (site_name, all_links_by_name[site_name.lower()])
+                
+            except KeyError:
+                pass
+
 class ExternalLink(models.Model):
     """A link to a page on an external site"""
     
     url = models.TextField()
     #Identifies the link, for example, by the name of the external website
     name = models.TextField()
+    
+    objects = ExternalLinkQuerySet.as_manager()
     
     class Meta:
         abstract = True
