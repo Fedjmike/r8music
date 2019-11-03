@@ -8,6 +8,7 @@ from r8music.actions.models import get_paginated_activity_feed
 
 def get_user_activity_feed(user, page_no=1, paginate_by=25):
     def filter_release_actions(release_actions):
+        #Actions from friends, and the user themself
         return release_actions \
             .filter(Q(user__followers__follower=user) | Q(user=user))
             
