@@ -59,7 +59,7 @@ class PickAction(Action):
 def enact(action):
     """Enact the complete semantics of an action."""
 
-    if isinstance(action, SaveAction):
+    if isinstance(action, RateAction):
         enact(ListenAction.objects.create(release=action.release, user=action.user))
     
     elif isinstance(action, ListenAction):
