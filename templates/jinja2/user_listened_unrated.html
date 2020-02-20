@@ -6,6 +6,9 @@
 {% block content_below_tabs %}
     <section class="page content"><div>
         <header><h1>Listened to but unrated</h1></header>
-        {{ release_grid(listened_unrated, request.user, class="small") }}
+        {% for time_description, releases in listened_unrated %}
+            <header><h3>{{ time_description }}</h3></header>
+            {{ release_grid(releases, request.user, class="small") }}
+        {% endfor %}
     </div></section>
 {% endblock %}

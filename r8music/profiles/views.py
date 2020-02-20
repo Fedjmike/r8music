@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, redirect_to_login
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.html import escape
 
 from rest_framework.decorators import api_view
@@ -91,12 +92,18 @@ class UserMainPage(AbstractUserPage):
         self.add_releases_rated_data(context)
         return context
 
+def group_by_action_time(qs, timestamp_field):
+    # Group and display by "natural" time i.e. "X time periods ago"
+    time = lambda r: naturaltime(getattr(r, timestamp_field))
+    return groupby(qs.order_by("-" + timestamp_field), time)
+
 class UserListenedUnratedPage(AbstractUserPage):
     template_name = "user_listened_unrated.html"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["listened_unrated"] = Release.objects.listened_unrated_by_user(context["user"]).prefetch_related("artists")
+        releases = Release.objects.listened_unrated_by_user(context["user"]).prefetch_related("artists")
+        context["listened_unrated"] = group_by_action_time(releases, "listen_timestamp")
         return context
 
 class UserSavedPage(AbstractUserPage):
@@ -104,7 +111,8 @@ class UserSavedPage(AbstractUserPage):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["saved"] = Release.objects.saved_by_user(context["user"])
+        releases = Release.objects.saved_by_user(context["user"])
+        context["saved"] = group_by_action_time(releases, "save_timestamp")
         return context
 
 class UserActivityPage(AbstractUserPage):

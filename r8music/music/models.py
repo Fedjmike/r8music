@@ -110,10 +110,13 @@ class ReleaseQuerySet(models.QuerySet):
         
     def listened_unrated_by_user(self, user):
         return self.with_actions_by_user(user) \
-            .filter(rate=None).exclude(listen=None)
+            .filter(rate=None).exclude(listen=None) \
+            .annotate(listen_timestamp=F("active_actions__listen__creation"))
     
     def saved_by_user(self, user):
-        return self.with_actions_by_user(user).exclude(save=None)
+        return self.with_actions_by_user(user) \
+            .exclude(save=None) \
+            .annotate(save_timestamp=F("active_actions__save_action__creation"))
         
 class Release(models.Model):
     title = models.TextField()
