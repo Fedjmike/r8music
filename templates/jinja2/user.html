@@ -38,13 +38,13 @@
 
 {% set tabs = [
       ("main", url_for_user(user),
-           "Releases rated", action_counts["rated"]),
+          "Releases rated", action_counts["rated"]),
       ("listened-unrated", url_for_user(user, "user_listened_unrated"),
           "Listened to but not rated", action_counts["listened_unrated"]),
-      ("activity", url_for_user(user, "user_activity"),
-          "Activity", None),
       ("saved", url_for_user(user, "user_saved"),
           "Saved", action_counts["saved"]),
+      ("activity", url_for_user(user, "user_activity"),
+          "Activity", None),
       ("friends", url_for_user(user, "user_friends"),
           "Friends", None),
       ("stats", url_for_user(user, "user_stats"),
