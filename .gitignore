@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 *.sqlite3
 *.coverage
+
+node_modules
+/static/dist.js
+.vscode

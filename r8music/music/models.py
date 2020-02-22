@@ -168,9 +168,8 @@ class Release(models.Model):
     def tracks_extra(self):
         tracks = self.tracks.all()
         return {
-            "sides": [list(tracks) for _, tracks in groupby(tracks, lambda track: track.side)],
+            "tracks": tracks,
             "runtime": make_runtime_str(sum(track.runtime for track in tracks if track.runtime)),
-            "track_no": len(tracks)
         }
 
 class TrackQuerySet(models.QuerySet):

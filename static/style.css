@@ -712,7 +712,7 @@ ol.tracks {
     content: counter(item);
     counter-increment: item;
     width: 1.1em;
-    padding-right: 0.15em;
+    padding-right: 0.35em;
     text-align: right;
     vertical-align: top;
     color: #aaa;
@@ -752,6 +752,7 @@ ol.tracks {
 
 .track-pick {
     display: none;
+    margin: 0 0.2em;
 }
 
 .tracks li:hover .track-pick,
@@ -776,75 +777,19 @@ ol.tracks {
 
 /*Expandable tracklists*/
 
-.tracks-expand-container {
-    /*The way this works is a little convoluted.
-      There are two copies of the tracklist. The secondary tracklist is outside
-      the <details>. This one shows the contracted form, and gets hidden when
-      the <details> is open.
-      This is necessary because there is no way to select which parts of the
-      contents of a <details> are hidden. Only the <summary> is shown, and we
-      don't want the tracklist to be part of the button which expands it.*/
-    display: flex;
-    flex-direction: column-reverse;
-}
-
-details.tracks-expand {
-    display: block;
-    /*Room at the bottom for the button*/
-    position: relative;
-    padding-bottom: 1.1em;
-}
-
-.tracks-expand > summary {
+.expand-button {
     display: block;
     width: 100%;
-    position: absolute;
-    bottom: 0em;
-    
-    cursor: pointer;
-    outline: none;
-}
-
-.tracks-expand > summary::-webkit-details-marker {
-    display: none;
-}
-
-.tracks-expand[open] > summary > .expand-more,
-.tracks-expand:not([open]) > summary > .expand-less {
-    display: none;
-}
-
-.tracks-expand > summary > * {
-    /*Expand/contract bar*/
-    display: block;
-    text-align: center;
+    margin-top: 0.2em;
     line-height: 1.1em;
+    text-align: center;
     background-color: rgba(0,0,0, 0.05);
-    opacity: 1;
+    cursor: pointer;
 }
 
-.tracks-expand + .tracks
-  > li:nth-child(13) ~ li:not(.total) {
-    /*In the secondary track list, hide all after the 13th element
-      (important: is odd, therefore not shaded)*/
-    display: none;
-}
-
-.tracks-expand[open] ~ .tracks {
-    /*When open, hide the secondary track list*/
-    display: none;
-}
-
-.tracks-expand + .tracks > li.total,
-.tracks-expand > .tracks > li.total {
-    border-top: 0;
-    /*Make room for the expand/contract bar above, and move this down*/
-    margin-top: 1.1em;
-    margin-bottom: -2.4em;
-}
-
-.tracks-expand {
-    margin-bottom: 0.8em;
+.expand-button + li.total {
+    border-top: 0 !important;
+    margin-top: -0.2em;
 }
 
 /*Albums*/

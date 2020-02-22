@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.core.serializers import serialize
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
@@ -104,6 +105,11 @@ class ReleaseMainPage(AbstractReleasePage):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        track_info = self.get_object().tracks_extra()
+        track_info["tracks"] = \
+            [TrackSerializer(track).data for track in track_info["tracks"]]
+        context["track_info"] = track_info
+        
         context["user_actions"], context["picks"] \
             = self.get_user_actions(self.request.user, context["release"])
         context["comparison_user"] \
@@ -193,6 +199,11 @@ class ReleaseViewSet(viewsets.ModelViewSet):
     def unrate(self, request, pk=None):
         self.set_release_actions(rate=None)
         return Response()
+
+class TrackSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField()
+    runtime_str = serializers.CharField()
 
 class TrackViewSet(viewsets.ModelViewSet):
     queryset = Track.objects.all()

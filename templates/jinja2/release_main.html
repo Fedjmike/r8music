@@ -2,37 +2,14 @@
 {% from "macros.html" import artist_link, user_link, clickable_action_list, tag_list %}
 {% from "release_list.html" import rating_widget %}
 
-{% macro tracklist(track_info) -%}
-    <ol class="tracks">
-        {% for tracks in track_info["sides"] %}
-            {% for track in tracks %}
-            <li>
-                <span class="track-title">
-                    {{ track.title }}
-                    {% if track.id in comparison_picks %}
-                        <span class="track-pick comparison-selected"
-                              title="{{ comparison_user.username }}'s pick">
-                            <i class="material-icons">stars</i>
-                        </span>
-                    {% endif %}
-                    <a class="track-pick action clickable {{ 'selected' if track.id in picks else '' }}"
-                       name="pick" href=# data-track-id={{ track.id }}
-                       title="Select as a pick">
-                        <i class="material-icons">stars</i>
-                    </a>
-                </span>
-                {% if track.runtime %} <time>{{ track.runtime_str }}</time> {% endif %}
-            </li>
-            {% endfor %}
-        {% endfor %}
-        
-        {% if track_info["runtime"] and track_info["track_no"] != 1 %}
-            <li class="total clearfix"><time>{{ track_info["runtime"] }}</time></li>
-        {% endif %}
-    </ol>
-{%- endmacro %}
-
 {% set current_tab = "main" %}
+
+{% set client_json_data = {
+    "trackInfo": track_info,
+    "picks": picks | list,
+    "comparisonPicks": comparison_picks | list,
+    "comparisonUser": comparison_user and comparison_user.username
+} %}
 
 {% block content_below_tabs %}
 <section class="album page content">
@@ -66,25 +43,8 @@
             </div>
         </header>
         
-        {% set track_info = release.tracks_extra() %}
-        
-        {% if track_info["track_no"] > 17 %}
-            {# See "expandable tracklists" in the CSS  simplify with JS #}
-            <div class="tracks-expand-container">
-                <details class="tracks-expand">
-                    {{ tracklist(track_info) }}
-                    <summary>
-                        <i class="material-icons tiny expand-more" title="Show the full tracklist">
-                            expand_more</i>
-                        <i class="material-icons tiny expand-less" title="Contract the tracklist">
-                            expand_less</i>
-                    </summary>
-                </details>
-                {{ tracklist(track_info) }}
-            </div>
-        {% else %}
-            {{ tracklist(track_info) }}
-        {% endif %}
+        {# Rendered by react with client_json_data #}
+        <div class="track-list"></div>
                     
         {% if not request.user.is_anonymous %}
             {# Which buttons appear / how they appear depends on their status #}

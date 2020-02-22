@@ -1,0 +1,33 @@
+{
+  "name": "r8music",
+  "version": "2.0.0",
+  "description": "http://r8music.com",
+  "scripts": {
+    "dev": "webpack --mode development ./js/index.tsx",
+    "watch": "webpack --mode development ./js/index.tsx --watch",
+    "build": "webpack --mode production ./js/index.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fedjmike/r8music.git"
+  },
+  "keywords": [],
+  "author": "Sam Nipps",
+  "license": "unlicensed",
+  "bugs": {
+    "url": "https://github.com/Fedjmike/r8music/issues"
+  },
+  "homepage": "http://r8music.com",
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-react": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "lodash": "^4.17.15",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "typescript": "^3.8.2",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  }
+}

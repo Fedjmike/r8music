@@ -38,6 +38,12 @@
     
     <script>
     var palette = ["{{ accent_color_1 }}", "{{ accent_color_2 }}"];
+
+    {% if client_json_data is defined %}
+        {% for key, value in client_json_data.items() %}
+            window.{{ key }} = {{ json_dumps(value) | safe }};
+        {% endfor %}
+    {% endif %}
     
     $.ajaxSetup({
       data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
@@ -134,5 +140,7 @@
     {% endfor %}
     
     {% block content %}{% endblock %}
+
+    <script src="/static/dist.js"></script>
 </body>
 </html>
