@@ -44,9 +44,7 @@ function handleAction(event) {
     var clickable = this;
     var is_undo = clickable.classList.contains("selected");
     var action = (is_undo ? "un" : "") + clickable.name;
-    var url =   "releaseId" in clickable.dataset
-        ? "/releases/" + clickable.dataset.releaseId + "/" + action + "/"
-        : "/tracks/" + clickable.dataset.trackId + "/" + action + "/";
+    var url = "/releases/" + clickable.dataset.releaseId + "/" + action + "/";
     
     $.ajax({
         method: "POST",
