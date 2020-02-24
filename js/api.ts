@@ -27,6 +27,12 @@ async function post(url: RequestInfo): Promise<Response> {
 
 //
 
+export async function actOnRelease(
+  releaseId: string, action: string, isUndo: boolean,
+): Promise<Response> {
+  return post(`/releases/${releaseId}/${isUndo ? "un" : ""}${action}/`);
+}
+
 export async function pickTrack(
   trackId: string, isUnpick: boolean,
 ): Promise<Response> {

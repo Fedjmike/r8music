@@ -39,25 +39,6 @@ function rateRelease(clicked_element, release_id, rating) {
     });
 }
 
-function handleAction(event) {
-    event.preventDefault();
-    var clickable = this;
-    var is_undo = clickable.classList.contains("selected");
-    var action = (is_undo ? "un" : "") + clickable.name;
-    var url = "/releases/" + clickable.dataset.releaseId + "/" + action + "/";
-    
-    $.ajax({
-        method: "POST",
-        url: url
-    }).done(function (msg) {
-        if (msg.error)
-            return;
-        
-        var classes = clickable.classList;
-        classes[is_undo ? "remove" : "add"]("selected");
-    })
-}
-
 if (typeof Chart !== "undefined") {
     Chart.defaults.global.legend.display = false;
     Chart.defaults.global.animation = false;
@@ -173,9 +154,6 @@ $(document).ready(function ($) {
         if ($("form#search [name='q']").val().trim() == "")
             event.preventDefault();
     });
-    
-    $(".action-list .clickable").click(handleAction);
-    $(".action.clickable").click(handleAction);
     
     if (typeof Chart !== "undefined") {
         renderRatingCounts(document.getElementById("rating-counts-chart"));

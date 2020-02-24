@@ -90,18 +90,6 @@
     <header><h2>{{ subpage_title }} &ndash; {{ main_link }}</h2></header>
 {%- endmacro %}
 
-{% macro clickable_action_list(actions, data) -%}
-<ol class="action-list inline unselectable">
-    {% for name, icon, description, active in actions %}
-        <li><a class="clickable {{ 'selected' if active else '' }}"
-               name={{ name }} href=#
-               {% for key, value in data %} {{ key }}="{{ value }}" {% endfor %}>
-            <i class="material-icons">{{ icon }}</i>{{ description }}
-        </a></li>
-    {% endfor %}
-</ol>
-{%- endmacro %}
-
 {% macro load_more(content, endpoint, page_no, autoload=False) -%}
 <span class="load-more-area">
     <span class="load-more-target">{{ content }}</span>

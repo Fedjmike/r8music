@@ -87,6 +87,13 @@ class ActiveActions(models.Model):
     def rating(self):
         return self.rate.rating if self.rate else None
 
+    def action_names(self):
+        return list(filter(lambda x: x, (
+            self.save_action and "save",
+            self.listen and "listen",
+            self.rate and "rate"
+        )))
+
 #
 
 #The maximum period of time between two actions which can be grouped in an activity feed

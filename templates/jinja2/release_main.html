@@ -1,10 +1,12 @@
 {% extends "release.html" %}
-{% from "macros.html" import artist_link, user_link, clickable_action_list, tag_list %}
+{% from "macros.html" import artist_link, user_link, tag_list %}
 {% from "release_list.html" import rating_widget %}
 
 {% set current_tab = "main" %}
 
 {% set client_json_data = {
+    "releaseId": release.id,
+    "releaseActions": user_actions and user_actions.action_names(),
     "trackInfo": track_info,
     "picks": picks | list,
     "comparisonPicks": comparison_picks | list,
@@ -47,15 +49,9 @@
         <div class="track-list"></div>
                     
         {% if not request.user.is_anonymous %}
-            {# Which buttons appear / how they appear depends on their status #}
-            {% set actions = [("save", "playlist_add", "Save",
-                               user_actions and user_actions.save_action != None)] %}
-            {% set _ = actions.append(("listen", "headset", "Listened to",
-                                       user_actions and user_actions.listen != None))
-                       if not (user_actions and user_actions.rate) %}
-            
-            {{ clickable_action_list(actions, data=[("data-release-id", release.id)]) }}
-            
+            {# Also rendered by react #}
+            <div class="release-actions"></div>
+
             {{ rating_widget(release, user_actions.rating() if user_actions else None, None) }}
         {% endif %}
     </div>
