@@ -344,4 +344,4 @@ def rating_description(request):
         rd.description = description
         rd.save()
         
-        return Response()
+        return Response({})

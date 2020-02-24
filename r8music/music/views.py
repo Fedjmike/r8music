@@ -162,12 +162,12 @@ class ReleaseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def save(self, request, pk=None):
         enact(SaveAction.objects.create(release=self.get_object(), user=request.user))
-        return Response()
+        return Response({})
         
     @action(detail=True, methods=["post"])
     def listen(self, request, pk=None):
         enact(ListenAction.objects.create(release=self.get_object(), user=request.user))
-        return Response()
+        return Response({})
         
     @action(detail=True, methods=["post"])
     def rate(self, request, pk=None):
@@ -188,17 +188,17 @@ class ReleaseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def unsave(self, request, pk=None):
         self.set_release_actions(save_action=None)
-        return Response()
+        return Response({})
         
     @action(detail=True, methods=["post"])
     def unlisten(self, request, pk=None):
         self.set_release_actions(listen=None)
-        return Response()
+        return Response({})
         
     @action(detail=True, methods=["post"])
     def unrate(self, request, pk=None):
         self.set_release_actions(rate=None)
-        return Response()
+        return Response({})
 
 class TrackSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -213,14 +213,14 @@ class TrackViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def pick(self, request, pk=None):
         enact(PickAction.objects.create(track=self.get_object(), user=request.user))
-        return Response()
+        return Response({})
         
     @action(detail=True, methods=["post"])
     def unpick(self, request, pk=None):
         request.user.active_actions \
             .get_or_create(release=self.get_object().release)[0] \
             .picks.filter(track=self.get_object()).delete()
-        return Response()
+        return Response({})
 
 #
 
