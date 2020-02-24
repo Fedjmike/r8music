@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Set } from "immutable";
 import * as API from "./api";
-import { toggleSet } from "./utils";
+import { toggleSet, setOnSuccessEagerly } from "./utils";
 
 function PickIcon(props: any) {
   const Element = "href" in props ? "a" : "span";
@@ -74,8 +74,10 @@ export function Tracklist({
   
   const togglePick = async (trackId: string) => {
     const isUnpick = pickState.has(trackId);
-    await API.pickTrack(trackId, isUnpick);
-    setPicks(toggleSet(pickState, trackId));
+    setOnSuccessEagerly(
+      API.pickTrack(trackId, isUnpick),
+      pickState, setPicks, toggleSet(pickState, trackId),
+    );
   }
   
   const renderTrack = (track: API.Track) =>

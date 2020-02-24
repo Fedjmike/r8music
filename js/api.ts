@@ -27,6 +27,8 @@ async function post(url: RequestInfo): Promise<Response> {
 
 //
 
-export async function pickTrack(trackId: string, isUnpick: boolean) {
-  await post(`/tracks/${trackId}/${isUnpick ? "un" : ""}pick/`);
+export async function pickTrack(
+  trackId: string, isUnpick: boolean,
+): Promise<Response> {
+  return post(`/tracks/${trackId}/${isUnpick ? "un" : ""}pick/`);
 }
