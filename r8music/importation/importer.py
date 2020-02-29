@@ -338,6 +338,12 @@ class Importer:
             #Prefer earlier years, then fuller dates, then earlier dates
             return (release["date"][:4], -len(release["date"]), release["date"])
         
+        is_standard_edition = lambda json: \
+            "disambiguation" not in json \
+            or "deluxe" not in json["disambiguation"]
+        release_jsons = list(filter(is_standard_edition, release_jsons)) \
+            or release_jsons
+
         #Assume that releases with unusual track counts (non-mode) are not canonical
         releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
         
