@@ -17,6 +17,7 @@ django-background-tasks
 editdistance
 pillow
 unidecode
+sentry-sdk
 #For V1
 flask
 arrow
