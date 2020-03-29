@@ -155,7 +155,7 @@ class Importer:
         guessed_wikipedia_url, description, images = \
             self.query_wikipedia(artist_json["name"], wikipedia_url)
         
-        extra_links = [guessed_wikipedia_url] if guessed_wikipedia_url else []
+        extra_links = [(guessed_wikipedia_url, "wikipedia")] if guessed_wikipedia_url else []
         return self.ArtistResponse(artist_json, extra_links, description, images)
         
     def replace_artist(self, existing_artist, artist):
@@ -183,8 +183,8 @@ class Importer:
         ]
         
         external_links += [
-            ArtistExternalLink(artist=artist, url=url, name=urlparse(url).netloc)
-            for url in artist_response.extra_links
+            ArtistExternalLink(artist=artist, url=url, name=name)
+            for url, name in artist_response.extra_links
         ]
         
         external_links.append(ArtistExternalLink(
