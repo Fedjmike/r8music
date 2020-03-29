@@ -374,11 +374,11 @@ class Importer:
             release_json, release_group_json, art_urls, discogs_tags
         )
         
-    def query_all_releases(self, artist_response):
+    def query_all_releases(self, artist_mbid):
         return filter(lambda x: x is not None, [
             self.query_release(release_group_json)
             for release_group_json in self.browse_release_groups(
-                artist_response.json["id"], includes=["artist-credits", "url-rels"]
+                artist_mbid, includes=["artist-credits", "url-rels"]
             )
         ])
         
@@ -609,7 +609,7 @@ class Importer:
     
     def import_artist(self, artist_mbid):
         artist_response = self.query_artist(artist_mbid)
-        release_responses = self.query_all_releases(artist_response)
+        release_responses = self.query_all_releases(artist_response.json["id"])
         
         artist_map = self.create_artists([artist_response])
         self.create_from_release_responses(release_responses, artist_map)
