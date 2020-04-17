@@ -132,6 +132,7 @@ table {
 td:first-child {
     min-width: 5em;
     text-align: right;
+    vertical-align: top;
     color: #999;
 }
 
@@ -844,6 +845,7 @@ img.cover-art {
 .artist-image-container {
     display: block;
     margin-top: 1.25em;
+    text-align: center;
 }
 
 .artist-image {
@@ -1223,10 +1225,6 @@ section > section {
     
     .next-albums > * {
         max-width: 20em;
-    }
-    
-    .artist-image-container {
-        margin-left: 1em;
     }
 }
 
