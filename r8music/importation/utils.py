@@ -88,6 +88,7 @@ class MemoizedModule:
                     try:
                         storage[args_key] = (f(*args, **kwargs), None)
                         
+                    #pylint:disable=broad-except
                     except Exception as exception:
                         storage[args_key] = (None, exception)
                 

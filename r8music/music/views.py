@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-from django.core.serializers import serialize
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
@@ -138,7 +137,7 @@ class ReleaseActivityPage(AbstractReleasePage):
         return context
 
 class EditReleasePage(LoginRequiredMixin, AbstractReleasePage):
-    template_name ="edit_release.html"
+    template_name = "edit_release.html"
     
     def post(self, request, *args, **kwargs):
         colours = (request.POST.get(c) for c in ["colour-1", "colour-2", "colour-3"])

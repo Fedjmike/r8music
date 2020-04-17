@@ -1,14 +1,12 @@
 from itertools import groupby
-from r8music.utils import fuzzy_groupby
 
 from django.db import models
 from django.utils import timezone
 from django.core.paginator import Paginator
 
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
-
 from django.contrib.auth.models import User
+
+from r8music.utils import fuzzy_groupby
 from r8music.music.models import Release, Track
 
 class Action(models.Model):

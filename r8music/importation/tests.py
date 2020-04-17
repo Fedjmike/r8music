@@ -103,8 +103,8 @@ class DiscogsTest(TestCase):
             
         def check(results, expected_release_id, expected_master_id, expected_tags):
             release_id, master_id, tags = results
-            self.assertEquals(release_id, expected_release_id)
-            self.assertEquals(master_id, expected_master_id)
+            self.assertEqual(release_id, expected_release_id)
+            self.assertEqual(master_id, expected_master_id)
             self.assertCountEqual(tags, expected_tags)
             
         #No discogs link
@@ -123,7 +123,7 @@ class CoverArtTest(TestCase):
         
     def test_cover_art(self):
         def check(art_urls):
-            self.assertEquals(set(art_urls.keys()), set(["max", "250", "500"]))
+            self.assertEqual(set(art_urls.keys()), set(["max", "250", "500"]))
             
             for url in art_urls.values():
                 self.assertIsNotNone(url)
@@ -198,13 +198,13 @@ class ImportTest(TestCase):
         #Check that the releases were updated, not duplicated
         
         artist = Artist.objects.get(mb_link__mbid=artist_mbid)
-        self.assertEquals(artist.releases.count(), release_count)
+        self.assertEqual(artist.releases.count(), release_count)
         
         #Check that this update transferred the action onto the new version of the release
         
         real_release = Release.objects.get(mb_link__release_mbid=real_release_mbid)
         test_user_actions = real_release.active_actions.get(user=test_user)
-        self.assertEquals(test_user_actions.listen, listen_action)
+        self.assertEqual(test_user_actions.listen, listen_action)
 
     def test_import_release(self):
         release_group_mbid = "5c9f1f0f-d079-4fa3-b2b7-858249c36703"

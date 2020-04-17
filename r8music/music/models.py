@@ -1,4 +1,4 @@
-from itertools import count, groupby
+from itertools import count
 from unidecode import unidecode
 
 from django.db import models

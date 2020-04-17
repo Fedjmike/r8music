@@ -66,7 +66,7 @@ class Chromatography(object):
         
         for color in colors:
             if not any(c.try_add(color) for c in clusters):
-                 clusters.append(Cluster(color))
+                clusters.append(Cluster(color))
                  
         top_clusters = sorted(clusters, key=lambda c: c.frequency, reverse=True)
         return [c.get_mean() for c in top_clusters[:n]]
@@ -90,7 +90,7 @@ def hue_difference(pair):
     return 1 - abs(0.5 - diff)
     
 def valid_color(color):
-    hue, lightness, saturation = rgb_to_hls(color)
+    _hue, lightness, saturation = rgb_to_hls(color)
     return saturation > 0.3 and lightness < 0.6 and lightness > 0.35
 
 def get_palette(album_art_url):

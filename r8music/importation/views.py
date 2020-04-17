@@ -3,7 +3,7 @@ import musicbrainzngs
 from django.conf import settings
 from django.views.generic import TemplateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
 from background_task import background

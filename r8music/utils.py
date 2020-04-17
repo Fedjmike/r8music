@@ -1,7 +1,7 @@
 def fuzzy_groupby(iterable, threshold, key=lambda x: x):
     iterator = iter(iterable)
-    item = next(iterator)
-    
+    item = None
+
     def group():
         nonlocal item
         group_continues = True
@@ -15,6 +15,8 @@ def fuzzy_groupby(iterable, threshold, key=lambda x: x):
             group_continues = item and abs(key(item) - key(previous_item)) <= threshold
     
     try:
+        item = next(iterator)
+        
         while item:
             yield key(item), group()
     

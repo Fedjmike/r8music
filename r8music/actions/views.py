@@ -37,5 +37,5 @@ class ActivityFeed(views.APIView):
     
     def get(self, request):
         page_no = request.query_params.get("page_no")
-        activity, page_obj = get_user_activity_feed(self.request.user, page_no)
+        activity, _page_obj = get_user_activity_feed(self.request.user, page_no)
         return Response({"activity": activity}, template_name="activity_feed.html")

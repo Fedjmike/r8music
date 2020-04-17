@@ -1,6 +1,6 @@
 import time, re, requests, wikipedia, musicbrainzngs, discogs_client
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin, unquote
+from urllib.parse import urljoin, unquote
 
 from django.conf import settings
 from django.db import transaction
@@ -13,7 +13,7 @@ from .models import (
     ArtistMBLink, ArtistMBImportation, ReleaseMBLink, ReleaseDuplication,
     ArtistMBIDMap, ReleaseMBIDMap, DiscogsTagMap
 )
-from r8music.actions.models import SaveAction, ListenAction, RateAction, PickAction, ActiveActions
+from r8music.actions.models import SaveAction, ListenAction, RateAction, ActiveActions
 
 from .utils import (
     uniqify, mode_items, query_and_collect,
@@ -93,9 +93,9 @@ class Importer:
         else:
             #srcset is a list of images of different sizes, with scales, in the
             #format of "<url> <scale>x" separated by commas
-            thumbs = re.findall("(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
+            thumbs = re.findall(r"(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
             #Get the largest thumbnail (which should be 220px wide)
-            thumb_url, scale = max(thumbs, key=lambda url_and_scale: url_and_scale[1])
+            thumb_url, _scale = max(thumbs, key=lambda url_and_scale: url_and_scale[1])
             
             urls = [image_url, thumb_url]
             #Turn the URLs (which might be relative) into absolute URLs
@@ -223,7 +223,7 @@ class Importer:
         
     # Discogs (used for populating tags)
     
-    discogs_url_pattern = re.compile("discogs.com(/.*)?/(release|master)/(\d*)")
+    discogs_url_pattern = re.compile(r"discogs.com(/.*)?/(release|master)/(\d*)")
     discogs_ratelimit_wait_time = 15 #in seconds
     
     def get_discogs_id(self, discogs_url):
@@ -422,8 +422,6 @@ class Importer:
             for track in medium["track-list"]
         ])
         
-        return release.tracks
-        
     def replace_tracks(self, existing_release, release):
         tracks = list(release.tracks.all())
         
@@ -488,7 +486,7 @@ class Importer:
             **extra_args
         )
         
-        tracks = self.create_tracks(release_json, release)
+        self.create_tracks(release_json, release)
         
         if existing_release:
             self.replace_tracks(existing_release, release)
@@ -528,6 +526,8 @@ class Importer:
                 release_json.get("url-relation-list", [])
                 + release_group_json.get("url-relation-list", [])
         ])
+
+        return release
         
     def create_releases(self, release_responses, artist_map):
         #Those releases already imported
