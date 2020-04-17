@@ -112,7 +112,7 @@
         {% if not request.user.is_anonymous %}
             <li>
                 <a href={{ url_for_user(request.user) }}>{{ request.user.username }}</a>
-                <a id="user-more" href="">&#9662;</a>
+                <a class="unselectable" id="user-more" href="">&#9662;</a>
             </li>
             <li><a id="logout" href="{{ url("logout") }}?next={{ request.path }}">log out</a></li>
             <div class="small popup"><div class="popup-content" id="user-popup">
