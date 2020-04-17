@@ -375,12 +375,12 @@ class Importer:
         )
         
     def query_all_releases(self, artist_mbid):
-        return filter(lambda x: x is not None, [
+        return list(filter(lambda x: x is not None, [
             self.query_release(release_group_json)
             for release_group_json in self.browse_release_groups(
                 artist_mbid, includes=["artist-credits", "url-rels"]
             )
-        ])
+        ]))
         
     def query_single_release(self, release_group_mbid):
         release_group_json = self.musicbrainz.get_release_group_by_id(
