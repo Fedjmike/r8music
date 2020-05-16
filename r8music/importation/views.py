@@ -43,7 +43,7 @@ class ImportArtistPage(LoginRequiredMixin, TemplateView):
 class ImportArtistSearchResults(LoginRequiredMixin, TemplateView):
     """Displays the importation options from a search of MusicBrainz"""
     
-    template_name =  "import_artist_search_results.html"
+    template_name = "import_artist_search_results.html"
     
     def get_context_data(self, **kwargs):
         artist_name = self.request.GET.get("name")
