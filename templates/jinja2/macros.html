@@ -41,7 +41,7 @@
     </a>
 {%- endmacro %}
 
-{% macro page_links(page_obj, request) %}
+{% macro page_number_links(page_obj, request) %}
     <p>
         {% if page_obj.has_previous() %}
             {% if page_obj.previous_page_number() != 1 %}

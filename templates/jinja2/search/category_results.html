@@ -1,5 +1,5 @@
 ﻿{% extends "layout.html" %}
-{% from "macros.html" import page_links %}
+{% from "macros.html" import page_number_links %}
 {% from "forms.html" import search_form %}
 
 {% block title %}'{{ query }}' &ndash; Search results {{ super() }}{% endblock %}
@@ -29,7 +29,7 @@
         </ol>
         
         {% if page_obj.paginator.num_pages != 1 %}
-            {{ page_links(page_obj, request) }}
+            {{ page_number_links(page_obj, request) }}
         {% endif %}
         
     {% else %}

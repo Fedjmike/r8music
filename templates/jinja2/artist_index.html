@@ -1,4 +1,4 @@
-{% from "macros.html" import page_links %}
+{% from "macros.html" import page_number_links %}
 
 {% extends "layout.html" %}
 
@@ -19,6 +19,6 @@
     {% endfor %}
     </ol>
     
-    {{ page_links(page_obj, request) }}
+    {{ page_number_links(page_obj, request) }}
 </section>
 {% endblock %}
