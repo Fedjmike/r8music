@@ -100,6 +100,23 @@
 </span>
 {%- endmacro %}
 
+{% macro external_links_list(external_links, begins_with_linebreak=False) -%}
+    {% for website, external_link in external_links.from_sites([
+        "Allmusic", "AZLyrics", "Bandcamp", "Discogs", "Facebook", "MusicBrainz",
+        "Twitter", "SoundCloud", "UltimateGuitar", "Wikipedia"
+    ]) %}
+        {% if loop.index == 1 %}
+            {% if begins_with_linebreak %}<br/>{% endif %}
+        {% elif (loop.index-1) % 4 == 0 %}
+            <br/>
+        {% else %}
+            &middot;
+        {% endif %}
+
+        <a href={{ external_link.url }}>{{ website }}</a> 
+    {% endfor %}
+{%- endmacro %}
+
 {% macro artist_details(artist) -%}
     {% set description = artist.description %}
     <p>{{ description | safe if description else "" }}</p>
@@ -112,15 +129,7 @@
     {% endif %}
 
     <header class="tight"><h4>External links</h4></header>
-    {% for website, external_link in artist.external_links.from_sites([
-           "Allmusic", "Bandcamp", "Facebook", "MusicBrainz",
-           "Twitter", "SoundCloud", "Wikipedia"
-       ]) %}
-        {% if loop.index == 1 %}
-        {% elif (loop.index-1) % 4 == 0 %}<br/>
-        {% else %}&middot;{% endif %}
-        <a href={{ external_link.url }}>{{ website }}</a> 
-    {% endfor %}
+    {{ external_links_list(artist.external_links) }}
 {%- endmacro %}
 
 {% macro tag_list(tags, counts=False, de_emph=False) -%}

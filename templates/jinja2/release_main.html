@@ -1,5 +1,5 @@
 {% extends "release.html" %}
-{% from "macros.html" import artist_link, user_link, tag_list %}
+{% from "macros.html" import artist_link, user_link, tag_list, external_links_list %}
 {% from "release_list.html" import rating_widget %}
 
 {% set current_tab = "main" %}
@@ -60,13 +60,7 @@
             <a href="{{ release.art_url_max }}">
                 <img class="cover-art" src="{{ release.art_url_500 }}"/></a><br/>
         {% endif %}
-        {% for website, external_link in release.external_links.from_sites([
-               "AZLyrics", "Allmusic", "Bandcamp", "MusicBrainz",
-               "SoundCloud", "UltimateGuitar", "Wikipedia"
-           ]) %}
-            {% if loop.index == 1 %}<br/>{% endif %}
-            <a href={{ external_link.url }}>{{ website }}</a>
-        {% endfor %}
+        {{ external_links_list(release.external_links, begins_with_linebreak=True) }}
     </div>
 </section>
 {% endblock %}
