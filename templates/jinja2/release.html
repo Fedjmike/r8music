@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% from "macros.html" import page_tabs, artist_details %}
+{% from "macros.html" import page_tabs, artist_details, artist_link %}
 
 {% block title %}
     {{ release.title }}
@@ -39,7 +39,7 @@
     
     {% for artist in release.artists.all() %}
     <section class="page content">
-        <header><h1>{{ artist.name }}</h1></header>
+        <header><h1>{{ artist_link(artist) }}</h1></header>
         {{ artist_details(artist) }}
     </section>
     {% endfor %}
