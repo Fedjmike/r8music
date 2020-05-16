@@ -60,7 +60,9 @@ class ImportArtistSearchResults(LoginRequiredMixin, TemplateView):
             {
                 "mbid": result["id"],
                 "name": result["name"],
-                "already_imported": result["id"] in already_imported_mbids,
+                "already_imported_artist":
+                    ArtistMBLink.objects.get(mbid=result["id"]).artist
+                    if result["id"] in already_imported_mbids else None,
                 "disambiguation":
                     result["disambiguation"] if "disambiguation" in result
                     else result["area"]["name"] if "area" in result

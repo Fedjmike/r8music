@@ -1,12 +1,15 @@
 {% extends "layout.html" %}
 
+{% from "macros.html" import artist_link %}
+
 {% block title %}'{{ query }}' search results - Import an artist {{ super() }}{% endblock %}
 
 {% macro search_results(results) -%}
     {% for result in results %}
         <label>
             <input type="radio" name="artist-mbid" value={{ result.mbid }} />
-            {{ result.name }}
+            {{ artist_link(result.already_imported_artist)
+                if result.already_imported_artist else result.name}}
             <span class="de-emph">
                 {{ ' (%s)' % result.disambiguation if result.disambiguation else '' }}
             </span>
@@ -35,9 +38,9 @@
         <form action={{ url("import_artist") }} method="post" class="clearfix">
             {{ csrf_input }}
             
-            {{ search_results(results | rejectattr("already_imported")) }}
+            {{ search_results(results | rejectattr("already_imported_artist")) }}
             
-            {% set already_imported = results | selectattr("already_imported") | list %}
+            {% set already_imported = results | selectattr("already_imported_artist") | list %}
             {% if already_imported %}
                 <p>The following artists have already been imported, and can be updated.</p>
                 {{ search_results(already_imported) }}
