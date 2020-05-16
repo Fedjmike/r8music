@@ -4,6 +4,7 @@ from urllib.parse import urljoin, unquote
 
 from django.conf import settings
 from django.db import transaction
+from background_task import background
 
 from r8music.music.models import (
     Artist, Release, Track, generate_slug_tracked,
@@ -408,7 +409,11 @@ class Importer:
         featured_artists = uniqify(featured_artists, key=lambda response: response.json["id"])
         
         artist_map = self.create_artists(featured_artists)
-        
+
+        #Schedule these artists to be fully imported later
+        for artist in featured_artists:
+            schedule_import_artist(artist)
+
         return artist_map
         
     def create_tracks(self, release_json, release):
@@ -615,3 +620,9 @@ class Importer:
         
         artist_map = self.create_artists([artist_response])
         self.create_from_release_responses(release_responses, artist_map)
+
+@background
+def schedule_import_artist(artist_mbid):
+    print("Importing ", artist_mbid)
+    Importer().import_artist(artist_mbid)
+    print("Finished importing ", artist_mbid)

@@ -6,20 +6,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
-from background_task import background
 
 from r8music.music.models import Artist
 from r8music.music.urls import url_for_artist
 from .models import ArtistMBLink
-from .importer import Importer
+from .importer import schedule_import_artist
 
 def search_artists(query):
     musicbrainzngs.set_useragent(*settings.MUSICBRAINZ_USERAGENT)
     return musicbrainzngs.search_artists(artist=query)["artist-list"]
-
-@background
-def schedule_import_artist(artist_mbid):
-    Importer().import_artist(artist_mbid)
 
 class ImportArtistPage(LoginRequiredMixin, TemplateView):
     """Displays the artist search form after a GET, and imports an artist given in a POST"""
