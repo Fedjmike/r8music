@@ -47,18 +47,18 @@
             {% if page_obj.previous_page_number() != 1 %}
                 <a href="{{ add_url_params(request, page=1) }}">{{ 1 }}</a> ..
             {% endif %}
-            <a href="{{ add_url_params(request, page=page_obj.previous_page_number()) }}">
-                {{ page_obj.previous_page_number() }}
-            </a>
+            <a href="{{ add_url_params(request, page=page_obj.previous_page_number()) }}">{{
+                page_obj.previous_page_number()
+            }}</a>
             /
         {% endif %}
         {{ page_obj.number }}
         {% if page_obj.has_next() %}
             /
             {% if page_obj.next_page_number() != page_obj.paginator.num_pages %}
-                <a href="{{ add_url_params(request, page=page_obj.next_page_number()) }}">
-                    {{ page_obj.next_page_number() }}
-                </a>
+                <a href="{{ add_url_params(request, page=page_obj.next_page_number()) }}">{{
+                    page_obj.next_page_number()
+                }}</a>
                 ..
             {% endif %}
             <a href="{{ add_url_params(request, page=page_obj.paginator.num_pages) }}">
