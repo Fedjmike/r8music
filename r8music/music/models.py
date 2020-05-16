@@ -65,7 +65,11 @@ class Artist(models.Model):
         
     @property
     def wikipedia_url(self):
-        return None
+        try:
+            return self.external_links.filter(name="Wikipedia").get().url
+
+        except ArtistExternalLink.DoesNotExist:
+            return None
     
 class ReleaseType(enum.Enum):
     ALBUM = 1
