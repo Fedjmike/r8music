@@ -106,7 +106,7 @@
     
     {% if artist.wikipedia_url %}
         <p class="de-emph">
-            [<a href="{{ artist.wikipedia_url }}" target=_blank>Read more</a>
+            [<a href="{{ artist.wikipedia_url }}">Read more</a>
             on Wikipedia]
         </p>
     {% endif %}
@@ -119,10 +119,7 @@
         {% if loop.index == 1 %}
         {% elif (loop.index-1) % 4 == 0 %}<br/>
         {% else %}&middot;{% endif %}
-        <a href={{ external_link.url }} target=_blank>
-            {{ website }}
-            <i class="material-icons tiny">launch</i>
-        </a> 
+        <a href={{ external_link.url }}>{{ website }}</a> 
     {% endfor %}
 {%- endmacro %}
 

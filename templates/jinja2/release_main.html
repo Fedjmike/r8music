@@ -65,10 +65,7 @@
                "SoundCloud", "UltimateGuitar", "Wikipedia"
            ]) %}
             {% if loop.index == 1 %}<br/>{% endif %}
-            <a href={{ external_link.url }} target=_blank>
-                {{ website }}
-                <i class="material-icons tiny">launch</i>
-            </a>
+            <a href={{ external_link.url }}>{{ website }}</a>
         {% endfor %}
     </div>
 </section>
