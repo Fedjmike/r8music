@@ -1,3 +1,10 @@
+import re
+
+from django.urls import re_path
+from django.shortcuts import redirect
+
+#
+
 def fuzzy_groupby(iterable, threshold, key=lambda x: x):
     iterator = iter(iterable)
     item = None
@@ -22,3 +29,16 @@ def fuzzy_groupby(iterable, threshold, key=lambda x: x):
     
     except StopIteration:
         pass
+
+#
+
+def prefix_redirect_route(prefix, replacement, permanent=False):
+    #The request object path includes a leading slash
+    pattern = re.compile("^/" + prefix)
+    replacement = "/" + replacement
+
+    def redirect_view(request):
+        new_url = re.sub(pattern, replacement, request.path)
+        return redirect(new_url, permanent)
+
+    return re_path(f"^{prefix}.*", redirect_view)

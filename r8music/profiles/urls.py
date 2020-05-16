@@ -1,6 +1,7 @@
 from django.conf.urls import include
 from django.urls import path, reverse
 
+from r8music.utils import prefix_redirect_route
 from .views import (
     UserIndex, UserMainPage, UserListenedUnratedPage, UserSavedPage,
     UserActivityPage, UserFriendsPage, UserStatsPage
@@ -12,6 +13,8 @@ null_view = lambda: None
 
 urlpatterns = [
     path("users", UserIndex.as_view(), name="user_index"),
+    
+    prefix_redirect_route("u/", "user/"),
     
     path("user/<slug>", UserMainPage.as_view(), name="user_main"),
     path("user/<slug>/listened-unrated", UserListenedUnratedPage.as_view(), name="user_listened_unrated"),

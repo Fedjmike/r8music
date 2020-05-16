@@ -1,6 +1,7 @@
 from django.urls import path, reverse
 from rest_framework import routers
 
+from r8music.utils import prefix_redirect_route
 from .views import (
     ArtistIndex, ArtistMainPage, ArtistActivityPage,
     ReleaseMainPage, ReleaseActivityPage, EditReleasePage,
@@ -8,6 +9,10 @@ from .views import (
 )
 
 urlpatterns = [
+    prefix_redirect_route("a/", "artist/"),
+    prefix_redirect_route("r/", "release/"),
+    prefix_redirect_route("t/", "tag/"),
+
     path("artists", ArtistIndex.as_view(), name="artist_index"),
     path("artist/<slug>", ArtistMainPage.as_view(), name="artist"),
     path("artist/<slug>/activity", ArtistActivityPage.as_view(), name="artist_activity"),
