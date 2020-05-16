@@ -331,18 +331,20 @@ class Importer:
     def select_release(self, release_jsons):
         """Select the preferred version of a release"""
         
+        def is_standard_edition(release):
+            non_standard_phrases = ["deluxe", "limited", "edition"]
+            disambiguation = release.get("disambiguation", "")
+            return not any(phrase not in disambiguation for phrase in non_standard_phrases)
+
         def track_count(release):
             return sum(medium["track-count"] for medium in release["medium-list"])
         
         def best_date(release):
             #Prefer earlier years, then fuller dates, then earlier dates
             return (release["date"][:4], -len(release["date"]), release["date"])
-        
-        is_standard_edition = lambda json: \
-            "disambiguation" not in json \
-            or "deluxe" not in json["disambiguation"]
-        release_jsons = list(filter(is_standard_edition, release_jsons)) \
-            or release_jsons
+
+        release_jsons = \
+            list(filter(is_standard_edition, release_jsons)) or release_jsons
 
         #Assume that releases with unusual track counts (non-mode) are not canonical
         releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
