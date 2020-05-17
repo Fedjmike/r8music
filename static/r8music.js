@@ -80,6 +80,21 @@ function renderBarChart(canvas, labels, data, options={}, datasetOptions={}) {
   });
 }
 
+function timeBarChartOptions(timeOptions) {
+  return {
+    scales: {
+      xAxes: [{
+        type: "time",
+        time: timeOptions,
+        // Add spacing either side of the x axis
+        offset: true,
+        // Show bars between the grid lines 
+        gridLines: {offsetGridLines: true},
+      }]
+    }
+  };
+}
+
 function renderRatingCounts(canvas) {
   const ratings = ["1", "2", "3", "4", "5", "6", "7", "8"];
   renderBarChart(canvas, ratings, userDatasets.ratingCounts,
@@ -99,27 +114,18 @@ function renderReleaseYearCounts(canvas) {
   
   labels = labels.map(year => year.toString());
   
-  renderBarChart(canvas, labels, data, {
-    scales: {
-      xAxes: [{
-        type: "time",
-        time: {parser: "YYYY", unit: "year", unitStepSize: stepSize}
-      }]
-    }
+  const chartOptions = timeBarChartOptions({
+    parser: "YYYY", unit: "year", unitStepSize: stepSize
   });
+  renderBarChart(canvas, labels, data, chartOptions);
 }
 
 function renderListenMonthCounts(canvas) {
   const [labels, data] = userDatasets.listenMonthCounts;
-  
-  renderBarChart(canvas, labels, data, {
-    scales: {
-      xAxes: [{
-        type: "time",
-        time: {parser: "YYYY-MM", unit: "month", unitStepSize: 6}
-      }]
-    }
+  const chartOptions = timeBarChartOptions({
+    parser: "YYYY-MM", unit: "month", unitStepSize: 6
   });
+  renderBarChart(canvas, labels, data, chartOptions);
 }
 
 function setupCharts() {
