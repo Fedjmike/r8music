@@ -16,10 +16,8 @@ from .models import (
 )
 from r8music.actions.models import SaveAction, ListenAction, RateAction, ActiveActions
 
-from .utils import (
-    uniqify, mode_items, query_and_collect,
-    musicbrainz_url, get_release_type_from_mb_str
-)
+from r8music.utils import uniqify, mode_items
+from .utils import query_and_collect, musicbrainz_url, get_release_type_from_mb_str
 from .chromatography import get_palette
 
 class Importer:

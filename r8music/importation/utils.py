@@ -3,27 +3,6 @@ from collections import defaultdict
 
 from r8music.music.models import ReleaseType
 
-def uniqify(iterable, key):
-    return {key(item): item for item in iterable}.values()
-
-def mode_items(iterable, key=lambda x: x):
-    """Select the mode item(s) (i.e. the most common ones) from an iterable,
-       as identified by the given key."""
-    
-    items_grouped_by_key = defaultdict(lambda: [])
-    
-    for item in iterable:
-        items_grouped_by_key[key(item)].append(item)
-        
-    groups = items_grouped_by_key.values()
-    largest_group_size = max(map(len, groups), default=0)
-    
-    return [
-        item
-        for group in groups if len(group) == largest_group_size
-        for item in group
-    ]
-
 def query_and_collect(query, limits):
     """Collect reponses by querying a paginated resource.
        `query` is a function which takes limit and offset parameters and returns
