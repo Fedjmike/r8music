@@ -122,6 +122,37 @@ function renderListenMonthCounts(canvas) {
   });
 }
 
+function setupCharts() {
+  if (typeof Chart !== "undefined") {
+    renderRatingCounts(document.getElementById("rating-counts-chart"));
+    renderReleaseYearCounts(document.getElementById("release-year-counts-chart"));
+    renderListenMonthCounts(document.getElementById("listen-month-counts-chart"));
+  }
+}
+
+// 'Load more' button
+
+function setupLoadMore() {
+  $(".load-more").click(function (event) {
+    event.preventDefault();
+    
+    const dataset = event.target.dataset;
+    
+    const next_page_no = parseInt(dataset.page_no) + 1;
+    
+    $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
+      if (msg.error) {
+          return; //todo
+      }
+      
+      dataset.page_no = msg.next_page_no;
+      
+      const target = $(event.target).closest(".load-more-area").find(".load-more-target");
+      target.append(msg);
+    });
+  });
+}
+
 // Scroll autoloading
 
 function elementInScroll(elem) {
@@ -161,13 +192,15 @@ function autoload() {
   };
 };
 
-// Setup
-
-$(document).ready(function ($) {
+function setupAutoloading() {
   if (document.getElementById("autoload-trigger")) {
     $(window).on('scroll',  _.debounce(autoload, 200));
   };
-  
+}
+
+// Navbar
+
+function setupNavbar() {
   $("#logout").parent().remove();
   $("#user-more").show();
   
@@ -183,54 +216,37 @@ $(document).ready(function ($) {
       event.preventDefault();
     }
   });
-  
-  if (typeof Chart !== "undefined") {
-    renderRatingCounts(document.getElementById("rating-counts-chart"));
-    renderReleaseYearCounts(document.getElementById("release-year-counts-chart"));
-    renderListenMonthCounts(document.getElementById("listen-month-counts-chart"));
-  }
-  
+}
+
+// Editable rating descriptions
+
+function setupEditableRatingDescriptions() {
   $(".editable.rating-description")
-  .attr("contenteditable", "")
-  .blur(function (event) {
-    const description = event.target.innerHTML;
-    const rating = event.target.dataset.rating;
-    
-    $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
-      if (msg.error) {
-        return; //todo
-      }
-    });
-  });
-  
-  $(".load-more").click(function (event) {
-    event.preventDefault();
-    
-    const dataset = event.target.dataset;
-    
-    const next_page_no = parseInt(dataset.page_no) + 1;
-    
-    $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
-      if (msg.error) {
+    .attr("contenteditable", "")
+    .blur(function (event) {
+      const description = event.target.innerHTML;
+      const rating = event.target.dataset.rating;
+      
+      $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
+        if (msg.error) {
           return; //todo
-      }
-      
-      dataset.page_no = msg.next_page_no;
-      
-      const target = $(event.target).closest(".load-more-area").find(".load-more-target");
-      target.append(msg);
+        }
+      });
     });
-  });
-  
+}
+
+// Search autocompletion
+
+function assignAutocompletionLabels(results, f) {
   // The jQuery autocomplete API relies on each result having a "label" field.
   // Even if _renderItem is overriden not to use it, it is still used when selecting
   // an item with the keyboard.
-  function assignLabels(results, f) {
-    results.map(function (result) {
-      result.label = f(result);
-    });
+  for (const result of results) {
+    result.label = f(result);
   }
-  
+}
+
+function setupSearchAutocompletion() {
   // From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
   $("#autocomplete").autocomplete({
     minLength: 2,
@@ -238,7 +254,7 @@ $(document).ready(function ($) {
       $.getJSON("/api/search", {
         q: request.term, 
       }, function (data) {
-        assignLabels(data.results, result => result.name);
+        assignAutocompletionLabels(data.results, result => result.name);
         response(data.results);
       });
     },
@@ -246,14 +262,16 @@ $(document).ready(function ($) {
       window.location.href = ui.item.url;
     }
   });
-  
+}
+
+function setupMBSearchAutocompletion() {
   const mb_autocomplete = $("#autocomplete-mb").autocomplete({
     minLength: 2,
     source: function (request, response) {
       $.getJSON("/add-artist-search/" + request.term, {
         return_json: 1
       }, function (data) {
-        assignLabels(data.results, result => result.name);
+        assignAutocompletionLabels(data.results, result => result.name);
         response(data.results);
       });
     },
@@ -263,7 +281,7 @@ $(document).ready(function ($) {
         url: "/add-artist",
         data: {'artist-id': ui.item.id}
       });
-      window.alert("The artist is being added")
+      window.alert("The artist is being added");
     }
   }).data("ui-autocomplete");
   
@@ -287,4 +305,16 @@ $(document).ready(function ($) {
       return li;
     }
   }
+}
+
+//
+
+$(document).ready(function ($) {
+  setupCharts();
+  setupAutoloading();
+  setupLoadMore();
+  setupNavbar();
+  setupEditableRatingDescriptions();
+  setupSearchAutocompletion();
+  setupMBSearchAutocompletion();
 });
