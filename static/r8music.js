@@ -150,8 +150,8 @@ function setupLoadMore() {
       if (msg.error) {
           return; //todo
       }
-      
-      dataset.page_no = msg.next_page_no;
+
+      dataset.page_no = next_page_no;
       
       const target = $(event.target).closest(".load-more-area").find(".load-more-target");
       target.append(msg);
