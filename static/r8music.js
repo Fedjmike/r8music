@@ -55,9 +55,7 @@ function renderChart(canvas, labels, options) {
     canvas.chart = new Chart(canvas.getContext("2d"), options);
 }
 
-defaultBarOptions = {scales: {xAxes: [{categoryPercentage: 1, barPercentage: 0.85}]}};
-
-function renderBarChart(canvas, labels, data, options=defaultBarOptions) {
+function renderBarChart(canvas, labels, data, options={}, datasetOptions={}) {
     renderChart(canvas, labels, {
         type: "bar",
         data: {
@@ -68,7 +66,9 @@ function renderBarChart(canvas, labels, data, options=defaultBarOptions) {
                 backgroundColor: "rgba(0,0,0, 0)",
                 hoverBackgroundColor: palette[0],
                 borderWidth: 1.5,
-                
+                categoryPercentage: 1,
+                barPercentage: 0.8,
+                ...datasetOptions
             }]
         },
         options: options
@@ -77,7 +77,9 @@ function renderBarChart(canvas, labels, data, options=defaultBarOptions) {
 
 function renderRatingCounts(canvas) {
     var ratings = ["1", "2", "3", "4", "5", "6", "7", "8"];
-    renderBarChart(canvas, ratings, userDatasets.ratingCounts);
+    renderBarChart(canvas, ratings, userDatasets.ratingCounts,
+        datasetOptions={categoryPercentage: 1, barPercentage: 0.85}
+    );
 }
 
 function renderReleaseYearCounts(canvas) {
@@ -88,14 +90,14 @@ function renderReleaseYearCounts(canvas) {
     data = Array(extraYears).fill(0).concat(data);
     labels = Array.from(Array(extraYears), (x, i) => labels[0] - extraYears + i).concat(labels);
     
+    labels = labels.map(year => year.toString());
+    
     renderBarChart(canvas, labels, data, {
         scales: {
             xAxes: [{
-                categoryPercentage: 1,
-                barPercentage: 0.8,
                 type: "time",
-                time: {parser: "YYYY", unit: "year", unitStepSize: 10
-            }}]
+                time: {parser: "YYYY", unit: "year", unitStepSize: 10}
+            }]
         }
     });
 }
@@ -106,11 +108,9 @@ function renderListenMonthCounts(canvas) {
     renderBarChart(canvas, labels, data, {
         scales: {
             xAxes: [{
-                categoryPercentage: 1,
-                barPercentage: 0.8,
                 type: "time",
-                time: {parser: "YYYY-MM", unit: "month", unitStepSize: 6
-            }}]
+                time: {parser: "YYYY-MM", unit: "month", unitStepSize: 6}
+            }]
         }
     });
 }
