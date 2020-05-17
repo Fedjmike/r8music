@@ -10,8 +10,7 @@ class SettingsTest(TestCase):
             for form_name in ["user_form", "settings_form", "profile_form"]:
                 form = response.context_data[form_name]
                 
-                expected_error_fields = expected_errors[form_name] \
-                    if form_name in expected_errors else []
+                expected_error_fields = expected_errors.get(form_name, [])
                 
                 self.assertEqual(set(form.errors.keys()), set(expected_error_fields), form_name)
                 

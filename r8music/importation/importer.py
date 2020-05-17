@@ -276,8 +276,8 @@ class Importer:
         art_urls = {
             "max": image["image"],
             #"small" and "large" are deprecated keys corresponding to "250" and "500"
-            "250": image["thumbnails"].get("250", None) or image["thumbnails"].get("small", None),
-            "500": image["thumbnails"].get("500", None) or image["thumbnails"].get("large", None)
+            "250": image["thumbnails"].get("250") or image["thumbnails"].get("small"),
+            "500": image["thumbnails"].get("500") or image["thumbnails"].get("large")
         }
         
         #The cover art archive gives links which serve the image through a redirect

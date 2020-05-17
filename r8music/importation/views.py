@@ -59,9 +59,8 @@ class ImportArtistSearchResults(LoginRequiredMixin, TemplateView):
                     ArtistMBLink.objects.get(mbid=result["id"]).artist
                     if result["id"] in already_imported_mbids else None,
                 "disambiguation":
-                    result["disambiguation"] if "disambiguation" in result
-                    else result["area"]["name"] if "area" in result
-                    else None
+                    result.get("disambiguation")
+                    or (result["area"]["name"] if "area" in result else None)
             }
             for result in mb_results
         ]
