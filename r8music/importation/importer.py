@@ -329,9 +329,14 @@ class Importer:
         
         return query_and_collect(query, limits=self.mb_browse_limit)
         
-    def select_release(self, release_jsons):
+    def select_release(self, release_group_json, release_jsons):
         """Select the preferred version of a release"""
-        
+
+        def is_in_first_year(release):
+            first_release_date = release_group_json.get("first-release-date", None)
+            #Also include releases without dates - likely originals
+            return "date" not in release or release["date"][:4] == first_release_date[:4]
+
         def is_standard_edition(release):
             non_standard_phrases = ["deluxe", "limited", "edition"]
             disambiguation = release.get("disambiguation", "")
@@ -341,23 +346,25 @@ class Importer:
             return sum(medium["track-count"] for medium in release["medium-list"])
         
         def best_date(release):
-            #Prefer earlier years, then fuller dates, then earlier dates
-            return (release["date"][:4], -len(release["date"]), release["date"])
+            #Prefer fuller dates, then earlier dates
+            return (-len(release["date"]), release["date"])
 
+        release_jsons = \
+            list(filter(is_in_first_year, release_jsons)) or release_jsons
         release_jsons = \
             list(filter(is_standard_edition, release_jsons)) or release_jsons
 
         #Assume that releases with unusual track counts (non-mode) are not canonical
-        releases_of_mode_track_count = mode_items(release_jsons, key=track_count)
+        release_jsons = mode_items(release_jsons, key=track_count)
         
         #Better if they have a date
-        those_with_dates = [r for r in releases_of_mode_track_count if "date" in r]
+        those_with_dates = [r for r in release_jsons if "date" in r]
         
         if those_with_dates:
             return min(those_with_dates, key=best_date)
             
         else:
-            return next(iter(releases_of_mode_track_count), None)
+            return next(iter(release_jsons), None)
 
     def query_release(self, release_group_json):
         release_jsons = self.browse_releases(
@@ -368,7 +375,7 @@ class Importer:
             #Cannot be imported
             return None
         
-        release_json = self.select_release(release_jsons)
+        release_json = self.select_release(release_group_json, release_jsons)
         
         art_urls = self.query_cover_art(release_json["id"], release_group_json["id"])
         _, _, discogs_tags = self.query_discogs(release_json, release_group_json)
