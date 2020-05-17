@@ -42,18 +42,17 @@
     </form>
 
     {% if results %}
-        <p>Choose the artist to import.</p>
-        
         <form action={{ url("import_artist") }} method="post" class="clearfix">
             {{ csrf_input }}
-            
-            {{ search_results(results | rejectattr("already_imported_artist")) }}
             
             {% set already_imported = results | selectattr("already_imported_artist") | list %}
             {% if already_imported %}
                 <p>The following artists have already been imported, and can be updated.</p>
                 {{ search_results(already_imported) }}
             {% endif %}
+            
+            <p>Choose the artist to import.</p>
+            {{ search_results(results | rejectattr("already_imported_artist")) }}
             
             <div>
                 <input type="submit" value="Add">
