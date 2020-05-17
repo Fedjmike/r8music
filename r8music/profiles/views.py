@@ -28,6 +28,8 @@ from r8music.actions.models import get_paginated_activity_feed
 
 from django.urls import reverse_lazy
 
+from r8music.utils import uniqify
+
 class UserIndex(ListView):
     model = User
     template_name = "user_index.html"
@@ -174,10 +176,25 @@ class UserStatsPage(AbstractUserPage):
         context["release_year_counts"] = \
             (year_range, [year_counts.get(year, 0) for year in year_range])
         
+    def add_listen_month_counts(self, context):
+        """Adds counts of the releases, by month they were listened to."""
+
+        listen_dates = context["user"].active_actions \
+            .exclude(listen=None) \
+            .order_by("listen__creation") \
+            .values_list("listen__creation", flat=True)
+        listen_months = [date.isoformat()[:7] for date in listen_dates]
+
+        counts = Counter(listen_months)
+        keys = uniqify(listen_months)
+
+        context["listen_month_counts"] = (keys, [counts[key] for key in keys])
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         self.add_rating_counts(context)
         self.add_release_year_counts(context)
+        self.add_listen_month_counts(context)
         return context
 
 # User 'post' views which redirect to the referrer

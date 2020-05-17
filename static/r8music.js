@@ -80,7 +80,7 @@ function renderRatingCounts(canvas) {
     renderBarChart(canvas, ratings, userDatasets.ratingCounts);
 }
 
-function renderYearCounts(canvas) {
+function renderReleaseYearCounts(canvas) {
     var [labels, data] = userDatasets.releaseYearCounts;
     
     /*Pad the front of the dataset to the start of a decade*/
@@ -95,6 +95,21 @@ function renderYearCounts(canvas) {
                 barPercentage: 0.8,
                 type: "time",
                 time: {parser: "YYYY", unit: "year", unitStepSize: 10
+            }}]
+        }
+    });
+}
+
+function renderListenMonthCounts(canvas) {
+    var [labels, data] = userDatasets.listenMonthCounts;
+    
+    renderBarChart(canvas, labels, data, {
+        scales: {
+            xAxes: [{
+                categoryPercentage: 1,
+                barPercentage: 0.8,
+                type: "time",
+                time: {parser: "YYYY-MM", unit: "month", unitStepSize: 6
             }}]
         }
     });
@@ -157,7 +172,8 @@ $(document).ready(function ($) {
     
     if (typeof Chart !== "undefined") {
         renderRatingCounts(document.getElementById("rating-counts-chart"));
-        renderYearCounts(document.getElementById("year-counts-chart"));
+        renderReleaseYearCounts(document.getElementById("release-year-counts-chart"));
+        renderListenMonthCounts(document.getElementById("listen-month-counts-chart"));
     }
     
     $(".editable.rating-description")

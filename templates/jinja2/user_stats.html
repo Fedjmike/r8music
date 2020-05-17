@@ -9,15 +9,19 @@
     <script>
     var userDatasets = {{ json_dumps({
         "ratingCounts":  rating_counts,
-        "releaseYearCounts": release_year_counts
+        "releaseYearCounts": release_year_counts,
+        "listenMonthCounts": listen_month_counts
     }) | safe }};
     </script>
     
     <section class="page content">
-        <header><h4>Number of releases by rating</h4></header>
+        <header><h4>Releases by rating</h4></header>
         <canvas class="chart" id="rating-counts-chart"></canvas>
         
-        <header><h4>Number of releases by year</h4></header>
-        <canvas class="chart" id="year-counts-chart"></canvas>
+        <header><h4>Releases by year</h4></header>
+        <canvas class="chart" id="release-year-counts-chart"></canvas>
+
+        <header><h4>Releases by month listened</h4></header>
+        <canvas class="chart" id="listen-month-counts-chart"></canvas>
     </section>
 {% endblock %}
