@@ -10,8 +10,8 @@ function updateAverageRating(averageRating) {
 
 function rateRelease(clicked_element, release_id, rating) {
     /*User clicked the already selected rating => unrate*/
-    var is_undo = clicked_element.classList.contains("selected");
-    var action = is_undo ? "unrate" : "rate";
+    const is_undo = clicked_element.classList.contains("selected");
+    const action = is_undo ? "unrate" : "rate";
     
     $.ajax({
         method: "POST",
@@ -27,10 +27,8 @@ function rateRelease(clicked_element, release_id, rating) {
             clicked_element.classList.remove("selected");
         
         } else {
-            var siblings = clicked_element.parentNode.children;
-            
-            for (var i = 0; i < siblings.length; i++)
-                siblings[i].classList.remove("selected");
+            for (const sibling of clicked_element.parentNode.children)
+                sibling.classList.remove("selected");
                 
             clicked_element.classList.add("selected");
         }
@@ -76,19 +74,19 @@ function renderBarChart(canvas, labels, data, options={}, datasetOptions={}) {
 }
 
 function renderRatingCounts(canvas) {
-    var ratings = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    const ratings = ["1", "2", "3", "4", "5", "6", "7", "8"];
     renderBarChart(canvas, ratings, userDatasets.ratingCounts,
         datasetOptions={categoryPercentage: 1, barPercentage: 0.85}
     );
 }
 
 function renderReleaseYearCounts(canvas) {
-    var [labels, data] = userDatasets.releaseYearCounts;
+    let [labels, data] = userDatasets.releaseYearCounts;
 
     const stepSize = 5;
     
     /*Pad the front of the dataset to an even step size*/
-    var extraYears = labels[0] % stepSize;
+    const extraYears = labels[0] % stepSize;
     data = Array(extraYears).fill(0).concat(data);
     labels = Array.from(Array(extraYears), (x, i) => labels[0] - extraYears + i).concat(labels);
     
@@ -105,7 +103,7 @@ function renderReleaseYearCounts(canvas) {
 }
 
 function renderListenMonthCounts(canvas) {
-    var [labels, data] = userDatasets.listenMonthCounts;
+    const [labels, data] = userDatasets.listenMonthCounts;
     
     renderBarChart(canvas, labels, data, {
         scales: {
@@ -118,24 +116,25 @@ function renderListenMonthCounts(canvas) {
 }
 
 function elementInScroll(elem) {
-    var docViewTop = $(window).scrollTop();
-    var docViewBottom = docViewTop + $(window).height();
+    const docViewTop = $(window).scrollTop();
+    const docViewBottom = docViewTop + $(window).height();
 
-    var elemTop = $(elem).offset().top;
-    var elemBottom = elemTop + $(elem).height();
+    const elemTop = $(elem).offset().top;
+    const elemBottom = elemTop + $(elem).height();
 
     return elemBottom <= docViewBottom && elemTop >= docViewTop;
 };
 
-var stahp = false;
-var autoload = function() {
-    if (!stahp && elementInScroll("#autoload-trigger")) {
-        var autoloadTrigger = document.getElementById("autoload-trigger");
-        stahp = true;
+let stopAutoloading = false;
+
+function autoload() {
+    if (!stopAutoloading && elementInScroll("#autoload-trigger")) {
+        const autoloadTrigger = document.getElementById("autoload-trigger");
+        stopAutoloading = true;
         
         $(autoloadTrigger).text("Loading");
         
-        var next_page_no = parseInt(autoloadTrigger.dataset.page_no) + 1;
+        const next_page_no = parseInt(autoloadTrigger.dataset.page_no) + 1;
         
         $.get(autoloadTrigger.dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
@@ -145,9 +144,9 @@ var autoload = function() {
             
             $(autoloadTrigger).text("Load more");
             
-            var target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
+            const target = $(autoloadTrigger).closest(".load-more-area").find(".load-more-target");
             target.append(msg);
-            stahp = false;
+            stopAutoloading = false;
         });
     };
 };
@@ -181,8 +180,8 @@ $(document).ready(function ($) {
     $(".editable.rating-description")
     .attr("contenteditable", "")
     .blur(function (event) {
-        var description = event.target.innerHTML;
-        var rating = event.target.dataset.rating;
+        const description = event.target.innerHTML;
+        const rating = event.target.dataset.rating;
         
         $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
             if (msg.error)
@@ -193,9 +192,9 @@ $(document).ready(function ($) {
     $(".load-more").click(function (event) {
         event.preventDefault();
         
-        var dataset = event.target.dataset;
+        const dataset = event.target.dataset;
         
-        var next_page_no = parseInt(dataset.page_no) + 1;
+        const next_page_no = parseInt(dataset.page_no) + 1;
         
         $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
             if (msg.error)
@@ -203,7 +202,7 @@ $(document).ready(function ($) {
             
             dataset.page_no = msg.next_page_no;
             
-            var target = $(event.target).closest(".load-more-area").find(".load-more-target");
+            const target = $(event.target).closest(".load-more-area").find(".load-more-target");
             target.append(msg);
         });
     });
@@ -233,7 +232,7 @@ $(document).ready(function ($) {
         }
     });
     
-    var mb_autocomplete = $("#autocomplete-mb").autocomplete({
+    const mb_autocomplete = $("#autocomplete-mb").autocomplete({
         minLength: 2,
         source: function (request, response) {
             $.getJSON("/add-artist-search/" + request.term, {
@@ -255,11 +254,11 @@ $(document).ready(function ($) {
     
     if (mb_autocomplete) {
         mb_autocomplete._renderItem = function (ul, item) {
-            var li = $("<li>")
+            const li = $("<li>")
                 .addClass("ui-menu-item")
                 .appendTo(ul);
             
-            var a = $("<a>")
+            const a = $("<a>")
                 .append(item.name + " ")
                 .appendTo(li);
                 
