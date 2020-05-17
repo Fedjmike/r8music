@@ -63,7 +63,11 @@
     <header>
         {% if not request.user.is_anonymous %}
             <span class="right de-emph" style="clear: right">
-                Out of date?
+                {% if artist.is_partially_imported() %}
+                    Only partially imported.
+                {% else %}
+                    Out of date?
+                {% endif %}
                 <a href={{ url("update_artist", kwargs={"id": artist.id}) }}>Update this artist</a>
             </span>
         {% endif %}

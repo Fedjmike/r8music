@@ -8,8 +8,17 @@
     {% for result in results %}
         <label>
             <input type="radio" name="artist-mbid" value={{ result.mbid }} />
-            {{ artist_link(result.already_imported_artist)
-                if result.already_imported_artist else result.name}}
+
+            {% set artist = result.already_imported_artist %}
+            {% if artist %}
+                <a href="{{ url_for_artist(artist) }}">
+                    {{ "[Partially imported]" if artist.is_partially_imported() else None }}
+                    {{ artist.name }}
+                </a>
+            {% else %}
+                {{ result.name}}
+            {% endif %}
+
             <span class="de-emph">
                 {{ ' (%s)' % result.disambiguation if result.disambiguation else '' }}
             </span>

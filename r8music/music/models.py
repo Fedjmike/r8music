@@ -70,6 +70,11 @@ class Artist(models.Model):
 
         except ArtistExternalLink.DoesNotExist:
             return None
+
+    def is_partially_imported(self):
+        solo_releases = Release.objects.annotate(artist_no=Count("artists")) \
+            .filter(artist_no=1, artists=self)
+        return solo_releases.count() == 0
     
 class ReleaseType(enum.Enum):
     ALBUM = 1

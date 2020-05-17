@@ -415,10 +415,6 @@ class Importer:
         
         artist_map = self.create_artists(featured_artists)
 
-        #Schedule these artists to be fully imported later
-        for artist in featured_artists:
-            schedule_import_artist(artist)
-
         return artist_map
         
     def create_tracks(self, release_json, release):
