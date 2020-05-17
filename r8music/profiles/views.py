@@ -44,9 +44,9 @@ class AbstractUserPage(DetailView):
     def get_object(self):
         return get_object_or_404(User, username=self.kwargs.get("slug"))
         
-    def get_actions_counts(self, user):
-        """Return the number of releases interacted with in certain ways by a user."""
-        return user.active_actions.aggregate(
+    def add_actions_counts(self, context):
+        """Adds the number of releases interacted with in certain ways by a user."""
+        context["action_counts"] = context["user"].active_actions.aggregate(
             rated=Count("id", filter=~Q(rate=None)),
             listened_unrated=Count("id", filter=~Q(listen=None) & Q(rate=None)),
             saved=Count("id", filter=~Q(save_action=None))
@@ -54,7 +54,7 @@ class AbstractUserPage(DetailView):
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["action_counts"] = self.get_actions_counts(context["user"])
+        self.add_actions_counts(context)
         return context
         
 class UserMainPage(AbstractUserPage):
@@ -144,22 +144,22 @@ class UserFriendsPage(AbstractUserPage):
 class UserStatsPage(AbstractUserPage):
     template_name = "user_stats.html"
     
-    def get_rating_counts(self, user):
-        """Return counts of releases given each rating by a user."""
+    def add_rating_counts(self, context):
+        """Adds the counts of releases given each rating by a user."""
         
-        rating_counts = user.active_actions.aggregate(**{
+        rating_counts = context["user"].active_actions.aggregate(**{
             ("rated_%d" % n): Count("id", filter=Q(rate__rating=n))
             for n in range(1, 8+1)
         })
         
-        return [rating_counts["rated_%d" % n] for n in range(1, 8+1)]
+        context["rating_counts"] = \
+            [rating_counts["rated_%d" % n] for n in range(1, 8+1)]
         
-        
-    def get_release_year_counts(self, user):
-        """Return counts of releases listened to by a user for each year between
+    def add_release_year_counts(self, context):
+        """Adds the counts of releases listened to by a user for each year between
            the years of the earliest and latest releases, as ([years], [counts])."""
         
-        release_dates = user.active_actions \
+        release_dates = context["user"].active_actions \
             .exclude(listen=None) \
             .order_by("release__release_date") \
             .values_list("release__release_date", flat=True)
@@ -171,12 +171,13 @@ class UserStatsPage(AbstractUserPage):
             range(min(iterable), max(iterable)+1) if iterable else []
         year_range = list(range_of(list(year_counts.keys())))
         
-        return (year_range, [year_counts.get(year, 0) for year in year_range])
+        context["release_year_counts"] = \
+            (year_range, [year_counts.get(year, 0) for year in year_range])
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["rating_counts"] = self.get_rating_counts(context["user"])
-        context["release_year_counts"] = self.get_release_year_counts(context["user"])
+        self.add_rating_counts(context)
+        self.add_release_year_counts(context)
         return context
 
 # User 'post' views which redirect to the referrer

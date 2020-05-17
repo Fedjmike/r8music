@@ -35,7 +35,7 @@ class AbstractArtistPage(DetailView):
 class ArtistMainPage(AbstractArtistPage):
     template_name = "artist_main.html"
 
-    def get_user_ratings(self, artist):
+    def add_user_ratings(self, context):
         #A defaultdict allows the template to look up a release whether or not there is a rating
         user_ratings = defaultdict(lambda: None)
         
@@ -43,16 +43,16 @@ class ArtistMainPage(AbstractArtistPage):
             user_ratings.update({
                 id: user_rating for id, user_rating
                 in ActiveActions.objects
-                    .filter(release__artists=artist, user=self.request.user).exclude(rate=None)
+                    .filter(release__artists=context["artist"], user=self.request.user)
+                    .exclude(rate=None)
                     .values_list("release_id", "rate__rating")
             })
         
-        return user_ratings
+        context["get_user_rating"] = lambda release: user_ratings[release.id]
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_ratings = self.get_user_ratings(context["artist"])
-        context["get_user_rating"] = lambda release: user_ratings[release.id]
+        self.add_user_ratings(context)
         return context
 
 class ArtistActivityPage(AbstractArtistPage):
