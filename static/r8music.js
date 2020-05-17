@@ -1,3 +1,5 @@
+// Ratings
+
 function updateAverageRating(averageRating) {
   if (!averageRating) {
     $("#average-rating-section").css("display", "none");
@@ -9,7 +11,7 @@ function updateAverageRating(averageRating) {
 }
 
 function rateRelease(clicked_element, release_id, rating) {
-  /*User clicked the already selected rating => unrate*/
+  // User clicked the already selected rating => unrate
   const is_undo = clicked_element.classList.contains("selected");
   const action = is_undo ? "unrate" : "rate";
   
@@ -18,17 +20,19 @@ function rateRelease(clicked_element, release_id, rating) {
     url: "/releases/" + release_id + "/" + action + "/",
     data: {rating: rating}
   }).done(function (msg) {
-    if (msg.error)
+    if (msg.error) {
       return;
+    }
     
-    /*Success, update rating widget*/
+    // Success, update rating widget
     
     if (is_undo) {
       clicked_element.classList.remove("selected");
     
     } else {
-      for (const sibling of clicked_element.parentNode.children)
+      for (const sibling of clicked_element.parentNode.children) {
         sibling.classList.remove("selected");
+      }
       
       clicked_element.classList.add("selected");
     }
@@ -36,6 +40,8 @@ function rateRelease(clicked_element, release_id, rating) {
     updateAverageRating(msg.averageRating);
   });
 }
+
+// Charts
 
 if (typeof Chart !== "undefined") {
   Chart.defaults.global.legend.display = false;
@@ -47,8 +53,9 @@ if (typeof Chart !== "undefined") {
 }
 
 function renderChart(canvas, labels, options) {
-  if ("chart" in canvas)
+  if ("chart" in canvas) {
     canvas.chart.destroy();
+  }
   
   canvas.chart = new Chart(canvas.getContext("2d"), options);
 }
@@ -85,7 +92,7 @@ function renderReleaseYearCounts(canvas) {
 
   const stepSize = 5;
   
-  /*Pad the front of the dataset to an even step size*/
+  // Pad the front of the dataset to an even step size
   const extraYears = labels[0] % stepSize;
   data = Array(extraYears).fill(0).concat(data);
   labels = Array.from(Array(extraYears), (x, i) => labels[0] - extraYears + i).concat(labels);
@@ -115,6 +122,8 @@ function renderListenMonthCounts(canvas) {
   });
 }
 
+// Scroll autoloading
+
 function elementInScroll(elem) {
   const docViewTop = $(window).scrollTop();
   const docViewBottom = docViewTop + $(window).height();
@@ -137,8 +146,9 @@ function autoload() {
     const next_page_no = parseInt(autoloadTrigger.dataset.page_no) + 1;
     
     $.get(autoloadTrigger.dataset.endpoint, {page_no: next_page_no}, function (msg) {
-      if (msg.error)
+      if (msg.error) {
           return; //todo
+      }
       
       autoloadTrigger.dataset.page_no = next_page_no;
       
@@ -150,6 +160,8 @@ function autoload() {
     });
   };
 };
+
+// Setup
 
 $(document).ready(function ($) {
   if (document.getElementById("autoload-trigger")) {
@@ -166,9 +178,10 @@ $(document).ready(function ($) {
   });
   
   $("form#search input[type='submit']").click(function (event) {
-    /*Cancel the click if the search query is empty*/
-    if ($("form#search [name='q']").val().trim() == "")
+    // Cancel the click if the search query is empty
+    if ($("form#search [name='q']").val().trim() == "") {
       event.preventDefault();
+    }
   });
   
   if (typeof Chart !== "undefined") {
@@ -184,8 +197,9 @@ $(document).ready(function ($) {
     const rating = event.target.dataset.rating;
     
     $.post("/settings/rating-description", {rating: rating, description: description}, function (msg) {
-      if (msg.error)
+      if (msg.error) {
         return; //todo
+      }
     });
   });
   
@@ -197,8 +211,9 @@ $(document).ready(function ($) {
     const next_page_no = parseInt(dataset.page_no) + 1;
     
     $.get(dataset.endpoint, {page_no: next_page_no}, function (msg) {
-      if (msg.error)
+      if (msg.error) {
           return; //todo
+      }
       
       dataset.page_no = msg.next_page_no;
       
@@ -207,16 +222,16 @@ $(document).ready(function ($) {
     });
   });
   
-  //The jQuery autocomplete API relies on each result having a "label" field.
-  //Even if _renderItem is overriden not to use it, it is still used when selecting
-  //an item with the keyboard.
+  // The jQuery autocomplete API relies on each result having a "label" field.
+  // Even if _renderItem is overriden not to use it, it is still used when selecting
+  // an item with the keyboard.
   function assignLabels(results, f) {
     results.map(function (result) {
       result.label = f(result);
     });
   }
   
-  //From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
+  // From http://stackoverflow.com/questions/34704997/jquery-autocomplete-in-flask
   $("#autocomplete").autocomplete({
     minLength: 2,
     source: function (request, response) {
@@ -262,11 +277,12 @@ $(document).ready(function ($) {
         .append(item.name + " ")
         .appendTo(li);
       
-      if ("disambiguation" in item || "area" in item)
+      if ("disambiguation" in item || "area" in item) {
         $("<span>")
           .addClass("de-emph")
           .append("disambiguation" in item ? item.disambiguation : item.area.name)
           .appendTo(a);
+      }
       
       return li;
     }
