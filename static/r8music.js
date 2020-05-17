@@ -84,9 +84,11 @@ function renderRatingCounts(canvas) {
 
 function renderReleaseYearCounts(canvas) {
     var [labels, data] = userDatasets.releaseYearCounts;
+
+    const stepSize = 5;
     
-    /*Pad the front of the dataset to the start of a decade*/
-    var extraYears = labels[0] % 10;
+    /*Pad the front of the dataset to an even step size*/
+    var extraYears = labels[0] % stepSize;
     data = Array(extraYears).fill(0).concat(data);
     labels = Array.from(Array(extraYears), (x, i) => labels[0] - extraYears + i).concat(labels);
     
@@ -96,7 +98,7 @@ function renderReleaseYearCounts(canvas) {
         scales: {
             xAxes: [{
                 type: "time",
-                time: {parser: "YYYY", unit: "year", unitStepSize: 10}
+                time: {parser: "YYYY", unit: "year", unitStepSize: stepSize}
             }]
         }
     });
