@@ -650,6 +650,12 @@ ol.tabs > li {
     margin-left: 1em;
 }
 
+.activity-details {
+    white-space: normal;
+    padding-right: 1em;
+    padding-top: 0.2em;
+}
+
 /*Thumb boxes*/
 
 .thumb-box {
@@ -661,6 +667,10 @@ ol.tabs > li {
     display: inline-block;
     vertical-align: middle;
     line-height: 0;
+}
+
+.thumb-box.activity-item > * {
+    vertical-align: top;
 }
 
 .thumb {
@@ -1096,6 +1106,7 @@ img.cover-art,
 .page {
     box-sizing: border-box;
     min-width: 20em;
+    overflow: hidden;
 }
 
 ol.nav {

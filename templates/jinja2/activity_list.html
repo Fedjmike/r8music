@@ -1,9 +1,9 @@
 {% from "macros.html" import event_datetime, artist_link, release_link, user_link, avatar_thumb %}
 
 {% macro action_secondary_details(action, request) -%}
-    <div class="secondary-details">
+    <span class="secondary-details">
         {{ action.describe() }} &middot; {{ event_datetime(action.creation, request) }}
-    </div>
+    </span>
 {%- endmacro %}
 
 {% macro explain_release_activity(activity, request) -%}
