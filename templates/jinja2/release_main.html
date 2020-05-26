@@ -32,13 +32,12 @@
                 {{ release.title }}
             </h1>
             <h2 class="byline">
-                {% for artist in release.artists.all() %}
-                    {# The unusual arrangement here ensures there's no whitespace 
-                       between the last artist and the comma. #}
-                    <span class="author">{{ artist_link(artist) 
-                    }}</span>{% endfor %}{% if release.release_year_str %},
-                    <time>{{ release.release_year_str }}</time>
-                {% endif %}
+                {% for artist in release.artists.all() -%}
+                    <span class="author">{{ artist_link(artist) }}</span>
+                {%- endfor -%}
+                {%- if release.release_year_str -%}
+                    , <time>{{ release.release_year_str }}</time>
+                {%- endif %}
             </h2>
             <div>
             {{ tag_list(release.tags.all()) }}
