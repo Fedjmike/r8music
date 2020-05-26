@@ -139,7 +139,7 @@
         <span class="comma-separated">
             {# The following code layout is necessary to avoid whitespace between the tag and comma #}
             <a class="{{ de_emph }}" href={{ url_for_tag(tag) }}>
-            {{ tag.name }}</a>{% if counts %} <span class="quite-small">[{{ count }}]</span>{% endif %}</span>
+            {{ tag.name }}</a>{% if counts %} <span class="quite-small">[{{ tag.frequency }}]</span>{% endif %}</span>
     {% endfor %}
     </span>
 {%- endmacro %}
