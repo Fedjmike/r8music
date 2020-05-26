@@ -16,7 +16,7 @@
         </span>
     </header>
     
-    <p>{{ tag_list(user.profile.all_tags.order_by_frequency()[:5]) }}</p>
+    <p>{{ tag_list(user.profile.favourite_tags()[:5]) }}</p>
     
     {% if not request.user.is_anonymous and user.id != request.user.id %}
         <p>

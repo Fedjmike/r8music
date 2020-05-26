@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
@@ -35,7 +36,17 @@ class UserProfile(models.Model):
     @property
     def all_tags(self):
         return Tag.objects.filter(releases__active_actions__user=self.user)
-        
+
+    def favourite_tags(self):
+        tags = self.all_tags.order_by_frequency()
+        tag_ids = [tag.id for tag in tags]
+        global_frequencies = Tag.objects.filter(id__in=tag_ids).frequencies()
+
+        for tag in tags:
+            tag.frequency /= global_frequencies[tag.id] ** (1/2)
+
+        return sorted(tags, key=lambda tag: -tag.frequency)
+
 class UserRatingDescription(models.Model):
     """The description of this rating displayed on the user's profile page"""
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="rating_descriptions")

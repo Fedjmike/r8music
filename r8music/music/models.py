@@ -32,6 +32,12 @@ class TagQuerySet(models.QuerySet):
     def order_by_frequency(self):
         return self.annotate(frequency=Count("releases")).order_by("-frequency")
 
+    def frequencies(self):
+        return dict(
+            self.annotate(frequency=Count("releases"))
+                .values_list("id", "frequency")
+        )
+
 class Tag(models.Model):
     name = models.TextField()
     title = models.TextField()
