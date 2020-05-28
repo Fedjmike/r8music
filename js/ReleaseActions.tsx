@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { Set } from "immutable";
-import { actOnRelease } from "./api";
-import { toggleSet, setOnSuccessEagerly } from "./utils";
+
+interface ActionButtonProps {
+  active: boolean;
+  icon: string;
+  descs: string[];
+  toggle: () => void;
+}
 
 export function ActionButton({
-  active, icon, descs, toggleAction
-}) {
+  active, icon, descs, toggle,
+}: ActionButtonProps) {
   const onClick = (event: React.SyntheticEvent) => {
     event.preventDefault();
-    toggleAction();
+    toggle();
   }
   return (
     <a className={active ? "selected" : ""} href="#" onClick={onClick}>
@@ -18,10 +23,17 @@ export function ActionButton({
   );
 }
 
-export function ReleaseActions({ releaseId, actions: actionsInput }: {
+//
+
+interface ReleaseActionsProps {
   releaseId: string;
   actions: string[];
-}) {
+}
+
+export function ReleaseActions({
+  releaseId,
+  actions: actionsInput,
+}: ReleaseActionsProps) {
   const [actions, setActions] = useState(Set(actionsInput));
 
   const toggleAction = async (action: string) => {
@@ -35,11 +47,11 @@ export function ReleaseActions({ releaseId, actions: actionsInput }: {
   const [save, listen] = [
     <ActionButton icon="playlist_add" descs={["Save", "Saved"]}
       active={actions.has("save")}
-      toggleAction={() => toggleAction("save")}
+      toggle={() => toggleAction("save")}
     />,
     <ActionButton icon="headset" descs={["Listened to", "Listened to"]}
       active={actions.has("listen")}
-      toggleAction={() => toggleAction("listen")}
+      toggle={() => toggleAction("listen")}
     />
   ];
 
