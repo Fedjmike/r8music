@@ -2,11 +2,11 @@
 
 function updateAverageRating(averageRating) {
   if (!averageRating) {
-    $("#average-rating-section").css("display", "none");
+    $(".average-rating-section").css("display", "none");
     
   } else {
-    $("#average-rating-section").css("display", "inline");
-    $("#average-rating").text(averageRating.toFixed(1));
+    $(".average-rating-section").css("display", "inline");
+    $(".average-rating").text(averageRating.toFixed(1));
   }
 }
 

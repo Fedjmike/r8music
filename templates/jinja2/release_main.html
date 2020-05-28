@@ -24,9 +24,9 @@
             <h1 class="album-title">
                 {% set average_rating = release.average_rating() %}
                 {# Comes before but floated right, so that it doesn't get selected #}
-                <span class="unselectable" id="average-rating-section"
+                <span class="unselectable average-rating-section"
                       style="{{ '' if average_rating else 'display: none;' }}">
-                    <span id="average-rating">
+                    <span class="average-rating">
                         {{ "%.1f" % average_rating if average_rating else '' }}</span>
                 </span>
                 {{ release.title }}

@@ -499,7 +499,7 @@ ol:not(.small).rating {
     text-align: right;
 }
 
-.releases.grid #average-rating {
+.releases.grid .average-rating {
     font-size: 0.8em;
     margin-left: 0.5em;
     background-color: rgba(96, 96, 96, 0.8);
@@ -829,12 +829,12 @@ img.cover-art {
     display: inline-block;
 }
 
-.album-title > #average-rating-section {
+.album-title > .average-rating-section {
     float: right;
     padding-left: 0.23em;
 }
 
-#average-rating {
+.average-rating {
     display: inline-block;
     padding: 0.05em 0.33em 0.1em 0.3em;
     vertical-align: text-top;
@@ -1064,17 +1064,17 @@ details.window[open] {
     text-shadow: 1px 1px 3px rgba(0,0,0, 0.5);
 }
 
-.rating, #average-rating,
+.rating, .average-rating,
 input[type=submit] {
     box-shadow: 1px 1px 3px 0px rgba(0,0,0, 0.25);
 }
 
-.rating, #average-rating,
+.rating, .average-rating,
 .ui-menu-item a:hover {
     text-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
 }
 
-.rating, #average-rating,
+.rating, .average-rating,
 input[type=submit] {
     color: white;
 }
