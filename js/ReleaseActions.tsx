@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Set } from "immutable";
 
 interface ActionButtonProps {
@@ -30,24 +30,14 @@ export function ActionButton({
 //
 
 interface ReleaseActionsProps {
-  releaseId: string;
-  actions: string[];
+  actions: Set<string>;
+  toggleAction: (action: string) => void;
 }
 
 export function ReleaseActions({
-  releaseId,
-  actions: actionsInput,
+  actions,
+  toggleAction,
 }: ReleaseActionsProps) {
-  const [actions, setActions] = useState(Set(actionsInput));
-
-  const toggleAction = async (action: string) => {
-    const isUndo = actions.has(action);
-    setOnSuccessEagerly(
-      actOnRelease(releaseId, action, isUndo),
-      actions, setActions, toggleSet(actions, action),
-    );
-  }
-
   const [save, listen] = [
     <ActionButton
       icon="playlist_add"

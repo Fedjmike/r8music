@@ -13,7 +13,7 @@ function getCsrfToken(): string | undefined {
   return match?.[1];
 }
 
-async function post(url: RequestInfo): Promise<Response> {
+async function post(url: RequestInfo, data?: {}): Promise<Response> {
   const response = await fetch(url, {
     method: "POST",
     cache: "no-cache",
@@ -21,20 +21,35 @@ async function post(url: RequestInfo): Promise<Response> {
       "Content-Type": "application/json",
       "X-CSRFToken": getCsrfToken()!,
     },
+    body: JSON.stringify(data),
   });
   return response;
 }
 
 //
 
+function apiEndpoint(
+  type: string, id: string, action: string, isUndo: boolean,
+): string {
+  return `/${type}/${id}/${isUndo ? "un" : ""}${action}/`;
+}
+
 export async function actOnRelease(
   releaseId: string, action: string, isUndo: boolean,
 ): Promise<Response> {
-  return post(`/releases/${releaseId}/${isUndo ? "un" : ""}${action}/`);
+  return post(apiEndpoint("releases", releaseId, action, isUndo));
+}
+
+export async function rateRelease(
+  releaseId: string, rating: number | null,
+): Promise<Response> {
+  const isUndo = rating == null;
+  const endpoint = apiEndpoint("releases", releaseId, "rate", isUndo);
+  return post(endpoint, { rating });
 }
 
 export async function pickTrack(
   trackId: string, isUnpick: boolean,
 ): Promise<Response> {
-  return post(`/tracks/${trackId}/${isUnpick ? "un" : ""}pick/`);
+  return post(apiEndpoint("tracks", trackId, "pick", isUnpick));
 }

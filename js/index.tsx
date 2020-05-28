@@ -4,18 +4,48 @@ import React from "react";
 import { render } from "react-dom";
 
 import { Tracklist } from "./Tracklist";
-import { ReleaseActions } from "./ReleaseActions";
+import { ReleasePage } from "./ReleasePage";
 
-for (const container of document.getElementsByClassName("track-list")) {
-  const tracklistProps = pick(window, [
+const [
+  tracklistContainer,
+  releaseContainer,
+  averageRatingContainer,
+  releaseActionsContainer,
+  ratingWidgetContainer
+] = [
+  "track-list",
+  "release-container",
+  "average-rating",
+  "release-actions",
+  "rating-widget"
+].map(document.getElementById.bind(document))
+
+if (tracklistContainer) {
+  const tracklistProps = pick(window as any, [
     "trackInfo", "picks", "comparisonPicks", "comparisonUser"
   ]);
-  const element = <Tracklist {...tracklistProps} />;
-  render(element, container);
+  render(<Tracklist {...tracklistProps} />, tracklistContainer);
 }
 
-for (const container of document.getElementsByClassName("release-actions")) {
-  const { releaseId, releaseActions } = window as any;
-  const element = <ReleaseActions {...{ releaseId, actions: releaseActions }} />;
-  render(element, container);
+if (
+  releaseContainer && averageRatingContainer &&
+  releaseActionsContainer && ratingWidgetContainer
+) {
+  const {
+    releaseId, releaseActions, userRating, averageRating,
+  } = window as any;
+  render(
+    <ReleasePage
+      {...{
+        averageRatingContainer,
+        releaseActionsContainer,
+        ratingWidgetContainer,
+        releaseId,
+        userRating, 
+        averageRating,
+        actions: releaseActions,
+      }}
+    />,
+    releaseContainer
+  );
 }
