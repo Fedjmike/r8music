@@ -35,11 +35,13 @@ function Track({
     <li>
       <span className="track-title">
         { track.title }
-        { alsoPickedBy &&
+        {
+          alsoPickedBy &&
           <PickIcon
             className="comparison-selected"
             title={alsoPickedBy + "'s pick"}
-          /> }
+          />
+        }
         <PickIcon
           className={"action " + (isPicked ? "selected" : "")}
           title="Select as a pick"
@@ -81,7 +83,9 @@ export function Tracklist({
   }
   
   const renderTrack = (track: API.Track) =>
-    <Track track={track} key={track.id}
+    <Track
+      track={track}
+      key={track.id}
       isPicked={pickState.has(track.id)}
       togglePicked={() => togglePick(track.id)}
       alsoPickedBy={comparisonPicks.includes(track.id) ? comparisonUser : undefined}
@@ -92,7 +96,9 @@ export function Tracklist({
       className="expand-button material-icons tiny"
       title={isExpanded ? "Contract the tracklist" : "Show the full tracklist"}
       onClick={toggleExpanded}
-    >{ isExpanded ? "expand_less" : "expand_more" }</i>;
+    >
+      { isExpanded ? "expand_less" : "expand_more" }
+    </i>;
 
   const showRuntime = runtime && tracks.length > 1;
   const isLargeTracklist = tracks.length > 17;

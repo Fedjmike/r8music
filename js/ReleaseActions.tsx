@@ -16,7 +16,11 @@ export function ActionButton({
     toggle();
   }
   return (
-    <a className={active ? "selected" : ""} href="#" onClick={onClick}>
+    <a
+      className={active ? "selected" : ""}
+      href="#"
+      onClick={onClick}
+    >
       <i className="material-icons">{ icon }</i>
       { descs[active ? 1 : 0] }
     </a>
@@ -45,11 +49,15 @@ export function ReleaseActions({
   }
 
   const [save, listen] = [
-    <ActionButton icon="playlist_add" descs={["Save", "Saved"]}
+    <ActionButton
+      icon="playlist_add"
+      descs={["Save", "Saved"]}
       active={actions.has("save")}
       toggle={() => toggleAction("save")}
     />,
-    <ActionButton icon="headset" descs={["Listened to", "Listened to"]}
+    <ActionButton
+      icon="headset"
+      descs={["Listened to", "Listened to"]}
       active={actions.has("listen")}
       toggle={() => toggleAction("listen")}
     />
