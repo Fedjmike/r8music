@@ -90,11 +90,15 @@ class Importer:
             return None
             
         else:
-            #srcset is a list of images of different sizes, with scales, in the
-            #format of "<url> <scale>x" separated by commas
-            thumbs = re.findall(r"(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
-            #Get the largest thumbnail (which should be 220px wide)
-            thumb_url, _scale = max(thumbs, key=lambda url_and_scale: url_and_scale[1])
+            if "srcset" in image_link.img:
+                #srcset is a list of images of different sizes, with scales, in the
+                #format of "<url> <scale>x" separated by commas
+                thumbs = re.findall(r"(?:([^, ]*) ([\d.]*x))", image_link.img["srcset"])
+                #Get the largest thumbnail (which should be 220px wide)
+                thumb_url, _scale = max(thumbs, key=lambda url_and_scale: url_and_scale[1])
+
+            else:
+                thumb_url = image_link.img["src"]
             
             urls = [image_url, thumb_url]
             #Turn the URLs (which might be relative) into absolute URLs
