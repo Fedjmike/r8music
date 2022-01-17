@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'captcha',
     'background_task',
+    'annoying',
     'r8music.profiles',
     'r8music.music',
     'r8music.actions',
