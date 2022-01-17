@@ -58,7 +58,8 @@ def enact(action):
     """Enact the complete semantics of an action."""
 
     if isinstance(action, RateAction):
-        enact(ListenAction.objects.create(release=action.release, user=action.user))
+        listen, _ = ListenAction.objects.get_or_create(release=action.release, user=action.user)
+        enact(listen)
     
     elif isinstance(action, ListenAction):
         if action.user.settings.listen_implies_unsave:
