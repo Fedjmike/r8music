@@ -1,4 +1,5 @@
 from django.apps import AppConfig
 
+
 class ActionsConfig(AppConfig):
-    name = 'actions'
+    name = 'r8music.actions'

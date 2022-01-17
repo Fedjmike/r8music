@@ -1,4 +1,5 @@
 from django.apps import AppConfig
 
+
 class ImportationConfig(AppConfig):
-    name = 'importation'
+    name = 'r8music.importation'
